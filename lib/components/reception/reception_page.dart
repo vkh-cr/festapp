@@ -26,7 +26,7 @@ class _ReceptionPageState extends State<ReceptionPage> {
       _email = TextEditingController();
   String? _sex;
   int? _group;
-  String? _accommodation, _commandId, _userId, _qr, _createdEmail;
+  String? _accommodation, _commandId, _userId, _qr, _manualCode, _createdEmail;
   bool _loading = false, _confirmSameName = false;
   List<Map<String, dynamic>> _groups = [],
       _accommodations = [],
@@ -113,6 +113,7 @@ class _ReceptionPageState extends State<ReceptionPage> {
         _userId = result['userId'].toString();
         _createdEmail = result['email']?.toString();
         _qr = issued['payload']?.toString();
+        _manualCode = issued['manualCode']?.toString();
         _matches = [];
       });
     } catch (error) {
@@ -127,6 +128,7 @@ class _ReceptionPageState extends State<ReceptionPage> {
   void _reset() {
     setState(() {
       _qr = null;
+      _manualCode = null;
       _userId = null;
       _createdEmail = null;
       _commandId = null;
@@ -144,7 +146,12 @@ class _ReceptionPageState extends State<ReceptionPage> {
   Future<void> _rotate() async {
     if (_userId == null) return;
     final r = await ReceptionService.issue(_userId!);
-    if (mounted) setState(() => _qr = r['payload']?.toString());
+    if (mounted) {
+      setState(() {
+        _qr = r['payload']?.toString();
+        _manualCode = r['manualCode']?.toString();
+      });
+    }
   }
 
   Future<void> _issueRecent(Map<String, dynamic> registration) async {
@@ -159,6 +166,7 @@ class _ReceptionPageState extends State<ReceptionPage> {
         _userId = userId;
         _createdEmail = registration['email']?.toString();
         _qr = issued['payload']?.toString();
+        _manualCode = issued['manualCode']?.toString();
       });
     } catch (error) {
       if (mounted) await _handleError(error);
@@ -406,7 +414,19 @@ class _ReceptionPageState extends State<ReceptionPage> {
         Text(_createdEmail ?? ''),
         const SizedBox(height: 12),
         QrImageView(data: _qr!, size: 280),
-        const SizedBox(height: 12),
+        if (_manualCode != null) ...[
+          const SizedBox(height: 8),
+          SelectableText(
+            _manualCode!,
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 3,
+                ),
+          ),
+          Text(ReceptionStrings.manualCodeValidity,
+              style: Theme.of(context).textTheme.bodySmall),
+        ],
+        const SizedBox(height: 16),
         FilledButton.tonal(
             onPressed: _rotate, child: Text(ReceptionStrings.rotate)),
         TextButton(

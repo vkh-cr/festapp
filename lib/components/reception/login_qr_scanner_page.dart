@@ -3,7 +3,20 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/reception/reception_strings.dart';
 import 'package:fstapp/components/reception/login_qr_barcode.dart';
+import 'package:fstapp/components/reception/manual_login_code_field.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+
+enum ReceptionLoginCredentialType { qr, manualCode }
+
+class ReceptionLoginCredential {
+  const ReceptionLoginCredential.qr(this.value)
+      : type = ReceptionLoginCredentialType.qr;
+  const ReceptionLoginCredential.manualCode(this.value)
+      : type = ReceptionLoginCredentialType.manualCode;
+
+  final ReceptionLoginCredentialType type;
+  final String value;
+}
 
 @RoutePage()
 class LoginQrScannerPage extends StatefulWidget {
@@ -41,15 +54,58 @@ class _LoginQrScannerPageState extends State<LoginQrScannerPage> {
     if (payload == null) return;
     _handled = true;
     await _controller.stop();
-    if (mounted) context.router.maybePop(payload.raw);
+    if (mounted) {
+      context.router.maybePop(ReceptionLoginCredential.qr(payload.raw));
+    }
+  }
+
+  Future<void> _useManualCode(String code) async {
+    if (_handled) return;
+    _handled = true;
+    await _controller.stop();
+    if (mounted) {
+      context.router.maybePop(ReceptionLoginCredential.manualCode(code));
+    }
   }
 
   @override
   Widget build(BuildContext context) => Scaffold(
       appBar: AppBar(title: Text(ReceptionStrings.scan)),
-      body: MobileScanner(
-          controller: _controller,
-          onDetect: _detect,
-          errorBuilder: (context, error) =>
-              Center(child: Text(ReceptionStrings.cameraUnavailable))));
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: MobileScanner(
+              controller: _controller,
+              onDetect: _detect,
+              errorBuilder: (context, error) =>
+                  Center(child: Text(ReceptionStrings.cameraUnavailable)),
+            ),
+          ),
+          Positioned(
+            left: 16,
+            right: 16,
+            bottom: 16,
+            child: SafeArea(
+              top: false,
+              child: Center(
+                child: Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: ManualLoginCodeEntry(
+                      onSubmitted: _useManualCode,
+                      title: ReceptionStrings.enterManualCode,
+                      fieldLabel: ReceptionStrings.manualCode,
+                      submitLabel:
+                          MaterialLocalizations.of(context).okButtonLabel,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ));
 }

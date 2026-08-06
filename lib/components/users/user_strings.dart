@@ -82,6 +82,8 @@ class UserStrings {
       'FeatureUser.forgotPasswordQuestion'.tr();
   static String get forgotYourPassword => 'FeatureUser.forgotYourPassword'.tr();
   static String get sendResetEmail => 'FeatureUser.sendResetEmail'.tr();
+  static String get existingAccountRecoveryHelp =>
+      'FeatureUser.existingAccountRecoveryHelp'.tr();
   static String get changePasswordTitle =>
       'FeatureUser.changePasswordTitle'.tr();
   static String get createPasswordToContinue =>

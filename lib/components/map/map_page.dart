@@ -337,65 +337,13 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
       setState(() => _offlineMapError = null);
     }
 
-    if (contract case final MapLibreOfflineMapContract mapLibre) {
-      setState(() => _useOffline = useOffline);
-      if (useOffline) {
-        await _downloadMapLibreBundle(
-          mapLibre,
-          allowDownload: hasConnection,
-        );
-      }
-      return;
+    setState(() => _useOffline = useOffline);
+    if (useOffline && contract != null) {
+      await _prepareOfflineMap(
+        contract,
+        allowDownload: hasConnection,
+      );
     }
-    if (contract case final LegacyOfflineMapContract legacy) {
-      final sharedBundle = configuration.mapLibre;
-      if (useOffline && sharedBundle != null) {
-        setState(() => _useOffline = true);
-        await _downloadLegacyBundle(
-          legacy,
-          sharedBundle,
-          allowDownload: hasConnection,
-        );
-        return;
-      }
-      _offlinePackagePath =
-          await OfflineMapHelper.getOfflinePackagePath(legacy.packageUrl);
-      final fileExists = await File(_offlinePackagePath!).exists();
-      if (!mounted) return;
-      if (fileExists) {
-        final openedConfiguration =
-            await ExceptionHandler.guard<LegacyMapConfiguration>(
-          context,
-          futureFunction: () => LegacyMapConfiguration.openOffline(
-            layer: _mapFeature.offlineMapLayer,
-            contract: legacy,
-            mbtilesPath: _offlinePackagePath!,
-          ),
-          defaultErrorMessage: MapStrings.legacyMapOpenFailed,
-        );
-        if (!mounted) {
-          openedConfiguration?.dispose();
-          return;
-        }
-        if (openedConfiguration != null) {
-          _legacyOfflineConfiguration?.dispose();
-          _legacyOfflineConfiguration = openedConfiguration;
-        }
-      }
-      if (!mounted) return;
-      setState(() => _useOffline = useOffline);
-      if (useOffline && !fileExists && hasConnection) {
-        Future.delayed(
-          const Duration(seconds: 1),
-          () {
-            if (mounted) _downloadOfflinePackage();
-          },
-        );
-      }
-      return;
-    }
-
-    setState(() => _useOffline = false);
   }
 
   Future<bool> _hasNetworkConnection() async {
@@ -404,82 +352,46 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
         !connectivity.contains(ConnectivityResult.none);
   }
 
-  Future<void> _downloadOfflinePackage() async {
-    if (!mounted) return;
+  Future<bool> _downloadOfflinePackage({bool forceRefresh = false}) async {
+    if (!mounted) return false;
     final contract = _offlineConfiguration.selectedContract;
-    if (contract case final MapLibreOfflineMapContract mapLibre) {
-      await _downloadMapLibreBundle(mapLibre);
-      return;
-    }
-    if (contract is! LegacyOfflineMapContract || _offlinePackagePath == null) {
-      return;
-    }
-    final sharedBundle = _offlineConfiguration.mapLibre;
-    if (sharedBundle != null) {
-      await _downloadLegacyBundle(contract, sharedBundle);
-      return;
-    }
-    setState(() {
-      _downloadState = const MapDownloading(0);
-    });
-    final openedConfiguration =
-        await ExceptionHandler.guard<LegacyMapConfiguration?>(
-      context,
-      defaultErrorMessage: MapStrings.legacyMapOpenFailed,
-      futureFunction: () async {
-        final mbtilesFile = await OfflineMapHelper.getOfflineMapPackage(
-          contract.packageUrl,
-          _offlinePackagePath!,
-          (progress) {
-            if (mounted) {
-              setState(() => _downloadState = MapDownloading(progress));
-            }
-          },
-        );
-        if (mbtilesFile == null) return null;
-        final offlineStylePath = await OfflineMapHelper.getOfflineStyleFilePath(
-          contract.styleUrl,
-        );
-        final styleFile = await OfflineMapHelper.getOrDownloadFile(
-          contract.styleUrl,
-          offlineStylePath,
-          (progress) {},
-        );
-        if (styleFile == null) return null;
-        return LegacyMapConfiguration.openOffline(
-          layer: _mapFeature.offlineMapLayer,
-          contract: contract,
-          mbtilesPath: _offlinePackagePath!,
-        );
-      },
-    );
-    if (!mounted) {
-      openedConfiguration?.dispose();
-      return;
-    }
-    if (openedConfiguration == null) {
-      setState(() => _downloadState = const MapDownloadIdle());
-      return;
-    }
-    _legacyOfflineConfiguration?.dispose();
-    _legacyOfflineConfiguration = openedConfiguration;
-    final completedState = MapDownloadCompleted();
-    setState(() => _downloadState = completedState);
+    if (contract == null) return false;
+    return _prepareOfflineMap(contract, forceRefresh: forceRefresh);
+  }
+
+  Future<bool> _prepareOfflineMap(
+    OfflineMapContract contract, {
+    bool allowDownload = true,
+    bool forceRefresh = false,
+  }) =>
+      switch (contract) {
+        final MapLibreOfflineMapContract mapLibre => _downloadMapLibreBundle(
+            mapLibre,
+            allowDownload: allowDownload,
+            forceRefresh: forceRefresh,
+          ),
+        final LegacyOfflineMapContract legacy => _downloadLegacyBundle(
+            legacy,
+            _offlineConfiguration.bundleFor(legacy),
+            allowDownload: allowDownload,
+            forceRefresh: forceRefresh,
+          ),
+      };
+
+  void _showOfflineDownloadComplete(MapDownloadCompleted completedState) {
     ToastHelper.Show(context, MapStrings.offlineMapReady);
     Timer(const Duration(seconds: 2), () {
       if (!mounted || !identical(_downloadState, completedState)) return;
-      setState(() {
-        _downloadState = const MapDownloadIdle();
-        _useOffline = true;
-      });
+      setState(() => _downloadState = const MapDownloadIdle());
     });
   }
 
-  Future<void> _downloadMapLibreBundle(
+  Future<bool> _downloadMapLibreBundle(
     MapLibreOfflineMapContract? selectedContract, {
     bool allowDownload = true,
+    bool forceRefresh = false,
   }) async {
-    if (!mounted) return;
+    if (!mounted) return false;
     final contract = selectedContract ??
         switch (_offlineConfiguration.selectedContract) {
           final MapLibreOfflineMapContract mapLibre => mapLibre,
@@ -488,7 +400,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     if (contract == null) {
       setState(
           () => _offlineMapError = MapStrings.mapLibreManifestNotConfigured);
-      return;
+      return false;
     }
     setState(() {
       _downloadState = const MapDownloadCheckingCache();
@@ -502,6 +414,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
         final installation = await _installSharedBundle(
           contract,
           allowDownload: allowDownload,
+          forceRefresh: forceRefresh,
           onDownloadRequired: () {
             downloadRequired = true;
             if (mounted) {
@@ -527,13 +440,13 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
         );
       },
     );
-    if (!mounted) return;
+    if (!mounted) return false;
     if (assembledStyle == null) {
       setState(() {
         _downloadState = const MapDownloadIdle();
         _offlineMapError = MapStrings.mapLibreBundleDownloadFailed;
       });
-      return;
+      return false;
     }
     final completedState = downloadRequired ? MapDownloadCompleted() : null;
     setState(() {
@@ -542,20 +455,18 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
       _useOffline = true;
     });
     if (downloadRequired) {
-      ToastHelper.Show(context, MapStrings.offlineMapReady);
-      Timer(const Duration(seconds: 2), () {
-        if (!mounted || !identical(_downloadState, completedState)) return;
-        setState(() => _downloadState = const MapDownloadIdle());
-      });
+      _showOfflineDownloadComplete(completedState!);
     }
+    return true;
   }
 
-  Future<void> _downloadLegacyBundle(
+  Future<bool> _downloadLegacyBundle(
     LegacyOfflineMapContract legacy,
-    MapLibreOfflineMapContract sharedBundle, {
+    MapLibreOfflineMapContract? sharedBundle, {
     bool allowDownload = true,
+    bool forceRefresh = false,
   }) async {
-    if (!mounted) return;
+    if (!mounted) return false;
     setState(() {
       _downloadState = const MapDownloadCheckingCache();
       _offlineMapError = null;
@@ -566,37 +477,55 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
       context,
       defaultErrorMessage: MapStrings.legacyMapOpenFailed,
       futureFunction: () async {
-        final installation = await _installSharedBundle(
-          sharedBundle,
+        if (sharedBundle != null) {
+          final installation = await _installSharedBundle(
+            sharedBundle,
+            allowDownload: allowDownload,
+            forceRefresh: forceRefresh,
+            onDownloadRequired: () {
+              downloadRequired = true;
+              if (mounted) {
+                setState(() => _downloadState = const MapDownloading(0));
+              }
+            },
+            onProgress: (progress) {
+              if (mounted) {
+                setState(
+                  () => _downloadState = MapDownloading(progress.fraction),
+                );
+              }
+            },
+          );
+          return LegacyMapConfiguration.openOfflineBundle(
+            layer: _mapFeature.offlineMapLayer,
+            contract: legacy,
+            installation: installation,
+          );
+        }
+        downloadRequired = forceRefresh;
+        return _openStandaloneLegacyMap(
+          legacy,
           allowDownload: allowDownload,
+          forceRefresh: forceRefresh,
           onDownloadRequired: () {
             downloadRequired = true;
             if (mounted) {
               setState(() => _downloadState = const MapDownloading(0));
             }
           },
-          onProgress: (progress) {
-            if (mounted) {
-              setState(
-                () => _downloadState = MapDownloading(progress.fraction),
-              );
-            }
-          },
-        );
-        return LegacyMapConfiguration.openOfflineBundle(
-          layer: _mapFeature.offlineMapLayer,
-          contract: legacy,
-          installation: installation,
         );
       },
     );
     if (!mounted) {
       openedConfiguration?.dispose();
-      return;
+      return false;
     }
     if (openedConfiguration == null) {
-      setState(() => _downloadState = const MapDownloadIdle());
-      return;
+      setState(() {
+        _downloadState = const MapDownloadIdle();
+        _offlineMapError = MapStrings.legacyMapOpenFailed;
+      });
+      return false;
     }
     _legacyOfflineConfiguration?.dispose();
     _legacyOfflineConfiguration = openedConfiguration;
@@ -606,17 +535,70 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
       _useOffline = true;
     });
     if (downloadRequired) {
-      ToastHelper.Show(context, MapStrings.offlineMapReady);
-      Timer(const Duration(seconds: 2), () {
-        if (!mounted || !identical(_downloadState, completedState)) return;
-        setState(() => _downloadState = const MapDownloadIdle());
-      });
+      _showOfflineDownloadComplete(completedState!);
+    }
+    return true;
+  }
+
+  Future<LegacyMapConfiguration> _openStandaloneLegacyMap(
+    LegacyOfflineMapContract contract, {
+    required bool allowDownload,
+    required bool forceRefresh,
+    required VoidCallback onDownloadRequired,
+  }) async {
+    _offlinePackagePath ??=
+        await OfflineMapHelper.getOfflinePackagePath(contract.packageUrl);
+    final stylePath =
+        await OfflineMapHelper.getOfflineStyleFilePath(contract.styleUrl);
+
+    Future<LegacyMapConfiguration> open({required bool refresh}) async {
+      final packageExists = await File(_offlinePackagePath!).exists();
+      final styleExists = await File(stylePath).exists();
+      if (allowDownload && (refresh || !packageExists || !styleExists)) {
+        onDownloadRequired();
+      }
+      final package = await OfflineMapHelper.getOfflineMapPackage(
+        contract.packageUrl,
+        _offlinePackagePath!,
+        (progress) {
+          if (mounted) {
+            setState(() => _downloadState = MapDownloading(progress));
+          }
+        },
+        forceRefresh: refresh,
+        allowDownload: allowDownload,
+      );
+      final style = await OfflineMapHelper.getOrDownloadFile(
+        contract.styleUrl,
+        stylePath,
+        (_) {},
+        forceRefresh: refresh,
+        allowDownload: allowDownload,
+      );
+      if (package == null || style == null) {
+        throw OfflineMapBundleException(
+          'No downloaded Legacy offline map is available.',
+        );
+      }
+      return LegacyMapConfiguration.openOffline(
+        layer: _mapFeature.offlineMapLayer,
+        contract: contract,
+        mbtilesPath: _offlinePackagePath!,
+      );
+    }
+
+    try {
+      return await open(refresh: forceRefresh);
+    } catch (_) {
+      if (!allowDownload || forceRefresh) rethrow;
+      return open(refresh: true);
     }
   }
 
   Future<OfflineMapBundleInstallation> _installSharedBundle(
     MapLibreOfflineMapContract contract, {
     bool allowDownload = true,
+    bool forceRefresh = false,
     VoidCallback? onDownloadRequired,
     void Function(OfflineMapBundleProgress progress)? onProgress,
   }) async {
@@ -628,20 +610,25 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
       rootDirectory: Directory('${appSupport.path}/maplibre-bundles'),
     );
     final manifestUri = Uri.parse(contract.manifestUrl);
-    if (!allowDownload) {
-      final cached = await manager.openCached(manifestUri);
-      if (cached == null) {
-        throw OfflineMapBundleException(
-          'No downloaded offline map bundle is available.',
-        );
+    try {
+      if (!allowDownload) {
+        final cached = await manager.openCached(manifestUri);
+        if (cached == null) {
+          throw OfflineMapBundleException(
+            'No downloaded offline map bundle is available.',
+          );
+        }
+        return cached;
       }
-      return cached;
+      final install = forceRefresh ? manager.update : manager.install;
+      return await install(
+        manifestUri,
+        onDownloadRequired: onDownloadRequired,
+        onProgress: onProgress,
+      );
+    } finally {
+      manager.close();
     }
-    return manager.install(
-      manifestUri,
-      onDownloadRequired: onDownloadRequired,
-      onProgress: onProgress,
-    );
   }
 
   @override
@@ -704,26 +691,10 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
                       : (value) async {
                           final currentCamera = _viewportController.camera;
                           if (value) {
-                            if (offlineConfiguration.selectedContract
-                                case final MapLibreOfflineMapContract
-                                    mapLibre) {
-                              setState(() => _useOffline = true);
-                              await _downloadMapLibreBundle(mapLibre);
-                            } else if (_offlinePackagePath != null &&
-                                !(await File(_offlinePackagePath!).exists())) {
-                              if (!mounted) return;
-                              await _downloadOfflinePackage();
-                              if (!mounted) return;
-                              final packageExists =
-                                  await File(_offlinePackagePath!).exists();
-                              if (!mounted) return;
-                              if (!packageExists) {
-                                setState(() => _useOffline = false);
-                              } else {
-                                setState(() => _useOffline = true);
-                              }
-                            } else {
-                              setState(() => _useOffline = true);
+                            setState(() => _useOffline = true);
+                            final ready = await _downloadOfflinePackage();
+                            if (mounted && !ready) {
+                              setState(() => _useOffline = false);
                             }
                           } else {
                             setState(() => _useOffline = false);
@@ -824,7 +795,9 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
               ElevatedButton.icon(
                 onPressed: ConnectivityService.isOfflineNotifier.value
                     ? null
-                    : () => unawaited(_downloadMapLibreBundle(null)),
+                    : () => unawaited(
+                          _downloadOfflinePackage(forceRefresh: true),
+                        ),
                 icon: const Icon(Icons.download),
                 label: Text(MapStrings.downloadMapAgain),
               ),
@@ -844,10 +817,26 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
             margin: const EdgeInsets.all(24),
             child: Padding(
               padding: const EdgeInsets.all(16),
-              child: Text(
-                _offlineMapError ??
-                    MapStrings.offlineMapConfigurationIncomplete,
-                textAlign: TextAlign.center,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    _offlineMapError ??
+                        MapStrings.offlineMapConfigurationIncomplete,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 12),
+                  ElevatedButton.icon(
+                    onPressed: ConnectivityService.isOfflineNotifier.value ||
+                            _downloadState.isBusy
+                        ? null
+                        : () => unawaited(
+                              _downloadOfflinePackage(forceRefresh: true),
+                            ),
+                    icon: const Icon(Icons.download),
+                    label: Text(MapStrings.downloadMapAgain),
+                  ),
+                ],
               ),
             ),
           ),

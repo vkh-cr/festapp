@@ -38,10 +38,22 @@ class AuthService {
   }
 
   static Future<void> loginWithQr(String payload) async {
+    await _loginWithReceptionCredential({'payload': payload});
+  }
+
+  static Future<void> loginWithManualCode(String code) async {
+    await _loginWithReceptionCredential({
+      'occasion': RightsService.currentOccasionId(),
+      'manualCode': code,
+    });
+  }
+
+  static Future<void> _loginWithReceptionCredential(
+      Map<String, dynamic> credential) async {
     DbEvents.invalidateSavedProgramMutationScope();
     final response = await _supabase.functions.invoke(
       'exchange-login-qr',
-      body: {'payload': payload},
+      body: credential,
     );
     final body = Map<String, dynamic>.from(response.data as Map);
     final refreshToken = body['refresh_token']?.toString();

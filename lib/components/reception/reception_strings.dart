@@ -27,6 +27,9 @@ class ReceptionStrings {
   static String get verifyingQr => 'Reception.verifyingQr'.tr();
   static String get signedIn => 'Reception.signedIn'.tr();
   static String get openingApp => 'Reception.openingApp'.tr();
+  static String get enterManualCode => 'Reception.enterManualCode'.tr();
+  static String get manualCode => 'Reception.manualCode'.tr();
+  static String get manualCodeValidity => 'Reception.manualCodeValidity'.tr();
 
   static String commandError(ReceptionCommandError error) => switch (error) {
         ReceptionCommandError.emailAlreadyExists =>

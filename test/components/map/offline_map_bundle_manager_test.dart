@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fstapp/components/map/offline_map_bundle_manager.dart';
-import 'package:fstapp/components/map/offline_map_bundle_manifest.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
@@ -115,7 +114,7 @@ void main() {
     );
   });
 
-  test('ready cache rejects same-size asset corruption', () async {
+  test('install repairs a corrupted ready cache from the network', () async {
     final root = await Directory.systemTemp.createTemp('bundle-corrupt-test');
     addTearDown(() => root.delete(recursive: true));
     final fixture = _fixture('v2');
@@ -136,16 +135,137 @@ void main() {
     await File('${installation.directory.path}/map.pmtiles')
         .writeAsBytes([3, 2, 1], flush: true);
 
-    await expectLater(
-      manager.install(manifestUri),
-      throwsA(
-        isA<OfflineMapBundleException>().having(
-          (error) => error.message,
-          'message',
-          contains('Checksum mismatch'),
-        ),
-      ),
+    final repaired = await manager.install(manifestUri);
+
+    expect(
+      await File('${repaired.directory.path}/map.pmtiles').readAsBytes(),
+      fixture.assets['map.pmtiles'],
     );
+  });
+
+  test('update really downloads a fresh copy of an installed version',
+      () async {
+    final root = await Directory.systemTemp.createTemp('bundle-refresh-test');
+    addTearDown(() => root.delete(recursive: true));
+    final fixture = _fixture('v2');
+    var assetRequests = 0;
+    final manager = OfflineMapBundleManager(
+      rootDirectory: root,
+      client: MockClient((request) async {
+        if (request.url.path.endsWith('manifest.json')) {
+          return http.Response(jsonEncode(fixture.manifest), 200);
+        }
+        assetRequests++;
+        return http.Response.bytes(
+          fixture.assets[request.url.path.substring(1)]!,
+          200,
+        );
+      }),
+    );
+    final manifestUri = Uri.parse('https://example.test/manifest.json');
+    await manager.install(manifestUri);
+    final firstAssetRequests = assetRequests;
+
+    await manager.update(manifestUri);
+
+    expect(assetRequests, firstAssetRequests * 2);
+  });
+
+  test('failed same-version refresh preserves the previous ready bundle',
+      () async {
+    final root = await Directory.systemTemp.createTemp('bundle-refresh-fail');
+    addTearDown(() => root.delete(recursive: true));
+    final fixture = _fixture('v2');
+    var failRefresh = false;
+    final manager = OfflineMapBundleManager(
+      rootDirectory: root,
+      retryDelay: Duration.zero,
+      client: MockClient((request) async {
+        if (request.url.path.endsWith('manifest.json')) {
+          return http.Response(jsonEncode(fixture.manifest), 200);
+        }
+        final path = request.url.path.substring(1);
+        if (failRefresh && path == 'map.pmtiles') {
+          return http.Response('temporary outage', 503);
+        }
+        return http.Response.bytes(fixture.assets[path]!, 200);
+      }),
+    );
+    final manifestUri = Uri.parse('https://example.test/manifest.json');
+    final original = await manager.install(manifestUri);
+    failRefresh = true;
+
+    await expectLater(
+        manager.update(manifestUri), throwsA(isA<HttpException>()));
+
+    final preserved = await manager.openCached(manifestUri);
+    expect(preserved, isNotNull);
+    expect(preserved!.directory.path, original.directory.path);
+    expect(
+      await File('${preserved.directory.path}/map.pmtiles').readAsBytes(),
+      fixture.assets['map.pmtiles'],
+    );
+  });
+
+  test('transient asset failure is retried without restarting the bundle',
+      () async {
+    final root = await Directory.systemTemp.createTemp('bundle-retry-test');
+    addTearDown(() => root.delete(recursive: true));
+    final fixture = _fixture('v2');
+    var pmtilesRequests = 0;
+    final manager = OfflineMapBundleManager(
+      rootDirectory: root,
+      retryDelay: Duration.zero,
+      client: MockClient((request) async {
+        if (request.url.path.endsWith('manifest.json')) {
+          return http.Response(jsonEncode(fixture.manifest), 200);
+        }
+        final path = request.url.path.substring(1);
+        if (path == 'map.pmtiles' && pmtilesRequests++ == 0) {
+          return http.Response('temporary outage', 503);
+        }
+        return http.Response.bytes(fixture.assets[path]!, 200);
+      }),
+    );
+
+    final installed = await manager.install(
+      Uri.parse('https://example.test/manifest.json'),
+    );
+
+    expect(pmtilesRequests, 2);
+    expect(
+        File('${installed.directory.path}/.ready.json').existsSync(), isTrue);
+  });
+
+  test('concurrent installs for one manifest share the filesystem safely',
+      () async {
+    final root = await Directory.systemTemp.createTemp('bundle-race-test');
+    addTearDown(() => root.delete(recursive: true));
+    final fixture = _fixture('v2');
+    var manifestRequests = 0;
+    final manager = OfflineMapBundleManager(
+      rootDirectory: root,
+      client: MockClient((request) async {
+        await Future<void>.delayed(const Duration(milliseconds: 5));
+        if (request.url.path.endsWith('manifest.json')) {
+          manifestRequests++;
+          return http.Response(jsonEncode(fixture.manifest), 200);
+        }
+        return http.Response.bytes(
+          fixture.assets[request.url.path.substring(1)]!,
+          200,
+        );
+      }),
+    );
+    final manifestUri = Uri.parse('https://example.test/manifest.json');
+
+    final installations = await Future.wait([
+      manager.install(manifestUri),
+      manager.install(manifestUri),
+    ]);
+
+    expect(installations[0].directory.path, installations[1].directory.path);
+    expect(manifestRequests, 1);
   });
 }
 

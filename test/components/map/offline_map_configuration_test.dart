@@ -95,4 +95,64 @@ void main() {
       isA<LegacyOfflineMapContract>(),
     );
   });
+
+  test('both renderers follow the same force-offline and connectivity policy',
+      () {
+    for (final renderer in OfflineMapRenderer.values) {
+      OfflineMapConfiguration configuration({required bool forceOffline}) =>
+          OfflineMapConfiguration.fromLayer(
+            MapLayer(
+              offlineMapRenderer: renderer,
+              offlineMapBundleManifestURL: 'https://maps.test/v2/manifest.json',
+              offlineMapPackageURL: 'https://maps.test/v1/map.mbtiles',
+              offlineMapStyleURL: 'https://maps.test/v1/style.json',
+              offlineMapLayerName: 'versatiles-shortbread',
+              forceOfflineMap: forceOffline,
+            ),
+          );
+
+      expect(
+        configuration(forceOffline: false).resolveStartup(hasConnection: true),
+        isA<OnlineMapStartup>(),
+        reason: '$renderer stays online when offline mode is not forced',
+      );
+      expect(
+        configuration(forceOffline: false).resolveStartup(hasConnection: false),
+        isA<ReadyOfflineMapStartup>(),
+        reason: '$renderer activates offline when disconnected',
+      );
+      expect(
+        configuration(forceOffline: true).resolveStartup(hasConnection: true),
+        isA<ReadyOfflineMapStartup>(),
+        reason: '$renderer honors forceOfflineMap while connected',
+      );
+    }
+  });
+
+  test('Legacy uses the shared manifest when present and keeps old URLs valid',
+      () {
+    final bundled = OfflineMapConfiguration.fromLayer(
+      MapLayer(
+        offlineMapRenderer: OfflineMapRenderer.legacy,
+        offlineMapBundleManifestURL: 'https://maps.test/v2/manifest.json',
+        offlineMapPackageURL: 'https://maps.test/v1/map.mbtiles',
+        offlineMapStyleURL: 'https://maps.test/v1/style.json',
+        offlineMapLayerName: 'versatiles-shortbread',
+      ),
+    );
+    final legacyOnly = OfflineMapConfiguration.fromLayer(
+      MapLayer(
+        offlineMapRenderer: OfflineMapRenderer.legacy,
+        offlineMapPackageURL: 'https://maps.test/v1/map.mbtiles',
+        offlineMapStyleURL: 'https://maps.test/v1/style.json',
+        offlineMapLayerName: 'versatiles-shortbread',
+      ),
+    );
+
+    expect(
+      bundled.bundleFor(bundled.selectedContract!),
+      isA<MapLibreOfflineMapContract>(),
+    );
+    expect(legacyOnly.bundleFor(legacyOnly.selectedContract!), isNull);
+  });
 }

@@ -1,8 +1,8 @@
-import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:fstapp/components/map/offline_map_file_downloader.dart';
 import 'package:fstapp/services/app_logger.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
@@ -13,52 +13,33 @@ class OfflineMapHelper {
   /// downloads the file from [url] to [filePath] (reporting progress via [onProgress]).
   /// If no connectivity is available or the download fails, returns null.
   static Future<File?> getOrDownloadFile(
-      String url, String filePath, Function(double) onProgress) async {
+    String url,
+    String filePath,
+    Function(double) onProgress, {
+    bool forceRefresh = false,
+    bool allowDownload = true,
+  }) async {
     final file = File(filePath);
-    if (await file.exists()) {
+    if (await file.exists() && !forceRefresh) {
       return file;
     }
+    if (!allowDownload) return await file.exists() ? file : null;
     final connectivity = await Connectivity().checkConnectivity();
     if (connectivity.contains(ConnectivityResult.none)) {
-      // No connection and no cache.
       return null;
     }
-    final part = File('$filePath.part');
-    final client = HttpClient();
-    IOSink? output;
+    final downloader = OfflineMapFileDownloader();
     try {
-      await file.parent.create(recursive: true);
-      if (await part.exists()) await part.delete();
-      final request = await client.getUrl(Uri.parse(url));
-      final response = await request.close();
-      if (response.statusCode < 200 || response.statusCode >= 300) {
-        throw HttpException(
-          'Offline map download failed: ${response.statusCode}',
-        );
-      }
-      final contentLength = response.contentLength;
-      var downloaded = 0;
-      output = part.openWrite();
-      await for (final data in response) {
-        output.add(data);
-        downloaded += data.length;
-        onProgress(contentLength > 0 ? downloaded / contentLength : 0.0);
-      }
-      await output.flush();
-      await output.close();
-      output = null;
-      if (contentLength >= 0 && downloaded != contentLength) {
-        throw HttpException('Offline map download was incomplete.');
-      }
-      await part.rename(filePath);
-      return file;
+      return await downloader.download(
+        uri: Uri.parse(url),
+        destination: file,
+        onProgress: onProgress,
+      );
     } catch (e) {
       AppLogger.error('Offline map download failed: $e');
-      await output?.close();
-      if (await part.exists()) await part.delete();
       return null;
     } finally {
-      client.close(force: true);
+      downloader.close();
     }
   }
 
@@ -147,9 +128,16 @@ class OfflineMapHelper {
   }
 
   /// Retrieves (or downloads if available) the offline MBTiles package.
-  static Future<File?> getOfflineMapPackage(String offlineMapPackageURL,
-      String filePath, Function(double) onProgress) async {
-    return await getOrDownloadFile(offlineMapPackageURL, filePath, onProgress);
+  static Future<File?> getOfflineMapPackage(
+      String offlineMapPackageURL, String filePath, Function(double) onProgress,
+      {bool forceRefresh = false, bool allowDownload = true}) async {
+    return getOrDownloadFile(
+      offlineMapPackageURL,
+      filePath,
+      onProgress,
+      forceRefresh: forceRefresh,
+      allowDownload: allowDownload,
+    );
   }
 
   /// Retrieves (or downloads if available) the sprite JSON file.

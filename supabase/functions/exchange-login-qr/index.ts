@@ -1,5 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.58.0";
-import { exchangeLoginQr } from "./exchange.ts";
+import { exchangeLoginCredential } from "./exchange.ts";
 import { sha256Hex } from "./qr.ts";
 
 const cors = {
@@ -57,11 +57,7 @@ Deno.serve(async (req) => {
       headers: cors,
     });
   }
-  const session = await exchangeLoginQr(
-    (body as { payload?: unknown })?.payload,
-    admin,
-    anon,
-  );
+  const session = await exchangeLoginCredential(body, admin, anon);
   return session
     ? new Response(JSON.stringify(session), { status: 200, headers: cors })
     : new Response(JSON.stringify({ error: "invalid_credential" }), {

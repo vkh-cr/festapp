@@ -1,13 +1,29 @@
 import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.58.0";
-import { parseLoginQr, sha256Hex } from "./qr.ts";
+import { parseLoginQr, parseManualLoginCode, sha256Hex } from "./qr.ts";
 
-export async function exchangeLoginQr(
-  payload: unknown,
+export async function exchangeLoginCredential(
+  input: unknown,
   admin: SupabaseClient,
   anon: SupabaseClient,
 ) {
-  const parsed = parseLoginQr(payload);
+  if (input == null || typeof input !== "object") return null;
+  const value = input as {
+    payload?: unknown;
+    occasion?: unknown;
+    manualCode?: unknown;
+  };
+  const parsed = value.payload != null
+    ? parseLoginQr(value.payload)
+    : parseManualLoginCode(value.occasion, value.manualCode);
   if (!parsed) return null;
+  return exchangeResolvedCredential(parsed, admin, anon);
+}
+
+async function exchangeResolvedCredential(
+  parsed: { occasion: number; token: string },
+  admin: SupabaseClient,
+  anon: SupabaseClient,
+) {
   const { data: resolved, error: resolveError } = await admin.rpc(
     "resolve_reception_login_qr_v1",
     {

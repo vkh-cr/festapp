@@ -21,6 +21,7 @@ import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/reception/reception_strings.dart';
 import 'package:fstapp/components/reception/login_qr_transition.dart';
+import 'package:fstapp/components/reception/login_qr_scanner_page.dart';
 import 'package:fstapp/app_router.gr.dart';
 
 @RoutePage()
@@ -231,15 +232,27 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _loginWithQr() async {
-    final payload =
-        await context.router.push<String>(const LoginQrScannerRoute());
-    if (payload == null || !mounted) return;
+    final credential = await context.router
+        .push<ReceptionLoginCredential>(const LoginQrScannerRoute());
+    if (credential == null || !mounted) return;
+    await _loginWithReceptionCredential(
+      () => switch (credential.type) {
+        ReceptionLoginCredentialType.qr =>
+          AuthService.loginWithQr(credential.value),
+        ReceptionLoginCredentialType.manualCode =>
+          AuthService.loginWithManualCode(credential.value),
+      },
+    );
+  }
+
+  Future<void> _loginWithReceptionCredential(
+      Future<void> Function() authenticate) async {
     setState(() {
       _isLoading = true;
       _qrTransition = LoginQrTransitionState.signingIn;
     });
     try {
-      await AuthService.loginWithQr(payload);
+      await authenticate();
       if (!mounted) return;
       setState(() => _qrTransition = LoginQrTransitionState.success);
       await Future<void>.delayed(const Duration(milliseconds: 900));
