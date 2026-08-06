@@ -18,7 +18,10 @@ void main() {
 
     final loaded = OccasionUserModel.fromJson({
       Tb.occasion_users.user: '00000000-0000-0000-0000-000000000001',
-      Tb.occasion_users.data: <String, dynamic>{},
+      Tb.occasion_users.is_receptionist: true,
+      Tb.occasion_users.data: <String, dynamic>{
+        Tb.occasion_users.data_appLinksSent: true,
+      },
       Tb.occasion_users.services: <String, dynamic>{
         DbOccasions.serviceTypeAccommodation: <String, dynamic>{
           'room-a': DbOccasions.servicePaid,
@@ -32,6 +35,8 @@ void main() {
     );
 
     expect(edited.aggregateVersion, expectedAggregateVersion);
+    expect(edited.isReceptionist, isTrue);
+    expect(edited.data?[Tb.occasion_users.data_appLinksSent], isTrue);
     expect(edited.services?[DbOccasions.serviceTypeAccommodation], {
       'room-a': DbOccasions.servicePaid,
     });

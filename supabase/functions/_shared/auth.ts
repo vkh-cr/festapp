@@ -1,4 +1,9 @@
-import { getSupabaseUser, isUserEditorOrder, supabaseAdmin } from "./supabaseUtil.ts";
+import {
+  canManageOccasionUsers,
+  getSupabaseUser,
+  isUserEditorOrder,
+  supabaseAdmin,
+} from "./supabaseUtil.ts";
 
 /**
  * Custom error class for authorization failures.
@@ -17,6 +22,7 @@ interface AuthParams {
   requestSecret?: string;
   authorizationHeader?: string | null;
   occasionId?: number;
+  permission?: "editorOrder" | "manageUsers";
 }
 
 interface AuthResult {
@@ -29,10 +35,18 @@ interface AuthResult {
  * @param {AuthParams} params - The authorization parameters.
  * @returns Promise<AuthResult> - Contains the user object if applicable.
  */
-export async function authorizeRequest({ requestSecret, authorizationHeader, occasionId }: AuthParams): Promise<AuthResult> {
+export async function authorizeRequest({
+  requestSecret,
+  authorizationHeader,
+  occasionId,
+  permission = "editorOrder",
+}: AuthParams): Promise<AuthResult> {
   // Path 1: Authorization via request secret (for cron jobs, etc.)
   if (requestSecret) {
-    const { data: secretValid, error: secretError } = await supabaseAdmin.rpc("check_request_secret", { p_secret: requestSecret });
+    const { data: secretValid, error: secretError } = await supabaseAdmin.rpc(
+      "check_request_secret",
+      { p_secret: requestSecret },
+    );
     if (secretError || !secretValid) {
       throw new AuthError("Invalid request secret", 403);
     }
@@ -50,7 +64,9 @@ export async function authorizeRequest({ requestSecret, authorizationHeader, occ
 
     const userId = userResponse.user.id;
     // Note: Passing BigInt(occasionId) assuming occasionId comes in as number but DB expects BigInt context
-    const userIsEditor = await isUserEditorOrder(userId, BigInt(occasionId));
+    const userIsEditor = permission === "manageUsers"
+      ? await canManageOccasionUsers(authorizationHeader, BigInt(occasionId))
+      : await isUserEditorOrder(userId, BigInt(occasionId));
 
     if (!userIsEditor) {
       throw new AuthError("Forbidden: Not an editor", 403);

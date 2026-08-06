@@ -40,6 +40,7 @@ class FeatureService {
     FeatureConstants.programNotifications,
     FeatureConstants.counseling,
     FeatureConstants.cleaning,
+    FeatureConstants.reception,
   ];
 
   /// Checks whether the feature with [featureCode] is enabled.
@@ -102,6 +103,7 @@ class FeatureService {
         ProgramNotificationsFeature(),
         CounselingFeature(code: FeatureConstants.counseling, isEnabled: false),
         SimpleFeature(code: FeatureConstants.cleaning, isEnabled: false),
+        SimpleFeature(code: FeatureConstants.reception, isEnabled: false),
       ],
     ];
   }

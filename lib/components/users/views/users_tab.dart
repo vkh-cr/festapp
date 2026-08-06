@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fstapp/app_config.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/features/import_feature.dart';
@@ -28,8 +29,8 @@ class UsersTab extends StatefulWidget {
 }
 
 class _UsersTabState extends State<UsersTab> {
-  static bool get _canManageCompanions =>
-      RightsService.isManager() || RightsService.isAdmin();
+  static bool get _hasCsmAppLinks => AppConfig.organization == 9;
+  static bool get _canManageCompanions => RightsService.isEditor();
 
   static List<String> getColumnIdentifiers() {
     final identifiers = [
@@ -58,6 +59,8 @@ class _UsersTabState extends State<UsersTab> {
         UserColumns.CLEANING_CREW,
       if (FeatureService.isFeatureEnabled(FeatureConstants.cleaning))
         UserColumns.CLEANING_BLOCKED,
+      if (FeatureService.isFeatureEnabled(FeatureConstants.reception))
+        UserColumns.RECEPTIONIST,
       UserColumns.INVITED,
       UserColumns.CREATED_AT,
       UserColumns.LAST_SIGN_IN_AT,
@@ -74,6 +77,8 @@ class _UsersTabState extends State<UsersTab> {
         UserColumns.FORM,
       ]);
     }
+
+    if (_hasCsmAppLinks) identifiers.add(UserColumns.APP_LINKS_SENT);
 
     return identifiers;
   }
@@ -116,13 +121,22 @@ class _UsersTabState extends State<UsersTab> {
                 refreshData);
           },
         ),
-      DataGridAction(
-        name: UserStrings.invite,
-        action: (SingleDataGridController p0, [_]) async {
-          await UsersTabHelper.invite(context, p0, refreshData);
-        },
-        isEnabled: RightsService.canUpdateUsers,
-      ),
+      if (_hasCsmAppLinks)
+        DataGridAction(
+          name: UserStrings.sendAppLinks,
+          action: (SingleDataGridController p0, [_]) async {
+            await UsersTabHelper.sendAppLinks(context, p0, refreshData);
+          },
+          isEnabled: RightsService.canUpdateUsers,
+        ),
+      if (!_hasCsmAppLinks)
+        DataGridAction(
+          name: UserStrings.invite,
+          action: (SingleDataGridController p0, [_]) async {
+            await UsersTabHelper.invite(context, p0, refreshData);
+          },
+          isEnabled: RightsService.canUpdateUsers,
+        ),
       if (FeatureService.allowsAdminCompanionAssignment() &&
           _canManageCompanions)
         DataGridAction(

@@ -210,6 +210,78 @@ void main() {
     expect(store.activations, isEmpty);
     await service.dispose();
   });
+
+  test('a matching catalog pointer repairs missing component payloads',
+      () async {
+    final fixture = _PublicFixture(validMapClosure: true);
+    final store = _MemoryStore(
+      initialCatalog: StoredSyncGeneration(
+        pointer: 'f'.padLeft(64, 'f'),
+        revisions: {
+          for (final component in ReleaseManifest.requiredComponents)
+            component: 1,
+        },
+        updatedAt: DateTime.utc(2026, 8, 3),
+      ),
+    );
+    final service = ClientSyncService(
+      publicHeadRemote: fixture,
+      publicComponentRemote: fixture,
+      privateRemote: _NoPrivateRemote(),
+      store: store,
+      clock: () => DateTime.utc(2026, 8, 3),
+    );
+
+    await service.open(context).first;
+    await service.refresh(reason: SyncReason.bootstrap);
+
+    expect(store.activations, hasLength(1));
+    expect(
+      store.activations.single.payloads.keys,
+      containsAll(ReleaseManifest.requiredComponents),
+    );
+    await service.dispose();
+  });
+
+  test('private sync does not advertise a missing cached payload', () async {
+    final fixture = _PublicFixture(validMapClosure: true);
+    final private = _RepairingPrivateRemote();
+    final privateRevisions = {
+      for (final component in ClientSyncComponent.values)
+        if (component.isPrivate) component: 1,
+    };
+    final store = _MemoryStore(
+      initialPrivate: StoredSyncGeneration(
+        pointer: 'private',
+        revisions: privateRevisions,
+        updatedAt: DateTime.utc(2026, 8, 3),
+      ),
+    );
+    const authenticated = SyncContext(
+      organizationId: 1,
+      occasionId: 2,
+      occasionLink: 'test',
+      userId: 'user-a',
+      identityEpoch: 1,
+    );
+    final service = ClientSyncService(
+      publicHeadRemote: fixture,
+      publicComponentRemote: fixture,
+      privateRemote: private,
+      store: store,
+      clock: () => DateTime.utc(2026, 8, 3),
+    );
+
+    await service.open(authenticated).first;
+    await service.refresh(reason: SyncReason.bootstrap, privateConsumer: true);
+
+    expect(private.receivedKnownVector, isEmpty);
+    final activation = store.activations.singleWhere(
+      (item) => item.type == SyncFreshnessClass.privateIdentity,
+    );
+    expect(activation.payloads.keys, containsAll(privateRevisions.keys));
+    await service.dispose();
+  });
 }
 
 class _PublicFixture implements PublicSyncHeadRemote, PublicComponentRemote {
@@ -345,6 +417,33 @@ class _CompanionPrivateRemote implements PrivateSyncRemote {
   }
 }
 
+class _RepairingPrivateRemote implements PrivateSyncRemote {
+  Map<ClientSyncComponent, int>? receivedKnownVector;
+
+  @override
+  Future<PrivateSyncResponse> getChanges(
+      SyncContext context, Map<ClientSyncComponent, int> knownVector) async {
+    receivedKnownVector = Map.of(knownVector);
+    final vector = {
+      for (final component in ClientSyncComponent.values)
+        if (component.isPrivate) component: 1,
+    };
+    return PrivateSyncResponse(
+      serverTime: DateTime.utc(2026, 8, 3),
+      vector: vector,
+      replacements: [
+        for (final component in vector.keys)
+          if (!knownVector.containsKey(component))
+            PrivateComponentReplacement(
+              component: component,
+              revision: 1,
+              payload: <String, dynamic>{},
+            ),
+      ],
+    );
+  }
+}
+
 class _Activation {
   const _Activation(this.scope, this.type, this.payloads);
   final String scope;
@@ -353,19 +452,31 @@ class _Activation {
 }
 
 class _MemoryStore extends ClientSyncStore {
-  _MemoryStore({this.initialCatalog});
+  _MemoryStore({this.initialCatalog, this.initialPrivate});
 
   final StoredSyncGeneration? initialCatalog;
+  final StoredSyncGeneration? initialPrivate;
   final Map<String, List<int>> blobs = {};
+  final Map<ClientSyncComponent, Object?> storedComponents = {};
   final List<_Activation> activations = [];
 
   @override
   Future<StoredSyncGeneration?> activeGeneration(
-          String scope, SyncFreshnessClass type) async =>
-      type == SyncFreshnessClass.catalog ? initialCatalog : null;
+      String scope, SyncFreshnessClass type) async {
+    return switch (type) {
+      SyncFreshnessClass.catalog => initialCatalog,
+      SyncFreshnessClass.privateIdentity => initialPrivate,
+      SyncFreshnessClass.live => null,
+    };
+  }
 
   @override
   Future<List<int>?> readBlob(String sha256) async => blobs[sha256];
+
+  @override
+  Future<Object?> readComponent(String scope, SyncFreshnessClass type,
+          ClientSyncComponent component) async =>
+      storedComponents[component];
 
   @override
   Future<void> stageBlob(String sha256, List<int> bytes) async {

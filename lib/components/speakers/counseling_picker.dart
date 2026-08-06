@@ -16,6 +16,7 @@ import 'package:fstapp/components/speakers/topic_picker.dart';
 import 'package:fstapp/components/offline/offline_strings.dart';
 import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/services/connectivity_service.dart';
 import 'package:fstapp/services/exception_handler.dart';
@@ -110,10 +111,8 @@ class _CounselingPickerState extends State<CounselingPicker> {
       final bundle =
           await DbSpeakers.getSpeakers(_occasionId, includeDescription: true);
       final reservations = await _loadReservations();
-      final overview = await DbSpeakers.getCounselingTopicsOverview(
-          _occasionId,
-          from: _windowFrom,
-          to: _windowTo);
+      final overview = await DbSpeakers.getCounselingTopicsOverview(_occasionId,
+          from: _windowFrom, to: _windowTo);
       if (mounted) {
         setState(() {
           _bundle = bundle;
@@ -141,7 +140,9 @@ class _CounselingPickerState extends State<CounselingPicker> {
 
   Future<List<EventModel>> _loadReservations() async {
     if (!AuthService.isLoggedIn()) return [];
-    final all = await DbEvents.getAllEvents(_occasionId, false);
+    final all = ClientSyncRuntime.isV1Selected
+        ? await OfflineDataService.getAllEvents()
+        : await DbEvents.getAllEvents(_occasionId, false);
     return all
         .where((e) => e.isCounselingSlot && (e.isSignedIn == true))
         .toList()
@@ -157,8 +158,7 @@ class _CounselingPickerState extends State<CounselingPicker> {
     });
     CounselingAvailability? avail;
     try {
-      avail = await DbSpeakers.getCounselingAvailability(
-          _occasionId, topicId,
+      avail = await DbSpeakers.getCounselingAvailability(_occasionId, topicId,
           from: _windowFrom, to: _windowTo);
     } catch (e) {
       // Network/timeout/server-unreachable error or no connection → readable
@@ -199,10 +199,8 @@ class _CounselingPickerState extends State<CounselingPicker> {
   Future<void> _reloadAfterChange() async {
     try {
       final reservations = await _loadReservations();
-      final overview = await DbSpeakers.getCounselingTopicsOverview(
-          _occasionId,
-          from: _windowFrom,
-          to: _windowTo);
+      final overview = await DbSpeakers.getCounselingTopicsOverview(_occasionId,
+          from: _windowFrom, to: _windowTo);
       CounselingAvailability? avail = _availability;
       if (_selectedTopicId != null) {
         avail = await DbSpeakers.getCounselingAvailability(
@@ -353,9 +351,8 @@ class _CounselingPickerState extends State<CounselingPicker> {
     final areas = _areasForReservation(e);
     final speaker = _speakerForReservation(e);
     final now = TimeHelper.now();
-    final isCurrent = !e.isCancelled &&
-        e.startTime.isBefore(now) &&
-        e.endTime.isAfter(now);
+    final isCurrent =
+        !e.isCancelled && e.startTime.isBefore(now) && e.endTime.isAfter(now);
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       clipBehavior: Clip.antiAlias,
@@ -519,9 +516,8 @@ class _CounselingPickerState extends State<CounselingPicker> {
         slot: s,
         speaker: _bundle.speakerById(c.id),
         areas: _areasForCounselor(c.id),
-        startTimeText: s.startTime != null
-            ? hm.format(s.startTime!.toOccasionTime())
-            : "",
+        startTimeText:
+            s.startTime != null ? hm.format(s.startTime!.toOccasionTime()) : "",
         endTimeText:
             s.endTime != null ? hm.format(s.endTime!.toOccasionTime()) : "",
         isLoggedIn: AuthService.isLoggedIn(),
@@ -713,10 +709,10 @@ class _CounselorSlotTile extends StatelessWidget {
     final strong = ThemeConfig.blackColor(context);
     final muted = ThemeConfig.grey700(context);
     final sp = speaker;
-    final detail = (counselor.subtitle != null &&
-            counselor.subtitle!.isNotEmpty)
-        ? counselor.subtitle
-        : sp?.subtitle;
+    final detail =
+        (counselor.subtitle != null && counselor.subtitle!.isNotEmpty)
+            ? counselor.subtitle
+            : sp?.subtitle;
     final place = slot.placeTitle;
     // Full "when": weekday + date + from–to, for the detail dialog.
     final st = slot.startTime?.toOccasionTime();
@@ -752,8 +748,7 @@ class _CounselorSlotTile extends StatelessWidget {
         placeTitle: slot.placeTitle,
         // No footer at all when there is nothing to act on (taken by someone
         // else) so the dialog doesn't render an empty anchored bar.
-        footerBuilder:
-            (slot.isSignedIn || !slot.isFull) ? _dialogAction : null,
+        footerBuilder: (slot.isSignedIn || !slot.isFull) ? _dialogAction : null,
         timeText: dialogTimeText,
       ),
       hoverColor: strong.withValues(alpha: 0.03),
@@ -879,8 +874,8 @@ class _CounselorSlotTile extends StatelessWidget {
   Widget _statusPill(BuildContext context) {
     final s = slot;
     if (s.isSignedIn) {
-      return _pill(SpeakersStrings.reserved,
-          Theme.of(context).primaryColor, Colors.white);
+      return _pill(SpeakersStrings.reserved, Theme.of(context).primaryColor,
+          Colors.white);
     }
     if (!s.isFull) {
       return _pill(SpeakersStrings.slotFree, ThemeConfig.greenColor(context),

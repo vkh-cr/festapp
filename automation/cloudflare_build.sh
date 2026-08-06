@@ -21,6 +21,15 @@ set -e
 
 echo "Cloudflare Pages build starting..."
 
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+BUILD_WEB_DIR="$PROJECT_ROOT/build/web"
+WEB_CLIENT_DIST_DIR="$PROJECT_ROOT/web_client/dist"
+
+# Both Flutter and Vite leave content-hashed assets from older builds in place.
+# A merged PWA must start from empty generated output or its service worker will
+# precache obsolete tenant bundles and retain them in browser storage.
+rm -rf -- "$BUILD_WEB_DIR" "$WEB_CLIENT_DIST_DIR"
+
 FLUTTER_VERSION="3.38.7"
 FLUTTER_INSTALL_DIR="${HOME}/flutter"
 
@@ -89,8 +98,10 @@ fi
 # 5d. Replace Flutter's deprecated self-unregistering worker with a versioned,
 #     complete app-shell cache after both frontends have been merged.
 rm -f build/web/flutter_service_worker.js
-node automation/generate_pwa_service_worker.mjs build/web "$(grep -m1 '^VERSION=' automation/project.conf | cut -d= -f2 | tr -d '[:space:]')"
-node automation/verify_web_build.mjs build/web "$(grep -m1 '^VERSION=' automation/project.conf | cut -d= -f2 | tr -d '[:space:]')"
+node automation/generate_pwa_service_worker.mjs \
+  build/web \
+  "$(grep -m1 '^VERSION=' automation/project.conf | cut -d= -f2 | tr -d '[:space:]')" \
+  "$(grep -m1 '^FORCE_OCCASION_LINK=' automation/project.conf | cut -d= -f2- | tr -d '\"' | tr -d "'" | tr -d '[:space:]')"
 
 # 6. Cloudflare-specific routing via Pages Function (_worker.js).
 #    Cloudflare Pages applies _redirects BEFORE static assets, so a catch-all
@@ -116,6 +127,7 @@ cat > build/web/_worker.js <<'WORKER'
 const WEB_CLIENT_INDEX = "/webclient";
 const FLUTTER_ENTRY = "/flutter";
 const AUTH_BRIDGE = "/auth_bridge";
+const FORCED_OCCASION_PATH = null; // replaced from project.conf after generation
 
 // Web client SPA routes (form list handled by /form/<slug> below).
 const WEB_CLIENT_EXACT = new Set(["/"]);
@@ -300,6 +312,10 @@ export default {
 
     if (path === "/sitemap.xml") return handleSitemap(request, env);
 
+    if (path === "/" && FORCED_OCCASION_PATH) {
+      return Response.redirect(new URL(FORCED_OCCASION_PATH, url).toString(), 302);
+    }
+
     if (INTERNAL_ASSET_PATHS.has(path)) {
       if (url.searchParams.get("pwa-cache") === "1") {
         const res = await serveAsset(env, request, path);
@@ -353,6 +369,34 @@ export default {
   },
 };
 WORKER
+
+python3 - build/web/_worker.js automation/project.conf <<'PY'
+import json
+import pathlib
+import re
+import sys
+
+worker_path, config_path = sys.argv[1:]
+source = pathlib.Path(worker_path).read_text(encoding="utf-8")
+config = pathlib.Path(config_path).read_text(encoding="utf-8")
+match = re.search(r"^FORCE_OCCASION_LINK=(.*)$", config, re.MULTILINE)
+occasion_link = match.group(1).strip().strip('"').strip("'") if match else ""
+occasion_link = occasion_link.strip().strip("/")
+replacement = json.dumps(f"/{occasion_link}" if occasion_link else None)
+source, count = re.subn(
+    r"const FORCED_OCCASION_PATH = null;",
+    f"const FORCED_OCCASION_PATH = {replacement};",
+    source,
+    count=1,
+)
+if count != 1:
+    raise SystemExit("Could not stamp FORCE_OCCASION_LINK into _worker.js")
+pathlib.Path(worker_path).write_text(source, encoding="utf-8")
+PY
+
+node automation/verify_web_build.mjs build/web \
+  "$(grep -m1 '^VERSION=' automation/project.conf | cut -d= -f2 | tr -d '[:space:]')" \
+  automation/project.conf
 
 echo "Build complete. Output in build/web"
 ls -la build/web | head -25

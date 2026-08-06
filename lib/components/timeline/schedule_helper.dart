@@ -60,7 +60,7 @@ class TimeBlockItem {
   TimeBlockPlace? timeBlockPlace;
   String? eventType;
   final String title;
-  final int participants;
+  final int? participants;
   final int maxParticipants;
   final String? imageUrl;
   final bool isCancelled;
@@ -80,7 +80,7 @@ class TimeBlockItem {
       this.timeBlockPlace,
       this.eventType,
       this.title = '',
-      this.participants = 0,
+      this.participants,
       this.maxParticipants = 0,
       this.children,
       this.imageUrl,
@@ -101,7 +101,10 @@ class TimeBlockItem {
   bool isSignedIn() => timeBlockType == TimeBlockType.signedIn;
   bool haveChildren() => children?.isNotEmpty ?? false;
   bool isSupportingSignIn() => !isCancelled && maxParticipants > 0;
-  bool canSignIn() => isSupportingSignIn() && maxParticipants > participants;
+  bool canSignIn() =>
+      isSupportingSignIn() &&
+      participants != null &&
+      maxParticipants > participants!;
   bool canSaveToMySchedule() => (!isSupportingSignIn()) && (!haveChildren());
 
   String durationTimeString() =>
@@ -113,10 +116,13 @@ class TimeBlockItem {
     if (isCancelled) {
       titleStr += " (${CommonStrings.cancelled})";
     }
-    return (maxParticipants == 0
-        ? titleStr
-        : "$titleStr ($participants/$maxParticipants)");
+    final capacity = capacityLabel;
+    return capacity == null ? titleStr : "$titleStr ($capacity)";
   }
+
+  String? get capacityLabel => maxParticipants > 0 && participants != null
+      ? '$participants/$maxParticipants'
+      : null;
 
   /// Factory from EventModel for schedule timeline (new usage).
   factory TimeBlockItem.fromEventModelBasicTimeline(EventModel model) {
@@ -149,7 +155,7 @@ class TimeBlockItem {
           ? TimeBlockPlace.fromPlaceModel(model.place!)
           : null,
       title: model.title!,
-      participants: model.currentParticipants ?? 0,
+      participants: model.currentParticipants,
       maxParticipants: model.maxParticipants ?? 0,
       children: model.childEvents
           .map((c) => TimeBlockItem.fromEventModelAsChild(c))
@@ -183,7 +189,7 @@ class TimeBlockItem {
           ? TimeBlockPlace.fromPlaceModel(model.place!)
           : null,
       title: model.title ?? '',
-      participants: model.currentParticipants ?? 0,
+      participants: model.currentParticipants,
       maxParticipants: model.maxParticipants ?? 0,
       imageUrl: model.data?[Tb.events.dataHeaderImage],
       isCancelled: model.isCancelled,
@@ -222,7 +228,8 @@ class TimeBlockHelper {
       return TimeBlockType.noAction;
     } else if (EventModel.isEventSupportingSignIn(model) && model.isFull()) {
       return TimeBlockType.isFull;
-    } else if (EventModel.isEventSupportingSignIn(model)) {
+    } else if (EventModel.isEventSupportingSignIn(model) &&
+        model.currentParticipants != null) {
       return TimeBlockType.canSignIn;
     } else if (model.canSaveEventToMyProgram() == true) {
       return TimeBlockType.canSave;

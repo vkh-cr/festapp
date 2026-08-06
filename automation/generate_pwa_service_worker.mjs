@@ -5,9 +5,15 @@ import path from 'node:path';
 
 const buildDir = path.resolve(process.argv[2] || 'build/web');
 const version = process.argv[3];
+const forcedOccasionLink = (process.argv[4] || '').trim().replace(/^\/+|\/+$/g, '');
 
 if (!version) {
-  throw new Error('Usage: generate_pwa_service_worker.mjs <build-dir> <version>');
+  throw new Error(
+    'Usage: generate_pwa_service_worker.mjs <build-dir> <version> [forced-occasion-link]',
+  );
+}
+if (forcedOccasionLink && !/^[a-zA-Z0-9_-]+$/.test(forcedOccasionLink)) {
+  throw new Error('forced-occasion-link contains unsupported characters');
 }
 
 const outputName = 'festapp_service_worker.js';
@@ -103,6 +109,7 @@ const PRECACHE_URLS = ${JSON.stringify(assets, null, 2)};
 const CORE_URLS = ${JSON.stringify(coreAssets, null, 2)};
 const FLUTTER_ENTRY = ${JSON.stringify(deploymentUrl(flutterEntry))};
 const WEB_CLIENT_ENTRY = ${JSON.stringify(deploymentUrl(webClientEntry))};
+const FORCED_OCCASION_PATH = ${JSON.stringify(forcedOccasionLink ? `/${forcedOccasionLink}` : null)};
 const STANDALONE_DOCUMENT_PATHS = new Set(${JSON.stringify(standaloneDocuments, null, 2)});
 const PRECACHE_PATHS = new Set(PRECACHE_URLS.map((url) =>
   new URL(url, self.location.origin).pathname));
@@ -202,6 +209,9 @@ function cachedNavigationTarget(pathname) {
   const normalizedPath = pathname.endsWith('/') ? pathname : pathname + '/';
   if (STANDALONE_DOCUMENT_PATHS.has(normalizedPath)) {
     return normalizedPath;
+  }
+  if (pathname === '/' && FORCED_OCCASION_PATH) {
+    return FLUTTER_ENTRY;
   }
   if (pathname === '/' || pathname.startsWith('/form/')) {
     return WEB_CLIENT_ENTRY;

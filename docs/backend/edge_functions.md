@@ -1,5 +1,27 @@
 # Supabase Edge Functions Reference
 
+## Reception QR authentication
+
+`exchange-login-qr` is the only anonymous authentication exception. It accepts
+only `POST {"payload":"festapp-login:v1:<occasion>:<opaque-token>"}` and is
+deployed with JWT verification disabled. It hashes the token, asks a
+service-role-only RPC to verify the active credential, membership and enabled
+`reception` feature, then exchanges an Admin-generated magic-link proof for a
+normal Supabase session. Responses use `Cache-Control: no-store`; payloads,
+identity details, generated links and session tokens must never be logged.
+It needs `SUPABASE_URL`, `SUPABASE_ANON_KEY`,
+`SUPABASE_SERVICE_ROLE_KEY`, and a stable `QR_RATE_SALT`.
+
+`cancel-reception-registration` requires the caller JWT. Its SQL command first
+marks the receipt cancelled and removes occasion membership (which cascades the
+QR credential). Only after that commit does the function attempt a global Auth
+sign-out for the target. An Auth failure returns
+`domain_blocked_auth_revocation_pending` and a retry completes the pending
+revocation. Global sign-out revokes refresh sessions; it does not promise that
+an already issued access JWT dies before `exp`. Immediate occasion protection
+therefore comes from membership removal and membership checks on private roots
+and writes.
+
 ## Overview
 
 Deno-based edge functions for privileged operations, external API calls, and email delivery. All deployed with `--no-verify-jwt`; each function handles its own authorization.
@@ -13,6 +35,7 @@ Deno-based edge functions for privileged operations, external API calls, and ema
 | `send-email` | Transactional emails for ticket orders. Supports single sends and batch queue. Template codes: `TICKET_ORDER_STORNO`, `TICKET_ORDER_UPDATE`, `TICKET_ORDER_REMINDER`. Strategy Pattern for data gathering. |
 | `send-custom-email` | Editor-initiated custom email. Validates editor role, then sends with provided template/substitutions. |
 | `send-sign-in-code` | Resets password and sends sign-in code through the delivery resolver (`email_delivery`, otherwise `email_readonly`). Used by admins/editors to invite users. |
+| `send-app-links` | Sends the CSM `APP_LINKS` template through the account delivery resolver and marks the occasion user only after successful delivery. |
 | `send-reset-password-link` | Self-service "Forgot Password" flow. Looks up by `email_readonly` and uses the same delivery resolver. |
 | `send-ticket-order` | Creates/replaces an order through one receipted RPC; confirmation effects are queued transactionally. |
 | `send-tickets` | Generates and emails PDF tickets (standard or named) for an order. |
@@ -43,7 +66,7 @@ Path 2: User Token + Editor Check
   - Used by: editor-initiated actions
 ```
 
-`AuthError` carries an HTTP status (401, 403); functions catch it and return the appropriate code.
+`AuthError` carries an HTTP status (401, 403); functions catch it and return the appropriate code. The default permission is order-editor access; user-management callers select `manageUsers`, which matches the Users admin UI's manager/admin/unit-editor roles.
 
 ### Direct Auth
 

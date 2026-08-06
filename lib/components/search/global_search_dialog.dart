@@ -454,6 +454,7 @@ class _GlobalSearchDialogState extends State<GlobalSearchDialog> {
         model?.place?.title ?? (r.extra['place_title'] as String?);
     final supportsSignIn = model != null &&
         EventModel.isEventSupportingSignIn(model) &&
+        model.participantCapacityLabel != null &&
         !cancelled;
     final now = TimeHelper.now();
     final isNow = model != null &&
@@ -587,7 +588,8 @@ class _GlobalSearchDialogState extends State<GlobalSearchDialog> {
   /// primary-colour pill when the current user is signed in, muted text
   /// otherwise.
   Widget _capacityChip(ThemeData theme, EventModel model) {
-    final text = '${model.currentParticipants ?? 0}/${model.maxParticipants}';
+    final text = model.participantCapacityLabel;
+    if (text == null) return const SizedBox.shrink();
     if (model.isSignedIn == true) {
       final fg = theme.cardColor;
       return Container(

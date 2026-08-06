@@ -21,6 +21,6 @@ export class AppConfig {
     static Keys = {
         theme: 'theme',
         locale: 'locale',
-        auth: 'sb-kjdpmixlnhntmxjedpxh-auth-token'
+        auth: 'sb-lwfpdjxsdmkfyrzqbrlk-auth-token'
     };
 }

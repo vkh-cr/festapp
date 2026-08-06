@@ -29,6 +29,12 @@ fvm flutter build ipa --release \
   --build-number="$target_build" \
   --export-options-plist="$SCRIPT_DIR/ExportOptions.plist"
 
+archive_app="$PROJECT_ROOT/build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app"
+if [ -d "$archive_app/Frameworks/OneSignalLocation.framework" ]; then
+  echo "Release archive unexpectedly contains OneSignalLocation.framework."
+  exit 1
+fi
+
 ipa_files=("$PROJECT_ROOT"/build/ios/ipa/*.ipa)
 if [ "${#ipa_files[@]}" -ne 1 ] || [ ! -f "${ipa_files[0]}" ]; then
   echo "Expected exactly one IPA in build/ios/ipa."

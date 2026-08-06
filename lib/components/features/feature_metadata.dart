@@ -38,6 +38,10 @@ class FeatureMetadata {
           'title': CleaningStrings.featureTitle,
           'description': CleaningStrings.featureDescription,
         },
+        FeatureConstants.reception: {
+          'title': FeaturesStrings.receptionTitle,
+          'description': FeaturesStrings.receptionDescription,
+        },
         FeatureConstants.form: {
           'title': FeaturesStrings.formTitle,
           'description': FeaturesStrings.formDescription,

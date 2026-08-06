@@ -1,5 +1,25 @@
 # Users Component
 
+## Reception ownership
+
+Reception is a default-disabled per-occasion feature. Its role lives only in
+`occasion_users.is_receptionist`; it does not imply the general user editor
+capability. SQL reception commands re-check both feature and capability. They
+expose only a minimal group/accommodation catalog and at most ten masked exact
+name matches, never a participant roster.
+
+`create_reception_user_v1` is the single idempotent identity/membership command.
+QR issue/rotation is separate so no plaintext credential enters its replay
+receipt. The credential table stores SHA-256 hashes only. Login accepts only
+the typed `festapp-login:v1` payload; profile UUIDs, ticket symbols, e-mails and
+password-bearing QR values remain invalid authentication inputs.
+
+Cancellation removes membership and its cascading QR first, then the Edge
+orchestrator globally revokes refresh sessions. An existing access JWT may live
+until expiry, so private occasion data and writes must always gate on current
+membership. Reception accommodation assigns only an existing occasion service
+code; it does not allocate an inventory spot.
+
 ## Companion projection and commands
 
 Companion policy comes from cached `occasion_config`. Relationship identity,

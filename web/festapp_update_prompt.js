@@ -536,6 +536,18 @@
         return;
       }
       if (latestVersion === currentVersion) {
+        // A network navigation can already serve the new HTML while the tab is
+        // still controlled by the previous worker. In that mixed state the
+        // document and manifest agree, so the normal "new version" branch
+        // cannot detect that main.dart.js is still coming from the old shell.
+        // Activate the already-installed worker for this document before the
+        // stale runtime can keep using another tenant's compiled configuration.
+        const registration = 'serviceWorker' in navigator
+          ? await navigator.serviceWorker.getRegistration('/')
+          : null;
+        const activeVersion = await queryWorkerVersion(registration?.active);
+        if (activeVersion && activeVersion !== currentVersion &&
+            await cutOverToVersion(currentVersion)) return;
         sessionStorage.removeItem(cutoverStorageKey);
         sessionStorage.removeItem(cleanRecoveryStorageKey);
         return;

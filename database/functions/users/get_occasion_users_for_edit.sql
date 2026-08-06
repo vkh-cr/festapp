@@ -97,6 +97,7 @@ BEGIN
             vu.is_editor_order_view,
             vu.is_cleaning_crew,
             vu.is_cleaning_blocked,
+            vu.is_receptionist,
             vu.ticket,
             order_info.form_id,
             order_info.created_at AS order_created_at,

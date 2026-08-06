@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 
 class UserStrings {
+  static String get receptionist => 'UserColumns.receptionist'.tr();
   // Column Titles
   static String get id => 'UserColumns.id'.tr();
   static String get unit => 'UserColumns.unit'.tr();
@@ -100,6 +101,21 @@ class UserStrings {
         'user': user,
         'retries': retries
       }); // "Failed to invite {user}. Number of retries: ({retries})."
+  static String get sendAppLinks => 'FeatureUser.sendAppLinks'.tr();
+  static String get sendAppLinksInfo => 'FeatureUser.sendAppLinksInfo'.tr();
+  static String get resendAppLinksConfirm =>
+      'FeatureUser.resendAppLinksConfirm'.tr();
+  static String get appLinksSent => 'FeatureUser.appLinksSent'.tr();
+  static String appLinksSentUser({required String user}) =>
+      'FeatureUser.appLinksSentUser'.tr(namedArgs: {'user': user});
+  static String sendAppLinksFailed(
+          {required String user, required String retries}) =>
+      'FeatureUser.sendAppLinksFailed'.tr(namedArgs: {
+        'user': user,
+        'retries': retries,
+      });
+  static String appLinksStatusFailed({required String user}) =>
+      'FeatureUser.appLinksStatusFailed'.tr(namedArgs: {'user': user});
   static String passwordChangeFailed(
           {required String user, required String error}) =>
       'FeatureUser.passwordChangeFailed'.tr(namedArgs: {

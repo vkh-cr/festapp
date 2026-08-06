@@ -32,6 +32,8 @@ import 'package:fstapp/components/schedule/timetable_page.dart';
 import 'package:fstapp/components/users/views/user_page.dart';
 import 'package:fstapp/components/forms/views/form_page.dart';
 import 'package:fstapp/components/app_management/instance_install_page.dart';
+import 'package:fstapp/components/reception/reception_page.dart';
+import 'package:fstapp/components/reception/login_qr_scanner_page.dart';
 
 import 'app_router.gr.dart';
 import 'components/information/game/game_page.dart';
@@ -60,6 +62,8 @@ class AppRouter extends RootStackRouter {
         AutoRoute(
             page: ForgotPasswordRoute.page, path: sl(ForgotPasswordPage.ROUTE)),
         AutoRoute(page: LoginRoute.page, path: sl(LoginPage.ROUTE)),
+        AutoRoute(
+            page: LoginQrScannerRoute.page, path: sl(LoginQrScannerPage.ROUTE)),
         AutoRoute(page: SignupRoute.page, path: sl(SignupPage.ROUTE)),
         AutoRoute(page: SettingsRoute.page, path: sl(SettingsPage.ROUTE)),
         AutoRoute(page: InstallRoute.page, path: sl(InstallPage.ROUTE)),
@@ -129,6 +133,9 @@ class AppRouter extends RootStackRouter {
             children: [
               AutoRoute(path: ':id', page: CleaningRoute.page),
             ]),
+        AutoRoute(
+            page: ReceptionRoute.page,
+            path: "/:$linkFormatted/${ReceptionPage.ROUTE}"),
         AutoRoute(
             page: TimetableRoute.page,
             path: "/:$linkFormatted/${TimetablePage.ROUTE}"),

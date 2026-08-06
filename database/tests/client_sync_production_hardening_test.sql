@@ -6,6 +6,12 @@ DECLARE
   v_unit bigint;
   v_occasion bigint;
   v_event bigint;
+  v_empty_event bigint;
+  v_user_one uuid;
+  v_user_two uuid;
+  v_news_old bigint;
+  v_news_new bigint;
+  v_live jsonb;
   v_token uuid;
   v_command uuid:=gen_random_uuid();
   v_client uuid:=gen_random_uuid();
@@ -21,6 +27,24 @@ BEGIN
   INSERT INTO public.events(occasion,title,start_time,end_time,is_hidden)
   VALUES (v_occasion,'Projected event',now(),now()+interval '1 hour',false)
   RETURNING id INTO v_event;
+  INSERT INTO public.events(occasion,title,start_time,end_time,is_hidden)
+  VALUES (v_occasion,'Empty projected event',now(),now()+interval '1 hour',false)
+  RETURNING id INTO v_empty_event;
+  PERFORM create_user_for_test('client_sync_live_one','client_sync_live_one@test.local');
+  PERFORM create_user_for_test('client_sync_live_two','client_sync_live_two@test.local');
+  v_user_one:=get_user_id('client_sync_live_one');
+  v_user_two:=get_user_id('client_sync_live_two');
+  INSERT INTO public.occasion_users(occasion,"user",is_approved) VALUES
+    (v_occasion,v_user_one,true),(v_occasion,v_user_two,true);
+  INSERT INTO public.event_users(event,"user") VALUES(v_event,v_user_one);
+  INSERT INTO public.event_users_saved(event,"user") VALUES
+    (v_event,v_user_one),(v_event,v_user_two);
+  INSERT INTO public.news(occasion,message,created_by)
+  VALUES(v_occasion,'Older live-count fixture',v_user_one) RETURNING id INTO v_news_old;
+  INSERT INTO public.news(occasion,message,created_by)
+  VALUES(v_occasion,'Newer live-count fixture',v_user_one) RETURNING id INTO v_news_new;
+  INSERT INTO public.user_news(news_id,"user",occasion) VALUES
+    (v_news_old,v_user_one,v_occasion),(v_news_new,v_user_two,v_occasion);
   INSERT INTO public.client_sync_scopes(component,scope_type,scope_id,source_revision)
   VALUES ('live_public','occasion',v_occasion,1);
   INSERT INTO public.client_projection_dirty_keys
@@ -40,6 +64,28 @@ BEGIN
   PERFORM assert_true(EXISTS (SELECT 1 FROM public.event_public_state
     WHERE occasion=v_occasion AND event=v_event),
     'null event IDs perform a full visible-event refresh');
+  v_live:=public.get_public_client_sync_component_v1(
+    'live_public','occasion',v_occasion);
+  PERFORM assert_eq((SELECT item->>'participantCount' FROM
+    jsonb_array_elements(v_live#>'{payload,events}') item
+    WHERE (item->>'eventId')::bigint=v_event),'1',
+    'live projection publishes the authoritative participant count');
+  PERFORM assert_eq((SELECT item->>'savedCount' FROM
+    jsonb_array_elements(v_live#>'{payload,events}') item
+    WHERE (item->>'eventId')::bigint=v_event),'2',
+    'live projection publishes the authoritative saved count');
+  PERFORM assert_eq((SELECT item->>'participantCount' FROM
+    jsonb_array_elements(v_live#>'{payload,events}') item
+    WHERE (item->>'eventId')::bigint=v_empty_event),'0',
+    'an authoritative empty event is explicitly published as zero');
+  PERFORM assert_eq((SELECT item->>'views' FROM
+    jsonb_array_elements(v_live#>'{payload,newsViews}') item
+    WHERE (item->>'newsId')::bigint=v_news_old),'2',
+    'older news includes readers whose marker advanced past it');
+  PERFORM assert_eq((SELECT item->>'views' FROM
+    jsonb_array_elements(v_live#>'{payload,newsViews}') item
+    WHERE (item->>'newsId')::bigint=v_news_new),'1',
+    'newer news includes only readers who reached it');
   UPDATE public.events SET is_hidden=true WHERE id=v_event;
   PERFORM public.refresh_event_public_state_v1(v_occasion,ARRAY[v_event]);
   PERFORM assert_true(NOT EXISTS (SELECT 1 FROM public.event_public_state

@@ -26,10 +26,11 @@ import '../components/occasion/occasion_model.dart';
 
 List<int> resolveMyScheduleIds({
   required bool isV1Selected,
+  required bool hasPrivateIdentity,
   required Object? privateProgram,
   required List<int> legacyIds,
 }) {
-  if (!isV1Selected) return List<int>.of(legacyIds);
+  if (!isV1Selected || !hasPrivateIdentity) return List<int>.of(legacyIds);
   final privateProgramMap = privateProgram is Map ? privateProgram : null;
   return ((privateProgramMap?['saved'] as List?) ?? const [])
       .whereType<num>()
@@ -97,25 +98,34 @@ class OfflineDataService {
     return savedProgramPendingState.apply(await _getConfirmedMyScheduleData());
   }
 
+  static Future<List<int>> getLocalMyScheduleData() async {
+    final eventData = await StorageHelper.get(myScheduleOffline);
+    if (eventData == null) return const [];
+    return (json.decode(eventData) as List<dynamic>)
+        .whereType<num>()
+        .map((id) => id.toInt())
+        .toList(growable: false);
+  }
+
   static Future<List<int>> _getConfirmedMyScheduleData() async {
-    if (ClientSyncRuntime.isV1Selected) {
+    final localIds = await getLocalMyScheduleData();
+    if (ClientSyncRuntime.isV1Selected &&
+        ClientSyncRuntime.hasPrivateIdentity) {
       final privateProgram = await ClientSyncRuntime.readPrivate(
         ClientSyncComponent.privateProgram,
       );
       return resolveMyScheduleIds(
         isV1Selected: true,
+        hasPrivateIdentity: true,
         privateProgram: privateProgram,
-        legacyIds: const [],
+        legacyIds: localIds,
       );
     }
-    var eventData = await StorageHelper.get(myScheduleOffline);
-    final offlineData = eventData == null
-        ? const <dynamic>[]
-        : json.decode(eventData) as List<dynamic>;
     return resolveMyScheduleIds(
-      isV1Selected: false,
+      isV1Selected: ClientSyncRuntime.isV1Selected,
+      hasPrivateIdentity: false,
       privateProgram: null,
-      legacyIds: List<int>.from(offlineData.map((x) => x)),
+      legacyIds: localIds,
     );
   }
 
@@ -153,15 +163,7 @@ class OfflineDataService {
   }
 
   static Future<bool> isEventSaved(int id) async {
-    if (ClientSyncRuntime.isV1Selected) {
-      final program = await ClientSyncRuntime.readPrivate(
-        ClientSyncComponent.privateProgram,
-      );
-      return program is Map &&
-          ((program['saved'] as List?) ?? const []).contains(id);
-    }
-    var offlineData = await getMyScheduleData();
-    return offlineData.contains(id);
+    return (await getMyScheduleData()).contains(id);
   }
 
   static Future<void> updateEventsWithMySchedule(

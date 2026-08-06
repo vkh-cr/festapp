@@ -42,7 +42,7 @@ Future<void> main() async {
   configureUrlStrategy();
   WidgetsFlutterBinding.ensureInitialized();
   final initialRoute = kIsWeb
-      ? _routeForUri(RouterService.getCurrentBrowserUri())
+      ? initialRouteForUri(RouterService.getCurrentBrowserUri())
       : WidgetsBinding.instance.platformDispatcher.defaultRouteName;
   runApp(FestappBootstrap(
     initialRoute: initialRoute,
@@ -59,8 +59,14 @@ Future<void> main() async {
   ));
 }
 
-String _routeForUri(Uri uri) =>
-    '${uri.path}${uri.hasQuery ? '?${uri.query}' : ''}';
+NotificationReconnectCoordinator? _notificationReconnectCoordinator;
+
+String initialRouteForUri(Uri uri) {
+  final path = uri.path == '/' && AppConfig.forceOccasionLink != null
+      ? '/${AppConfig.forceOccasionLink}'
+      : uri.path;
+  return '$path${uri.hasQuery ? '?${uri.query}' : ''}';
+}
 
 /// Paints immediately on PWA, Android and iOS while startup restores the local
 /// context and probes online services. A slow or unreachable backend therefore
@@ -84,8 +90,14 @@ class FestappBootstrap extends StatefulWidget {
 }
 
 class _FestappBootstrapState extends State<FestappBootstrap> {
-  late final Future<void> _initialization = _initialize();
   late final String _initialRoute = widget.initialRoute;
+  bool _isReady = false;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_initialize());
+  }
 
   Future<void> _initialize() async {
     try {
@@ -95,6 +107,8 @@ class _FestappBootstrapState extends State<FestappBootstrap> {
       // boundary still guarantees a usable app shell after an unexpected error.
       AppLogger.error('Unexpected startup failure: $error');
     }
+    if (!mounted) return;
+    setState(() => _isReady = true);
   }
 
   MaterialPageRoute<void> _loadingRoute(RouteSettings settings) =>
@@ -107,23 +121,18 @@ class _FestappBootstrapState extends State<FestappBootstrap> {
       );
 
   @override
-  Widget build(BuildContext context) => FutureBuilder<void>(
-        future: _initialization,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            return widget.buildReadyApp();
-          }
-          return MaterialApp(
-            key: const ValueKey('festapp-startup-material-app'),
-            debugShowCheckedModeBanner: false,
-            initialRoute: _initialRoute,
-            onGenerateRoute: _loadingRoute,
-            onGenerateInitialRoutes: (initialRoute) => [
-              _loadingRoute(RouteSettings(name: initialRoute)),
-            ],
-          );
-        },
-      );
+  Widget build(BuildContext context) {
+    if (_isReady) return widget.buildReadyApp();
+    return MaterialApp(
+      key: const ValueKey('festapp-startup-material-app'),
+      debugShowCheckedModeBanner: false,
+      initialRoute: _initialRoute,
+      onGenerateRoute: _loadingRoute,
+      onGenerateInitialRoutes: (initialRoute) => [
+        _loadingRoute(RouteSettings(name: initialRoute)),
+      ],
+    );
+  }
 }
 
 Future<void> initializeEverything() async {
@@ -163,6 +172,7 @@ Future<void> initializeEverything() async {
     AppLogger.error('Connectivity service initialization failed: $e');
   }
   final startOffline = ConnectivityService.isOfflineNotifier.value;
+  var effectiveOffline = startOffline;
 
   try {
     await initializeDateFormatting();
@@ -178,21 +188,40 @@ Future<void> initializeEverything() async {
     AppLogger.error('EasyLocalization initialization failed: $e');
   }
 
+  const supabaseUrl = String.fromEnvironment(
+    'FESTAPP_SUPABASE_URL',
+    defaultValue: AppConfig.supabaseUrl,
+  );
+  const supabaseAnonKey = String.fromEnvironment(
+    'FESTAPP_SUPABASE_ANON_KEY',
+    defaultValue: AppConfig.anonKey,
+  );
+  var supabaseInitialized = false;
   try {
     await Supabase.initialize(
-      url: AppConfig.supabaseUrl,
-      anonKey: AppConfig.anonKey,
+      url: supabaseUrl,
+      anonKey: supabaseAnonKey,
       // Observe every backend request's outcome so ConnectivityService can tell
       // when the server is unreachable (weak signal / outage), not just when the
       // network interface is down.
       httpClient: HealthTrackingHttpClient(),
     ).timeout(const Duration(seconds: 2));
+    supabaseInitialized = true;
+    AppLogger.debug('Supabase initialized');
+  } catch (e) {
+    effectiveOffline = true;
+    AppLogger.error('Supabase initialization failed: $e');
+  }
+
+  // Supabase exposes its client before asynchronous session recovery finishes.
+  // Configure the canonical sync owner even when that recovery times out, so
+  // an offline cold start can still activate the persisted public generation.
+  try {
     ClientSyncRuntime.configure(
       Supabase.instance.client,
       onLastSuccess: OfflineDataService.saveLastSyncedAt,
     );
-    AppLogger.debug('Supabase initialized');
-    if (!startOffline) {
+    if (supabaseInitialized && !effectiveOffline) {
       if (AuthService.isLoggedIn()) {
         await AuthService.refreshSession().timeout(const Duration(seconds: 2));
         AppLogger.debug('Session refreshed');
@@ -208,7 +237,8 @@ Future<void> initializeEverything() async {
       AppLogger.debug('Offline start: skipped remote session validation');
     }
   } catch (e) {
-    AppLogger.error('Supabase initialization failed: $e');
+    effectiveOffline = true;
+    AppLogger.error('Client sync initialization failed: $e');
   }
 
   try {
@@ -266,7 +296,7 @@ Future<void> initializeEverything() async {
     // Tabs own their existing online/cache refresh flow. Blocking first paint
     // on a serial refresh of every offline bundle leaves the app blank when
     // any backend endpoint is slow.
-    if (startOffline) {
+    if (effectiveOffline) {
       RightsService.useOfflineVersion = true;
       AppLogger.debug('Offline start: using cached occasion data');
     } else {
@@ -288,15 +318,25 @@ Future<void> initializeEverything() async {
 
   AppLogger.debug('Notification helper initializing');
 
-  if (!startOffline) {
-    NotificationHelper.initialize().then((f) {
-      AppLogger.debug('Notification helper initialized');
-    }, onError: (e) {
-      AppLogger.error('Notification helper initialization failed: $e');
+  if (_notificationReconnectCoordinator == null) {
+    final reconnect = NotificationReconnectCoordinator(
+      startsOffline: effectiveOffline,
+      initialize: NotificationHelper.initialize,
+    );
+    _notificationReconnectCoordinator = reconnect;
+    ConnectivityService.isOfflineNotifier.addListener(() {
+      unawaited(reconnect
+          .connectivityChanged(ConnectivityService.isOfflineNotifier.value)
+          .catchError((Object error) {
+        AppLogger.error('Notification reconnect initialization failed: $error');
+      }));
     });
-  } else {
-    AppLogger.debug('Offline start: skipped notification initialization');
   }
+  NotificationHelper.initialize().then((_) {
+    AppLogger.debug('Notification helper initialized');
+  }, onError: (Object error) {
+    AppLogger.error('Notification helper initialization failed: $error');
+  });
 
   AppLogger.debug('Initialization completed');
 

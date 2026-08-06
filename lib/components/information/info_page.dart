@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
@@ -45,6 +47,23 @@ class _InfoPageState extends State<InfoPage> {
   List<GlobalKey> _itemKeys = [];
 
   String title = InformationStrings.information;
+
+  @override
+  void initState() {
+    super.initState();
+    ClientSyncRuntime.projectionEpoch.addListener(_onProjectionChanged);
+  }
+
+  void _onProjectionChanged() {
+    if (ClientSyncRuntime.isV1Selected) unawaited(loadData());
+  }
+
+  @override
+  void dispose() {
+    ClientSyncRuntime.projectionEpoch.removeListener(_onProjectionChanged);
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   void didChangeDependencies() {

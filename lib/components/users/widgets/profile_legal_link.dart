@@ -58,7 +58,13 @@ class ProfileLegalLink extends StatelessWidget {
       target: LinkTarget.self,
       builder: (context, followLink) => TextButton(
         onPressed: followLink,
-        child: Text(label),
+        style: TextButton.styleFrom(
+          foregroundColor: Theme.of(context).colorScheme.onSurfaceVariant,
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          minimumSize: const Size(0, 36),
+          textStyle: Theme.of(context).textTheme.bodySmall,
+        ),
+        child: Text(label, textAlign: TextAlign.center),
       ),
     );
   }
@@ -98,7 +104,8 @@ class AppLegalLinks extends StatelessWidget {
 
     return Wrap(
       alignment: WrapAlignment.center,
-      spacing: 4,
+      spacing: 2,
+      runSpacing: 0,
       children: [
         for (final link in links)
           ProfileLegalLink(

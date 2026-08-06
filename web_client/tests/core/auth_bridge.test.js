@@ -13,6 +13,11 @@ const AUTH_BRIDGE_HTML = readFileSync(
     resolve(__dirname, '../../public/auth_bridge.html'),
     'utf-8'
 );
+const SUPABASE_KEY = AUTH_BRIDGE_HTML.match(
+    /const SUPABASE_KEY = '([^']+)'/
+)?.[1];
+
+assert.ok(SUPABASE_KEY, 'auth bridge must declare its Supabase storage key');
 
 /**
  * Helper: create a JSDOM instance with the auth_bridge.html loaded,
@@ -89,13 +94,12 @@ describe('auth_bridge.html', () => {
     });
 
     test('localStorage fallback stores tokens in sessionStorage', () => {
-        const supabaseKey = 'sb-kjdpmixlnhntmxjedpxh-auth-token';
         const sessionData = JSON.stringify({
             access_token: 'ls_at',
             refresh_token: 'ls_rt'
         });
         const dom = createBridge({
-            localStorage: { [supabaseKey]: sessionData }
+            localStorage: { [SUPABASE_KEY]: sessionData }
         });
         const { window } = dom;
 

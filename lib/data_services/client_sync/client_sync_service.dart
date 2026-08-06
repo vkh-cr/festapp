@@ -202,7 +202,12 @@ class ClientSyncService {
         descriptor.revision < activeReleaseRevision) {
       throw const FormatException('Release manifest revision regression');
     }
-    if (existing?.pointer == descriptor.sha256) {
+    if (existing?.pointer == descriptor.sha256 &&
+        await _store.isGenerationComplete(
+          context.publicScope,
+          SyncFreshnessClass.catalog,
+          ReleaseManifest.requiredComponents,
+        )) {
       _replaceClass(
           SyncFreshnessClass.catalog,
           _state!.classes[SyncFreshnessClass.catalog]!.copyWith(
@@ -294,7 +299,12 @@ class ClientSyncService {
     if (existingRevision != null && descriptor.revision < existingRevision) {
       throw const FormatException('live_public revision regression');
     }
-    if (existing?.pointer == descriptor.sha256) {
+    if (existing?.pointer == descriptor.sha256 &&
+        await _store.isGenerationComplete(
+          context.publicScope,
+          SyncFreshnessClass.live,
+          const {ClientSyncComponent.livePublic},
+        )) {
       _replaceClass(
           SyncFreshnessClass.live,
           _state!.classes[SyncFreshnessClass.live]!.copyWith(
@@ -360,8 +370,16 @@ class ClientSyncService {
     try {
       final current = await _store.activeGeneration(
           scope, SyncFreshnessClass.privateIdentity);
-      final response =
-          await _privateRemote.getChanges(context, current?.revisions ?? {});
+      final knownVector = <ClientSyncComponent, int>{};
+      for (final entry in current?.revisions.entries ??
+          const <MapEntry<ClientSyncComponent, int>>[]) {
+        if (await _store.readComponent(
+                scope, SyncFreshnessClass.privateIdentity, entry.key) !=
+            null) {
+          knownVector[entry.key] = entry.value;
+        }
+      }
+      final response = await _privateRemote.getChanges(context, knownVector);
       if (!_isCurrent(context, requestEpoch)) return;
       final privateComponents = {
         for (final component in ClientSyncComponent.values)

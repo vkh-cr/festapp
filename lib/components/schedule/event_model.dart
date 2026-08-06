@@ -80,8 +80,18 @@ class EventModel extends ITrinaRowModel {
     return isInMySchedule == false;
   }
 
+  /// A capacity label exists only when the live participant count is known.
+  /// Missing live data must not be presented as an authoritative zero.
+  String? get participantCapacityLabel {
+    final maximum = maxParticipants;
+    final current = currentParticipants;
+    if (maximum == null || maximum <= 0 || current == null) return null;
+    return '$current/$maximum';
+  }
+
   bool canSignIn() {
     return isEventSupportingSignIn(this) &&
+        currentParticipants != null &&
         currentParticipants! < maxParticipants!;
   }
 
@@ -276,16 +286,16 @@ class EventModel extends ITrinaRowModel {
       event.maxParticipants! > 0;
   static bool isEventFull(EventModel? event) =>
       isEventSupportingSignIn(event) &&
-      (event!.currentParticipants ?? 0) >= event.maxParticipants!;
+      event!.currentParticipants != null &&
+      event.currentParticipants! >= event.maxParticipants!;
   @override
   String toString() {
     String titleStr = title ?? "";
     if (isCancelled) {
       titleStr += " (${CommonStrings.cancelled})";
     }
-    return (maxParticipants == null
-        ? titleStr
-        : "$titleStr (${currentParticipants ?? 0}/$maxParticipants)");
+    final capacity = participantCapacityLabel;
+    return capacity == null ? titleStr : "$titleStr ($capacity)";
   }
 
   static const String startDateColumn = "startDate";

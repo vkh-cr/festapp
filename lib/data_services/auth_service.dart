@@ -18,9 +18,11 @@ import 'package:fstapp/data_services/client_sync/client_sync_projection.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/services/notification_helper.dart';
+import 'package:fstapp/services/app_logger.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../components/map/place_model.dart';
+import '../components/users/logout_flow.dart';
 
 class AuthService {
   static final _supabase = Supabase.instance.client;
@@ -32,36 +34,73 @@ class AuthService {
     DbEvents.invalidateSavedProgramMutationScope();
     var data = await _supabase.auth
         .signInWithPassword(email: email, password: password);
+    await _finalizeLogin(data.session!);
+  }
+
+  static Future<void> loginWithQr(String payload) async {
+    DbEvents.invalidateSavedProgramMutationScope();
+    final response = await _supabase.functions.invoke(
+      'exchange-login-qr',
+      body: {'payload': payload},
+    );
+    final body = Map<String, dynamic>.from(response.data as Map);
+    final refreshToken = body['refresh_token']?.toString();
+    if (refreshToken == null || refreshToken.isEmpty) {
+      throw const AuthException('Invalid QR credential');
+    }
+    final auth = await _supabase.auth.setSession(refreshToken);
+    if (auth.session == null) throw const AuthException('Invalid QR session');
+    await _finalizeLogin(auth.session!);
+  }
+
+  static Future<void> _finalizeLogin(Session session) async {
     if (!await validateCurrentOrganization()) {
       throw Exception('Account is not available for this organization.');
     }
     await _secureStorage.write(
-        key: REFRESH_TOKEN_KEY, value: data.session!.refreshToken.toString());
-    if (AppConfig.isAppSupported) {
-      if (ClientSyncRuntime.isV1Selected) {
-        await RightsService.updateAppData(force: true, refreshOffline: false);
-        await ClientSyncRuntime.identityChanged();
-        await ClientSyncRuntime.refresh(SyncReason.login,
-            privateConsumer: true);
-      } else {
-        await DbEvents.synchronizeMySchedule(join: true);
-        await SynchroService.refreshOfflineData();
+        key: REFRESH_TOKEN_KEY, value: session.refreshToken.toString());
+    try {
+      if (AppConfig.isAppSupported) {
+        if (ClientSyncRuntime.isV1Selected) {
+          await RightsService.updateAppData(force: true, refreshOffline: false);
+          await ClientSyncRuntime.identityChanged();
+          await ClientSyncRuntime.refresh(SyncReason.login,
+              privateConsumer: true);
+          await DbEvents.synchronizeMySchedule(join: true);
+        } else {
+          await DbEvents.synchronizeMySchedule(join: true);
+          await SynchroService.refreshOfflineData();
+        }
       }
+    } catch (error) {
+      AppLogger.error('Post-login data refresh failed: $error');
     }
-    await NotificationHelper.loginCurrentUser();
+    try {
+      await NotificationHelper.loginCurrentUser();
+    } catch (error) {
+      AppLogger.error('Post-login notification identity failed: $error');
+    }
   }
 
   static Future<void> logout() async {
     DbEvents.invalidateSavedProgramMutationScope();
-    await NotificationHelper.logoutCurrentUser()
-        .timeout(const Duration(seconds: 2));
-    await OfflineDataService.clearUserData();
-    await _supabase.auth.signOut(scope: SignOutScope.local);
-    await ClientSyncRuntime.identityChanged();
-    _secureStorage.delete(key: REFRESH_TOKEN_KEY);
-    RightsService.occasionLinkModel?.occasionUser = null;
-    RightsService.occasionLinkModel?.unitUser = null;
-    RightsService.occasionLinkModel?.userInfo = null;
+    await runLogoutFlow(
+      signOutLocal: () => _supabase.auth.signOut(scope: SignOutScope.local),
+      clearRefreshToken: () => _secureStorage.delete(key: REFRESH_TOKEN_KEY),
+      clearPrivateData: OfflineDataService.clearUserData,
+      resetIdentity: ClientSyncRuntime.identityChanged,
+      clearRights: () {
+        RightsService.occasionLinkModel?.occasionUser = null;
+        RightsService.occasionLinkModel?.unitUser = null;
+        RightsService.occasionLinkModel?.userInfo = null;
+        RightsService.occasionLinkModelNotifier.value =
+            RightsService.occasionLinkModel;
+      },
+      detachNotifications: () => NotificationHelper.logoutCurrentUser()
+          .timeout(const Duration(seconds: 2)),
+      onCleanupError: (step, error) =>
+          AppLogger.error('Post-logout $step cleanup failed: $error'),
+    );
   }
 
   static Future<dynamic> resetPasswordForEmail(String email) async {
@@ -74,6 +113,14 @@ class AuthService {
       "oc": ou.occasion,
       "usr": ou.user,
     });
+  }
+
+  static Future<bool> sendAppLinks(OccasionUserModel ou) async {
+    final response = await _supabase.functions.invoke("send-app-links", body: {
+      "oc": ou.occasion,
+      "usr": ou.user,
+    });
+    return response.data?["status"] == "sent";
   }
 
   static Future<UserInfoModel> getFullUserInfo() async {

@@ -10,6 +10,8 @@ import 'package:fstapp/components/inventory/db_inventory_pools.dart';
 import 'package:fstapp/components/news/db_news.dart';
 import 'package:fstapp/components/map/db_places.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_protocol.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
 import 'package:fstapp/components/occasion/link_model.dart';
 import 'package:fstapp/components/users/user_info_model.dart';
 import 'package:fstapp/services/platform_helper.dart';
@@ -39,6 +41,14 @@ class SynchroService {
   }
 
   static Future<void> refreshOfflineData() async {
+    if (ClientSyncRuntime.isV1Selected) {
+      await ClientSyncRuntime.refresh(
+        SyncReason.manual,
+        privateConsumer: true,
+      );
+      await DbSearch.rebuildOfflineIndex();
+      return;
+    }
     await refreshUserOfflineData();
 
     final occasionId = _getCurrentOccasionId();
@@ -98,6 +108,13 @@ class SynchroService {
   /// Kept separate so startup can make this private offline snapshot available
   /// without blocking first paint on the complete public-data refresh.
   static Future<void> refreshUserOfflineData() async {
+    if (ClientSyncRuntime.isV1Selected) {
+      await ClientSyncRuntime.refresh(
+        SyncReason.manual,
+        privateConsumer: true,
+      );
+      return;
+    }
     final occasionId = _getCurrentOccasionId();
     if (_isLoggedIn() && occasionId != null) {
       var userInfo = await _getFullUserInfo();

@@ -112,8 +112,7 @@ class UsersTabHelper {
     }, nonAdded, CommonStrings.add);
   }
 
-  /// Invites the checked users.
-  /// [reloadUsers] is a callback to trigger reloading the user list.
+  /// Sends sign-in codes in non-CSM applications that retain invitations.
   static Future<void> invite(
       BuildContext context,
       SingleDataGridController singleDataGrid,
@@ -122,10 +121,10 @@ class UsersTabHelper {
     if (users.isEmpty) return;
 
     var alreadyInvitedUsers = users
-        .where((user) => user.data![Tb.occasion_users.data_isInvited] == true)
+        .where((user) => user.data?[Tb.occasion_users.data_isInvited] == true)
         .toList();
     var newUsers = users
-        .where((user) => user.data![Tb.occasion_users.data_isInvited] != true)
+        .where((user) => user.data?[Tb.occasion_users.data_isInvited] != true)
         .toList();
 
     if (alreadyInvitedUsers.isNotEmpty) {
@@ -144,7 +143,6 @@ class UsersTabHelper {
     await reloadUsers();
   }
 
-  /// Processes sending sign-in codes to the given users.
   static Future<void> processInvites(
       BuildContext context, List<OccasionUserModel> users,
       {int retryLimit = 3}) async {
@@ -154,19 +152,114 @@ class UsersTabHelper {
       "${UserStrings.inviteInfo} (${users.length}):\n${users.map((u) => u.toBasicString()).join(",\n")}",
     );
 
+    if (!confirm) return;
+
+    Map<OccasionUserModel, int> retryAttempts = {
+      for (var user in users) user: 0
+    };
+    List<Future<void> Function()> inviteFutures = users.map((user) {
+      return () async {
+        while (retryAttempts[user]! < retryLimit) {
+          try {
+            await AuthService.sendSignInCode(user);
+            ToastHelper.Show(
+              context,
+              UserStrings.invitedUser(
+                  user: user.data![Tb.occasion_users.data_email]),
+            );
+            return;
+          } catch (_) {
+            retryAttempts[user] = retryAttempts[user]! + 1;
+            if (retryAttempts[user]! >= retryLimit) {
+              ToastHelper.Show(
+                context,
+                UserStrings.inviteFailed(
+                    user: user.data![Tb.occasion_users.data_email],
+                    retries: retryLimit.toString()),
+                severity: ToastSeverity.NotOk,
+              );
+            }
+            await Future.delayed(Duration(milliseconds: 500));
+          }
+        }
+      };
+    }).toList();
+
+    await DialogHelper.showProgressDialogAsync(
+      context,
+      UserStrings.invite,
+      inviteFutures.length,
+      futures: inviteFutures,
+      delay: Duration(milliseconds: 500),
+    );
+  }
+
+  /// Sends application links to the checked users.
+  /// [reloadUsers] is a callback to trigger reloading the user list.
+  static Future<void> sendAppLinks(
+      BuildContext context,
+      SingleDataGridController singleDataGrid,
+      Future<void> Function() reloadUsers) async {
+    var users = getCheckedUsers(singleDataGrid);
+    if (users.isEmpty) return;
+
+    var alreadySentUsers = users
+        .where(
+            (user) => user.data?[Tb.occasion_users.data_appLinksSent] == true)
+        .toList();
+    var newUsers = users
+        .where(
+            (user) => user.data?[Tb.occasion_users.data_appLinksSent] != true)
+        .toList();
+
+    if (alreadySentUsers.isNotEmpty) {
+      var resendConfirm = await DialogHelper.showConfirmationDialog(
+        context,
+        UserStrings.sendAppLinks,
+        UserStrings.resendAppLinksConfirm,
+      );
+      if (!resendConfirm) {
+        await processAppLinks(context, newUsers);
+        await reloadUsers();
+        return;
+      }
+    }
+    await processAppLinks(context, users);
+    await reloadUsers();
+  }
+
+  /// Processes sending application links to the given users.
+  static Future<void> processAppLinks(
+      BuildContext context, List<OccasionUserModel> users,
+      {int retryLimit = 3}) async {
+    var confirm = await DialogHelper.showConfirmationDialog(
+      context,
+      UserStrings.sendAppLinks,
+      "${UserStrings.sendAppLinksInfo} (${users.length}):\n${users.map((u) => u.toBasicString()).join(",\n")}",
+    );
+
     if (confirm) {
       Map<OccasionUserModel, int> retryAttempts = {
         for (var user in users) user: 0
       };
 
-      List<Future<void> Function()> inviteFutures = users.map((user) {
+      List<Future<void> Function()> sendFutures = users.map((user) {
         return () async {
           while (retryAttempts[user]! < retryLimit) {
             try {
-              await AuthService.sendSignInCode(user);
+              final statusRecorded = await AuthService.sendAppLinks(user);
+              if (!statusRecorded) {
+                ToastHelper.Show(
+                  context,
+                  UserStrings.appLinksStatusFailed(
+                      user: user.data![Tb.occasion_users.data_email]),
+                  severity: ToastSeverity.NotOk,
+                );
+                return;
+              }
               ToastHelper.Show(
                 context,
-                UserStrings.invitedUser(
+                UserStrings.appLinksSentUser(
                     user: user.data![Tb.occasion_users.data_email]),
               );
               return;
@@ -175,12 +268,12 @@ class UsersTabHelper {
               if (retryAttempts[user]! >= retryLimit) {
                 ToastHelper.Show(
                   context,
-                  UserStrings.inviteFailed(
+                  UserStrings.sendAppLinksFailed(
                       user: user.data![Tb.occasion_users.data_email],
                       retries: retryLimit.toString()),
                   severity: ToastSeverity.NotOk,
                 );
-                // Retrying to invite user
+                // Retrying the application-links delivery.
               }
               await Future.delayed(Duration(milliseconds: 500));
             }
@@ -190,9 +283,9 @@ class UsersTabHelper {
 
       await DialogHelper.showProgressDialogAsync(
         context,
-        UserStrings.invite,
-        inviteFutures.length,
-        futures: inviteFutures,
+        UserStrings.sendAppLinks,
+        sendFutures.length,
+        futures: sendFutures,
         delay: Duration(milliseconds: 500),
       );
     }

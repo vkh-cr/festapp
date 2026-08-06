@@ -36,6 +36,7 @@ class OccasionUserModel extends ITrinaRowModel {
   bool? isEditorOrderView = false;
   bool? isCleaningCrew = false;
   bool? isCleaningBlocked = false;
+  bool? isReceptionist = false;
   bool? isManager = false;
   bool? isApprover = false;
   bool? isApproved = false;
@@ -45,7 +46,8 @@ class OccasionUserModel extends ITrinaRowModel {
       (isManager ?? false) ||
       (isEditorView ?? false) ||
       (isEditorOrder ?? false) ||
-      (isEditorOrderView ?? false);
+      (isEditorOrderView ?? false) ||
+      (isReceptionist ?? false);
 
   Map<String, dynamic>? data;
   Map<String, dynamic>? services;
@@ -64,6 +66,7 @@ class OccasionUserModel extends ITrinaRowModel {
       this.isEditorOrderView,
       this.isCleaningCrew,
       this.isCleaningBlocked,
+      this.isReceptionist,
       this.isManager,
       this.isApprover,
       this.isApproved,
@@ -103,6 +106,7 @@ class OccasionUserModel extends ITrinaRowModel {
         isEditorOrderView: json[Tb.occasion_users.is_editor_order_view],
         isCleaningCrew: json[Tb.occasion_users.is_cleaning_crew],
         isCleaningBlocked: json[Tb.occasion_users.is_cleaning_blocked],
+        isReceptionist: json[Tb.occasion_users.is_receptionist],
         isApprover: json[Tb.occasion_users.is_approver],
         isApproved: json[Tb.occasion_users.is_approved],
         isManager: json[Tb.occasion_users.is_manager],
@@ -127,6 +131,7 @@ class OccasionUserModel extends ITrinaRowModel {
       Tb.occasion_users.is_editor_order_view: isEditorOrderView ?? false,
       Tb.occasion_users.is_cleaning_crew: isCleaningCrew ?? false,
       Tb.occasion_users.is_cleaning_blocked: isCleaningBlocked ?? false,
+      Tb.occasion_users.is_receptionist: isReceptionist ?? false,
       Tb.occasion_users.is_approver: isApprover ?? false,
       Tb.occasion_users.is_approved: isApproved ?? false,
       Tb.occasion_users.is_manager: isManager ?? false,
@@ -212,6 +217,7 @@ class OccasionUserModel extends ITrinaRowModel {
       UserColumns.CLEANING_CREW: TrinaCell(value: isCleaningCrew.toString()),
       UserColumns.CLEANING_BLOCKED:
           TrinaCell(value: isCleaningBlocked.toString()),
+      UserColumns.RECEPTIONIST: TrinaCell(value: isReceptionist.toString()),
       UserColumns.MANAGER: TrinaCell(value: isManager.toString()),
       UserColumns.APPROVED: TrinaCell(value: isApproved.toString()),
       UserColumns.APPROVER: TrinaCell(value: isApprover.toString()),
@@ -237,6 +243,8 @@ class OccasionUserModel extends ITrinaRowModel {
               DateTime.fromMicrosecondsSinceEpoch(0)),
       UserColumns.INVITED:
           TrinaCell(value: data?[Tb.occasion_users.data_isInvited].toString()),
+      UserColumns.APP_LINKS_SENT: TrinaCell(
+          value: data?[Tb.occasion_users.data_appLinksSent].toString()),
       UserColumns.IS_VOLUNTEER: TrinaCell(
           value: data?[Tb.occasion_users.data_is_volunteer].toString()),
       UserColumns.NOTE:
@@ -329,6 +337,7 @@ class OccasionUserModel extends ITrinaRowModel {
       isCleaningCrew: json[UserColumns.CLEANING_CREW] == "true" ? true : false,
       isCleaningBlocked:
           json[UserColumns.CLEANING_BLOCKED] == "true" ? true : false,
+      isReceptionist: json[UserColumns.RECEPTIONIST] == "true" ? true : false,
       role: int.tryParse(json[UserColumns.ROLE] ?? ""),
       services: services,
       data: {
@@ -340,6 +349,8 @@ class OccasionUserModel extends ITrinaRowModel {
         Tb.occasion_users.data_birthDate: bd?.toIso8601String(),
         Tb.occasion_users.data_isInvited:
             json[UserColumns.INVITED] == "true" ? true : false,
+        Tb.occasion_users.data_appLinksSent:
+            json[UserColumns.APP_LINKS_SENT] == "true" ? true : false,
         Tb.occasion_users.data_is_volunteer:
             json[UserColumns.IS_VOLUNTEER] == "true" ? true : false,
         Tb.occasion_users.data_note: json[UserColumns.NOTE]?.trim(),

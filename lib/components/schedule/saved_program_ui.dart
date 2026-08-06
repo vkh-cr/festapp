@@ -25,6 +25,7 @@ class SavedProgramActionIcon extends StatelessWidget {
     required this.savedIcon,
     required this.size,
     required this.diameter,
+    this.highlightSaved = true,
     super.key,
   });
 
@@ -34,6 +35,7 @@ class SavedProgramActionIcon extends StatelessWidget {
   final IconData savedIcon;
   final double size;
   final double diameter;
+  final bool highlightSaved;
 
   @override
   Widget build(BuildContext context) {
@@ -45,23 +47,26 @@ class SavedProgramActionIcon extends StatelessWidget {
         alignment: Alignment.center,
         children: [
           Icon(addIcon, color: color, size: size),
-          Container(
-            width: diameter,
-            height: diameter,
-            decoration: BoxDecoration(
-              color: colors.primary,
-              shape: BoxShape.circle,
-            ),
-            alignment: Alignment.center,
-            child: Icon(
-              savedIcon,
-              color: colors.onPrimary,
-              size: size,
-              weight: 700,
-              grade: 100,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
+          if (highlightSaved)
+            Container(
+              width: diameter,
+              height: diameter,
+              decoration: BoxDecoration(
+                color: colors.primary,
+                shape: BoxShape.circle,
+              ),
+              alignment: Alignment.center,
+              child: Icon(
+                savedIcon,
+                color: colors.onPrimary,
+                size: size,
+                weight: 700,
+                grade: 100,
+                fontWeight: FontWeight.w700,
+              ),
+            )
+          else
+            Icon(savedIcon, color: color, size: size),
         ],
       ),
     );

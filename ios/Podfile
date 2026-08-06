@@ -3,6 +3,9 @@ platform :ios, '15.6'
 
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
+# The app never shares location with OneSignal. Resolve the modular SDK without
+# OneSignalLocation so App Store privacy analysis sees only our foreground map use.
+ENV['ONESIGNAL_DISABLE_LOCATION'] = 'true'
 
 project 'Runner', {
   'Debug' => :debug,
@@ -36,12 +39,21 @@ end
 
 target 'OneSignalNotificationServiceExtension' do
   use_frameworks!
-  pod 'OneSignalXCFramework', '5.5.3'
+  pod 'OneSignalXCFramework/OneSignal', '5.5.3'
+  pod 'OneSignalXCFramework/OneSignalInAppMessages', '5.5.3'
 end
+
 
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
+    next unless target.name == 'geolocator_apple'
 
+    target.build_configurations.each do |config|
+      definitions = config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] || ['$(inherited)']
+      definitions = [definitions] unless definitions.is_a?(Array)
+      definitions << 'BYPASS_PERMISSION_LOCATION_ALWAYS=1' unless definitions.include?('BYPASS_PERMISSION_LOCATION_ALWAYS=1')
+      config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] = definitions
+    end
   end
 end

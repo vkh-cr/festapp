@@ -879,12 +879,68 @@ create table if not exists public.occasion_users (
   is_editor_order_view boolean NOT NULL DEFAULT false,
   is_cleaning_crew boolean NOT NULL DEFAULT false,
   is_cleaning_blocked boolean NOT NULL DEFAULT false,
+  is_receptionist boolean NOT NULL DEFAULT false,
   ticket bigint null,
   CONSTRAINT public_occasion_users_occasion_fkey FOREIGN KEY (occasion) REFERENCES public.occasions (id),
   constraint occasion_users_ticket_fkey foreign KEY (ticket) references eshop.tickets (id),
   CONSTRAINT public_occasion_users_role_fkey FOREIGN KEY (role) REFERENCES public.role_info (id),
   CONSTRAINT occasion_users_pkey PRIMARY KEY (occasion, "user")
 ) TABLESPACE pg_default;
+
+create table if not exists public.reception_registrations (
+  occasion bigint not null,
+  "user" uuid not null,
+  created_by uuid not null,
+  command_id uuid not null,
+  request_hash text not null,
+  created_at timestamptz not null default now(),
+  status text not null default 'active' check (status in ('active', 'cancelled')),
+  cancelled_by uuid null,
+  cancelled_at timestamptz null,
+  auth_revoked_at timestamptz null,
+  constraint reception_registrations_pkey primary key (occasion, "user"),
+  constraint reception_registrations_command_key unique (occasion, created_by, command_id),
+  constraint reception_registrations_occasion_fkey foreign key (occasion) references public.occasions(id),
+  constraint reception_registrations_user_fkey foreign key ("user") references public.user_info(id),
+  constraint reception_registrations_created_by_fkey foreign key (created_by) references public.user_info(id),
+  constraint reception_registrations_cancelled_by_fkey foreign key (cancelled_by) references public.user_info(id)
+) tablespace pg_default;
+
+alter table public.reception_registrations enable row level security;
+
+create table if not exists public.user_login_qr_credentials (
+  occasion bigint not null,
+  "user" uuid not null,
+  token_hash text not null,
+  created_by uuid not null,
+  created_at timestamptz not null default now(),
+  rotated_at timestamptz null,
+  revoked_at timestamptz null,
+  last_used_at timestamptz null,
+  use_count bigint not null default 0,
+  constraint user_login_qr_credentials_pkey primary key (occasion, "user"),
+  constraint user_login_qr_credentials_hash_key unique (token_hash),
+  constraint user_login_qr_credentials_membership_fkey foreign key (occasion, "user")
+    references public.occasion_users(occasion, "user") on delete cascade,
+  constraint user_login_qr_credentials_created_by_fkey foreign key (created_by) references public.user_info(id),
+  constraint user_login_qr_credentials_hash_check check (token_hash ~ '^[0-9a-f]{64}$')
+) tablespace pg_default;
+
+alter table public.user_login_qr_credentials enable row level security;
+
+create table if not exists public.reception_rate_limits (
+  actor uuid not null,
+  operation text not null,
+  bucket timestamptz not null,
+  count integer not null default 1,
+  primary key (actor, operation, bucket)
+);
+
+alter table public.reception_rate_limits enable row level security;
+
+revoke all on table public.reception_registrations,
+  public.user_login_qr_credentials, public.reception_rate_limits
+from public, anon, authenticated;
 
 create table if not exists public.organization_users (
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),

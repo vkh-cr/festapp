@@ -40,6 +40,9 @@ BEGIN
   PERFORM assert_true(to_regprocedure(
     'public.unassign_existing_companion_client_sync_v1(bigint,uuid,uuid,uuid)') IS NOT NULL,
     'canonical admin unassign exists');
+  PERFORM assert_true(to_regprocedure(
+    'public.get_can_assign_companions_on_occasion(bigint)') IS NOT NULL,
+    'canonical companion assignment permission exists');
   PERFORM assert_true((SELECT relrowsecurity FROM pg_class
       WHERE oid='public.user_companions'::regclass),
     'user_companions has RLS enabled');
@@ -151,19 +154,27 @@ INSERT INTO auth.users(id,email) VALUES
   ('99000000-0000-0000-0000-000000000001','manager@companion.test'),
   ('99000000-0000-0000-0000-000000000002','owner@companion.test'),
   ('99000000-0000-0000-0000-000000000003','target@companion.test'),
-  ('99000000-0000-0000-0000-000000000004','other@companion.test');
+  ('99000000-0000-0000-0000-000000000004','other@companion.test'),
+  ('99000000-0000-0000-0000-000000000005','editor@companion.test'),
+  ('99000000-0000-0000-0000-000000000006','unit-editor@companion.test');
 INSERT INTO public.user_info(id,email_readonly,name,surname,organization) VALUES
   ('99000000-0000-0000-0000-000000000001','manager@companion.test','Manager','Test',990001),
   ('99000000-0000-0000-0000-000000000002','owner@companion.test','Owner','Test',990001),
   ('99000000-0000-0000-0000-000000000003','target@companion.test','Target','Test',990001),
-  ('99000000-0000-0000-0000-000000000004','other@companion.test','Other','Test',990001);
-INSERT INTO public.occasion_users(occasion,"user",is_manager) VALUES
-  (990001,'99000000-0000-0000-0000-000000000001',true),
-  (990001,'99000000-0000-0000-0000-000000000002',false),
-  (990001,'99000000-0000-0000-0000-000000000003',false),
-  (990001,'99000000-0000-0000-0000-000000000004',false),
-  (990002,'99000000-0000-0000-0000-000000000002',false),
-  (990002,'99000000-0000-0000-0000-000000000003',false);
+  ('99000000-0000-0000-0000-000000000004','other@companion.test','Other','Test',990001),
+  ('99000000-0000-0000-0000-000000000005','editor@companion.test','Editor','Test',990001),
+  ('99000000-0000-0000-0000-000000000006','unit-editor@companion.test','Unit editor','Test',990001);
+INSERT INTO public.occasion_users(occasion,"user",is_manager,is_editor) VALUES
+  (990001,'99000000-0000-0000-0000-000000000001',true,true),
+  (990001,'99000000-0000-0000-0000-000000000002',false,false),
+  (990001,'99000000-0000-0000-0000-000000000003',false,false),
+  (990001,'99000000-0000-0000-0000-000000000004',false,false),
+  (990001,'99000000-0000-0000-0000-000000000005',false,true),
+  (990001,'99000000-0000-0000-0000-000000000006',false,false),
+  (990002,'99000000-0000-0000-0000-000000000002',false,false),
+  (990002,'99000000-0000-0000-0000-000000000003',false,false);
+INSERT INTO public.unit_users(unit,"user",is_editor)
+VALUES (990001,'99000000-0000-0000-0000-000000000006',true);
 UPDATE public.occasion_users
 SET services='{"accommodation":{"room-a":"paid"}}'::jsonb
 WHERE occasion=990001
@@ -216,6 +227,66 @@ END $$;
 UPDATE public.occasions SET features=jsonb_build_array(jsonb_build_object(
   'code','companions','is_enabled',true,'max_companions',1,
   'allow_user_create',true,'allow_admin_assign',true)) WHERE id=990001;
+
+DO $$
+DECLARE v_result jsonb;
+BEGIN
+  PERFORM set_config('request.jwt.claim.sub',
+    '99000000-0000-0000-0000-000000000002',true);
+  BEGIN
+    PERFORM public.assign_existing_companion_client_sync_v1(
+      990001,'99000000-0000-0000-0000-000000000002',
+      '99000000-0000-0000-0000-000000000003',
+      '99000000-0000-0000-0000-000000000120');
+    PERFORM assert_fail('plain participant accepted companion assignment');
+  EXCEPTION WHEN insufficient_privilege THEN NULL;
+  END;
+
+  PERFORM set_config('request.jwt.claim.sub',
+    '99000000-0000-0000-0000-000000000005',true);
+  v_result:=public.assign_existing_companion_client_sync_v1(
+    990001,'99000000-0000-0000-0000-000000000002',
+    '99000000-0000-0000-0000-000000000003',
+    '99000000-0000-0000-0000-000000000121');
+  PERFORM assert_eq(v_result->>'status','applied',
+    'occasion editor can assign a companion');
+  v_result:=public.unassign_existing_companion_client_sync_v1(
+    990001,'99000000-0000-0000-0000-000000000002',
+    '99000000-0000-0000-0000-000000000003',
+    '99000000-0000-0000-0000-000000000122');
+  PERFORM assert_eq(v_result->>'status','applied',
+    'occasion editor can unassign a companion');
+
+  PERFORM set_config('request.jwt.claim.sub',
+    '99000000-0000-0000-0000-000000000006',true);
+  BEGIN
+    PERFORM public.assign_existing_companion_client_sync_v1(
+      990001,'99000000-0000-0000-0000-000000000002',
+      '99000000-0000-0000-0000-000000000003',
+      '99000000-0000-0000-0000-000000000123');
+    PERFORM assert_fail('unit role bypassed canonical occasion editor permission');
+  EXCEPTION WHEN insufficient_privilege THEN NULL;
+  END;
+
+  UPDATE public.occasion_users SET is_editor=true
+  WHERE occasion=990001
+    AND "user"='99000000-0000-0000-0000-000000000006';
+  v_result:=public.assign_existing_companion_client_sync_v1(
+    990001,'99000000-0000-0000-0000-000000000002',
+    '99000000-0000-0000-0000-000000000003',
+    '99000000-0000-0000-0000-000000000125');
+  PERFORM assert_eq(v_result->>'status','applied',
+    'inherited occasion editor can assign a companion');
+  v_result:=public.unassign_existing_companion_client_sync_v1(
+    990001,'99000000-0000-0000-0000-000000000002',
+    '99000000-0000-0000-0000-000000000003',
+    '99000000-0000-0000-0000-000000000126');
+  PERFORM assert_eq(v_result->>'status','applied',
+    'inherited occasion editor can unassign a companion');
+
+  PERFORM set_config('request.jwt.claim.sub',
+    '99000000-0000-0000-0000-000000000001',true);
+END $$;
 
 DO $$
 DECLARE v_result jsonb; v_profile jsonb; v_companion jsonb;

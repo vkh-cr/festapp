@@ -35,6 +35,7 @@ class UserColumns {
   static const String EDITOR_ORDER = "editorOrder";
   static const String EDITOR_ORDER_VIEW = "editorOrderView";
   static const String CLEANING_CREW = "cleaningCrew";
+  static const String RECEPTIONIST = "receptionist";
   static const String CLEANING_BLOCKED = "cleaningBlocked";
   static const String UNIT_MANAGER = "unitManager";
   static const String UNIT_EDITOR = "unitEditor";
@@ -42,6 +43,7 @@ class UserColumns {
   static const String APPROVER = "approver";
   static const String APPROVED = "approved";
   static const String INVITED = "invited";
+  static const String APP_LINKS_SENT = "appLinksSent";
   static const String FOOD = "food";
   static const String FORM = "form";
   static const String ORDERED_AT = "ordered_at";
@@ -333,6 +335,7 @@ class UserColumns {
           _statusColumn(UserStrings.readOrders, EDITOR_ORDER_VIEW)
         ],
         CLEANING_CREW: [_statusColumn(UserStrings.cleaningCrew, CLEANING_CREW)],
+        RECEPTIONIST: [_statusColumn(UserStrings.receptionist, RECEPTIONIST)],
         CLEANING_BLOCKED: [
           _statusColumn(UserStrings.cleaningBlocked, CLEANING_BLOCKED)
         ],
@@ -351,6 +354,13 @@ class UserColumns {
         APPROVER: [_statusColumn(UserStrings.approver, APPROVER)],
         APPROVED: [_statusColumn(UserStrings.approved, APPROVED)],
         INVITED: [_statusColumn(UserStrings.invited, INVITED)],
+        APP_LINKS_SENT: [
+          _statusColumn(
+            UserStrings.appLinksSent,
+            APP_LINKS_SENT,
+            canUpdateUser: () => false,
+          )
+        ],
       };
 
   static List<TrinaColumn> generateColumns(List<String> identifiers,

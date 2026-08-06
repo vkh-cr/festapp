@@ -30,6 +30,7 @@ try {
     path.join(projectRoot, 'automation/generate_pwa_service_worker.mjs'),
     tempRoot,
     '1.2.3+4',
+    'csmostrava2026',
   ], { encoding: 'utf8' });
 
   assert.equal(result.status, 0, result.stderr);
@@ -51,6 +52,7 @@ try {
   assert.match(worker, /url\.origin === 'https:\/\/fonts\.gstatic\.com'/);
   assert.match(worker, /url\.origin === 'https:\/\/fonts\.googleapis\.com'/);
   assert.match(worker, /festapp-used-fonts-v1/);
+  assert.match(worker, /const FORCED_OCCASION_PATH = "\/csmostrava2026";/);
   assert.match(worker, /cache\.put\(request, response\.clone\(\)\)/);
   const coreUrls = JSON.parse(worker.match(/const CORE_URLS = (\[[\s\S]*?\]);/)[1]);
   assert.ok(coreUrls.includes('/main.dart.js'));
@@ -60,10 +62,31 @@ try {
   assert.ok(coreUrls.includes('/main.dart.js_7.part.js'),
     'every deferred executable must be installed for offline cold-start routes');
 
+  const genericRoot = await mkdtemp(path.join(tmpdir(), 'festapp-pwa-generic-'));
+  try {
+    await writeFile(path.join(genericRoot, 'flutter'), '<html>flutter</html>');
+    await writeFile(path.join(genericRoot, 'webclient'), '<html>web</html>');
+    await writeFile(path.join(genericRoot, 'main.dart.js'), 'main');
+    const genericResult = spawnSync(process.execPath, [
+      path.join(projectRoot, 'automation/generate_pwa_service_worker.mjs'),
+      genericRoot,
+      '1.2.3+4',
+    ], { encoding: 'utf8' });
+    assert.equal(genericResult.status, 0, genericResult.stderr);
+    const genericWorker = await readFile(
+      path.join(genericRoot, 'festapp_service_worker.js'),
+      'utf8',
+    );
+    assert.match(genericWorker, /const FORCED_OCCASION_PATH = null;/);
+  } finally {
+    await rm(genericRoot, { recursive: true, force: true });
+  }
+
   const handlers = {};
   const fontUrl = 'https://fonts.gstatic.com/s/notocoloremoji/test.woff2';
   const cachedFont = new Response('cached emoji font');
   const cachedShell = new Response('<html>offline shell</html>');
+  const cachedWebClient = new Response('<html>generic event list</html>');
   const cachedPrivacy = new Response('<html>privacy policy</html>');
   let networkCalls = 0;
   let serverVersion = '1.2.3+5';
@@ -97,6 +120,7 @@ try {
       const url = typeof request === 'string' ? request : request.url;
       if (url === fontUrl) return cachedFont.clone();
       if (url.includes('/flutter?pwa-cache=1')) return cachedShell.clone();
+      if (url.includes('/webclient?pwa-cache=1')) return cachedWebClient.clone();
       if (url === '/privacy/') return cachedPrivacy.clone();
       if (url.includes('/assets/translation.json')) return new Response('{}');
       return undefined;
@@ -193,6 +217,11 @@ try {
   assert.equal(await shellResponse.text(), '<html>offline shell</html>');
   assert.equal(openedCaches.at(-1), 'festapp-app-shell-1.2.3+4',
     'the tab that requested the update must navigate through the new shell');
+  const rootNavigation = new Request('https://app.test/');
+  Object.defineProperty(rootNavigation, 'mode', { value: 'navigate' });
+  const rootResponse = await dispatchFetch(rootNavigation, 'updating-tab');
+  assert.equal(await rootResponse.text(), '<html>offline shell</html>',
+    'a forced-occasion tenant must never open the generic event list at /');
   const privacyNavigation = new Request('https://app.test/privacy');
   Object.defineProperty(privacyNavigation, 'mode', { value: 'navigate' });
   const privacyResponse = await dispatchFetch(privacyNavigation, 'updating-tab');
@@ -290,6 +319,11 @@ try {
   );
   assert.match(flutterIndex, /serviceWorkerPath: "\.\/push\/OneSignalSDKWorker\.js"/);
   assert.match(flutterIndex, /serviceWorkerParam: \{ scope: "\/push\/" \}/);
+  assert.match(
+    flutterIndex,
+    /OneSignal initialization failed:[\s\S]*window\.OneSignalInitialized = false;[\s\S]*errorCallback\(error\);[\s\S]*return;/,
+    'a failed SDK initialization must remain retryable after reconnect',
+  );
   assert.match(oneSignalWorker, /OneSignalSDK\.sw\.js/);
   assert.match(flutterIndex, /e\.preventDefault\(\)/);
   assert.match(flutterIndex, /function promptInstall\(\)/);
@@ -305,6 +339,13 @@ try {
   assert.match(flutterIndex, /festappLocalDevelopmentReady/);
   assert.match(flutterIndex, /serviceWorker\.getRegistrations\(\)/);
   assert.match(flutterIndex, /festapp-app-shell-/);
+  assert.match(flutterIndex, /<svg class="initial-logo"/);
+  assert.match(
+    flutterIndex,
+    /svg\.initial-logo\s*\{[\s\S]*?max-width:\s*320px/,
+    'the tenant-specific inline startup logo must keep its CSM sizing',
+  );
+  assert.doesNotMatch(flutterIndex, /<img class="initial-logo"/);
   const updatePrompt = await readFile(
     path.join(projectRoot, 'web/festapp_update_prompt.js'),
     'utf8',
