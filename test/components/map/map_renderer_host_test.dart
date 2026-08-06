@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart' as fm;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fstapp/components/features/map_feature.dart';
 import 'package:fstapp/components/map/legacy_map_surface.dart';
@@ -61,6 +62,8 @@ void main() {
     ));
 
     expect(find.byType(LegacyMapSurface), findsOneWidget);
+    final map = tester.widget<fm.FlutterMap>(find.byType(fm.FlutterMap));
+    expect(map.options.maxZoom, MapZoomLimits.offlineMaximum);
   });
 
   testWidgets('does not silently fall back when MapLibre is unavailable',
@@ -87,5 +90,21 @@ void main() {
       ),
       OfflineMapRenderer.legacy,
     );
+  });
+
+  test('offline renderers allow safe vector-tile overzoom', () {
+    expect(
+      MapZoomLimits.legacyMaximum(offline: true),
+      MapZoomLimits.offlineMaximum,
+    );
+    expect(MapZoomLimits.offlineMaximum, 22);
+  });
+
+  test('online Legacy keeps the existing raster zoom cap', () {
+    expect(
+      MapZoomLimits.legacyMaximum(offline: false),
+      MapZoomLimits.onlineMaximum,
+    );
+    expect(MapZoomLimits.onlineMaximum, 18);
   });
 }
