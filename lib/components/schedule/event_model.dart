@@ -20,7 +20,16 @@ class EventModel extends ITrinaRowModel {
   String durationString(BuildContext context) =>
       "${DateFormat("EEEE, MMM d, HH:mm", context.locale.languageCode).format(startTime)} - ${DateFormat.Hm().format(endTime)}";
   String durationCompactString(BuildContext context) =>
-      "${DateFormat("EEEE d. M. HH:mm", context.locale.languageCode).format(startTime)} - ${DateFormat.Hm().format(endTime)}";
+      durationCompactStringForLocale(context.locale.languageCode);
+
+  String durationCompactStringForLocale(String locale) {
+    final weekday = DateFormat('EEEE', locale).format(startTime);
+    final shortWeekday = weekday.length <= 2
+        ? weekday.toUpperCase()
+        : weekday.substring(0, 2).toUpperCase();
+    return "$shortWeekday ${DateFormat("d. M. HH:mm", locale).format(startTime)} - ${DateFormat.Hm(locale).format(endTime)}";
+  }
+
   Duration duration() => startTime.isBefore(endTime)
       ? (DateTimeRange(start: startTime, end: endTime)).duration
       : Duration.zero;

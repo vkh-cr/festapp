@@ -3,11 +3,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fstapp/components/icons/icons_strings.dart';
 import 'package:fstapp/components/icons/place_type_model.dart';
 import 'package:fstapp/components/map/icon_model.dart';
+import 'package:fstapp/components/map/map_place_model.dart';
 import 'package:fstapp/components/map/map_page_helper.dart';
 import 'package:fstapp/components/map/map_scene.dart';
 import 'package:fstapp/components/map/path_group_model.dart';
 import 'package:fstapp/components/map/path_node.dart';
 import 'package:fstapp/components/map/place_model.dart';
+import 'package:latlong2/latlong.dart';
 
 /// The place-type filter bar shown at the bottom of the map: one chip per
 /// visible place type plus a trailing "Other" chip, single-select.
@@ -40,6 +42,7 @@ void main() {
     required List<PlaceTypeModel> types,
     String? selectedCode,
     required void Function(String? code) onTap,
+    bool showOther = true,
   }) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -54,6 +57,7 @@ void main() {
                   otherCode,
                   onTap,
                   icons,
+                  showOther: showOther,
                 ),
               ),
             ],
@@ -80,6 +84,58 @@ void main() {
     expect(find.byIcon(Icons.more_horiz), findsOneWidget);
     // The type with an unknown icon id falls back to the generic pin.
     expect(find.byIcon(Icons.place), findsOneWidget);
+  });
+
+  testWidgets('hides Other chip when it has no visible places', (tester) async {
+    await pumpBar(
+      tester,
+      types: placeTypes,
+      selectedCode: "ubytovani",
+      showOther: false,
+      onTap: (_) {},
+    );
+
+    expect(find.byIcon(Icons.more_horiz), findsNothing);
+    expect(find.byType(Tooltip), findsNWidgets(placeTypes.length));
+  });
+
+  test('Other availability ignores hidden places', () {
+    MapPlacePresentation marker({required String? type, bool hidden = false}) {
+      final place = MapPlaceModel(
+        id: 1,
+        title: 'Place',
+        type: type,
+        latLng: const LatLng(49.82, 18.26),
+        isHidden: hidden,
+      );
+      return MapPlacePresentation(
+        place: place,
+        coordinate: place.latLng,
+        pinColorValue: Colors.blue.toARGB32(),
+      );
+    }
+
+    expect(
+      MapPageHelper.hasOtherVisiblePlaces(
+        [marker(type: null, hidden: true)],
+        placeTypes,
+      ),
+      isFalse,
+    );
+    expect(
+      MapPageHelper.hasOtherVisiblePlaces(
+        [marker(type: 'unlisted')],
+        placeTypes,
+      ),
+      isTrue,
+    );
+    expect(
+      MapPageHelper.hasOtherVisiblePlaces(
+        [marker(type: 'ubytovani')],
+        placeTypes,
+      ),
+      isFalse,
+    );
   });
 
   testWidgets('place type names are not permanently shown in the compact bar',

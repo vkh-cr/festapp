@@ -207,9 +207,9 @@ class MapPageHelper {
     );
   }
 
-  /// Bottom-center dark pill with one chip per visible place type plus a
-  /// trailing "Other" chip. Single-select: the caller filters the map markers
-  /// to the tapped type (or the [otherCode] bucket) and re-fits the camera.
+  /// Bottom-center dark pill with one chip per visible place type and an
+  /// optional trailing "Other" chip. Single-select: the caller filters the map
+  /// markers to the tapped type (or the [otherCode] bucket) and re-fits the camera.
   /// Returns an empty box when there are no place types to show.
   static Widget buildPlaceTypeFilterBar(
     BuildContext context,
@@ -217,8 +217,9 @@ class MapPageHelper {
     String? selectedCode,
     String otherCode,
     void Function(String? code) onTap,
-    List<IconModel> icons,
-  ) {
+    List<IconModel> icons, {
+    bool showOther = true,
+  }) {
     if (placeTypes.isEmpty) return const SizedBox.shrink();
 
     final chips = <Widget>[
@@ -230,14 +231,15 @@ class MapPageHelper {
           onTap: onTap,
           semanticLabel: type.title ?? '',
         ),
-      _buildPlaceTypeChip(
-        code: otherCode,
-        iconWidget: const Icon(Icons.more_horiz,
-            size: _chipIconSize, color: Colors.white),
-        isSelected: selectedCode == otherCode,
-        onTap: onTap,
-        semanticLabel: IconsStrings.placeTypesOther,
-      ),
+      if (showOther)
+        _buildPlaceTypeChip(
+          code: otherCode,
+          iconWidget: const Icon(Icons.more_horiz,
+              size: _chipIconSize, color: Colors.white),
+          isSelected: selectedCode == otherCode,
+          onTap: onTap,
+          semanticLabel: IconsStrings.placeTypesOther,
+        ),
     ];
 
     return Positioned(
@@ -274,6 +276,19 @@ class MapPageHelper {
         ),
       ),
     );
+  }
+
+  /// Whether the trailing "Other" chip has at least one visible map marker.
+  static bool hasOtherVisiblePlaces(
+    Iterable<MapPlacePresentation> places,
+    Iterable<PlaceTypeModel> visiblePlaceTypes,
+  ) {
+    final visibleCodes = visiblePlaceTypes.map((type) => type.code).toSet();
+    return places.any((marker) {
+      final place = marker.place;
+      return !place.isHidden &&
+          (place.type == null || !visibleCodes.contains(place.type));
+    });
   }
 
   static Widget _buildPlaceTypeChip({

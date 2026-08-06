@@ -10,6 +10,7 @@ class MapPlaceModel {
   final String? type;
   final LatLng latLng;
   final int? icon;
+  final bool isHidden;
   final List<TimeBlockItem>? events;
   int aggregateVersion;
 
@@ -20,6 +21,7 @@ class MapPlaceModel {
     this.type,
     required this.latLng,
     this.icon,
+    this.isHidden = false,
     this.events,
     this.aggregateVersion = 0,
   });
@@ -32,6 +34,7 @@ class MapPlaceModel {
         type: place.type,
         latLng: LatLng(place.getLat(), place.getLng()),
         icon: place.icon,
+        isHidden: place.isHidden,
         aggregateVersion: place.aggregateVersion,
         events: List<TimeBlockItem>.from(
             place.events.map((e) => TimeBlockItem.fromEventModelAsChild(e))));

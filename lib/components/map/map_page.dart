@@ -753,6 +753,10 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
               _otherPlaceTypeCode,
               _onPlaceTypeTap,
               _icons,
+              showOther: MapPageHelper.hasOtherVisiblePlaces(
+                _places,
+                _placeTypes,
+              ),
             ),
           if (!_isDrawingPath && selectedPlace == null)
             MapPageHelper.buildPlaceTypeSelectionFeedback(
@@ -1193,7 +1197,6 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
         _placeTypeInitialized = true;
       }
     }
-    _initPlaceTypeSelection();
     // Cached types are enough to filter the first paint; if there are none we
     // wait for the online pass so we don't flash every place unfiltered.
     if (_placeTypes.isNotEmpty) _placeTypesResolved = true;
@@ -1213,6 +1216,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     // the online pass below overwrites them with the live statuses.
     await _seedCleaningStatusFromCache();
     addPlacesToMap(offlineList);
+    _initPlaceTypeSelection();
 
     _pathGroups = (await OfflineDataService.getAllPathGroups())
         .where((p) => !(p.isHidden ?? false))
@@ -1321,10 +1325,10 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
         if (!mounted) return;
         _icons = onlineIcons;
         _placeTypes = onlinePlaceTypes;
-        _initPlaceTypeSelection();
         _placeTypesResolved = true;
         _cleaningByPlace = onlineCleaningByPlace;
         addPlacesToMap(onlineList);
+        _initPlaceTypeSelection();
         _pathGroups = onlinePathGroups;
         _allGroupPaths = onlineGroupPaths;
 
@@ -1879,8 +1883,11 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
       return;
     }
     if (_placeTypes.isEmpty) return;
+    final otherSelectionIsAvailable =
+        _selectedPlaceTypeCode == _otherPlaceTypeCode &&
+            MapPageHelper.hasOtherVisiblePlaces(_places, _placeTypes);
     if (_placeTypeInitialized &&
-        (_selectedPlaceTypeCode == _otherPlaceTypeCode ||
+        (otherSelectionIsAvailable ||
             _placeTypes.any((t) => t.code == _selectedPlaceTypeCode))) {
       return;
     }
