@@ -1,6 +1,8 @@
 # Miscellaneous
 *.class
 *.lock
+!pubspec.lock
+!Gemfile.lock
 *.log
 *.pyc
 *.swp
