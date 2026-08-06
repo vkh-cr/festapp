@@ -194,7 +194,7 @@ class _MapLibreMapSurfaceState extends State<MapLibreMapSurface> {
         ),
         initZoom: widget.model.initialZoom,
         minZoom: 0,
-        maxZoom: MapZoomLimits.offlineMaximum,
+        maxZoom: MapZoomLimits.interactionMaximum,
         // The feasibility benchmark selected Hybrid Composition without the
         // expensive texture mode. Keep this explicit; never inherit defaults.
         androidTextureMode: false,

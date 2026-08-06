@@ -63,7 +63,7 @@ void main() {
 
     expect(find.byType(LegacyMapSurface), findsOneWidget);
     final map = tester.widget<fm.FlutterMap>(find.byType(fm.FlutterMap));
-    expect(map.options.maxZoom, MapZoomLimits.offlineMaximum);
+    expect(map.options.maxZoom, MapZoomLimits.interactionMaximum);
   });
 
   testWidgets('does not silently fall back when MapLibre is unavailable',
@@ -92,19 +92,28 @@ void main() {
     );
   });
 
-  test('offline renderers allow safe vector-tile overzoom', () {
-    expect(
-      MapZoomLimits.legacyMaximum(offline: true),
-      MapZoomLimits.offlineMaximum,
-    );
-    expect(MapZoomLimits.offlineMaximum, 22);
+  test('map renderers allow the maximum supported interaction zoom', () {
+    expect(MapZoomLimits.interactionMaximum, 24);
   });
 
-  test('online Legacy keeps the existing raster zoom cap', () {
-    expect(
-      MapZoomLimits.legacyMaximum(offline: false),
-      MapZoomLimits.onlineMaximum,
-    );
-    expect(MapZoomLimits.onlineMaximum, 18);
+  testWidgets('online Legacy overzooms without requesting deeper raster tiles',
+      (tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: MapRendererHost(
+        renderer: OfflineMapRenderer.legacy,
+        isOffline: false,
+        model: model(),
+        legacy: legacy(),
+      ),
+    ));
+
+    final map = tester.widget<fm.FlutterMap>(find.byType(fm.FlutterMap));
+    final tiles = tester.widget<fm.TileLayer>(find.byType(fm.TileLayer));
+    expect(map.options.maxZoom, MapZoomLimits.interactionMaximum);
+    expect(tiles.maxZoom, MapZoomLimits.interactionMaximum);
+    expect(tiles.maxNativeZoom, MapZoomLimits.onlineRasterNativeMaximum);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump(const Duration(seconds: 1));
   });
 }

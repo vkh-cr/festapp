@@ -81,7 +81,8 @@ class _LegacyMapSurfaceState extends State<LegacyMapSurface>
         ? _buildOfflineBaseLayer()
         : fm.TileLayer(
             tileProvider: CancellableNetworkTileProvider(),
-            maxZoom: MapZoomLimits.onlineMaximum,
+            maxZoom: MapZoomLimits.interactionMaximum,
+            maxNativeZoom: MapZoomLimits.onlineRasterNativeMaximum,
             urlTemplate: widget.layer.layerLink,
             fallbackUrl: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
           );
@@ -98,7 +99,7 @@ class _LegacyMapSurfaceState extends State<LegacyMapSurface>
               fm.InteractiveFlag.scrollWheelZoom,
         ),
         initialZoom: widget.model.initialZoom,
-        maxZoom: MapZoomLimits.legacyMaximum(offline: widget.offline),
+        maxZoom: MapZoomLimits.interactionMaximum,
         initialCenter: widget.model.initialCenter,
         onTap: (_, location) => widget.model.onMapTap(location),
         onMapReady: () {
@@ -135,7 +136,7 @@ class _LegacyMapSurfaceState extends State<LegacyMapSurface>
       tileProviders: vmt.TileProviders({
         sourceName: vmtm.MbTilesVectorTileProvider(mbtiles: mbtiles),
       }),
-      maximumZoom: MapZoomLimits.offlineMaximum,
+      maximumZoom: MapZoomLimits.interactionMaximum,
     );
   }
 

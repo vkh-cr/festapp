@@ -4,14 +4,11 @@ import 'package:fstapp/components/map/map_scene.dart';
 import 'package:fstapp/components/map/map_viewport_controller.dart';
 import 'package:latlong2/latlong.dart';
 
-/// Interaction zoom limits. Offline vector maps may safely overzoom their
-/// highest native tile level; the online raster source keeps its existing cap.
+/// Interaction zoom limits. Every renderer may safely zoom past its highest
+/// native tile level; tile sources keep their own native cap and are overzoomed.
 abstract final class MapZoomLimits {
-  static const double onlineMaximum = 18;
-  static const double offlineMaximum = 22;
-
-  static double legacyMaximum({required bool offline}) =>
-      offline ? offlineMaximum : onlineMaximum;
+  static const double interactionMaximum = 24;
+  static const int onlineRasterNativeMaximum = 18;
 }
 
 /// Renderer-neutral input shared by both concrete map surface adapters.
