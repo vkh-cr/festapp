@@ -28,6 +28,9 @@ class EmailTemplatesStrings {
       'EmailTemplates.subs.paymentDetails'.tr();
   static String get subRemainingTime =>
       'EmailTemplates.subs.remainingTime'.tr();
+  static String get subConfirmationUrl =>
+      'EmailTemplates.subs.confirmationUrl'.tr();
+  static String get subExpiresAt => 'EmailTemplates.subs.expiresAt'.tr();
 
   // --- Template Usage Details ---
 
@@ -42,6 +45,18 @@ class EmailTemplatesStrings {
       'EmailTemplates.usage.signInCode_title'.tr();
   static String get usageSignInCodeDescription =>
       'EmailTemplates.usage.signInCode_description'.tr();
+  static String get usageAppLinksTitle =>
+      'EmailTemplates.usage.appLinks_title'.tr();
+  static String get usageAppLinksDescription =>
+      'EmailTemplates.usage.appLinks_description'.tr();
+  static String get usageAccountDeletionConfirmTitle =>
+      'EmailTemplates.usage.accountDeletionConfirm_title'.tr();
+  static String get usageAccountDeletionConfirmDescription =>
+      'EmailTemplates.usage.accountDeletionConfirm_description'.tr();
+  static String get usageAccountDeletionCompleteTitle =>
+      'EmailTemplates.usage.accountDeletionComplete_title'.tr();
+  static String get usageAccountDeletionCompleteDescription =>
+      'EmailTemplates.usage.accountDeletionComplete_description'.tr();
 
   // TICKET_ORDER_CONFIRMATION
   static String get usageTicketOrderConfirmationTitle =>

@@ -59,6 +59,15 @@ printf '{\n  "name": "web_client",\n  "version": "0.0.0"\n}\n' > "$TMP_ROOT/web_
     echo "  FAIL: configure_version.js exited non-zero. Log:"; cat "$TMP_ROOT/configure.log"; fail=1;
 }
 assert_contains "$TMP_ROOT/web/index.html" 'window.__FESTAPP_BUILD_VERSION__ = "1.2.3+456";'
+
+# A fresh HTML document may still be controlled by the previous app-shell
+# worker. The runtime updater must compare both versions even when the network
+# manifest already equals the HTML version, otherwise stale compiled tenant
+# configuration can survive indefinitely.
+assert_contains "$PROJECT_ROOT/web/festapp_update_prompt.js" \
+  'activeVersion && activeVersion !== currentVersion'
+assert_contains "$PROJECT_ROOT/web/festapp_update_prompt.js" \
+  'await cutOverToVersion(currentVersion)'
 # Idempotent second run should keep the same value.
 ( cd "$TMP_ROOT" && node automation/configure_version.js 1.2.3+456 >> configure.log 2>&1 ) || fail=1
 assert_contains "$TMP_ROOT/web/index.html" 'window.__FESTAPP_BUILD_VERSION__ = "1.2.3+456";'
@@ -70,8 +79,15 @@ echo
 echo "--- emit_version_manifest.sh writes festapp-version.json + stamped main ---"
 
 BUILD_DIR="$TMP_ROOT/build/web"
-mkdir -p "$BUILD_DIR"
-printf '// fake compiled app\n' > "$BUILD_DIR/main.dart.js"
+mkdir -p "$BUILD_DIR/web-assets"
+CONFIG_ANON_KEY="$(sed -n 's/^SUPABASE_ANON_KEY=//p' "$PROJECT_ROOT/automation/project.conf")"
+CONFIG_PROJECT_REF="$(sed -n 's#^SUPABASE_URL=https://\([^.]*\)\.supabase\.co/*#\1#p' \
+  "$PROJECT_ROOT/automation/project.conf")"
+printf '// fake compiled app\n%s\n' "$CONFIG_ANON_KEY" > "$BUILD_DIR/main.dart.js"
+printf "const SUPABASE_KEY = 'sb-%s-auth-token';\n" "$CONFIG_PROJECT_REF" \
+  > "$BUILD_DIR/auth_bridge"
+printf "const authKey = 'sb-%s-auth-token';\n" "$CONFIG_PROJECT_REF" \
+  > "$BUILD_DIR/web-assets/app.js"
 cp "$PROJECT_ROOT/automation/emit_version_manifest.sh" "$TMP_ROOT/automation/emit_version_manifest.sh"
 chmod +x "$TMP_ROOT/automation/emit_version_manifest.sh"
 
@@ -93,7 +109,9 @@ fi
 # The release gate must accept only a self-consistent HTML/manifest/main/worker
 # set carrying the same version.
 printf '<script>window.__FESTAPP_BUILD_VERSION__ = "1.2.3+456";</script>\n' > "$BUILD_DIR/flutter"
-printf 'const BUILD_VERSION = "1.2.3+456"; // FESTAPP_QUERY_BUILD_VERSION\n' > "$BUILD_DIR/festapp_service_worker.js"
+printf 'const BUILD_VERSION = "1.2.3+456"; const FORCED_OCCASION_PATH = "/test-occasion"; // FESTAPP_QUERY_BUILD_VERSION\n' > "$BUILD_DIR/festapp_service_worker.js"
+printf '{"start_url":"/test-occasion/"}\n' > "$BUILD_DIR/site.webmanifest"
+printf 'const FORCED_OCCASION_PATH = "/test-occasion";\n' > "$BUILD_DIR/_worker.js"
 if node "$PROJECT_ROOT/automation/verify_web_build.mjs" "$BUILD_DIR" "1.2.3+456" > /dev/null; then
     echo "  ok: coherent web release passes the build gate"
 else

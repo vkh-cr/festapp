@@ -26,6 +26,8 @@ import 'package:fstapp/components/schedule/event_page.dart';
 import 'package:fstapp/components/schedule/schedule_strings.dart';
 import 'package:fstapp/components/cleaning/cleaning_page.dart';
 import 'package:fstapp/components/cleaning/cleaning_strings.dart';
+import 'package:fstapp/components/reception/reception_page.dart';
+import 'package:fstapp/components/reception/reception_strings.dart';
 import 'package:fstapp/components/map/map_navigation.dart';
 import 'package:fstapp/components/app_management/settings_page.dart';
 import 'package:fstapp/components/occasion/admin_page.dart';
@@ -468,6 +470,38 @@ class _UserPageState extends State<UserPage> {
                 if (userData?.eventUserGroup != null) _buildGroupField(context),
                 if (FeatureService.isFeatureEnabled(FeatureConstants.cleaning))
                   _buildCleaningSection(context),
+                if (RightsService.canUseReception())
+                  Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: ListTile(
+                      tileColor: ThemeConfig.qrButtonColor(context),
+                      leading: Icon(Icons.how_to_reg,
+                          color: Theme.of(context).colorScheme.primary),
+                      title: Text(
+                        ReceptionStrings.title,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      subtitle: Text(
+                        ReceptionStrings.subtitle,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      trailing: Icon(
+                        Icons.arrow_forward_ios,
+                        size: 16,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                      onTap: () => RouterService.navigateOccasion(
+                          context, ReceptionPage.ROUTE),
+                    ),
+                  ),
                 const SizedBox(height: 16),
                 Visibility(
                   visible: RightsService.canSeeAdmin(),
@@ -477,51 +511,73 @@ class _UserPageState extends State<UserPage> {
                     label: CommonStrings.eventManagement,
                   ),
                 ),
-                const SizedBox(height: 16),
-                ButtonsHelper.bigButton(
-                  context: context,
-                  onPressed: () async => _logout(),
-                  label: UserStrings.signOut,
-                  color: ThemeConfig.seed1,
-                  textColor: Colors.white,
-                ),
                 const SizedBox(height: 24),
-                Container(
-                  alignment: Alignment.topCenter,
-                  child: TextButton(
-                    onPressed: _isPasswordResetPending
-                        ? null
-                        : () => _requestPasswordReset(userData?.email),
-                    child: _isPasswordResetPending
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : Text(
-                            UserStrings.changePassword,
-                            style: TextStyle(
-                                fontSize: StylesConfig.normalClickableFontSize),
-                          ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  alignment: Alignment.topCenter,
-                  child: TextButton(
-                    onPressed: _requestAccountDeletion,
-                    child: Text(
-                      UserStrings.deleteAccount,
-                      style: TextStyle(
-                        fontSize: StylesConfig.normalClickableFontSize,
-                        color: Theme.of(context).colorScheme.error,
-                      ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Card(
+                    elevation: 0,
+                    clipBehavior: Clip.antiAlias,
+                    color: ThemeConfig.qrButtonColor(context),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
+                    child: Column(children: [
+                      ListTile(
+                        leading: Icon(Icons.logout,
+                            color: Theme.of(context).colorScheme.primary),
+                        title: Text(
+                          UserStrings.signOut,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        trailing: Icon(
+                          Icons.arrow_forward_ios,
+                          size: 16,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                        onTap: _logout,
+                      ),
+                      const Divider(height: 1, indent: 56),
+                      ListTile(
+                        leading: Icon(Icons.lock_reset,
+                            color: Theme.of(context).colorScheme.primary),
+                        title: Text(
+                          UserStrings.changePassword,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        trailing: Icon(
+                          Icons.arrow_forward_ios,
+                          size: 16,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                        onTap: _isPasswordResetPending
+                            ? null
+                            : () => _requestPasswordReset(userData?.email),
+                      ),
+                      const Divider(height: 1, indent: 56),
+                      ListTile(
+                        leading: Icon(Icons.delete_outline,
+                            color: Theme.of(context).colorScheme.error),
+                        title: Text(
+                          UserStrings.deleteAccount,
+                          style: TextStyle(
+                              color: Theme.of(context).colorScheme.error),
+                        ),
+                        onTap: _requestAccountDeletion,
+                      ),
+                    ]),
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 72),
+                const Divider(indent: 32, endIndent: 32),
+                const SizedBox(height: 12),
                 const AppLegalLinks(),
-                const SizedBox(height: 16),
+                const SizedBox(height: 24),
               ],
             ),
           ),
@@ -664,10 +720,25 @@ class _UserPageState extends State<UserPage> {
         tileColor: ThemeConfig.qrButtonColor(context),
         leading: Icon(Icons.cleaning_services,
             color: Theme.of(context).colorScheme.primary),
-        title: Text(CleaningStrings.pageTitle,
-            style: const TextStyle(fontWeight: FontWeight.bold)),
-        subtitle: Text(CleaningStrings.tapToReport),
-        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+        title: Text(
+          CleaningStrings.pageTitle,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        subtitle: Text(
+          CleaningStrings.tapToReport,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        trailing: Icon(
+          Icons.arrow_forward_ios,
+          size: 16,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         onTap: () =>
             RouterService.navigateOccasion(context, CleaningPage.ROUTE),

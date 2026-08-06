@@ -91,6 +91,64 @@ void main() {
     expect(news.map((item) => item.isRead), [false, true, true]);
   });
 
+  test('missing live news counts stay unavailable instead of becoming zero',
+      () {
+    final news = ClientSyncProjection.projectNews(
+      content: {
+        'news': [
+          {
+            'id': 204,
+            'message': 'Newest',
+            'createdAt': '2026-08-03T10:00:00Z',
+            'aggregateVersion': 2,
+          },
+        ],
+      },
+      live: const {},
+      marker: null,
+    );
+
+    expect(news.single.views, isNull);
+  });
+
+  test(
+      'missing event occupancy stays unavailable but an authoritative zero remains zero',
+      () {
+    Map<String, dynamic> catalog() => {
+          'events': [
+            {
+              'id': 42,
+              'title': 'Workshop',
+              'startTime': '2026-08-14T18:00:00Z',
+              'endTime': '2026-08-14T19:00:00Z',
+              'maxParticipants': 10,
+            },
+          ],
+        };
+
+    final missing = ClientSyncProjection.projectEvents(
+      catalog: catalog(),
+      map: const {},
+      live: const {},
+      privateProgram: null,
+    ).single;
+    final actualZero = ClientSyncProjection.projectEvents(
+      catalog: catalog(),
+      map: const {},
+      live: const {
+        'events': [
+          {'eventId': 42, 'participantCount': 0, 'savedCount': 0},
+        ],
+      },
+      privateProgram: null,
+    ).single;
+
+    expect(missing.currentParticipants, isNull);
+    expect(missing.participantCapacityLabel, isNull);
+    expect(actualZero.currentParticipants, 0);
+    expect(actualZero.participantCapacityLabel, '0/10');
+  });
+
   test('private-profile replacement fully adds and removes companions', () {
     final withCompanion = ClientSyncProjection.projectCompanions({
       'companions': [

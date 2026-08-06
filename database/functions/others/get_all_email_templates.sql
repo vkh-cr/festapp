@@ -66,7 +66,8 @@ BEGIN
            et.subject,
            et.organization,
            et.code,
-           et.unit
+           et.unit,
+           et.title
     FROM public.email_templates et
     WHERE
       -- A. Filter based on context (Scope)

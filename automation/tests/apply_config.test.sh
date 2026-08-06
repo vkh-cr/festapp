@@ -52,6 +52,7 @@ cp "$PROJECT_ROOT/web/site.webmanifest"      "$TMP_ROOT/web/site.webmanifest"
 cp "$PROJECT_ROOT/web_client/index.html"     "$TMP_ROOT/web_client/index.html"
 cp "$PROJECT_ROOT/web_client/public/site.webmanifest" "$TMP_ROOT/web_client/public/site.webmanifest"
 cp "$PROJECT_ROOT/web_client/src/app_config.js" "$TMP_ROOT/web_client/src/app_config.js"
+cp "$PROJECT_ROOT/web_client/public/auth_bridge.html" "$TMP_ROOT/web_client/public/auth_bridge.html"
 cp "$PROJECT_ROOT/lib/app_config.dart"       "$TMP_ROOT/lib/app_config.dart"
 cp "$PROJECT_ROOT/lib/theme_config.dart"     "$TMP_ROOT/lib/theme_config.dart"
 cp "$PROJECT_ROOT/android/app/build.gradle" "$TMP_ROOT/android/app/build.gradle"
@@ -113,7 +114,12 @@ assert_contains "$TMP_ROOT/web/index.html" 'appId: "aaaaaaaa-bbbb-cccc-dddd-eeee
 assert_contains "$TMP_ROOT/web/index.html" 'safari_web_id: "web.onesignal.auto.test"'
 assert_contains "$TMP_ROOT/web/index.html" "app_generation: 'test_generation_v1'"
 assert_contains "$TMP_ROOT/web/index.html" "occasion: 'test-occasion'"
-assert_contains "$TMP_ROOT/web/index.html" '<img class="initial-logo" src="fstapplogo.png"'
+if grep -F -q '<svg class="initial-logo"' "$PROJECT_ROOT/web/index.html"; then
+    assert_contains "$TMP_ROOT/web/index.html" '<svg class="initial-logo"'
+    assert_missing "$TMP_ROOT/web/index.html" '<img class="initial-logo"'
+else
+    assert_contains "$TMP_ROOT/web/index.html" '<img class="initial-logo" src="fstapplogo.png"'
+fi
 
 echo
 echo "--- installable PWA manifests ---"
@@ -134,6 +140,7 @@ echo
 echo "--- web_client/src/app_config.js ---"
 assert_contains "$TMP_ROOT/web_client/src/app_config.js" "static supabaseUrl = 'https://test.supabase.co';"
 assert_contains "$TMP_ROOT/web_client/src/app_config.js" "static anonKey = 'test-anon-key-fixture';"
+assert_contains "$TMP_ROOT/web_client/src/app_config.js" "auth: 'sb-test-auth-token'"
 assert_contains "$TMP_ROOT/web_client/src/app_config.js" "static organization = 42;"
 assert_contains "$TMP_ROOT/web_client/src/app_config.js" "static isAllUnit = true;"
 assert_contains "$TMP_ROOT/web_client/src/app_config.js" "static supportedLanguages = ['cs', 'en'];"
@@ -141,8 +148,13 @@ assert_contains "$TMP_ROOT/web_client/src/app_config.js" 'static webLink = "http
 assert_contains "$TMP_ROOT/web_client/src/app_config.js" 'static forceOccasionLink = "test-occasion";'
 
 echo
+echo "--- web_client/public/auth_bridge.html ---"
+assert_contains "$TMP_ROOT/web_client/public/auth_bridge.html" "const SUPABASE_KEY = 'sb-test-auth-token';"
+
+echo
 echo "--- lib/app_config.dart ---"
 assert_contains "$TMP_ROOT/lib/app_config.dart" "static const String supabaseUrl = 'https://test.supabase.co';"
+assert_contains "$TMP_ROOT/lib/app_config.dart" "'test-anon-key-fixture';"
 assert_contains "$TMP_ROOT/lib/app_config.dart" "static const int organization = 42;"
 assert_contains "$TMP_ROOT/lib/app_config.dart" 'static const String webLink = "https://test.example.com";'
 assert_contains "$TMP_ROOT/lib/app_config.dart" 'static const String? forceOccasionLink = "test-occasion";'

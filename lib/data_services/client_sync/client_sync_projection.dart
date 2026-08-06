@@ -105,10 +105,11 @@ class ClientSyncProjection {
         'is_group_event': raw['isGroupEvent'] ?? false,
         'isSignedIn': signedIn.contains(id),
         'isEventInMyProgram': saved.contains(id),
-        'currentParticipants': liveEvent?['participantCount'] ?? 0,
-        'event_users_saved': [
-          {'count': liveEvent?['savedCount'] ?? 0}
-        ],
+        'currentParticipants': liveEvent?['participantCount'],
+        if (liveEvent?['savedCount'] != null)
+          'event_users_saved': [
+            {'count': liveEvent!['savedCount']}
+          ],
         'event_groups': [
           for (final group in groups)
             if (group['parentId'] == id)
@@ -257,7 +258,7 @@ class ClientSyncProjection {
         'id': raw['id'],
         'message': raw['message'],
         'created_at': raw['createdAt'],
-        'views': viewsByNewsId[(raw['id'] as num).toInt()] ?? 0,
+        'views': viewsByNewsId[(raw['id'] as num).toInt()],
         'aggregate_version': raw['aggregateVersion'],
       });
       item.isRead = item.id <= lastRead;
@@ -349,6 +350,7 @@ class ClientSyncProjection {
         'data': occasionMap['data'],
         'is_cleaning_blocked': occasionMap['isCleaningBlocked'],
         'is_cleaning_crew': occasionMap['isCleaningCrew'],
+        'is_receptionist': occasionMap['isReceptionist'],
       },
     });
     final projectedGroups = await groups();

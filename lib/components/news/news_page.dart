@@ -254,7 +254,8 @@ class _NewsPageState extends State<NewsPage> {
                                         ),
                                       ),
                                       Visibility(
-                                        visible: AuthService.isLoggedIn(),
+                                        visible: AuthService.isLoggedIn() &&
+                                            message.views != null,
                                         child: Padding(
                                           padding: const EdgeInsets.all(8),
                                           child: Row(
@@ -267,7 +268,7 @@ class _NewsPageState extends State<NewsPage> {
                                                       .disabledColor),
                                               const SizedBox(width: 6),
                                               Text(
-                                                message.views.toString(),
+                                                message.views!.toString(),
                                                 style: TextStyle(
                                                   color: Theme.of(context)
                                                       .disabledColor,

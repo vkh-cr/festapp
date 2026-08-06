@@ -71,6 +71,40 @@ void main() {
         {'revision': 2});
   });
 
+  test('generation completeness detects a missing offline payload', () async {
+    final storage = _MemoryStorage();
+    final store = ClientSyncStore(storage: storage);
+    await store.activate(
+      scope: '9/643',
+      type: SyncFreshnessClass.catalog,
+      pointer: 'catalog',
+      updatedAt: DateTime.utc(2026, 8, 6),
+      revisions: const {ClientSyncComponent.programCatalog: 49},
+      payloads: const {
+        ClientSyncComponent.programCatalog: {'events': []}
+      },
+    );
+    expect(
+      await store.isGenerationComplete(
+        '9/643',
+        SyncFreshnessClass.catalog,
+        const {ClientSyncComponent.programCatalog},
+      ),
+      isTrue,
+    );
+
+    storage.values.remove('generation/9/643/catalog/catalog/program_catalog');
+
+    expect(
+      await store.isGenerationComplete(
+        '9/643',
+        SyncFreshnessClass.catalog,
+        const {ClientSyncComponent.programCatalog},
+      ),
+      isFalse,
+    );
+  });
+
   test('blob cache is bounded by item count and encoded byte budget', () async {
     final storage = _MemoryStorage();
     final store = ClientSyncStore(storage: storage);

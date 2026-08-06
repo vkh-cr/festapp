@@ -1380,6 +1380,10 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
   }
 
   Future<void> addEventsToPlace(List<PlaceModel> places) async {
+    if (ClientSyncRuntime.isV1Selected) {
+      await addOfflineEventsToPlace(places);
+      return;
+    }
     var events =
         await DbEvents.getAllEvents(RightsService.currentOccasionId()!, false);
     events = events.filterRootEvents().sortEvents();

@@ -101,6 +101,7 @@ BEGIN
            is_editor_order_view = COALESCE((input_data->>'is_editor_order_view')::boolean, is_editor_order_view),
            is_cleaning_crew = COALESCE((input_data->>'is_cleaning_crew')::boolean, is_cleaning_crew),
            is_cleaning_blocked = COALESCE((input_data->>'is_cleaning_blocked')::boolean, is_cleaning_blocked),
+           is_receptionist = COALESCE((input_data->>'is_receptionist')::boolean, is_receptionist),
            is_approver = COALESCE((input_data->>'is_approver')::boolean, is_approver),
            is_approved = COALESCE((input_data->>'is_approved')::boolean, is_approved),
            is_manager = COALESCE((input_data->>'is_manager')::boolean, is_manager)

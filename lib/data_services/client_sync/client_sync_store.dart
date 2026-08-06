@@ -150,6 +150,25 @@ class ClientSyncStore {
     return raw == null ? null : jsonDecode(raw);
   }
 
+  /// Verifies the active generation as a usable offline snapshot, not merely
+  /// as a pointer. A browser may retain generation metadata after individual
+  /// values were evicted or an older write was interrupted.
+  Future<bool> isGenerationComplete(
+    String scope,
+    SyncFreshnessClass type,
+    Set<ClientSyncComponent> requiredComponents,
+  ) async {
+    final generation = await activeGeneration(scope, type);
+    if (generation == null ||
+        !generation.revisions.keys.toSet().containsAll(requiredComponents)) {
+      return false;
+    }
+    for (final component in requiredComponents) {
+      if (await readComponent(scope, type, component) == null) return false;
+    }
+    return true;
+  }
+
   /// Stages all component references and switches the class pointer in the
   /// same transaction. Each consistency class is intentionally independent.
   Future<void> activate({

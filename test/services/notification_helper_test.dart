@@ -4,6 +4,7 @@ import 'package:fstapp/services/notification_helper.dart';
 class _FakeAudienceClient implements NotificationAudienceClient {
   final addedTags = <Map<String, String>>[];
   final logins = <String>[];
+  var optInCount = 0;
   var logoutCount = 0;
 
   @override
@@ -12,6 +13,9 @@ class _FakeAudienceClient implements NotificationAudienceClient {
 
   @override
   Future<void> login(String externalId) async => logins.add(externalId);
+
+  @override
+  Future<void> optIn() async => optInCount++;
 
   @override
   Future<void> logout() async => logoutCount++;
@@ -62,7 +66,7 @@ void main() {
     },
   );
 
-  test('permission blocks both tags and identity login', () async {
+  test('permission blocks tags but not authenticated identity login', () async {
     permitted = false;
     loggedIn = true;
 
@@ -70,7 +74,7 @@ void main() {
     await coordinator.loginCurrentUser();
 
     expect(client.addedTags, isEmpty);
-    expect(client.logins, isEmpty);
+    expect(client.logins, ['user-uuid']);
   });
 
   test(
@@ -100,4 +104,48 @@ void main() {
       expect(client.addedTags, isEmpty);
     },
   );
+
+  test('does not write a partial tenant audience', () async {
+    coordinator = NotificationAudienceCoordinator(
+      client: client,
+      notificationsSupported: () => supported,
+      notificationPermission: () => permitted,
+      isLoggedIn: () => loggedIn,
+      currentUserId: () => 'user-uuid',
+      occasionLink: () => 'csmostrava2026',
+      installationGeneration: '',
+    );
+
+    await coordinator.tagCurrentSubscription();
+
+    expect(client.addedTags, isEmpty);
+  });
+
+  test('activates the complete audience immediately after permission grant',
+      () async {
+    loggedIn = true;
+
+    await coordinator.activateCurrentInstallation();
+
+    expect(client.optInCount, 1);
+    expect(client.addedTags, [
+      {'app_generation': 'csm_ostrava_2026_v1', 'occasion': 'csmostrava2026'},
+    ]);
+    expect(client.logins, ['user-uuid']);
+  });
+
+  test('retries notification initialization when an offline start reconnects',
+      () async {
+    var initializeCount = 0;
+    final reconnect = NotificationReconnectCoordinator(
+      startsOffline: true,
+      initialize: () async => initializeCount++,
+    );
+
+    await reconnect.connectivityChanged(true);
+    await reconnect.connectivityChanged(false);
+    await reconnect.connectivityChanged(false);
+
+    expect(initializeCount, 1);
+  });
 }

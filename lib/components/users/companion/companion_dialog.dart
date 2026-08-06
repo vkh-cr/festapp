@@ -78,6 +78,8 @@ class _CompanionManagementDialogState extends State<CompanionManagementDialog> {
   Widget build(BuildContext context) => ValueListenableBuilder<bool>(
       valueListenable: ConnectivityService.isOfflineNotifier,
       builder: (context, isOffline, _) => AlertDialog(
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             title: Text(CommonStrings.companions),
             content: SizedBox(
               width: 520,
@@ -176,6 +178,8 @@ class _CompanionAttendanceDialogState extends State<CompanionAttendanceDialog> {
   Widget build(BuildContext context) => ValueListenableBuilder<bool>(
       valueListenable: ConnectivityService.isOfflineNotifier,
       builder: (context, isOffline, _) => AlertDialog(
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             title: Text(CommonStrings.companions),
             content: SizedBox(
               width: 480,

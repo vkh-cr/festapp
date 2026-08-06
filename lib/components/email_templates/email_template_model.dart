@@ -27,6 +27,7 @@ class EmailTemplateModel {
   int? organization;
   String? code;
   int? unit;
+  String? title;
 
   EmailTemplateModel({
     this.id,
@@ -36,6 +37,7 @@ class EmailTemplateModel {
     this.organization,
     this.code,
     this.unit,
+    this.title,
   });
 
   factory EmailTemplateModel.fromJson(Map<String, dynamic> json) {
@@ -47,6 +49,7 @@ class EmailTemplateModel {
       organization: json[Tb.email_templates.organization],
       code: json[Tb.email_templates.code],
       unit: json[Tb.email_templates.unit],
+      title: json[Tb.email_templates.title],
     );
   }
 
@@ -59,12 +62,19 @@ class EmailTemplateModel {
       Tb.email_templates.organization: organization,
       Tb.email_templates.code: code,
       Tb.email_templates.unit: unit,
+      Tb.email_templates.title: title,
     };
   }
 
   // Common substitution definitions (codes are now without '{{' and '}}'):
   static EmailTemplateSub appPlatformLinksSub = EmailTemplateSub(
     code: 'platformLinks',
+    description: EmailTemplatesStrings.subPlatformLinks,
+    defaultValue: 'Open the app on https://live.festapp.net/.',
+  );
+
+  static EmailTemplateSub appLinksSub = EmailTemplateSub(
+    code: 'appLinks',
     description: EmailTemplatesStrings.subPlatformLinks,
     defaultValue: 'Open the app on https://live.festapp.net/.',
   );
@@ -171,6 +181,18 @@ class EmailTemplateModel {
     defaultValue: '5 days',
   );
 
+  static EmailTemplateSub confirmationUrlSub = EmailTemplateSub(
+    code: 'confirmationUrl',
+    description: EmailTemplatesStrings.subConfirmationUrl,
+    defaultValue: 'https://live.festapp.net/delete-account/confirm',
+  );
+
+  static EmailTemplateSub expiresAtSub = EmailTemplateSub(
+    code: 'expiresAt',
+    description: EmailTemplatesStrings.subExpiresAt,
+    defaultValue: '31. 12. 2026 23:59',
+  );
+
   /// Mapping of template codes to their available substitutions.
   static final Map<String, List<EmailTemplateSub>> substitutionDefinitions = {
     'RESET_PASSWORD': [
@@ -187,6 +209,13 @@ class EmailTemplateModel {
       surnameSub,
       signInCodeSub,
     ],
+    'APP_LINKS': [appLinksSub],
+    'ACCOUNT_DELETION_CONFIRM': [
+      appNameSub,
+      confirmationUrlSub,
+      expiresAtSub,
+    ],
+    'ACCOUNT_DELETION_COMPLETE': [appNameSub],
     'TICKET_ORDER_CONFIRMATION': [
       occasionTitleSub,
       amountSub,
@@ -243,6 +272,26 @@ class EmailTemplateModel {
           'description': EmailTemplatesStrings.usageSignInCodeDescription,
           'subs': substitutionDefinitions['SIGN_IN_CODE'] ?? [],
         };
+      case 'APP_LINKS':
+        return {
+          'title': EmailTemplatesStrings.usageAppLinksTitle,
+          'description': EmailTemplatesStrings.usageAppLinksDescription,
+          'subs': substitutionDefinitions['APP_LINKS'] ?? [],
+        };
+      case 'ACCOUNT_DELETION_CONFIRM':
+        return {
+          'title': EmailTemplatesStrings.usageAccountDeletionConfirmTitle,
+          'description':
+              EmailTemplatesStrings.usageAccountDeletionConfirmDescription,
+          'subs': substitutionDefinitions['ACCOUNT_DELETION_CONFIRM'] ?? [],
+        };
+      case 'ACCOUNT_DELETION_COMPLETE':
+        return {
+          'title': EmailTemplatesStrings.usageAccountDeletionCompleteTitle,
+          'description':
+              EmailTemplatesStrings.usageAccountDeletionCompleteDescription,
+          'subs': substitutionDefinitions['ACCOUNT_DELETION_COMPLETE'] ?? [],
+        };
       case 'TICKET_ORDER_CONFIRMATION':
         return {
           'title': EmailTemplatesStrings.usageTicketOrderConfirmationTitle,
@@ -280,7 +329,9 @@ class EmailTemplateModel {
         };
       default:
         return {
-          'title': 'Unknown Template',
+          'title': title?.trim().isNotEmpty == true
+              ? title!.trim()
+              : (code?.trim().isNotEmpty == true ? code!.trim() : '-'),
           'description': '-',
           'subs': [],
         };

@@ -106,6 +106,7 @@ class OccasionUsersTb {
   String get is_editor_order_view => "is_editor_order_view";
   String get is_cleaning_crew => "is_cleaning_crew";
   String get is_cleaning_blocked => "is_cleaning_blocked";
+  String get is_receptionist => "is_receptionist";
   String get is_editor => "is_editor";
   String get is_manager => "is_manager";
   String get is_approved => "is_approved";
@@ -462,6 +463,7 @@ class EmailTemplatesTb {
   String get organization => "organization";
   String get code => "code";
   String get unit => "unit";
+  String get title => "title";
 }
 
 class PathGroupsTb {

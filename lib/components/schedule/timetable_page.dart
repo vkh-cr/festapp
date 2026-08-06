@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +15,7 @@ import 'package:fstapp/data_services/data_extensions.dart';
 import 'package:fstapp/components/schedule/db_events.dart';
 import 'package:fstapp/components/map/db_places.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/schedule/event_page.dart';
 import 'package:fstapp/services/time_helper.dart';
@@ -63,6 +66,8 @@ class _TimetablePageState extends State<TimetablePage>
       context.tabsRouter.addListener(_tabsRouterListener);
     }
 
+    ClientSyncRuntime.projectionEpoch.addListener(_onProjectionChanged);
+
     loadData();
   }
 
@@ -72,8 +77,15 @@ class _TimetablePageState extends State<TimetablePage>
     if (tabsRouter != null) {
       context.tabsRouter.removeListener(_tabsRouterListener);
     }
+    ClientSyncRuntime.projectionEpoch.removeListener(_onProjectionChanged);
     _tabController?.dispose();
     super.dispose();
+  }
+
+  void _onProjectionChanged() {
+    if (ClientSyncRuntime.isV1Selected) {
+      unawaited(loadDataOffline());
+    }
   }
 
   Future<void> loadData() async {
@@ -81,6 +93,8 @@ class _TimetablePageState extends State<TimetablePage>
     if (!mounted) return;
 
     await loadDataOffline();
+
+    if (ClientSyncRuntime.isV1Selected) return;
 
     _events =
         await DbEvents.getAllEvents(RightsService.currentOccasionId()!, false);

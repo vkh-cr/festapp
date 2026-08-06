@@ -46,7 +46,10 @@ cp -r dist/* ../build/web/
 cd ..
 
 rm -f build/web/flutter_service_worker.js
-node automation/generate_pwa_service_worker.mjs build/web "$(grep -m1 '^VERSION=' automation/project.conf | cut -d= -f2 | tr -d '[:space:]')"
+node automation/generate_pwa_service_worker.mjs \
+  build/web \
+  "$(grep -m1 '^VERSION=' automation/project.conf | cut -d= -f2 | tr -d '[:space:]')" \
+  "$(grep -m1 '^FORCE_OCCASION_LINK=' automation/project.conf | cut -d= -f2- | tr -d '\"' | tr -d "'" | tr -d '[:space:]')"
 
 echo "Build Complete. Output in build/web"
 ls -la build/web

@@ -1,6 +1,8 @@
 import 'package:easy_localization/easy_localization.dart';
 
 class UserStrings {
+  static String get receptionist => 'UserColumns.receptionist'.tr();
+
   // Column Titles
   static String get id => 'UserColumns.id'.tr();
   static String get unit => 'UserColumns.unit'.tr();

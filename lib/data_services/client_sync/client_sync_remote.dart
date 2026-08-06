@@ -58,11 +58,22 @@ class HttpPublicSyncRemote
   final ArtifactRequestUriResolver? artifactRequestUriResolver;
   final http.Client _client;
   final Map<String, String> _etags = {};
+  int _headPollSequence = 0;
 
   @override
   Future<PublicHeadResult> getHead(SyncContext context) async {
-    final uri = headOrigin.resolve(
+    final baseUri = headOrigin.resolve(
         '/v1/public-sync/${context.organizationId}/${context.occasionId}/head');
+    // The head is mutable. A unique query keeps browser/URLSession caches from
+    // serving an hours-old 200 response even if an intermediary accidentally
+    // broadens Cache-Control. The worker canonicalizes this query for its
+    // five-second edge cache, while If-None-Match still makes unchanged polls
+    // bodyless.
+    final uri = baseUri.replace(queryParameters: {
+      ...baseUri.queryParameters,
+      'poll':
+          '${DateTime.now().toUtc().microsecondsSinceEpoch}-${_headPollSequence++}',
+    });
     final response = await _client.get(uri, headers: {
       'Accept': 'application/json',
       if (_etags[context.publicScope] case final etag?) 'If-None-Match': etag,

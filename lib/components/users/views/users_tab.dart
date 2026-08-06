@@ -28,8 +28,7 @@ class UsersTab extends StatefulWidget {
 }
 
 class _UsersTabState extends State<UsersTab> {
-  static bool get _canManageCompanions =>
-      RightsService.isManager() || RightsService.isAdmin();
+  static bool get _canManageCompanions => RightsService.isEditor();
 
   static List<String> getColumnIdentifiers() {
     final identifiers = [
@@ -58,6 +57,8 @@ class _UsersTabState extends State<UsersTab> {
         UserColumns.CLEANING_CREW,
       if (FeatureService.isFeatureEnabled(FeatureConstants.cleaning))
         UserColumns.CLEANING_BLOCKED,
+      if (FeatureService.isFeatureEnabled(FeatureConstants.reception))
+        UserColumns.RECEPTIONIST,
       UserColumns.INVITED,
       UserColumns.CREATED_AT,
       UserColumns.LAST_SIGN_IN_AT,

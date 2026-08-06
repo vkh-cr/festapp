@@ -17,6 +17,8 @@ import 'package:fstapp/components/occasion/link_model.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:fstapp/components/organization/organization_model.dart';
+import 'package:fstapp/components/features/feature_constants.dart';
+import 'package:fstapp/components/features/feature_service.dart';
 
 class RightsService {
   static final _supabase = Supabase.instance.client;
@@ -172,6 +174,13 @@ class RightsService {
     return occasionLinkModelNotifier.value?.occasionUser?.isCleaningCrew ??
         false;
   }
+
+  static bool isReceptionist() =>
+      occasionLinkModelNotifier.value?.occasionUser?.isReceptionist ?? false;
+
+  static bool canUseReception() =>
+      FeatureService.isFeatureEnabled(FeatureConstants.reception) &&
+      (isReceptionist() || isManager() || isAdmin());
 
   static bool canSeeUnitUsers() {
     return isUnitEditor() || isUnitManager() || isAdmin();

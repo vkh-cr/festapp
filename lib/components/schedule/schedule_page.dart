@@ -112,7 +112,29 @@ class _SchedulePageState extends State<SchedulePage>
   void _onProjectionChanged() {
     if (ClientSyncRuntime.isV1Selected) {
       unawaited(_reloadCompanionOwnership());
+      unawaited(_reloadProjectedEvents());
     }
+  }
+
+  Future<void> _reloadProjectedEvents() async {
+    final events = await OfflineDataService.getAllEvents();
+    if (!AuthService.isLoggedIn() &&
+        AppConfig.isOwnProgramSupportedWithoutSignIn) {
+      await OfflineDataService.updateEventsWithMySchedule(events);
+    }
+    final dots = events
+        .filterRootEvents()
+        .where((event) => !event.isCounselingSlot)
+        .map(TimeBlockItem.fromEventModel)
+        .toList();
+    if (!mounted) return;
+    setState(() {
+      _events = events;
+      _dots = dots;
+      for (final event in events) {
+        if (event.id != null) _eventDescriptions[event.id!] = event.description;
+      }
+    });
   }
 
   Future<void> _reloadCompanionOwnership() async {
@@ -164,6 +186,10 @@ class _SchedulePageState extends State<SchedulePage>
     });
 
     try {
+      if (ClientSyncRuntime.isV1Selected) {
+        await _reloadProjectedEvents();
+        return;
+      }
       await _loadOfflineDataThenFast();
       if (!_fullDataGloballyLoaded) {
         await _loadFullData();
@@ -205,8 +231,6 @@ class _SchedulePageState extends State<SchedulePage>
     if (mounted) {
       setState(() {});
     }
-
-    if (ClientSyncRuntime.isV1Selected) return;
 
     final fast = await DbEvents.getAllEvents(
       RightsService.currentOccasionId()!,

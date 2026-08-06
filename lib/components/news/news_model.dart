@@ -8,7 +8,7 @@ class NewsModel {
   String? message;
   String? createdBy;
   int id;
-  int views = 0;
+  int? views;
   bool isRead = false;
   int aggregateVersion;
 
@@ -37,7 +37,7 @@ class NewsModel {
             : null,
         message: json[Tb.news.message],
         createdBy: json[Tb.user_info.name],
-        views: json[NewsModel.viewsColumn] ?? 0,
+        views: (json[NewsModel.viewsColumn] as num?)?.toInt(),
         aggregateVersion: (json['aggregate_version'] as num?)?.toInt() ?? 0);
   }
 }

@@ -254,7 +254,7 @@ class DbNews {
 
     int viewsAggregate = 0;
     for (var message in loadedMessages) {
-      viewsAggregate += message.views;
+      viewsAggregate += message.views ?? 0;
       message.views = viewsAggregate;
       if (AuthService.isLoggedIn()) {
         message.isRead = lastReadMessageId >= message.id;

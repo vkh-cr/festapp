@@ -1,4 +1,6 @@
 import 'package:auto_route/auto_route.dart';
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/map/place_model.dart';
@@ -54,6 +56,7 @@ class _ScheduleLightPageState extends State<ScheduleLightPage>
     if (!ClientSyncRuntime.isV1Selected) {
       WidgetsBinding.instance.addObserver(this);
     }
+    ClientSyncRuntime.projectionEpoch.addListener(_onProjectionChanged);
     loadData();
   }
 
@@ -67,13 +70,44 @@ class _ScheduleLightPageState extends State<ScheduleLightPage>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    ClientSyncRuntime.projectionEpoch.removeListener(_onProjectionChanged);
     super.dispose();
+  }
+
+  void _onProjectionChanged() {
+    if (ClientSyncRuntime.isV1Selected) {
+      unawaited(_reloadProjectedEvents());
+    }
+  }
+
+  Future<void> _reloadProjectedEvents() async {
+    final events = await OfflineDataService.getAllEvents();
+    await OfflineDataService.updateEventsWithGroupName(events);
+    await _loadPlacesForEvents(
+        events, (_) async => OfflineDataService.getAllPlaces());
+    final dots = events
+        .filterRootEvents()
+        .where((event) => !event.isCounselingSlot)
+        .map(TimeBlockItem.fromEventModel)
+        .toList();
+    if (!mounted) return;
+    setState(() {
+      _events = events;
+      _dots = dots;
+      for (final event in events) {
+        if (event.id != null) _eventDescriptions[event.id!] = event.description;
+      }
+    });
   }
 
   Future<void> loadData() async {
     if (_isLoading) return;
     setState(() => _isLoading = true);
     try {
+      if (ClientSyncRuntime.isV1Selected) {
+        await _reloadProjectedEvents();
+        return;
+      }
       await _loadOfflineThenFast();
       if (!_fullDataGloballyLoaded) {
         await _loadFullData();
@@ -101,8 +135,6 @@ class _ScheduleLightPageState extends State<ScheduleLightPage>
           .toList();
     }
     if (mounted) setState(() {});
-
-    if (ClientSyncRuntime.isV1Selected) return;
 
     final fast =
         await DbEvents.getAllEvents(RightsService.currentOccasionId()!, false);

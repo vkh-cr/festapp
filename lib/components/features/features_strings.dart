@@ -1,6 +1,8 @@
 import 'package:easy_localization/easy_localization.dart';
 
 class FeaturesStrings {
+  static String get receptionTitle => 'FeatureReception.title'.tr();
+  static String get receptionDescription => 'FeatureReception.description'.tr();
   // Schedule Feature Form
   static String get labelScheduleType =>
       'FeatureSchedule.labelScheduleType'.tr();

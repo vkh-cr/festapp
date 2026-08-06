@@ -96,6 +96,29 @@ void main() {
     expect(savedGlyph.fontWeight, FontWeight.w700);
   });
 
+  testWidgets('collapsed saved-program action keeps the compact legacy icon',
+      (tester) async {
+    final canSave = ValueNotifier(false);
+    addTearDown(canSave.dispose);
+    await tester.pumpWidget(MaterialApp(
+      home: SavedProgramActionIcon(
+        canSave: canSave,
+        color: Colors.black,
+        addIcon: Icons.add_circle_outline,
+        savedIcon: Icons.check_circle,
+        size: 30,
+        diameter: 30,
+        highlightSaved: false,
+      ),
+    ));
+
+    expect(find.byIcon(Icons.check_circle), findsOneWidget);
+    expect(find.byType(Container), findsNothing,
+        reason: 'the collapsed bar must not wrap the check in a larger circle');
+    expect(tester.widget<Icon>(find.byIcon(Icons.check_circle)).color,
+        Colors.black);
+  });
+
   test('saved-program button has no transient material overlay', () {
     expect(savedProgramActionButtonStyle.splashFactory,
         same(NoSplash.splashFactory));

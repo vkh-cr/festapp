@@ -607,8 +607,9 @@ class _EventPageState extends State<EventPage> {
         metaTexts.add(_event!.place!.title ?? "");
       }
       final int maxP = _event!.maxParticipants ?? 0;
-      if (maxP > 0) {
-        metaTexts.add("${_event!.currentParticipants ?? 0}/$maxP");
+      final capacity = _event!.participantCapacityLabel;
+      if (maxP > 0 && capacity != null) {
+        metaTexts.add(capacity);
       }
       int lines = metaTexts.isEmpty ? 0 : 1;
       double lineW = 0;
@@ -801,27 +802,20 @@ class _EventPageState extends State<EventPage> {
                     canSave: _canSaveSavedProgram,
                     color: fg,
                     addIcon: Icons.add_circle_outline,
-                    savedIcon: Icons.check,
+                    savedIcon: Icons.check_circle,
                     size: 30,
                     diameter: 30,
+                    highlightSaved: false,
                   ),
                 ),
-              ] else if ((_event?.maxParticipants ?? 0) > 0) ...[
+              ] else if (_event?.participantCapacityLabel != null) ...[
                 const SizedBox(width: 8),
                 if (_event?.isSignedIn == true)
                   _participantPill(
-                      context,
-                      fg,
-                      "${_event?.currentParticipants ?? 0}/${_event?.maxParticipants}",
-                      18,
-                      14)
+                      context, fg, _event!.participantCapacityLabel!, 18, 14)
                 else
-                  _metaItem(
-                      Icons.people_alt_outlined,
-                      "${_event?.currentParticipants ?? 0}/${_event?.maxParticipants}",
-                      fg,
-                      18,
-                      14),
+                  _metaItem(Icons.people_alt_outlined,
+                      _event!.participantCapacityLabel!, fg, 18, 14),
               ],
             ],
           ),
@@ -993,9 +987,8 @@ class _EventPageState extends State<EventPage> {
           context, fg, _event?.place?.title ?? "", iconSize, fontSize));
     }
 
-    final int maxParticipants = _event?.maxParticipants ?? 0;
-    if (includeParticipants && maxParticipants > 0) {
-      final text = "${_event?.currentParticipants ?? 0}/$maxParticipants";
+    final text = _event?.participantCapacityLabel;
+    if (includeParticipants && text != null) {
       items.add(_event?.isSignedIn == true
           ? _participantPill(context, fg, text, iconSize, fontSize)
           : _metaItem(Icons.people_alt_outlined, text, fg, iconSize, fontSize));

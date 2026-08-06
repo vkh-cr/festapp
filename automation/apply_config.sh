@@ -121,6 +121,19 @@ if [ -f "$APP_CONFIG" ]; then
     # Update Supabase URL
     if [ ! -z "$SUPABASE_URL" ]; then
         sed_inplace "s|static supabaseUrl = '.*';|static supabaseUrl = '$SUPABASE_URL';|g" "$APP_CONFIG"
+
+        SUPABASE_PROJECT_REF="$(printf '%s' "$SUPABASE_URL" | sed -E 's|^https://([a-z0-9]+)\.supabase\.co/?$|\1|')"
+        if [ -z "$SUPABASE_PROJECT_REF" ] || [ "$SUPABASE_PROJECT_REF" = "$SUPABASE_URL" ]; then
+            echo "Error: SUPABASE_URL must use https://<project-ref>.supabase.co"
+            exit 1
+        fi
+        SUPABASE_AUTH_STORAGE_KEY="sb-$SUPABASE_PROJECT_REF-auth-token"
+        sed_inplace "s|auth: 'sb-[^']*-auth-token'|auth: '$SUPABASE_AUTH_STORAGE_KEY'|g" "$APP_CONFIG"
+
+        AUTH_BRIDGE="$PROJECT_ROOT/web_client/public/auth_bridge.html"
+        if [ -f "$AUTH_BRIDGE" ]; then
+            sed_inplace "s|const SUPABASE_KEY = 'sb-[^']*-auth-token';|const SUPABASE_KEY = '$SUPABASE_AUTH_STORAGE_KEY';|g" "$AUTH_BRIDGE"
+        fi
     fi
     
     # Update Anon Key
@@ -190,9 +203,27 @@ if [ -f "$FLUTTER_CONFIG" ]; then
         sed_inplace "s|static const String supabaseUrl = '.*';|static const String supabaseUrl = '$SUPABASE_URL';|g" "$FLUTTER_CONFIG"
     fi
 
-    # Update Anon Key
+    # Update Anon Key. Keep this multiline-safe because dart format wraps the
+    # long JWT after `=`; a line-based sed silently left the previous tenant's
+    # key in production.
     if [ ! -z "$SUPABASE_ANON_KEY" ]; then
-        sed_inplace "s|static const String anonKey = '.*';|static const String anonKey = '$SUPABASE_ANON_KEY';|g" "$FLUTTER_CONFIG"
+        python3 - "$FLUTTER_CONFIG" "$SUPABASE_ANON_KEY" <<'PY'
+import pathlib
+import re
+import sys
+
+path, anon_key = sys.argv[1:]
+source = pathlib.Path(path).read_text(encoding="utf-8")
+source, count = re.subn(
+    r"static const String anonKey\s*=\s*'[^']*';",
+    f"static const String anonKey = '{anon_key}';",
+    source,
+    count=1,
+)
+if count != 1:
+    raise SystemExit("Could not update Flutter anonKey")
+pathlib.Path(path).write_text(source, encoding="utf-8")
+PY
     fi
 
     # Update App Name (used as the app title / OccasionHomePage.homePageTitle)

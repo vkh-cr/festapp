@@ -31,6 +31,7 @@ class ClientSyncRuntime {
   static String? _searchProjectionSignature;
 
   static bool get isV1Selected => _v1Selected;
+  static bool get hasPrivateIdentity => _context?.privateScope != null;
   static String get mutationContextToken =>
       '$_identityEpoch|$_v1Selected|${_context?.publicScope}|${_context?.privateScope}';
 
@@ -84,7 +85,12 @@ class ClientSyncRuntime {
       publicScope,
       SyncFreshnessClass.catalog,
     );
-    if (!isRestorableSyncContext(stored, catalog)) {
+    final hasCompleteCatalog = await _store.isGenerationComplete(
+      publicScope,
+      SyncFreshnessClass.catalog,
+      ReleaseManifest.requiredComponents,
+    );
+    if (!isRestorableSyncContext(stored, catalog) || !hasCompleteCatalog) {
       await _store.clearLastContext();
       return null;
     }
@@ -160,18 +166,22 @@ class ClientSyncRuntime {
     );
     await opened.future;
     if (!networkAvailable) return;
-    final existing = await _store.activeGeneration(
-        context.publicScope, SyncFreshnessClass.catalog);
-    if (existing == null) {
+    final hasCompleteCatalog = await _store.isGenerationComplete(
+      context.publicScope,
+      SyncFreshnessClass.catalog,
+      ReleaseManifest.requiredComponents,
+    );
+    if (!hasCompleteCatalog) {
       await service.start();
     } else {
       unawaited(service.start());
     }
-    final activated = await _store.activeGeneration(
+    final activated = await _store.isGenerationComplete(
       context.publicScope,
       SyncFreshnessClass.catalog,
+      ReleaseManifest.requiredComponents,
     );
-    if (activated != null) {
+    if (activated) {
       await _store.saveLastContext(
           StoredSyncContext(
             organizationId: context.organizationId,

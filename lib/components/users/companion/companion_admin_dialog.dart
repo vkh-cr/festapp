@@ -117,6 +117,7 @@ class _CompanionAdminDialogState extends State<CompanionAdminDialog> {
     return ValueListenableBuilder<bool>(
       valueListenable: ConnectivityService.isOfflineNotifier,
       builder: (context, isOffline, _) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(UserStrings.manageCompanions),
         content: SizedBox(
           width: 680,

@@ -399,7 +399,8 @@ class _EventCardState extends State<_EventCard>
               capEvent &&
               AuthService.isLoggedIn() &&
               (event.isSignedIn() ||
-                  event.participants < event.maxParticipants) &&
+                  (event.participants != null &&
+                      event.participants! < event.maxParticipants)) &&
               !showInlineButtons) ...[
             Center(
               child: event.isSignedIn()
@@ -510,41 +511,44 @@ class _EventCardState extends State<_EventCard>
           event.isSignedIn() ? selectedColor : unselectedColor;
 
       inlineActionSection = Column(mainAxisSize: MainAxisSize.min, children: [
-        Row(
-          children: [
-            if (event.isSignedIn())
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: selectedColor,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
+        if (event.capacityLabel != null)
+          Row(
+            children: [
+              if (event.isSignedIn())
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: selectedColor,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      Text(
+                        event.capacityLabel!,
+                        style: TextStyle(fontSize: 13, color: capTextColor),
+                      ),
+                      const SizedBox(width: 4),
+                      Icon(Icons.people, size: 14, color: capTextColor),
+                    ],
+                  ),
+                )
+              else
+                Row(
                   children: [
-                    Text(
-                      '${event.participants}/${event.maxParticipants}',
-                      style: TextStyle(fontSize: 13, color: capTextColor),
-                    ),
+                    Text(event.capacityLabel!,
+                        style:
+                            TextStyle(fontSize: 13, color: capBackgroundColor)),
                     const SizedBox(width: 4),
-                    Icon(Icons.people, size: 14, color: capTextColor),
+                    Icon(Icons.people, size: 14, color: capBackgroundColor),
                   ],
                 ),
-              )
-            else
-              Row(
-                children: [
-                  Text('${event.participants}/${event.maxParticipants}',
-                      style:
-                          TextStyle(fontSize: 13, color: capBackgroundColor)),
-                  const SizedBox(width: 4),
-                  Icon(Icons.people, size: 14, color: capBackgroundColor),
-                ],
-              ),
-          ],
-        ),
+            ],
+          ),
         if (AuthService.isLoggedIn() &&
             (event.isSignedIn() ||
-                event.participants < event.maxParticipants) &&
+                (event.participants != null &&
+                    event.participants! < event.maxParticipants)) &&
             showInlineButtons) ...[
           const SizedBox(height: 4),
           event.isSignedIn()

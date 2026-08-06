@@ -5,6 +5,34 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fstapp/main.dart';
 
 void main() {
+  test('opens the forced occasion when the web URL has no path', () {
+    expect(
+      initialRouteForUri(
+        Uri.parse('https://preview.example/'),
+        forcedOccasionLink: 'sample-occasion',
+      ),
+      '/sample-occasion',
+    );
+  });
+
+  test('keeps the root route when no occasion is forced', () {
+    expect(
+      initialRouteForUri(
+        Uri.parse('https://preview.example/'),
+        forcedOccasionLink: null,
+      ),
+      '/',
+    );
+  });
+
+  test('preserves explicit web deep links', () {
+    expect(
+      initialRouteForUri(Uri.parse(
+          'https://preview.example/sample-occasion/news?filter=latest')),
+      '/sample-occasion/news?filter=latest',
+    );
+  });
+
   testWidgets('preserves a password-reset deep link while initialization runs',
       (tester) async {
     const resetRoute = '/resetPassword?token=test-token';

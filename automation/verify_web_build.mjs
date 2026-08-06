@@ -1,13 +1,14 @@
 #!/usr/bin/env node
 
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
 
 const buildDir = path.resolve(process.argv[2] || 'build/web');
 const expectedVersion = process.argv[3];
+const configPath = path.resolve(process.argv[4] || 'automation/project.conf');
 if (!expectedVersion) {
-  throw new Error('Usage: verify_web_build.mjs <build-dir> <expected-version>');
+  throw new Error('Usage: verify_web_build.mjs <build-dir> <expected-version> [project-conf]');
 }
 const escapedVersion = expectedVersion.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
@@ -22,11 +23,14 @@ assert.equal(
   'manifest points to an unexpected main bundle',
 );
 
-const [flutterHtml, main, versionedMain, worker] = await Promise.all([
+const [flutterHtml, main, versionedMain, worker, siteManifestText, edgeWorker, authBridge] = await Promise.all([
   readFile(path.join(buildDir, 'flutter'), 'utf8'),
   readFile(path.join(buildDir, 'main.dart.js')),
   readFile(path.join(buildDir, manifest.main)),
   readFile(path.join(buildDir, 'festapp_service_worker.js'), 'utf8'),
+  readFile(path.join(buildDir, 'site.webmanifest'), 'utf8'),
+  readFile(path.join(buildDir, '_worker.js'), 'utf8'),
+  readFile(path.join(buildDir, 'auth_bridge'), 'utf8'),
 ]);
 assert.match(
   flutterHtml,
@@ -34,11 +38,71 @@ assert.match(
   'Flutter HTML has a different build version',
 );
 assert.deepEqual(versionedMain, main, 'versioned and canonical main bundles differ');
+
+const projectConfig = await readFile(configPath, 'utf8');
+const configValue = (key) => projectConfig.match(new RegExp(`^${key}=(.*)$`, 'm'))?.[1].trim();
+const supabaseUrl = configValue('SUPABASE_URL');
+const expectedAnonKey = configValue('SUPABASE_ANON_KEY');
+const expectedProjectRef = supabaseUrl?.match(/^https:\/\/([a-z0-9]+)\.supabase\.co\/?$/)?.[1];
+assert.ok(expectedProjectRef, 'project.conf has an invalid SUPABASE_URL');
+assert.ok(expectedAnonKey, 'project.conf is missing SUPABASE_ANON_KEY');
+const anonPayload = JSON.parse(
+  Buffer.from(expectedAnonKey.split('.')[1] || '', 'base64url').toString('utf8'),
+);
+assert.equal(
+  anonPayload.ref,
+  expectedProjectRef,
+  'project.conf anon JWT belongs to a different Supabase project',
+);
+assert.ok(
+  main.includes(Buffer.from(expectedAnonKey)),
+  'compiled Flutter bundle does not contain the configured Supabase anon key',
+);
 assert.match(
   worker,
   new RegExp(`const BUILD_VERSION = "${escapedVersion}"`),
   'service worker has a different build version',
 );
 assert.match(worker, /FESTAPP_QUERY_BUILD_VERSION/);
+
+const siteManifest = JSON.parse(siteManifestText);
+const configuredStartPath = new URL(siteManifest.start_url, 'https://festapp.test')
+  .pathname.replace(/\/$/, '');
+const expectedForcedPath = configuredStartPath || null;
+const parseForcedPath = (source, owner) => {
+  const match = source.match(/const FORCED_OCCASION_PATH = (null|"[^"]+");/);
+  assert.ok(match, `${owner} does not expose its forced-occasion routing contract`);
+  return JSON.parse(match[1]);
+};
+assert.equal(
+  parseForcedPath(worker, 'service worker'),
+  expectedForcedPath,
+  'service worker routing differs from site.webmanifest start_url',
+);
+assert.equal(
+  parseForcedPath(edgeWorker, 'edge worker'),
+  expectedForcedPath,
+  'edge worker routing differs from site.webmanifest start_url',
+);
+
+const authStorageKey = authBridge.match(
+  /const SUPABASE_KEY = '(sb-[a-z0-9]+-auth-token)'/,
+)?.[1];
+assert.ok(authStorageKey, 'auth bridge does not declare a Supabase storage key');
+const webAssetDir = path.join(buildDir, 'web-assets');
+const webAssetFiles = (await readdir(webAssetDir)).filter((name) => name.endsWith('.js'));
+const webAssetSources = await Promise.all(
+  webAssetFiles.map((name) => readFile(path.join(webAssetDir, name), 'utf8')),
+);
+const bundledAuthKeys = new Set(
+  webAssetSources.flatMap((source) =>
+    [...source.matchAll(/sb-[a-z0-9]+-auth-token/g)].map((match) => match[0]),
+  ),
+);
+assert.deepEqual(
+  [...bundledAuthKeys],
+  [authStorageKey],
+  'web client and auth bridge disagree on the Supabase session storage key',
+);
 
 console.log(`verify_web_build: ok (${expectedVersion})`);

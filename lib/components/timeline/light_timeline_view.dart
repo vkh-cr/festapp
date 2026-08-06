@@ -93,15 +93,15 @@ class _LightTimelineViewState extends State<LightTimelineView> {
             Expanded(
               child: Center(
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(
-                      maxWidth: StylesConfig.formMaxWidth),
+                  constraints:
+                      const BoxConstraints(maxWidth: StylesConfig.formMaxWidth),
                   child: TabBarView(
                     children: days
                         .map((day) => _DayList(
                               day: day,
                               openId: _openId,
-                              onToggle: (id) => setState(() =>
-                                  _openId = (_openId == id) ? null : id),
+                              onToggle: (id) => setState(
+                                  () => _openId = (_openId == id) ? null : id),
                               onEventPressed: widget.onEventPressed,
                               showAddNewEventButton:
                                   widget.showAddNewEventButton,
@@ -152,7 +152,6 @@ class _LightTimelineViewState extends State<LightTimelineView> {
     return 0;
   }
 }
-
 
 // ---------------------------------------------------------------------------
 // Flat, non-tabbed list of the same rows — used to render an event's
@@ -279,8 +278,7 @@ class _LightMyScheduleListState extends State<LightMyScheduleList> {
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 88, 24, 24),
               child: Text(ScheduleStrings.noEvents,
-                  style:
-                      TextStyle(color: _mutedText(context), fontSize: 14)),
+                  style: TextStyle(color: _mutedText(context), fontSize: 14)),
             ),
       );
     }
@@ -422,13 +420,11 @@ class _DayList extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(ScheduleStrings.noEvents,
-                  style:
-                      TextStyle(color: _mutedText(context), fontSize: 14)),
+                  style: TextStyle(color: _mutedText(context), fontSize: 14)),
               if (canAdd) ...[
                 const SizedBox(height: 12),
                 _AddEventButton(
-                  onPressed: () =>
-                      onAddNewEvent!(context, [day], null),
+                  onPressed: () => onAddNewEvent!(context, [day], null),
                 ),
               ],
             ],
@@ -505,8 +501,7 @@ class _AddEventButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(999),
-          side: BorderSide(
-              color: accent.withValues(alpha: 0.25), width: 1),
+          side: BorderSide(color: accent.withValues(alpha: 0.25), width: 1),
         ),
       ),
     );
@@ -611,8 +606,7 @@ class _EventRow extends StatelessWidget {
                           ? Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                    DateFormat.Hm().format(event.startTime),
+                                Text(DateFormat.Hm().format(event.startTime),
                                     style: startStyle),
                                 const SizedBox(height: 2),
                                 Text(DateFormat.Hm().format(event.endTime),
@@ -657,7 +651,7 @@ class _EventRow extends StatelessWidget {
                         ],
                       ),
                     ),
-                    if (event.isSupportingSignIn())
+                    if (event.capacityLabel != null)
                       Padding(
                         padding: const EdgeInsets.only(left: 10),
                         child: _CapacityChip(event: event),
@@ -811,7 +805,7 @@ class _ChildCard extends StatelessWidget {
                             fontWeight: FontWeight.w600),
                       ),
                     ],
-                    if (event.isSupportingSignIn()) ...[
+                    if (event.capacityLabel != null) ...[
                       const SizedBox(height: 10),
                       _CapacityChip(event: event),
                     ],
@@ -856,7 +850,8 @@ class _CapacityChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isSignedIn = event.isSignedIn();
-    final text = '${event.participants}/${event.maxParticipants}';
+    final text = event.capacityLabel;
+    if (text == null) return const SizedBox.shrink();
 
     if (isSignedIn) {
       final bg = Theme.of(context).primaryColor;
@@ -967,8 +962,8 @@ class _LightDayTabBar extends StatelessWidget {
               ),
               Flexible(
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(
-                      maxWidth: StylesConfig.formMaxWidth),
+                  constraints:
+                      const BoxConstraints(maxWidth: StylesConfig.formMaxWidth),
                   child: TabBar(
                     controller: controller,
                     isScrollable: true,
@@ -997,8 +992,8 @@ class _LightDayTabBar extends StatelessWidget {
                         child: AnimatedBuilder(
                           animation: animation,
                           builder: (ctx, _) {
-                            final diff = (animation.value - i).abs().clamp(
-                                0.0, 1.0);
+                            final diff =
+                                (animation.value - i).abs().clamp(0.0, 1.0);
                             final factor = 1.0 - diff;
                             final labelColor =
                                 Color.lerp(inactive, activeText, factor)!;
@@ -1040,8 +1035,7 @@ class _LightDayTabBar extends StatelessWidget {
                                   )
                                 else if (dt != null)
                                   Text(
-                                    DateFormat.Md(
-                                            context.locale.toString())
+                                    DateFormat.Md(context.locale.toString())
                                         .format(dt),
                                     style: TextStyle(
                                       fontSize: 11,

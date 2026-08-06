@@ -40,6 +40,9 @@ describe('public sync head', () => {
     expect(response.status).toBe(200);
     expect(await response.text()).toBe(body);
     expect(response.headers.get('cache-control')).toContain('s-maxage=5');
+    expect(response.headers.get('cache-control')).toBe(
+      'public, max-age=0, must-revalidate, s-maxage=5',
+    );
     expect(env.PUBLIC_SYNC.get).toHaveBeenCalledWith(
       'client-sync/v1/7/42/public-head.json',
     );

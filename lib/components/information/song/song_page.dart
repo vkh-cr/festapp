@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/data_services/data_extensions.dart';
 import 'package:fstapp/components/information/db_information.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
+import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
 import 'package:fstapp/components/information/information_model.dart';
 import 'package:fstapp/components/information/song/song_dialog.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
@@ -30,6 +33,22 @@ class _SongbookPageState extends State<SongbookPage> {
   final ThemeData darkTheme = ThemeConfig.darkTheme(ThemeConfig.baseTheme());
 
   bool _isDialogOpen = false;
+
+  @override
+  void initState() {
+    super.initState();
+    ClientSyncRuntime.projectionEpoch.addListener(_onProjectionChanged);
+  }
+
+  void _onProjectionChanged() {
+    if (ClientSyncRuntime.isV1Selected) unawaited(loadData());
+  }
+
+  @override
+  void dispose() {
+    ClientSyncRuntime.projectionEpoch.removeListener(_onProjectionChanged);
+    super.dispose();
+  }
 
   @override
   void didChangeDependencies() {
@@ -153,6 +172,7 @@ class _SongbookPageState extends State<SongbookPage> {
     _informationList =
         (await OfflineDataService.getAllInfo()).filterByType(widget.type);
     setState(() {});
+    if (ClientSyncRuntime.isV1Selected) return;
     var allInfo = await DbInformation.getAllActiveInformation();
     _informationList = allInfo.filterByType(widget.type);
     OfflineDataService.saveAllInfo(allInfo);
