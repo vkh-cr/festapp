@@ -5,6 +5,7 @@ import 'package:badges/badges.dart' as badges;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
+import 'package:fstapp/components/_shared/async_reload_coordinator.dart';
 import 'package:fstapp/components/occasion/occasion_home_strings.dart';
 import 'package:fstapp/components/occasion/occasion_link_model.dart';
 import 'package:fstapp/components/occasion/news_badge_controller.dart';
@@ -59,7 +60,7 @@ class OccasionHomePage extends StatefulWidget {
 class _OccasionHomePageState extends State<OccasionHomePage>
     with WidgetsBindingObserver {
   int _messageCount = 0;
-  bool _isLoadingData = false;
+  final AsyncReloadCoordinator _reloadCoordinator = AsyncReloadCoordinator();
   late final Map<String, OccasionTab> _availableTabs;
 
   /// Effective bottom-nav keys: when GlobalSearch is on, the profile ("user")
@@ -110,29 +111,23 @@ class _OccasionHomePageState extends State<OccasionHomePage>
 
   @override
   void dispose() {
+    _reloadCoordinator.dispose();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
-  Future<void> loadData() async {
-    // Coalesce rapid/overlapping triggers (lifecycle resumes, tab notifications)
-    // so we never fire concurrent version checks + countNewMessages() bursts.
-    if (_isLoadingData) return;
-    _isLoadingData = true;
-    try {
-      await UpdateService.versionCheck(context);
-      if (AuthService.isLoggedIn()) {
-        DbNews.countNewMessages().then((count) {
-          if (mounted) {
-            setState(() => _messageCount = count);
-          }
-        });
-      }
-      await NotificationHelper.checkForNotificationPermission(context);
-    } finally {
-      _isLoadingData = false;
-    }
-  }
+  Future<void> loadData() => _reloadCoordinator.run(() async {
+        await UpdateService.versionCheck(context);
+        if (AuthService.isLoggedIn()) {
+          DbNews.countNewMessages().then((count) {
+            if (mounted) {
+              setState(() => _messageCount = count);
+            }
+          });
+        }
+        if (!mounted) return;
+        await NotificationHelper.checkForNotificationPermission(context);
+      });
 
   String messageCountString() =>
       _messageCount < 100 ? _messageCount.toString() : "99+";
@@ -152,14 +147,21 @@ class _OccasionHomePageState extends State<OccasionHomePage>
               return ValueListenableBuilder<OccasionLinkModel?>(
                 valueListenable: RightsService.occasionLinkModelNotifier,
                 builder: (listenableContext, occasionLinkModel, __) {
+                  final suppressSelection =
+                      visibleTabKeys[tabsRouter.activeIndex] ==
+                          OccasionTab.search;
+                  final unselectedColor =
+                      ThemeConfig.bottomNavUnselectedItemColor(
+                          listenableContext);
                   return BottomNavigationBar(
                     backgroundColor:
                         ThemeConfig.bottomNavBackgroundColor(listenableContext),
-                    selectedItemColor: ThemeConfig.bottomNavSelectedItemColor(
-                        listenableContext),
-                    unselectedItemColor:
-                        ThemeConfig.bottomNavUnselectedItemColor(
+                    selectedItemColor: suppressSelection
+                        ? unselectedColor
+                        : ThemeConfig.bottomNavSelectedItemColor(
                             listenableContext),
+                    unselectedItemColor: unselectedColor,
+                    selectedFontSize: suppressSelection ? 12 : 14,
                     currentIndex: tabsRouter.activeIndex,
                     type: BottomNavigationBarType.fixed,
                     onTap: (int index) async {
@@ -214,8 +216,11 @@ class _OccasionHomePageState extends State<OccasionHomePage>
                       return BottomNavigationBarItem(
                         icon: tab.buildIcon(listenableContext, _messageCount,
                             messageCountString),
-                        activeIcon: tab.buildActiveIcon(listenableContext,
-                            _messageCount, messageCountString),
+                        activeIcon: suppressSelection
+                            ? tab.buildIcon(listenableContext, _messageCount,
+                                messageCountString)
+                            : tab.buildActiveIcon(listenableContext,
+                                _messageCount, messageCountString),
                         label: key == OccasionTab.user
                             ? (occasionLinkModel?.userInfo?.name ??
                                 UserStrings.signIn)

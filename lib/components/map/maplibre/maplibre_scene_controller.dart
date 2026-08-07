@@ -5,6 +5,7 @@ import 'package:maplibre/maplibre.dart';
 
 class MapLibreSceneController {
   static const placeIconScale = 1.0;
+  static const fallbackPlaceIconSize = 36.0;
   static const placeSourceId = 'festapp-places-source';
   static const placeLayerId = 'festapp-places-layer';
   static const pathSourceId = 'festapp-paths-source';
@@ -68,16 +69,21 @@ class MapLibreSceneController {
         'icon-allow-overlap': true,
         'text-field': ['get', 'label'],
         'text-font': ['noto_sans_bold'],
-        'text-size': 12,
-        'text-offset': [1.8, -2.2],
-        'text-anchor': 'left',
+        'text-size': 13,
+        'text-offset': [0, -3.8],
+        'text-anchor': 'bottom',
+        'text-justify': 'center',
+        'text-max-width': 18,
+        'text-padding': 4,
         'text-allow-overlap': true,
+        'text-ignore-placement': true,
         'symbol-sort-key': ['get', 'z_index'],
       },
       paint: {
         'text-color': '#111111',
         'text-halo-color': '#FFFFFF',
-        'text-halo-width': 2,
+        'text-halo-width': 3,
+        'text-halo-blur': 0.5,
       },
     ));
     await style.addSource(GeoJsonSource(

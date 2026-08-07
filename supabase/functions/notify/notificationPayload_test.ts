@@ -21,7 +21,10 @@ function matchesFilters(
 
 Deno.test("broadcast requires both exact CSM audience tags", () => {
   const payload = buildNotificationPayload(base);
-  const filters = payload.filters!;
+  if (!("filters" in payload)) {
+    throw new Error("Broadcast payload must use tag filters");
+  }
+  const filters = payload.filters;
 
   assertEquals(
     matchesFilters(filters, {
@@ -50,8 +53,23 @@ Deno.test("broadcast requires both exact CSM audience tags", () => {
 
 Deno.test("direct recipient delivery uses only external_id", () => {
   const payload = buildNotificationPayload({ ...base, recipient: "user-uuid" });
+  if (!("include_aliases" in payload)) {
+    throw new Error("Direct payload must use an external ID alias");
+  }
 
   assertEquals(payload.include_aliases, { external_id: "user-uuid" });
   assertEquals("filters" in payload, false);
   assertEquals("included_segments" in payload, false);
+});
+
+Deno.test("web notifications use the deployed application icon", () => {
+  const expectedIcon = "https://example.test/notification-icon-256x256.png";
+
+  for (const payload of [
+    buildNotificationPayload(base),
+    buildNotificationPayload({ ...base, recipient: "user-uuid" }),
+  ]) {
+    assertEquals(payload.chrome_web_icon, expectedIcon);
+    assertEquals(payload.firefox_icon, expectedIcon);
+  }
 });

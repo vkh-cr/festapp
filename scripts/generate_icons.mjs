@@ -27,6 +27,7 @@ const iconTargets = [
   { path: 'web/apple-touch-icon.png', size: 180 },
   { path: 'web/android-chrome-192x192.png', size: 192 },
   { path: 'web/android-chrome-512x512.png', size: 512 },
+  { path: 'web/notification-icon-256x256.png', size: 256 },
   { path: 'web/web-app-manifest-192x192.png', size: 192 },
   { path: 'web/web-app-manifest-512x512.png', size: 512 },
   { path: 'assets/icons/fstappicon.png', size: 512 },

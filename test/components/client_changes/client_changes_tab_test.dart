@@ -1,10 +1,7 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fstapp/components/client_changes/client_change_model.dart';
 import 'package:fstapp/components/client_changes/client_changes_tab.dart';
-import 'package:fstapp/components/client_changes/db_client_changes.dart';
 
 void main() {
   Widget testApp(Widget child) => MaterialApp(home: Scaffold(body: child));
@@ -23,68 +20,68 @@ void main() {
     expect(find.byType(CircularProgressIndicator), findsNothing);
   });
 
-  testWidgets('keeps filters visible while results reload', (tester) async {
-    final pendingReload = Completer<ClientChangesPage>();
+  testWidgets('loads an aggregate seven-day activity range', (tester) async {
+    DateTime? requestedFrom;
+    DateTime? requestedTo;
 
-    Future<ClientChangesPage> load({
+    Future<List<ClientActivityBucket>> load({
       required int occasionId,
-      DateTime? beforeTime,
-      String? beforeId,
-      Map<String, dynamic> filters = const {},
-    }) =>
-        pendingReload.future;
-
-    await tester.pumpWidget(testApp(
-      ClientChangesTab(
-        clientSyncEnabled: true,
-        pageLoader: load,
-        detailLoader: (_) async =>
-            const ClientChangeDetail(summary: {}, items: []),
-        isOffline: () async => false,
-        occasionId: 1,
-      ),
-    ));
-    await tester.pump();
-
-    expect(find.byIcon(Icons.filter_list), findsOneWidget);
-    expect(find.byType(DropdownButton<String?>), findsNWidgets(2));
-    expect(find.byType(TextField), findsOneWidget);
-  });
-
-  testWidgets('searches by user after typing stops', (tester) async {
-    final requests = <Map<String, dynamic>>[];
-
-    Future<ClientChangesPage> load({
-      required int occasionId,
-      DateTime? beforeTime,
-      String? beforeId,
-      Map<String, dynamic> filters = const {},
+      required DateTime from,
+      required DateTime to,
     }) async {
-      requests.add(Map.of(filters));
-      return const ClientChangesPage([], null, null, false);
+      requestedFrom = from;
+      requestedTo = to;
+      return const [];
     }
 
     await tester.pumpWidget(testApp(
       ClientChangesTab(
         clientSyncEnabled: true,
-        pageLoader: load,
-        detailLoader: (_) async =>
-            const ClientChangeDetail(summary: {}, items: []),
+        activityLoader: load,
         isOffline: () async => false,
         occasionId: 1,
       ),
     ));
     await tester.pumpAndSettle();
 
-    await tester.enterText(find.byType(TextField), '  mi  ');
-    await tester.pump(const Duration(milliseconds: 349));
-    expect(requests, hasLength(1));
+    expect(requestedTo!.difference(requestedFrom!), const Duration(days: 7));
+    expect(find.byType(TextField), findsNothing);
+    expect(find.byType(ListTile), findsNothing);
+  });
 
-    await tester.pump(const Duration(milliseconds: 1));
-    await tester.pump();
+  testWidgets('renders activity by half-hour and category without users',
+      (tester) async {
+    final today = DateUtils.dateOnly(DateTime.now());
+    final bucketTime = today.add(const Duration(hours: 10, minutes: 30));
 
-    expect(requests, hasLength(2));
-    expect(requests.last, {'actor': 'mi'});
-    expect(find.byType(TextField), findsOneWidget);
+    Future<List<ClientActivityBucket>> load({
+      required int occasionId,
+      required DateTime from,
+      required DateTime to,
+    }) async =>
+        [
+          ClientActivityBucket(
+            startedAt: bucketTime,
+            category: 'live',
+            count: 4,
+          ),
+        ];
+
+    await tester.pumpWidget(testApp(
+      ClientChangesTab(
+        clientSyncEnabled: true,
+        activityLoader: load,
+        isOffline: () async => false,
+        occasionId: 1,
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ClientActivityHeatmap), findsOneWidget);
+    expect(
+      find.byKey(ValueKey('activity-${bucketTime.toIso8601String()}')),
+      findsOneWidget,
+    );
+    expect(find.byIcon(Icons.person_search), findsNothing);
   });
 }
