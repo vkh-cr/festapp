@@ -184,11 +184,12 @@ try {
   };
   vm.runInNewContext(worker, context);
 
-  async function dispatchFetch(request, clientId = '') {
+  async function dispatchFetch(request, clientId = '', resultingClientId = '') {
     let responsePromise;
     handlers.fetch({
       request,
       clientId,
+      resultingClientId,
       respondWith: (promise) => { responsePromise = promise; },
     });
     assert.ok(responsePromise, `worker did not handle ${request.url}`);
@@ -221,6 +222,25 @@ try {
   await activation;
   assert.equal(claimedExistingClients, 1);
   assert.deepEqual(deletedCaches, []);
+
+  // A cold navigation has no clientId: the newly created page is identified
+  // by resultingClientId. Its first scripts must inherit the navigation's
+  // current shell without waiting for a report from a script that has not yet
+  // been allowed to load.
+  const freshNavigation = new Request('https://app.test/csmostrava2026/');
+  Object.defineProperty(freshNavigation, 'mode', { value: 'navigate' });
+  const freshShellResponse = await dispatchFetch(
+    freshNavigation,
+    '',
+    'fresh-tab',
+  );
+  assert.equal(await freshShellResponse.text(), '<html>offline shell</html>');
+  const freshAssetResponse = await dispatchFetch(
+    new Request('https://app.test/assets/translation.json'),
+    'fresh-tab',
+  );
+  assert.equal(await freshAssetResponse.text(), '{}',
+    'a cold page must load subresources before its report script executes');
 
   const openedBeforeUnknownFetch = openedCaches.length;
   const unknownGenerationResponse = await dispatchFetch(
