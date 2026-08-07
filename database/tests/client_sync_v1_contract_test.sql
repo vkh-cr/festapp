@@ -112,6 +112,23 @@ BEGIN
         'public.get_client_activity_v1(bigint,timestamptz,timestamptz)'::regprocedure)
         NOT LIKE '%actor_id%',
     'activity overview exposes no actor identity');
+  PERFORM assert_true(pg_get_functiondef(
+      'public.get_client_activity_v1(bigint,timestamptz,timestamptz)'::regprocedure)
+      LIKE '%c.occasion = p_occasion%'
+      AND pg_get_functiondef(
+        'public.get_client_activity_v1(bigint,timestamptz,timestamptz)'::regprocedure)
+        NOT LIKE '%c.unit = s.unit%'
+      AND pg_get_functiondef(
+        'public.get_client_activity_v1(bigint,timestamptz,timestamptz)'::regprocedure)
+        NOT LIKE '%c.organization = s.organization%',
+    'activity permission never broadens the requested occasion dataset');
+  PERFORM assert_true(pg_get_functiondef(
+      'public.get_client_activity_v1(bigint,timestamptz,timestamptz)'::regprocedure)
+      LIKE '%activeActorCount%'
+      AND pg_get_functiondef(
+        'public.get_client_activity_v1(bigint,timestamptz,timestamptz)'::regprocedure)
+        LIKE '%generate_series%',
+    'activity overview returns daily metrics including zero days');
   PERFORM assert_true(has_function_privilege(
       'authenticated',
       'public.get_client_activity_v1(bigint,timestamptz,timestamptz)',

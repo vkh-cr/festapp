@@ -12,14 +12,11 @@ class ClientChangesStrings {
       'ClientChanges.subtitle'.tr(namedArgs: {'days': '$days'});
   static String rangeDays(int days) =>
       'ClientChanges.rangeDays'.tr(namedArgs: {'days': '$days'});
-  static String get time => 'ClientChanges.time'.tr();
-  static String get less => 'ClientChanges.less'.tr();
-  static String get more => 'ClientChanges.more'.tr();
-  static String get structural => 'ClientChanges.structural'.tr();
-  static String get live => 'ClientChanges.live'.tr();
-  static String get private => 'ClientChanges.private'.tr();
-  static String get bulk => 'ClientChanges.bulk'.tr();
-  static String get other => 'ClientChanges.other'.tr();
-  static String activityCount(int count) =>
-      'ClientChanges.activityCount'.tr(namedArgs: {'count': '$count'});
+  static String totalChanges(int count) =>
+      'ClientChanges.totalChanges'.tr(namedArgs: {'count': '$count'});
+  static String dayChanges(String day, int count) =>
+      'ClientChanges.dayChanges'.tr(namedArgs: {
+        'day': day,
+        'count': '$count',
+      });
 }

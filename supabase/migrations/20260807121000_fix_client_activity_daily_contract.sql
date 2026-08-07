@@ -1,3 +1,5 @@
+-- The admin chart is a daily, occasion-local aggregate. Permissions authorize
+-- access but must never broaden the requested occasion's dataset.
 CREATE OR REPLACE FUNCTION public.get_client_activity_v1(
   p_occasion bigint,
   p_from timestamptz,
@@ -15,14 +17,11 @@ AS $$
       coalesce(o.data->>'timezone', 'UTC') AS timezone,
       public.get_is_manager_on_occasion(p_occasion)
         OR public.get_is_admin_on_occasion(p_occasion) AS can_occasion,
-      CASE
-        WHEN o.unit IS NULL THEN false
-        ELSE public.get_is_manager_on_unit(o.unit)
-      END AS can_unit,
-      CASE
-        WHEN o.organization IS NULL THEN false
-        ELSE public.get_is_admin_on_organization(o.organization)
-      END AS can_organization
+      CASE WHEN o.unit IS NULL THEN false
+        ELSE public.get_is_manager_on_unit(o.unit) END AS can_unit,
+      CASE WHEN o.organization IS NULL THEN false
+        ELSE public.get_is_admin_on_organization(o.organization) END
+        AS can_organization
     FROM public.occasions o
     WHERE o.id = p_occasion
   ),
@@ -55,14 +54,11 @@ AS $$
     ) generated
   )
   SELECT CASE
-    WHEN p_from IS NULL
-      OR p_to IS NULL
-      OR p_to <= p_from
+    WHEN p_from IS NULL OR p_to IS NULL OR p_to <= p_from
       OR p_to - p_from > interval '31 days'
       THEN jsonb_build_object('code', 400)
     WHEN NOT EXISTS (
-      SELECT 1
-      FROM scope s
+      SELECT 1 FROM scope s
       WHERE s.can_occasion OR s.can_unit OR s.can_organization
     ) THEN jsonb_build_object('code', 403)
     ELSE jsonb_build_object(
@@ -74,8 +70,7 @@ AS $$
             'actionCount', coalesce(a.action_count, 0),
             'changedItemCount', coalesce(a.changed_item_count, 0),
             'activeActorCount', coalesce(a.active_actor_count, 0)
-          )
-          ORDER BY c.activity_day
+          ) ORDER BY c.activity_day
         )
         FROM calendar c
         LEFT JOIN activity a USING (activity_day)

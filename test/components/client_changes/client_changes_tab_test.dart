@@ -24,7 +24,7 @@ void main() {
     DateTime? requestedFrom;
     DateTime? requestedTo;
 
-    Future<List<ClientActivityBucket>> load({
+    Future<List<ClientActivityDay>> load({
       required int occasionId,
       required DateTime from,
       required DateTime to,
@@ -53,7 +53,7 @@ void main() {
       (tester) async {
     final requestedRanges = <Duration>[];
 
-    Future<List<ClientActivityBucket>> load({
+    Future<List<ClientActivityDay>> load({
       required int occasionId,
       required DateTime from,
       required DateTime to,
@@ -84,21 +84,20 @@ void main() {
     ]);
   });
 
-  testWidgets('renders activity by half-hour and category without users',
-      (tester) async {
+  testWidgets('renders daily change columns without users', (tester) async {
     final today = DateUtils.dateOnly(DateTime.now());
-    final bucketTime = today.add(const Duration(hours: 10, minutes: 30));
 
-    Future<List<ClientActivityBucket>> load({
+    Future<List<ClientActivityDay>> load({
       required int occasionId,
       required DateTime from,
       required DateTime to,
     }) async =>
         [
-          ClientActivityBucket(
-            startedAt: bucketTime,
-            category: 'live',
-            count: 4,
+          ClientActivityDay(
+            day: today,
+            actionCount: 511,
+            changedItemCount: 511,
+            activeActorCount: 42,
           ),
         ];
 
@@ -112,9 +111,10 @@ void main() {
     ));
     await tester.pumpAndSettle();
 
-    expect(find.byType(ClientActivityHeatmap), findsOneWidget);
+    expect(find.byType(ClientActivityBarChart), findsOneWidget);
     expect(
-      find.byKey(ValueKey('activity-${bucketTime.toIso8601String()}')),
+      find.byKey(
+          ValueKey('activity-${today.year}-${today.month}-${today.day}')),
       findsOneWidget,
     );
     expect(find.byIcon(Icons.person_search), findsNothing);

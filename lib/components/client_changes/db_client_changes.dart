@@ -6,7 +6,7 @@ class DbClientChanges {
       : _client = client ?? Supabase.instance.client;
   final SupabaseClient _client;
 
-  Future<List<ClientActivityBucket>> activity({
+  Future<List<ClientActivityDay>> activity({
     required int occasionId,
     required DateTime from,
     required DateTime to,
@@ -21,8 +21,8 @@ class DbClientChanges {
       throw StateError('Client activity returned ${json['code']}');
     }
     return ((json['data'] as List?) ?? const [])
-        .map((item) => ClientActivityBucket.fromJson(
-            (item as Map).cast<String, dynamic>()))
+        .map((item) =>
+            ClientActivityDay.fromJson((item as Map).cast<String, dynamic>()))
         .toList(growable: false);
   }
 }

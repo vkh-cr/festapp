@@ -1946,22 +1946,15 @@
     "feedbackStateUnknown": "Cannot check the feedback status without a connection."
   },
   "ClientChanges": {
-    "title": "Activity",
-    "onlineOnly": "The activity overview is available online only.",
-    "empty": "No activity was recorded in the last {days} days.",
-    "notActive": "Activity will start being recorded after the new sync mode is activated. Existing database state is not reconstructed.",
+    "title": "App changes",
+    "onlineOnly": "The changes overview is available online only.",
+    "empty": "No changes were recorded in the last {days} days.",
+    "notActive": "Changes will start being recorded after the new sync mode is activated. Earlier history is not reconstructed.",
     "retry": "Try again",
-    "loadError": "The activity overview could not be loaded.",
-    "subtitle": "Aggregate activity from the last {days} days in 30-minute intervals. No personal data is shown.",
+    "loadError": "The changes overview could not be loaded.",
+    "subtitle": "Changes saved on each day during the last {days} days. No personal data is shown.",
     "rangeDays": "{days} days",
-    "time": "Day / time",
-    "less": "Less",
-    "more": "More",
-    "structural": "Content and settings",
-    "live": "Live activity",
-    "private": "Private data",
-    "bulk": "Bulk operations",
-    "other": "Other",
-    "activityCount": "Activity count: {count}"
+    "totalChanges": "{count} changes total",
+    "dayChanges": "{day}: {count} changes"
   }
 }

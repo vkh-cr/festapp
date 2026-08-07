@@ -118,6 +118,33 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
   });
 
+  testWidgets('configured online provider keeps an independent OSM base layer',
+      (tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: MapRendererHost(
+        renderer: OfflineMapRenderer.legacy,
+        isOffline: false,
+        model: model(),
+        legacy: LegacyMapConfiguration.online(
+          MapLayer(layerLink: 'https://primary.example/{z}/{x}/{y}.png'),
+        ),
+      ),
+    ));
+
+    final layers = tester.widgetList<fm.TileLayer>(find.byType(fm.TileLayer));
+    expect(layers, hasLength(2));
+    expect(
+      layers.first.urlTemplate,
+      'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+    );
+    expect(layers.last.urlTemplate, 'https://primary.example/{z}/{x}/{y}.png');
+    expect(layers.last.fallbackUrl,
+        'https://tile.openstreetmap.org/{z}/{x}/{y}.png');
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump(const Duration(seconds: 1));
+  });
+
   testWidgets('Legacy place long press uses the shared navigation callback',
       (tester) async {
     const coordinate = LatLng(49.8, 18.2);

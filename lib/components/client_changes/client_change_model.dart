@@ -1,18 +1,21 @@
-class ClientActivityBucket {
-  const ClientActivityBucket({
-    required this.startedAt,
-    required this.category,
-    required this.count,
+class ClientActivityDay {
+  const ClientActivityDay({
+    required this.day,
+    required this.actionCount,
+    required this.changedItemCount,
+    required this.activeActorCount,
   });
 
-  final DateTime startedAt;
-  final String category;
-  final int count;
+  final DateTime day;
+  final int actionCount;
+  final int changedItemCount;
+  final int activeActorCount;
 
-  factory ClientActivityBucket.fromJson(Map<String, dynamic> json) =>
-      ClientActivityBucket(
-        startedAt: DateTime.parse(json['bucketStart'] as String).toLocal(),
-        category: json['category'] as String,
-        count: (json['activityCount'] as num?)?.toInt() ?? 0,
+  factory ClientActivityDay.fromJson(Map<String, dynamic> json) =>
+      ClientActivityDay(
+        day: DateTime.parse(json['day'] as String),
+        actionCount: (json['actionCount'] as num?)?.toInt() ?? 0,
+        changedItemCount: (json['changedItemCount'] as num?)?.toInt() ?? 0,
+        activeActorCount: (json['activeActorCount'] as num?)?.toInt() ?? 0,
       );
 }

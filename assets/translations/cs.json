@@ -1946,22 +1946,15 @@
     "feedbackStateUnknown": "Bez připojení nelze zjistit stav zpětné vazby."
   },
   "ClientChanges": {
-    "title": "Aktivita",
-    "onlineOnly": "Přehled aktivity je dostupný pouze online.",
-    "empty": "Za posledních {days} dní nebyla zaznamenána žádná aktivita.",
-    "notActive": "Aktivita se začne zaznamenávat po aktivaci nového synchronizačního režimu. Existující stav databáze se zpětně nevytváří.",
+    "title": "Změny v aplikaci",
+    "onlineOnly": "Přehled změn je dostupný pouze online.",
+    "empty": "Za posledních {days} dní nebyla zaznamenána žádná změna.",
+    "notActive": "Změny se začnou zaznamenávat po aktivaci nového synchronizačního režimu. Starší historie se zpětně nevytváří.",
     "retry": "Zkusit znovu",
-    "loadError": "Přehled aktivity se nepodařilo načíst.",
-    "subtitle": "Souhrnná aktivita za posledních {days} dní po 30 minutách. Nezobrazuje žádné osobní údaje.",
+    "loadError": "Přehled změn se nepodařilo načíst.",
+    "subtitle": "Počet změn uložených v jednotlivých dnech za posledních {days} dní. Nezobrazuje žádné osobní údaje.",
     "rangeDays": "{days} dní",
-    "time": "Den / čas",
-    "less": "Méně",
-    "more": "Více",
-    "structural": "Obsah a nastavení",
-    "live": "Živá aktivita",
-    "private": "Soukromá data",
-    "bulk": "Hromadné operace",
-    "other": "Ostatní",
-    "activityCount": "Počet aktivit: {count}"
+    "totalChanges": "Celkem {count} změn",
+    "dayChanges": "{day}: {count} změn"
   }
 }
