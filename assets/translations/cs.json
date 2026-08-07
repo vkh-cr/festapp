@@ -1952,7 +1952,7 @@
     "notActive": "Změny se začnou zaznamenávat po aktivaci nového synchronizačního režimu. Starší historie se zpětně nevytváří.",
     "retry": "Zkusit znovu",
     "loadError": "Přehled změn se nepodařilo načíst.",
-    "subtitle": "Počet změn uložených v jednotlivých dnech za posledních {days} dní. Nezobrazuje žádné osobní údaje.",
+    "subtitle": "Počet změn uložených v jednotlivých dnech za posledních {days} dní.",
     "rangeDays": "{days} dní",
     "totalChanges": "Celkem {count} změn",
     "dayChanges": "{day}: {count} změn"

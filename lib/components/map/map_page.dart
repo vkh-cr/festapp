@@ -233,12 +233,10 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     if (!mounted || !_dependenciesInitialized) return;
     final isOffline = ConnectivityService.isOfflineNotifier.value;
     if (kIsWeb) {
-      setState(() {
-        // Web has no downloadable base-map bundle. While offline, render the
-        // complete local marker/path scene over an empty base instead of making
-        // tile requests or leaving the renderer in a loading state.
-        _useOffline = isOffline;
-      });
+      // Web has no native offline renderer. A transient connectivity result
+      // must not swap the online Legacy surface for an empty offline base;
+      // network tiles fail naturally while cached places and paths stay usable.
+      if (_useOffline) setState(() => _useOffline = false);
       return;
     }
     if (isOffline) {
@@ -282,6 +280,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     _useOffline = offlineConfiguration.useOfflineWhileConnectivityLoads(
       isKnownOffline: ConnectivityService.isOfflineNotifier.value,
       hasAuthoritativeConfiguration: hasAuthoritativeMapConfiguration,
+      isWeb: kIsWeb,
     );
     if (!PlatformHelper.isWeb && offlineConfiguration.shouldInitialize) {
       // Renderer selection must be correct before the first await. Otherwise a

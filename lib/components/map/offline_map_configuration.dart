@@ -115,8 +115,10 @@ final class OfflineMapConfiguration {
   bool useOfflineWhileConnectivityLoads({
     required bool isKnownOffline,
     bool hasAuthoritativeConfiguration = true,
+    bool isWeb = false,
   }) =>
-      forceOffline || isKnownOffline || !hasAuthoritativeConfiguration;
+      !isWeb &&
+      (forceOffline || isKnownOffline || !hasAuthoritativeConfiguration);
 
   OfflineMapStartupDecision resolveStartup({required bool hasConnection}) {
     final contract = selectedContract;

@@ -1952,7 +1952,7 @@
     "notActive": "Changes will start being recorded after the new sync mode is activated. Earlier history is not reconstructed.",
     "retry": "Try again",
     "loadError": "The changes overview could not be loaded.",
-    "subtitle": "Changes saved on each day during the last {days} days. No personal data is shown.",
+    "subtitle": "Changes saved on each day during the last {days} days.",
     "rangeDays": "{days} days",
     "totalChanges": "{count} changes total",
     "dayChanges": "{day}: {count} changes"

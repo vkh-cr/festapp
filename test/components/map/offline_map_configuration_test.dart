@@ -3,6 +3,21 @@ import 'package:fstapp/components/features/map_feature.dart';
 import 'package:fstapp/components/map/offline_map_configuration.dart';
 
 void main() {
+  test('web never selects the native offline renderer', () {
+    final configuration = OfflineMapConfiguration.fromLayer(
+      MapLayer(forceOfflineMap: true),
+    );
+
+    expect(
+      configuration.useOfflineWhileConnectivityLoads(
+        isKnownOffline: true,
+        hasAuthoritativeConfiguration: false,
+        isWeb: true,
+      ),
+      isFalse,
+    );
+  });
+
   test('exposes only the selected renderer contract', () {
     final configuration = OfflineMapConfiguration.fromLayer(
       MapLayer(
