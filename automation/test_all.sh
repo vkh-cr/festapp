@@ -275,6 +275,14 @@ if [ "$RUN_AUTOMATION" = true ]; then
             echo "Skipping $t (missing or not executable)."
         fi
     done
+
+    echo "Running canonical PWA storage and recovery contract tests..."
+    node --test \
+      "$SCRIPT_DIR/tests/pwa_manifest.test.mjs" \
+      "$SCRIPT_DIR/tests/pwa_reconcile.test.mjs" \
+      "$SCRIPT_DIR/tests/pwa_storage_bridge.test.mjs" \
+      "$SCRIPT_DIR/tests/recovery_readiness.test.mjs" \
+      "$WEB_CLIENT_DIR/tests/core/pwa_client_adapter.test.js"
 fi
 
 echo ""

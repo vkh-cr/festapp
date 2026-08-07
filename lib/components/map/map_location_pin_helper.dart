@@ -6,13 +6,24 @@ import 'package:fstapp/components/map/icon_model.dart';
 import 'package:fstapp/theme_config.dart';
 
 class MapLocationPinHelper {
+  static bool hasCustomIcon(MapPlaceModel place, List<IconModel> source) =>
+      source.any((icon) =>
+          icon.data != null &&
+          ((place.icon != null && icon.id == place.icon) ||
+              (place.type != null && icon.link == place.type)));
+
   static Widget? type2icon(
       BuildContext context, MapPlaceModel placeType, List<IconModel> source,
       {Color? pinColor}) {
     SvgPicture? fill;
 
-    var iconData = source.firstWhereOrNull((i) => i.id == placeType.icon)?.data;
-    iconData ??= source.firstWhereOrNull((i) => i.link == placeType.type)?.data;
+    String? iconData;
+    if (placeType.icon != null) {
+      iconData = source.firstWhereOrNull((i) => i.id == placeType.icon)?.data;
+    }
+    if (iconData == null && placeType.type != null) {
+      iconData = source.firstWhereOrNull((i) => i.link == placeType.type)?.data;
+    }
     if (iconData != null) {
       fill = SvgPicture.string(
         iconData,

@@ -854,7 +854,14 @@
     "androidInstallHint": "Otevři tuto webovou stránku na svém telefonu s Androidem v prohlížeči, jako je Chrome nebo Edge, a klikni na tlačítko Nainstalovat teď.",
     "appAlreadyInstalled": "Aplikace je již nainstalována.",
     "pwaPromptNotSupported": "Tato platforma nebo prohlížeč nepodporuje instalaci PWA nebo je aplikace již nainstalována.",
-    "installOptionsLoadFailed": "Nepodařilo se načíst možnosti instalace."
+    "installOptionsLoadFailed": "Nepodařilo se načíst možnosti instalace.",
+    "storageTitle": "Úložiště aplikace",
+    "inspectStorage": "Zkontrolovat úložiště",
+    "pruneShells": "Uvolnit nepoužívané verze",
+    "pruneShellsConfirm": "Odstraní se pouze nepoužívané verze aplikace. Přihlášení, offline data a fonty zůstanou zachované.",
+    "storageUsage": "Využití prohlížeče: {usage} MiB z {quota} MiB",
+    "storageBlocked": "Aplikace teď nic neodstraní. Vaše data zůstávají v bezpečí.",
+    "storageReady": "Zachované verze: {retained}; k odstranění: {deletable}"
   },
   "GroupStrings": {
     "newGroup": "Nová skupina",
@@ -1627,6 +1634,7 @@
   },
   "FeatureMap": {
     "changeLocation": "Změnit pozici",
+    "counselingHours": "Poradenské hodiny",
     "drawPath": "Kreslit cestu",
     "importRouteHint": "Vyexportuj trasu z Mapy.com (nebo Strava, Garmin, komoot…) jako GPX a přetáhni ji sem.",
     "forceOfflineMap": "Vynutit offline mapy",
@@ -1641,6 +1649,8 @@
     "mapLayerTextLink": "Odkaz na text mapové vrstvy",
     "mapLayerUrl": "URL mapové vrstvy",
     "mapZoom": "Přiblížení mapy",
+    "navigate": "Navigovat",
+    "loadingMap": "Načítám mapu…",
     "newSegment": "Nový segment",
     "noRouteInGpx": "V GPX souboru nebyla nalezena žádná trasa.",
     "offlineMapLayerName": "Název vrstvy offline mapy",
@@ -1936,29 +1946,21 @@
     "feedbackStateUnknown": "Bez připojení nelze zjistit stav zpětné vazby."
   },
   "ClientChanges": {
-    "title": "Změny",
-    "onlineOnly": "Historie změn je dostupná pouze online.",
-    "empty": "Zatím nejsou zaznamenány žádné změny.",
-    "notActive": "Historie začne zaznamenávat nové změny po aktivaci nového synchronizačního režimu. Existující stav databáze se jako historie změn zpětně nevytváří.",
+    "title": "Aktivita",
+    "onlineOnly": "Přehled aktivity je dostupný pouze online.",
+    "empty": "Za posledních 7 dní nebyla zaznamenána žádná aktivita.",
+    "notActive": "Aktivita se začne zaznamenávat po aktivaci nového synchronizačního režimu. Existující stav databáze se zpětně nevytváří.",
     "retry": "Zkusit znovu",
-    "loadError": "Historii změn se nepodařilo načíst.",
-    "publicationPending": "Čeká na publikaci",
-    "published": "Publikováno",
-    "deletedActor": "Smazaný nebo neznámý uživatel",
-    "filters": "Filtry",
-    "all": "Vše",
-    "component": "Komponenta",
-    "changeClass": "Třída změny",
-    "publication": "Publikace",
-    "details": "Podrobnosti",
-    "actorSearch": "Hledat podle uživatele",
-    "previousPage": "Předchozí stránka",
-    "nextPage": "Další stránka",
-    "page": "Strana {page}",
-    "itemCount": {
-      "one": "1 změna",
-      "other": "{count} změn",
-      "few": "{count} změny"
-    }
+    "loadError": "Přehled aktivity se nepodařilo načíst.",
+    "subtitle": "Souhrnná aktivita za posledních 7 dní po 30 minutách. Nezobrazuje žádné osobní údaje.",
+    "time": "Den / čas",
+    "less": "Méně",
+    "more": "Více",
+    "structural": "Obsah a nastavení",
+    "live": "Živá aktivita",
+    "private": "Soukromá data",
+    "bulk": "Hromadné operace",
+    "other": "Ostatní",
+    "activityCount": "Počet aktivit: {count}"
   }
 }

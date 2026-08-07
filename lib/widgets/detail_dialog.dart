@@ -10,6 +10,8 @@ class DetailDialog extends StatefulWidget {
   final bool canEdit;
   final VoidCallback? onEditPressed;
   final Widget? customContentWidget;
+  final List<Widget> titleActions;
+  final bool shrinkWrapCustomContent;
 
   const DetailDialog({
     super.key,
@@ -18,10 +20,12 @@ class DetailDialog extends StatefulWidget {
     this.canEdit = false,
     this.onEditPressed,
     this.customContentWidget,
+    this.titleActions = const [],
+    this.shrinkWrapCustomContent = false,
   });
 
   @override
-  _DetailDialogState createState() => _DetailDialogState();
+  State<DetailDialog> createState() => _DetailDialogState();
 }
 
 class _DetailDialogState extends State<DetailDialog> {
@@ -39,6 +43,7 @@ class _DetailDialogState extends State<DetailDialog> {
               widget.title,
             ),
           ),
+          ...widget.titleActions,
           IconButton(
             icon: const Icon(Icons.close),
             onPressed: () => Navigator.of(context).pop(),
@@ -49,7 +54,10 @@ class _DetailDialogState extends State<DetailDialog> {
         constraints: const BoxConstraints(
             maxWidth: StylesConfig.formMaxWidthMid, maxHeight: 500),
         child: SizedBox(
-          height: widget.customContentWidget != null ? 500 : null,
+          height: widget.customContentWidget != null &&
+                  !widget.shrinkWrapCustomContent
+              ? 500
+              : null,
           width: widget.customContentWidget != null
               ? StylesConfig.formMaxWidthMid
               : null,

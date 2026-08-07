@@ -15,6 +15,11 @@ class MapStrings {
   static String get showGroups => 'FeatureMap.showGroups'.tr(); // "Show groups"
   static String get saveLocation =>
       'FeatureMap.saveLocation'.tr(); // "Save location"
+  static String get navigate => 'FeatureMap.navigate'.tr(); // "Navigate"
+  static String get loadingMap =>
+      'FeatureMap.loadingMap'.tr(); // "Loading map…"
+  static String get counselingHours =>
+      'FeatureMap.counselingHours'.tr(); // "Counseling hours"
 
   // Paths / route drawing
   static String get paths => 'FeatureMap.paths'.tr(); // "Paths"

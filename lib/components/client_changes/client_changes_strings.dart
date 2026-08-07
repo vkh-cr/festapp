@@ -7,21 +7,15 @@ class ClientChangesStrings {
   static String get notActive => 'ClientChanges.notActive'.tr();
   static String get retry => 'ClientChanges.retry'.tr();
   static String get loadError => 'ClientChanges.loadError'.tr();
-  static String get publicationPending =>
-      'ClientChanges.publicationPending'.tr();
-  static String get published => 'ClientChanges.published'.tr();
-  static String get deletedActor => 'ClientChanges.deletedActor'.tr();
-  static String get filters => 'ClientChanges.filters'.tr();
-  static String get all => 'ClientChanges.all'.tr();
-  static String get component => 'ClientChanges.component'.tr();
-  static String get changeClass => 'ClientChanges.changeClass'.tr();
-  static String get publication => 'ClientChanges.publication'.tr();
-  static String get details => 'ClientChanges.details'.tr();
-  static String get actorSearch => 'ClientChanges.actorSearch'.tr();
-  static String get previousPage => 'ClientChanges.previousPage'.tr();
-  static String get nextPage => 'ClientChanges.nextPage'.tr();
-  static String page(int page) =>
-      'ClientChanges.page'.tr(namedArgs: {'page': '$page'});
-  static String itemCount(int count) =>
-      'ClientChanges.itemCount'.plural(count, namedArgs: {'count': '$count'});
+  static String get subtitle => 'ClientChanges.subtitle'.tr();
+  static String get time => 'ClientChanges.time'.tr();
+  static String get less => 'ClientChanges.less'.tr();
+  static String get more => 'ClientChanges.more'.tr();
+  static String get structural => 'ClientChanges.structural'.tr();
+  static String get live => 'ClientChanges.live'.tr();
+  static String get private => 'ClientChanges.private'.tr();
+  static String get bulk => 'ClientChanges.bulk'.tr();
+  static String get other => 'ClientChanges.other'.tr();
+  static String activityCount(int count) =>
+      'ClientChanges.activityCount'.tr(namedArgs: {'count': '$count'});
 }

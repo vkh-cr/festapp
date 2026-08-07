@@ -11,6 +11,15 @@ export interface NotificationPayloadInput {
 }
 
 export function buildNotificationPayload(input: NotificationPayloadInput) {
+  const notificationIcon = new URL(
+    "/notification-icon-256x256.png",
+    input.defaultUrl,
+  ).toString();
+  const webIcons = {
+    chrome_web_icon: notificationIcon,
+    firefox_icon: notificationIcon,
+  };
+
   if (input.recipient) {
     return {
       app_id: input.appId,
@@ -20,6 +29,7 @@ export function buildNotificationPayload(input: NotificationPayloadInput) {
       target_channel: "push",
       headings: { en: input.heading },
       contents: { en: input.content },
+      ...webIcons,
     };
   }
 
@@ -42,5 +52,6 @@ export function buildNotificationPayload(input: NotificationPayloadInput) {
     ],
     headings: { en: input.heading },
     contents: { en: input.content },
+    ...webIcons,
   };
 }

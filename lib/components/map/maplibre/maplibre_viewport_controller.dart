@@ -30,10 +30,12 @@ class MapLibreViewportController implements MapViewportController {
     LatLng destination, {
     double? zoom,
     Curve curve = Curves.easeInOut,
+    Duration? duration,
   }) =>
       controller.animateCamera(
         center: _toGeographic(destination),
         zoom: zoom,
+        nativeDuration: duration ?? const Duration(seconds: 2),
       );
 
   @override

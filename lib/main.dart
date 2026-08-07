@@ -20,6 +20,7 @@ import 'package:fstapp/services/connectivity_service.dart';
 import 'package:fstapp/services/health_tracking_http_client.dart';
 import 'package:fstapp/services/notification_helper.dart';
 import 'package:fstapp/services/installation_cutover_service.dart';
+import 'package:fstapp/startup/startup_failure_policy.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -173,6 +174,7 @@ Future<void> initializeEverything() async {
   }
   final startOffline = ConnectivityService.isOfflineNotifier.value;
   var effectiveOffline = startOffline;
+  var hasCachedOccasionSettings = false;
 
   try {
     await initializeDateFormatting();
@@ -237,7 +239,10 @@ Future<void> initializeEverything() async {
       AppLogger.debug('Offline start: skipped remote session validation');
     }
   } catch (e) {
-    effectiveOffline = true;
+    effectiveOffline = shouldEnterOfflineAfterSessionInitializationFailure(
+      wasAlreadyOffline: effectiveOffline,
+      supabaseInitialized: supabaseInitialized,
+    );
     AppLogger.error('Client sync initialization failed: $e');
   }
 
@@ -259,6 +264,7 @@ Future<void> initializeEverything() async {
         ? await OfflineDataService.getGlobalSettings()
         : null;
     if (settings != null) {
+      hasCachedOccasionSettings = true;
       SynchroService.globalSettingsModel = settings;
       final cachedUser = AuthService.isLoggedIn()
           ? await OfflineDataService.getUserInfo()
@@ -301,7 +307,9 @@ Future<void> initializeEverything() async {
       AppLogger.debug('Offline start: using cached occasion data');
     } else {
       await RightsService.updateAppData(force: true, refreshOffline: false)
-          .timeout(const Duration(seconds: 5));
+          .timeout(occasionLoadTimeout(
+        hasCachedSettings: hasCachedOccasionSettings,
+      ));
       AppLogger.debug('Occasion loaded');
       if (AuthService.isLoggedIn() && !ClientSyncRuntime.isV1Selected) {
         unawaited(SynchroService.refreshUserOfflineData().then((_) {

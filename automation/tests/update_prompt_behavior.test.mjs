@@ -138,8 +138,8 @@ assert.equal(
   0,
   'an already-attempted version must never show the same update banner again',
 );
-assert.equal(unregistered, 1, 'failed cutover must unregister the stale Festapp worker once');
-assert.deepEqual(deletedCaches, ['festapp-app-shell-1.0.0+1']);
+assert.equal(unregistered, 0, 'window recovery must preserve the canonical Festapp worker');
+assert.deepEqual(deletedCaches, [], 'window recovery must never delete versioned shells');
 assert.match(replacedLocation, /festapp-recovery=2\.0\.0%2B2/);
 
 console.log('update_prompt_behavior.test: ok');

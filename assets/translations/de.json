@@ -305,6 +305,9 @@
   },
   "FeatureMap": {
     "changeLocation": "Standort ändern",
+    "navigate": "Navigieren",
+    "loadingMap": "Karte wird geladen…",
+    "counselingHours": "Beratungszeiten",
     "drawPath": "Weg zeichnen",
     "importRouteHint": "Exportieren Sie Ihre Route aus Mapy.com (oder Strava, Garmin, komoot…) als GPX und legen Sie sie hier ab.",
     "importRoute": "Route importieren",

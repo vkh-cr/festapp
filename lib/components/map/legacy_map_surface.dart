@@ -190,6 +190,9 @@ class _LegacyMapSurfaceState extends State<LegacyMapSurface>
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () => widget.model.onPlaceTap(presentation.placeId),
+              onLongPress: widget.model.onPlaceLongPress == null
+                  ? null
+                  : () => widget.model.onPlaceLongPress!(presentation.placeId),
               child: _LegacyPlaceMarker(
                 presentation: presentation,
                 icons: widget.model.icons,
@@ -370,8 +373,14 @@ class LegacyMapViewportController implements MapViewportController {
     LatLng destination, {
     double? zoom,
     Curve curve = Curves.easeInOut,
+    Duration? duration,
   }) =>
-      controller.animateTo(dest: destination, zoom: zoom, curve: curve);
+      controller.animateTo(
+        dest: destination,
+        zoom: zoom,
+        curve: curve,
+        duration: duration,
+      );
 
   @override
   Future<void> fitCoordinates(

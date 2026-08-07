@@ -241,10 +241,11 @@
     atomic updates and offline cold starts.
   -->
   <script>
-    window.__FESTAPP_BUILD_VERSION__ = "0.19.85+423";
+    window.__FESTAPP_BUILD_VERSION__ = "0.19.85+424";
     window.__FESTAPP_LOCAL_DEVELOPMENT__ =
       ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
   </script>
+  <script src="festapp_pwa_bridge.js" defer></script>
   <script src="festapp_update_prompt.js" defer></script>
 </head>
 <body>
@@ -317,6 +318,8 @@
     }));
   }
 
+  // Development-only boundary. Production cannot enter because the build-time
+  // hostname guard above accepts only loopback hosts.
   async function prepareFestappLocalDevelopment() {
     if (!('serviceWorker' in navigator)) return;
 

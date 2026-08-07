@@ -6,11 +6,13 @@ import 'package:auto_route/auto_route.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fstapp/components/features/map_feature.dart';
 import 'package:fstapp/services/app_logger.dart';
 import 'package:fstapp/services/connectivity_service.dart';
 import 'package:fstapp/services/exception_handler.dart';
 import 'package:fstapp/components/map/map_page_helper.dart';
+import 'package:fstapp/components/map/counseling_hours_panel.dart';
 import 'package:fstapp/components/map/map_path_direction_layout.dart';
 import 'package:fstapp/components/map/map_scene.dart';
 import 'package:fstapp/components/map/map_viewport_controller.dart';
@@ -67,6 +69,7 @@ import 'package:fstapp/services/launch_url_service.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../schedule/event_page.dart';
+import '../speakers/counseling_page.dart';
 
 @RoutePage()
 class MapPage extends StatefulWidget {
@@ -111,6 +114,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
   // Derived cleaning status + rating aggregate per toilet place id (empty unless
   // the cleaning feature is enabled). Colors the toilet pins for everyone.
   Map<int, CleaningPlaceStatus> _cleaningByPlace = {};
+  Map<int, List<CounselingHoursRange>> _counselingHoursByPlace = {};
   final List<MapPlacePresentation> _places = [];
   final List<MapPlacePresentation> _selectedPlaces = [];
   MapPlacePresentation? focusedPlace;
@@ -133,7 +137,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
   bool _useOffline = false;
   MapDownloadState _downloadState = const MapDownloadIdle();
   String? _offlinePackagePath;
-  bool _isMapLoaded = false;
+  final Completer<void> _mapReady = Completer<void>();
   LegacyMapConfiguration? _legacyOfflineConfiguration;
   String? _mapLibreStyle;
   String? _offlineMapError;
@@ -199,7 +203,6 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
       if (context.tabsRouter.activeIndex ==
           OccasionHomePage.baseTabKeys.indexOf(OccasionTab.map)) {
         setState(() => _showLocation = true);
-        _placeId = null;
         if (kIsWeb) {
           WidgetsBinding.instance.addPostFrameCallback((_) async {
             await Future.delayed(Duration(milliseconds: 100));
@@ -265,6 +268,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     }
 
     final feature = FeatureService.getFeatureDetails(FeatureConstants.map);
+    final hasAuthoritativeMapConfiguration = feature is MapFeature;
     _mapFeature = (feature == null || feature is! MapFeature)
         ? MapFeature.getDefault()
         : feature;
@@ -274,8 +278,18 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
             _mapFeature.defaultMapLocation.lat,
             _mapFeature.defaultMapLocation.lng,
           );
-    if (!PlatformHelper.isWeb && _offlineConfiguration.shouldInitialize) {
-      await _initOfflineMap();
+    final offlineConfiguration = _offlineConfiguration;
+    _useOffline = offlineConfiguration.useOfflineWhileConnectivityLoads(
+      isKnownOffline: ConnectivityService.isOfflineNotifier.value,
+      hasAuthoritativeConfiguration: hasAuthoritativeMapConfiguration,
+    );
+    if (!PlatformHelper.isWeb && offlineConfiguration.shouldInitialize) {
+      // Renderer selection must be correct before the first await. Otherwise a
+      // forced/offline MapLibre page briefly builds the online Legacy surface,
+      // which starts tile and attribution-logo requests that can outlive it.
+      // Preparing the base-map bundle must not block cached place content. A
+      // deep-linked place can open while MapLibre finishes underneath it.
+      unawaited(_initOfflineMap());
     }
 
     selectedPlace = null;
@@ -651,7 +665,10 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
         viewport: _viewportController,
         onMapTap: onMapTap,
         onPlaceTap: _onPlaceTap,
-        onCameraReady: () => _isMapLoaded = true,
+        onPlaceLongPress: _onPlaceLongPress,
+        onCameraReady: () {
+          if (!_mapReady.isCompleted) _mapReady.complete();
+        },
         onCameraChanged: () {
           if (mounted && _popupPlaceId != null) setState(() {});
         },
@@ -910,10 +927,13 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
       return;
     }
     final place = marker.place;
+    final counselingHours =
+        _counselingHoursByPlace[place.id] ?? const <CounselingHoursRange>[];
     final isToilet = place.type == CleaningStatusHelper.toiletPlaceTypeCode &&
         FeatureService.isFeatureEnabled(FeatureConstants.cleaning);
     final hasLongDescription = HtmlHelper.isHtmlLong(place.description);
-    final hasEvents = place.events?.isNotEmpty ?? false;
+    final hasEvents =
+        (place.events?.isNotEmpty ?? false) || counselingHours.isNotEmpty;
     final descriptionIsEmpty =
         !MapPageHelper.hasMeaningfulPlaceDescription(place.description);
 
@@ -930,12 +950,23 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
         context: context,
         builder: (context) => DetailDialog(
           title: place.title,
+          titleActions: [
+            FilledButton.tonalIcon(
+              onPressed: () => _navigateToPlace(place),
+              icon: const Icon(Icons.directions_outlined),
+              label: Text(MapStrings.navigate),
+            ),
+          ],
           canEdit: RightsService.isEditor(),
           onEditPressed: () {
             if (selectedPlace == null) runEditPositionMode(marker);
           },
           htmlDescription: place.description,
-          customContentWidget: activityContent(place.events),
+          customContentWidget: activityContent(
+            place.events,
+            counselingHours: counselingHours,
+          ),
+          shrinkWrapCustomContent: true,
         ),
       );
       if (selectedPlace == null || placeId == selectedPlace!.place.id) {
@@ -948,6 +979,55 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     } else {
       setState(() => _popupPlaceId = placeId);
     }
+  }
+
+  Future<bool> _navigateToPlace(MapPlaceModel place) =>
+      LaunchUrlService.openExternalUrl(
+        MapPageHelper.navigationUri(
+          latitude: place.latLng.latitude,
+          longitude: place.latLng.longitude,
+          label: place.title,
+          isWeb: kIsWeb,
+          platform: defaultTargetPlatform,
+        ).toString(),
+      );
+
+  Future<void> _onPlaceLongPress(int placeId) async {
+    final marker = _places.firstWhereOrNull(
+      (candidate) => candidate.place.id == placeId,
+    );
+    if (marker == null) return;
+    await HapticFeedback.selectionClick();
+    if (!mounted) return;
+    await showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (sheetContext) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                marker.place.title,
+                style: Theme.of(sheetContext).textTheme.titleMedium,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+              FilledButton.icon(
+                onPressed: () {
+                  Navigator.of(sheetContext).pop();
+                  unawaited(_navigateToPlace(marker.place));
+                },
+                icon: const Icon(Icons.directions_outlined),
+                label: Text(MapStrings.navigate),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _buildPlacePopup() {
@@ -970,6 +1050,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
         place: marker.place,
         isEditing: selectedPlace != null,
         onClose: () => setState(() => _popupPlaceId = null),
+        onNavigate: () => unawaited(_navigateToPlace(marker.place)),
         onChangePosition: () => runEditPositionMode(marker),
         cleaningStatus: isToilet
             ? (_cleaningByPlace[marker.place.id]?.status ??
@@ -1178,7 +1259,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     // though current logic replaces _places list entirely.
     // The selectedPlace instance itself in _selectedPlaces should persist.
 
-    _places.clear();
+    if (placeId != null) _forcedVisiblePlaceId = placeId;
     var offlinePlaces = await OfflineDataService.getAllPlaces();
     _icons = await OfflineDataService.getAllIcons();
 
@@ -1210,6 +1291,9 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
       if (p != null && !offlineList.any((item) => item.id == p.id)) {
         offlineList.add(p);
       }
+      if (p?.hasCoordinates == true) {
+        _mapCenter = LatLng(p!.getLat(), p.getLng());
+      }
     }
     await addOfflineEventsToPlace(offlineList);
     // Cache-first paint of the toilet colors, so they show without network;
@@ -1218,14 +1302,25 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     addPlacesToMap(offlineList);
     _initPlaceTypeSelection();
 
+    var isPlaceSetToOnePlace = false;
+    if (mounted) setState(() {});
+    if (placeId != null && !isOnlyEditMode && selectedPlace == null) {
+      // Place content is independent of the renderer. Open it as soon as the
+      // cached place and events are ready; paths and the base map may continue
+      // loading underneath the dialog.
+      final place = offlineList.firstWhereOrNull((p) => p.id == placeId);
+      if (place != null) {
+        setMapToOnePlaceAndShowPopup(placeId, place);
+        isPlaceSetToOnePlace = true;
+      }
+    }
+
     _pathGroups = (await OfflineDataService.getAllPathGroups())
         .where((p) => !(p.isHidden ?? false))
         .toList();
     _allGroupPaths = await MapPageHelper.loadGroupPaths(
         offlineList, // Use offline list for initial polyline calculation if it's primary
         _pathGroups);
-
-    bool isPlaceSetToOnePlace = false;
 
     // Update polylines based on current selection
     if (_selectedGroupId == null) {
@@ -1239,14 +1334,6 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     }
 
     if (mounted) setState(() {});
-    if (placeId != null && !isOnlyEditMode && selectedPlace == null) {
-      // Avoid auto-focusing if in edit mode already
-      var p = offlineList.firstWhereOrNull((p) => p.id == placeId);
-      if (p != null) {
-        setMapToOnePlaceAndShowPopup(placeId, p);
-        isPlaceSetToOnePlace = true;
-      }
-    }
 
     // v1 readers consume the closed map_catalog aggregate above. Missing
     // places/types/paths/icons block publication; they are never side-loaded.
@@ -1363,13 +1450,9 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
   }
 
   Future<void> addOfflineEventsToPlace(List<PlaceModel> places) async {
-    var events = await OfflineDataService.getAllEvents();
-    events = events.filterRootEvents().sortEvents();
-    for (var p in places) {
-      var matches = events.where((e) => e.place?.id == p.id);
-      p.events.clear();
-      p.events.addAll(matches);
-    }
+    final events = await OfflineDataService.getAllEvents();
+    _counselingHoursByPlace =
+        MapPageHelper.assignEventsToPlaces(places, events);
   }
 
   Future<void> addEventsToPlace(List<PlaceModel> places) async {
@@ -1377,14 +1460,10 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
       await addOfflineEventsToPlace(places);
       return;
     }
-    var events =
+    final events =
         await DbEvents.getAllEvents(RightsService.currentOccasionId()!, false);
-    events = events.filterRootEvents().sortEvents();
-    for (var p in places) {
-      var matches = events.where((e) => e.place?.id == p.id);
-      p.events.clear();
-      p.events.addAll(matches);
-    }
+    _counselingHoursByPlace =
+        MapPageHelper.assignEventsToPlaces(places, events);
   }
 
   bool _shouldShowPlaceTitle(int? placeId, int? currentFocusedPlaceId,
@@ -1526,20 +1605,24 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     _places.remove(m);
     _places.add(m);
 
-    _onPlaceTap(placeId);
-    setMapToOnePlace(p);
+    unawaited(_onPlaceTap(placeId));
+    unawaited(setMapToOnePlace(p));
   }
 
-  void setMapToOnePlace(PlaceModel place) async {
+  Future<void> setMapToOnePlace(PlaceModel place) async {
     _mapCenter = LatLng(place.getLat(), place.getLng());
-    int i = 0;
-    while (!_isMapLoaded && mounted && i < 50) {
-      // Poll with 5-second timeout
-      await Future.delayed(const Duration(milliseconds: 100));
-      i++;
+    try {
+      await _mapReady.future.timeout(const Duration(seconds: 5));
+    } on TimeoutException {
+      return;
     }
-    if (_isMapLoaded && mounted) {
-      _viewportController.animateTo(_mapCenter!, zoom: 18);
+    if (mounted && _viewportController.isAttached) {
+      await _viewportController.animateTo(
+        _mapCenter!,
+        zoom: 18,
+        curve: Curves.easeOutCubic,
+        duration: const Duration(milliseconds: 700),
+      );
     }
   }
 
@@ -1906,6 +1989,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
         : _placeTypes.firstWhereOrNull((type) => type.code == code)?.title;
     _placeTypeSelectionFeedbackTimer?.cancel();
     setState(() {
+      _forcedVisiblePlaceId = null;
       _selectedPlaceTypeCode = code;
       _placeTypeSelectionFeedback = feedback;
     });
@@ -2003,9 +2087,17 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     });
   }
 
-  Widget activityContent(List<TimeBlockItem>? events) {
+  Widget activityContent(
+    List<TimeBlockItem>? events, {
+    List<CounselingHoursRange> counselingHours = const [],
+  }) {
     return Column(
       children: [
+        if (counselingHours.isNotEmpty)
+          CounselingHoursPanel(
+            ranges: counselingHours,
+            onRangePressed: _openCounselingRange,
+          ),
         if (events != null && events.isNotEmpty)
           Padding(
             padding: const EdgeInsets.fromLTRB(0, 0, 0, 24),
@@ -2024,5 +2116,13 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
           ),
       ],
     );
+  }
+
+  void _openCounselingRange(CounselingHoursRange range) {
+    Navigator.of(context, rootNavigator: true).pop();
+    final route = range.entryEventId == null
+        ? CounselingPage.ROUTE
+        : '${EventPage.ROUTE}/${range.entryEventId}';
+    RouterService.navigateOccasion(context, route).then((_) => loadData());
   }
 }
