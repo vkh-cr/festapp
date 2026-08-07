@@ -24,7 +24,8 @@ if ! command -v flutter &> /dev/null; then
 fi
 
 flutter precache
-flutter build web --release --base-href / --no-web-resources-cdn
+flutter build web --release --base-href / --no-web-resources-cdn --no-wasm-dry-run \
+  --dart-define=FLUTTER_WEB_CANVASKIT_FORCE_MULTI_SURFACE_RASTERIZER=true
 
 # 2. Prepare Flutter Build for Merge
 echo "Preparing Flutter build..."

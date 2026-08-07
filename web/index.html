@@ -241,7 +241,7 @@
     atomic updates and offline cold starts.
   -->
   <script>
-    window.__FESTAPP_BUILD_VERSION__ = "0.19.85+422";
+    window.__FESTAPP_BUILD_VERSION__ = "0.19.85+423";
     window.__FESTAPP_LOCAL_DEVELOPMENT__ =
       ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
   </script>
@@ -386,7 +386,8 @@
         onEntrypointLoaded: async function(engineInitializer) {
           try {
             const appRunner = await engineInitializer.initializeEngine({
-              useColorEmoji: true
+              useColorEmoji: true,
+              canvasKitForceMultiSurfaceRasterizer: true
             });
             await appRunner.runApp();
             window.__FESTAPP_APP_READY__ = true;
