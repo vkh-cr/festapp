@@ -47,6 +47,14 @@ let cacheMutationStatusUnknown = false;
 const STORAGE_API_TIMEOUT_MS = 1000;
 const CLIENT_VERSION_REPORT_TIMEOUT_MS = 1000;
 const MAX_EXPLICIT_PRUNE_OPERATIONS = 100;
+// 0.19.85+418 recorded cold navigations under the empty clientId instead of
+// resultingClientId, deadlocking every first-party subresource. A waiting
+// worker cannot be activated by that page because its update script is one of
+// the blocked resources. Only clients carrying this known-bad shell may bypass
+// the normal user-confirmed cutover.
+const EMERGENCY_RECOVERY_CACHE_NAMES = new Set([
+  'festapp-app-shell-0.19.85+418',
+]);
 
 function withStorageTimeout(promise) {
   let timeoutId;
@@ -68,6 +76,15 @@ async function precacheAtomically() {
   // installed PWA stall when it is cold-started offline on that URL. Large
   // non-code assets remain lazy so maps/media do not delay activation.
   await cache.addAll(CORE_URLS);
+}
+
+async function requiresEmergencyCutover() {
+  try {
+    const names = await withStorageTimeout(caches.keys());
+    return names.some((name) => EMERGENCY_RECOVERY_CACHE_NAMES.has(name));
+  } catch (_) {
+    return false;
+  }
 }
 
 function recordClientVersion(clientId, version) {
@@ -99,7 +116,10 @@ function waitForClientVersion(clientId) {
 }
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(precacheAtomically());
+  event.waitUntil((async () => {
+    await precacheAtomically();
+    if (await requiresEmergencyCutover()) await self.skipWaiting();
+  })());
 });
 
 async function reconcileShellCaches({ apply = false } = {}) {
@@ -273,13 +293,29 @@ self.addEventListener('activate', (event) => {
     } catch (_) {
       // Activation remains available, but reconciliation below fails closed.
     }
+    const emergencyCutover = await requiresEmergencyCutover();
     // Do not guess one "previous" cache for every already-open tab: multiple
     // old generations can legitimately coexist. After claim, runtime fetches
     // wait briefly for each page's exact version report and fail closed if it
     // never arrives. Navigations are the explicit current-version boundary.
     await self.clients.claim();
-    for (const client of windowClients) {
-      client.postMessage({ type: 'FESTAPP_REPORT_VERSION' });
+    if (emergencyCutover) {
+      // The broken page never loaded its reporting script. Bind it to this
+      // fully installed shell before reloading so no request can re-enter the
+      // client-version handshake deadlock.
+      for (const client of windowClients) {
+        clientCacheNames.delete(client.id);
+        recordClientVersion(client.id, BUILD_VERSION);
+        try {
+          await client.navigate(client.url);
+        } catch (_) {
+          // A later manual navigation remains recoverable by resultingClientId.
+        }
+      }
+    } else {
+      for (const client of windowClients) {
+        client.postMessage({ type: 'FESTAPP_REPORT_VERSION' });
+      }
     }
     await scheduleShellReconcile({ apply: true });
   })());
