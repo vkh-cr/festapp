@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fstapp/components/features/map_feature.dart';
 import 'package:fstapp/components/map/legacy_map_surface.dart';
 import 'package:fstapp/components/map/map_renderer_host.dart';
+import 'package:fstapp/components/map/map_place_model.dart';
 import 'package:fstapp/components/map/map_scene.dart';
 import 'package:fstapp/components/map/map_viewport_controller.dart';
 import 'package:latlong2/latlong.dart';
@@ -93,7 +94,7 @@ void main() {
   });
 
   test('map renderers allow the maximum supported interaction zoom', () {
-    expect(MapZoomLimits.interactionMaximum, 24);
+    expect(MapZoomLimits.interactionMaximum, 22);
   });
 
   testWidgets('online Legacy overzooms without requesting deeper raster tiles',
@@ -112,6 +113,53 @@ void main() {
     expect(map.options.maxZoom, MapZoomLimits.interactionMaximum);
     expect(tiles.maxZoom, MapZoomLimits.interactionMaximum);
     expect(tiles.maxNativeZoom, MapZoomLimits.onlineRasterNativeMaximum);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump(const Duration(seconds: 1));
+  });
+
+  testWidgets('Legacy place long press uses the shared navigation callback',
+      (tester) async {
+    const coordinate = LatLng(49.8, 18.2);
+    int? longPressedPlaceId;
+    final longPressModel = MapSurfaceModel(
+      scene: MapScene(
+        places: [
+          MapPlacePresentation(
+            place: MapPlaceModel(
+              id: 7,
+              title: 'WC',
+              latLng: coordinate,
+            ),
+            coordinate: coordinate,
+            pinColorValue: Colors.orange.toARGB32(),
+          ),
+        ],
+      ),
+      icons: const [],
+      initialCenter: coordinate,
+      initialZoom: 14,
+      viewport: MapViewportCoordinator(),
+      onMapTap: (_) {},
+      onPlaceTap: (_) {},
+      onPlaceLongPress: (placeId) => longPressedPlaceId = placeId,
+    );
+
+    await tester.pumpWidget(MaterialApp(
+      home: MapRendererHost(
+        renderer: OfflineMapRenderer.legacy,
+        isOffline: false,
+        model: longPressModel,
+        legacy: legacy(),
+      ),
+    ));
+
+    final longPressTarget = find.byWidgetPredicate(
+      (widget) => widget is GestureDetector && widget.onLongPress != null,
+    );
+    expect(longPressTarget, findsOneWidget);
+    await tester.longPress(longPressTarget);
+    expect(longPressedPlaceId, 7);
 
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump(const Duration(seconds: 1));

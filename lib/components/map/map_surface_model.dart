@@ -7,7 +7,7 @@ import 'package:latlong2/latlong.dart';
 /// Interaction zoom limits. Every renderer may safely zoom past its highest
 /// native tile level; tile sources keep their own native cap and are overzoomed.
 abstract final class MapZoomLimits {
-  static const double interactionMaximum = 24;
+  static const double interactionMaximum = 22;
   static const int onlineRasterNativeMaximum = 18;
 }
 
