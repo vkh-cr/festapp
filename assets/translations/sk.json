@@ -305,9 +305,6 @@
   },
   "FeatureMap": {
     "changeLocation": "Zmeniť polohu",
-    "navigate": "Navigovať",
-    "loadingMap": "Načítava sa mapa…",
-    "counselingHours": "Poradenské hodiny",
     "drawPath": "Kresliť cestu",
     "importRouteHint": "Vyexportuj trasu z Mapy.com (alebo Strava, Garmin, komoot…) ako GPX a presuň ju sem.",
     "importRoute": "Importovať trasu",

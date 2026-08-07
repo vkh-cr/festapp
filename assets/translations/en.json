@@ -854,14 +854,7 @@
     "androidInstallHint": "Open this website on your Android phone in a browser like Chrome or Edge and hit the Install Now button.",
     "appAlreadyInstalled": "The app is already installed.",
     "pwaPromptNotSupported": "This platform or browser does not support the PWA install prompt or the app is already installed.",
-    "installOptionsLoadFailed": "Failed to load installation options.",
-    "storageTitle": "App storage",
-    "inspectStorage": "Inspect storage",
-    "pruneShells": "Free unused versions",
-    "pruneShellsConfirm": "Only unused app versions will be removed. Sign-in, offline data, and fonts remain preserved.",
-    "storageUsage": "Browser usage: {usage} MiB of {quota} MiB",
-    "storageBlocked": "The app will not remove anything right now. Your data remains safe.",
-    "storageReady": "Retained versions: {retained}; deletable: {deletable}"
+    "installOptionsLoadFailed": "Failed to load installation options."
   },
   "GroupStrings": {
     "newGroup": "New Group",
@@ -1634,7 +1627,6 @@
   },
   "FeatureMap": {
     "changeLocation": "Change location",
-    "counselingHours": "Counseling hours",
     "drawPath": "Draw path",
     "importRouteHint": "Export your route from Mapy.com (or Strava, Garmin, komoot…) as GPX and drop it here.",
     "forceOfflineMap": "Force offline map",
@@ -1649,8 +1641,6 @@
     "mapLayerTextLink": "Map Layer Text Link",
     "mapLayerUrl": "Map Layer URL",
     "mapZoom": "Map Zoom",
-    "navigate": "Navigate",
-    "loadingMap": "Loading map…",
     "newSegment": "New segment",
     "noRouteInGpx": "No route found in the GPX file.",
     "offlineMapLayerName": "Offline Map Layer Name",
@@ -1946,21 +1936,28 @@
     "feedbackStateUnknown": "Cannot check the feedback status without a connection."
   },
   "ClientChanges": {
-    "title": "Activity",
-    "onlineOnly": "The activity overview is available online only.",
-    "empty": "No activity was recorded in the last 7 days.",
-    "notActive": "Activity will start being recorded after the new sync mode is activated. Existing database state is not reconstructed.",
+    "title": "Changes",
+    "onlineOnly": "Change history is available online only.",
+    "empty": "No changes have been recorded yet.",
+    "notActive": "The history will start recording new changes after the new sync mode is activated. Existing database state is not reconstructed as change history.",
     "retry": "Try again",
-    "loadError": "The activity overview could not be loaded.",
-    "subtitle": "Aggregate activity from the last 7 days in 30-minute intervals. No personal data is shown.",
-    "time": "Day / time",
-    "less": "Less",
-    "more": "More",
-    "structural": "Content and settings",
-    "live": "Live activity",
-    "private": "Private data",
-    "bulk": "Bulk operations",
-    "other": "Other",
-    "activityCount": "Activity count: {count}"
+    "loadError": "Change history could not be loaded.",
+    "publicationPending": "Awaiting publication",
+    "published": "Published",
+    "deletedActor": "Deleted or unknown user",
+    "filters": "Filters",
+    "all": "All",
+    "component": "Component",
+    "changeClass": "Change class",
+    "publication": "Publication",
+    "details": "Details",
+    "actorSearch": "Search by user",
+    "previousPage": "Previous page",
+    "nextPage": "Next page",
+    "page": "Page {page}",
+    "itemCount": {
+      "one": "1 change",
+      "other": "{count} changes"
+    }
   }
 }

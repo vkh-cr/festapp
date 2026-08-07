@@ -29,29 +29,4 @@ void main() {
 
     expect(closed, isTrue);
   });
-
-  testWidgets('popup offers an obvious navigation action', (tester) async {
-    var navigated = false;
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: MapDescriptionPopup(
-            place: MapPlaceModel(
-              id: 1,
-              title: 'WC',
-              latLng: const LatLng(49.82, 18.26),
-            ),
-            isEditing: false,
-            onClose: () {},
-            onNavigate: () => navigated = true,
-          ),
-        ),
-      ),
-    );
-
-    await tester.tap(find.byType(FilledButton));
-
-    expect(navigated, isTrue);
-  });
 }

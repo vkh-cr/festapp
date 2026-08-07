@@ -34,11 +34,8 @@ class ConnectivityService {
 
   static StreamSubscription<List<ConnectivityResult>>? _subscription;
   static Timer? _probeTimer;
-  static Future<void>? _probeInFlight;
-  static Future<void> Function()? _debugProbe;
   static const Duration _probeInterval = Duration(seconds: 12);
   static const Duration _probeTimeout = Duration(seconds: 5);
-  static const Duration _startupProbeWait = Duration(milliseconds: 750);
 
   /// Public health endpoint that answers without auth; getting *any* response
   /// from it proves the backend is reachable again.
@@ -63,25 +60,18 @@ class ConnectivityService {
     } catch (_) {
       // Keep the online default when the platform check is unavailable.
     }
-    if (_interfaceOffline) {
-      // iOS can briefly report `none` while its network monitor is warming up
-      // after a restart. Give the authoritative backend probe a small window to
-      // disprove that stale signal, without making a real offline start wait for
-      // the full network timeout.
-      await _probeNow().timeout(_startupProbeWait, onTimeout: () {});
-    }
     _recompute();
   }
 
   /// A backend request completed (any HTTP status) → the server was reached, so
-  /// the app is online. This is stronger evidence than a potentially stale OS
-  /// interface report, therefore it clears both offline inputs immediately.
+  /// the app is online. Clears the unreachable state immediately.
   static void reportSuccess() {
     _consecutiveFailures = 0;
-    _interfaceOffline = false;
-    _backendUnreachable = false;
-    _stopProbe();
-    _recompute();
+    if (_backendUnreachable) {
+      _backendUnreachable = false;
+      _stopProbe();
+      _recompute();
+    }
   }
 
   /// A backend request failed with a network / timeout / connection error.
@@ -119,12 +109,6 @@ class ConnectivityService {
   }
 
   static void _startProbe() {
-    // Do not leave the UI in a stale offline state until the first periodic
-    // tick. Startup/reload can produce a short burst of failed requests while
-    // the native network stack is settling, even though the backend is already
-    // reachable. One immediate, coalesced probe makes the backend response the
-    // authoritative recovery signal.
-    unawaited(_probeNow());
     _probeTimer ??= Timer.periodic(_probeInterval, (_) => _probeNow());
   }
 
@@ -137,27 +121,8 @@ class ConnectivityService {
   /// where the user is idle on cached data and issues no requests. Uses a plain
   /// client so it never re-enters the health tracker. Any response (even an
   /// error status) proves the server answered, so it clears the offline state.
-  static Future<void> _probeNow() {
-    return _probeInFlight ??= _performProbe().whenComplete(() {
-      _probeInFlight = null;
-    });
-  }
-
-  static Future<void> _performProbe() async {
-    // Probe even when the platform currently reports no interface: that signal
-    // can briefly be stale after reload/resume, while an actual backend response
-    // is conclusive proof that the app is online.
-    final debugProbe = _debugProbe;
-    if (debugProbe != null) {
-      try {
-        await debugProbe();
-        reportSuccess();
-      } catch (_) {
-        // A failed fake has the same meaning as an unreachable health endpoint.
-      }
-      return;
-    }
-
+  static Future<void> _probeNow() async {
+    if (_interfaceOffline) return; // pointless without a network interface
     final client = http.Client();
     try {
       await client.get(_healthUri).timeout(_probeTimeout);
@@ -176,23 +141,9 @@ class ConnectivityService {
     _stopProbe();
     _subscription?.cancel();
     _subscription = null;
-    _probeInFlight = null;
-    _debugProbe = null;
     _interfaceOffline = false;
     _backendUnreachable = false;
     _consecutiveFailures = 0;
     isOfflineNotifier.value = false;
-  }
-
-  /// Simulates the platform connectivity signal without a method channel.
-  @visibleForTesting
-  static void debugSetInterfaceOffline(bool value) {
-    _interfaceOffline = value;
-    _recompute();
-  }
-
-  @visibleForTesting
-  static void debugSetProbe(Future<void> Function() probe) {
-    _debugProbe = probe;
   }
 }

@@ -11,11 +11,6 @@ void main() {
     expect(MapLibreSceneController.placeIconScale, 1.0);
   });
 
-  test('fallback place pin is smaller than a custom place pin', () {
-    expect(MapLibreSceneController.fallbackPlaceIconSize, 36);
-    expect(MapLibreSceneController.fallbackPlaceIconSize, lessThan(52));
-  });
-
   test('place edit lifecycle preserves and then clears the original position',
       () {
     final place = MapPlacePresentation(

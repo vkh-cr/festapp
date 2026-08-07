@@ -110,14 +110,6 @@ final class OfflineMapConfiguration {
   bool get shouldInitialize =>
       selectedContract != null || forceOffline || hasExplicitRenderer;
 
-  /// Whether the first frame must avoid the online renderer while the
-  /// asynchronous connectivity check is still pending.
-  bool useOfflineWhileConnectivityLoads({
-    required bool isKnownOffline,
-    bool hasAuthoritativeConfiguration = true,
-  }) =>
-      forceOffline || isKnownOffline || !hasAuthoritativeConfiguration;
-
   OfflineMapStartupDecision resolveStartup({required bool hasConnection}) {
     final contract = selectedContract;
     if (contract == null) {

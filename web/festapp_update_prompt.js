@@ -9,9 +9,6 @@
   const bannerId = 'festapp-update-banner';
   let checkInFlight = false;
 
-  // Compatibility boundary for installations created before Festapp's worker.
-  // Remove after the minimum supported installed version is newer than that
-  // migration generation; never add festapp-app-shell-* to this adapter.
   async function clearLegacyFlutterCaches() {
     try {
       if ('serviceWorker' in navigator) {
@@ -126,10 +123,26 @@
     sessionStorage.setItem(cleanRecoveryStorageKey, latestVersion);
     try {
       if ('serviceWorker' in navigator) {
-        const registration = await navigator.serviceWorker.getRegistration('/');
-        if (registration) await registration.update();
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(registrations
+          .filter(function(registration) {
+            const scriptUrl = registration.active?.scriptURL ||
+              registration.waiting?.scriptURL ||
+              registration.installing?.scriptURL || '';
+            return scriptUrl.includes('festapp_service_worker.js') ||
+              scriptUrl.includes('flutter_service_worker.js');
+          })
+          .map(function(registration) { return registration.unregister(); }));
       }
-      await clearLegacyFlutterCaches();
+      if ('caches' in window) {
+        const names = await caches.keys();
+        await Promise.all(names
+          .filter(function(name) {
+            return name.startsWith('festapp-app-shell-') ||
+              name.startsWith('flutter-app-cache');
+          })
+          .map(function(name) { return caches.delete(name); }));
+      }
       const recoveryUrl = new URL(window.location.href);
       recoveryUrl.searchParams.set('festapp-recovery', latestVersion);
       window.location.replace(recoveryUrl.toString());
@@ -576,9 +589,6 @@
     });
   }
   if ('serviceWorker' in navigator) {
-    if (navigator.serviceWorker.ready) {
-      navigator.serviceWorker.ready.then(reportClientVersion).catch(function() {});
-    }
     navigator.serviceWorker.addEventListener('message', function(event) {
       if (event.data?.type === 'FESTAPP_REPORT_VERSION') reportClientVersion();
     });
@@ -598,17 +608,13 @@
       }
     });
   });
-  window.addEventListener('focus', function() {
-    reportClientVersion();
-    checkVersion();
-  });
+  window.addEventListener('focus', checkVersion);
   window.addEventListener('festapp-update-available', function(event) {
     const detail = event.detail || {};
     showUpdateBanner(detail.version || currentVersion, detail.reason);
   });
   document.addEventListener('visibilitychange', function() {
     if (document.visibilityState === 'visible') {
-      reportClientVersion();
       checkVersion();
     }
   });

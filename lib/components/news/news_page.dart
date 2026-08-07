@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:auto_route/auto_route.dart';
 import 'package:fstapp/app_router.gr.dart';
 import 'package:fstapp/components/news/news_model.dart';
-import 'package:fstapp/components/_shared/async_reload_coordinator.dart';
+import 'package:fstapp/components/news/news_refresh_coordinator.dart';
 import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/components/news/db_news.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
@@ -28,7 +28,7 @@ import '../occasion/occasion_home_page.dart';
 @RoutePage()
 class NewsPage extends StatefulWidget {
   static const ROUTE = "news";
-  final VoidCallback? onSetAsRead;
+  VoidCallback? onSetAsRead;
 
   NewsPage({super.key, this.onSetAsRead});
 
@@ -39,7 +39,7 @@ class NewsPage extends StatefulWidget {
 class _NewsPageState extends State<NewsPage> {
   List<NewsModel> newsMessages = [];
   bool _isSetAsReadCalled = false;
-  final AsyncReloadCoordinator _refreshCoordinator = AsyncReloadCoordinator();
+  final NewsRefreshCoordinator _refreshCoordinator = NewsRefreshCoordinator();
 
   // The tabs router this page is subscribed to, plus the last active index we
   // saw. Kept as fields so the listener can be removed in dispose() — otherwise
@@ -88,7 +88,6 @@ class _NewsPageState extends State<NewsPage> {
 
   @override
   void dispose() {
-    _refreshCoordinator.dispose();
     ClientSyncRuntime.projectionEpoch.removeListener(_onProjectionChanged);
     _tabsRouter?.removeListener(_onTabChanged);
     super.dispose();

@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:fstapp/components/map/map_direction_marker.dart';
 import 'package:fstapp/components/map/map_location_pin_helper.dart';
-import 'package:fstapp/components/map/map_strings.dart';
 import 'package:fstapp/components/map/map_surface_model.dart';
 import 'package:fstapp/components/map/maplibre/maplibre_scene_controller.dart';
 import 'package:fstapp/components/map/maplibre/maplibre_native_performance.dart';
@@ -32,14 +31,10 @@ class _MapLibreMapSurfaceState extends State<MapLibreMapSurface> {
   MapLibreViewportController? _viewportAdapter;
   MapLibreSceneController? _sceneController;
   final Set<String> _registeredIconKeys = {};
-  bool _isStyleReady = false;
 
   @override
   void didUpdateWidget(covariant MapLibreMapSurface oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.style != widget.style) {
-      _isStyleReady = false;
-    }
     if (!identical(oldWidget.model.viewport, widget.model.viewport) &&
         _viewportAdapter != null) {
       oldWidget.model.viewport.detach(_viewportAdapter!);
@@ -69,6 +64,7 @@ class _MapLibreMapSurfaceState extends State<MapLibreMapSurface> {
     final adapter = MapLibreViewportController(controller);
     _viewportAdapter = adapter;
     widget.model.viewport.attach(adapter);
+    unawaited(_configureNativePerformance());
   }
 
   Future<void> _configureNativePerformance() async {
@@ -80,14 +76,12 @@ class _MapLibreMapSurfaceState extends State<MapLibreMapSurface> {
   }
 
   Future<void> _onStyleLoaded(ml.StyleController style) async {
-    unawaited(_configureNativePerformance());
     _registeredIconKeys.clear();
     await _registerIcons(style);
     final sceneController = MapLibreSceneController(style);
     _sceneController = sceneController;
     await sceneController.register(widget.model.scene);
     await _enableLocationIfAllowed();
-    if (mounted) setState(() => _isStyleReady = true);
     widget.model.onZoomChanged?.call(_controller?.getCamera().zoom ?? 0);
     widget.model.onCameraReady?.call();
   }
@@ -115,19 +109,14 @@ class _MapLibreMapSurfaceState extends State<MapLibreMapSurface> {
     for (final place in widget.model.scene.places) {
       if (_registeredIconKeys.contains(place.iconKey)) continue;
       final color = Color(place.pinColorValue);
-      final customPin = MapLocationPinHelper.type2icon(
-        context,
-        place.place,
-        widget.model.icons,
-        pinColor: color,
-      );
       iconsToRegister[place.iconKey] = _MapImageRegistration(
-        widget: customPin ??
-            Icon(
-              Icons.location_pin,
-              size: MapLibreSceneController.fallbackPlaceIconSize,
-              color: color,
-            ),
+        widget: MapLocationPinHelper.type2icon(
+              context,
+              place.place,
+              widget.model.icons,
+              pinColor: color,
+            ) ??
+            Icon(Icons.location_pin, size: 52, color: color),
         size: const Size(58, 52),
       );
     }
@@ -172,12 +161,7 @@ class _MapLibreMapSurfaceState extends State<MapLibreMapSurface> {
     if (event is ml.MapEventCameraIdle && controller != null) {
       widget.model.onZoomChanged?.call(controller.getCamera().zoom);
     }
-    if (event is! ml.MapEventUserInput || controller == null) {
-      return;
-    }
-    if (event is! ml.MapEventClick && event is! ml.MapEventLongClick) {
-      return;
-    }
+    if (event is! ml.MapEventClick || controller == null) return;
     final features = controller.featuresAtPoint(
       event.screenPoint,
       layerIds: const [MapLibreSceneController.placeLayerId],
@@ -186,93 +170,39 @@ class _MapLibreMapSurfaceState extends State<MapLibreMapSurface> {
       final rawId = features.first.properties['place_id'];
       final placeId = rawId is num ? rawId.toInt() : int.tryParse('$rawId');
       if (placeId != null) {
-        if (event is ml.MapEventLongClick) {
-          widget.model.onPlaceLongPress?.call(placeId);
-        } else {
-          widget.model.onPlaceTap(placeId);
-        }
+        widget.model.onPlaceTap(placeId);
         return;
       }
     }
-    if (event is ml.MapEventClick) {
-      widget.model.onMapTap(LatLng(event.point.lat, event.point.lon));
-    }
+    widget.model.onMapTap(LatLng(event.point.lat, event.point.lon));
   }
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        ml.MapLibreMap(
-          // The wrapper has no disableLocation API. Recreate the native surface
-          // when map visibility changes so leaving the map always stops native
-          // location sampling; privacy takes precedence over retaining tiles.
-          key: ValueKey(
-            'maplibre-location-${widget.model.scene.showCurrentLocation}',
-          ),
-          options: ml.MapOptions(
-            initStyle: widget.style,
-            initCenter: ml.Geographic(
-              lon: widget.model.initialCenter.longitude,
-              lat: widget.model.initialCenter.latitude,
-            ),
-            initZoom: widget.model.initialZoom,
-            minZoom: 0,
-            maxZoom: MapZoomLimits.interactionMaximum,
-            // The feasibility benchmark selected Hybrid Composition without the
-            // expensive texture mode. Keep this explicit; never inherit defaults.
-            androidTextureMode: false,
-            androidMode: ml.AndroidPlatformViewMode.hc,
-          ),
-          onMapCreated: _onMapCreated,
-          onStyleLoaded: _onStyleLoaded,
-          onEvent: _onEvent,
+    return ml.MapLibreMap(
+      // The current package has no disableLocation API. Recreating the native
+      // view when visibility changes guarantees that leaving the map tab stops
+      // the location layer instead of keeping it alive invisibly.
+      key: ValueKey(
+        'maplibre-location-${widget.model.scene.showCurrentLocation}',
+      ),
+      options: ml.MapOptions(
+        initStyle: widget.style,
+        initCenter: ml.Geographic(
+          lon: widget.model.initialCenter.longitude,
+          lat: widget.model.initialCenter.latitude,
         ),
-        IgnorePointer(
-          child: AnimatedOpacity(
-            opacity: _isStyleReady ? 0 : 1,
-            duration: const Duration(milliseconds: 450),
-            curve: Curves.easeOutCubic,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [colors.surfaceContainer, colors.surface],
-                ),
-              ),
-              child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.map_outlined,
-                      size: 42,
-                      color: colors.primary,
-                    ),
-                    const SizedBox(height: 14),
-                    SizedBox(
-                      width: 28,
-                      height: 28,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 3,
-                        color: colors.primary,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      MapStrings.loadingMap,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
+        initZoom: widget.model.initialZoom,
+        minZoom: 0,
+        maxZoom: MapZoomLimits.interactionMaximum,
+        // The feasibility benchmark selected Hybrid Composition without the
+        // expensive texture mode. Keep this explicit; never inherit defaults.
+        androidTextureMode: false,
+        androidMode: ml.AndroidPlatformViewMode.hc,
+      ),
+      onMapCreated: _onMapCreated,
+      onStyleLoaded: _onStyleLoaded,
+      onEvent: _onEvent,
     );
   }
 }

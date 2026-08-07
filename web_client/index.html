@@ -87,16 +87,7 @@
 
     <!-- Application Entry (Module) -->
     <script type="module" src="/src/main.js"></script>
-    <script type="module">
-        import { APP_VERSION } from '/src/version.js';
-
-        function reportFestappClientVersion() {
-            navigator.serviceWorker.controller?.postMessage({
-                type: 'FESTAPP_CLIENT_VERSION',
-                version: APP_VERSION,
-            });
-        }
-
+    <script>
         async function persistUsedFontResources() {
             await navigator.serviceWorker.ready;
             if (!navigator.serviceWorker.controller) {
@@ -127,20 +118,8 @@
             window.festappOfflineReady = navigator.serviceWorker.register('/festapp_service_worker.js', {
                 scope: '/',
                 updateViaCache: 'none'
-            }).then(async function() {
-                await navigator.serviceWorker.ready;
-                reportFestappClientVersion();
-                return persistUsedFontResources();
-            }).catch(function(error) {
+            }).then(persistUsedFontResources).catch(function(error) {
                 console.warn('Festapp offline service worker registration failed:', error);
-            });
-            navigator.serviceWorker.addEventListener('controllerchange', reportFestappClientVersion);
-            navigator.serviceWorker.addEventListener('message', function(event) {
-                if (event.data?.type === 'FESTAPP_REPORT_VERSION') reportFestappClientVersion();
-            });
-            window.addEventListener('focus', reportFestappClientVersion);
-            document.addEventListener('visibilitychange', function() {
-                if (document.visibilityState === 'visible') reportFestappClientVersion();
             });
         }
     </script>

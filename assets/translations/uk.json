@@ -405,9 +405,6 @@
   },
   "FeatureMap": {
     "changeLocation": "Змінити місцезнаходження",
-    "navigate": "Навігація",
-    "loadingMap": "Завантаження карти…",
-    "counselingHours": "Години консультацій",
     "drawPath": "Намалювати маршрут",
     "importRouteHint": "Експортуйте маршрут із Mapy.com (або Strava, Garmin, komoot…) як GPX і перетягніть його сюди.",
     "forceOfflineMap": "Примусово використовувати офлайн-карти",

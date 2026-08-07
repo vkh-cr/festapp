@@ -8,7 +8,6 @@ import 'package:fstapp/router_service.dart';
 import 'package:fstapp/components/timeline/schedule_tab_view.dart';
 import 'package:fstapp/components/timeline/schedule_helper.dart';
 import 'package:fstapp/components/schedule/event_model.dart';
-import 'package:fstapp/components/_shared/async_reload_coordinator.dart';
 import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/data_services/data_extensions.dart';
 import 'package:fstapp/components/schedule/db_events.dart';
@@ -42,7 +41,7 @@ class ScheduleBasicPage extends StatefulWidget {
 
 class _ScheduleBasicPageState extends State<ScheduleBasicPage>
     with WidgetsBindingObserver {
-  final AsyncReloadCoordinator _reloadCoordinator = AsyncReloadCoordinator();
+  static bool _isLoading = false;
   static bool _fullDataGloballyLoaded = false;
 
   List<TimeBlockItem> _dots = [];
@@ -69,7 +68,6 @@ class _ScheduleBasicPageState extends State<ScheduleBasicPage>
 
   @override
   void dispose() {
-    _reloadCoordinator.dispose();
     WidgetsBinding.instance.removeObserver(this);
     ClientSyncRuntime.projectionEpoch.removeListener(_onProjectionChanged);
     super.dispose();
@@ -101,17 +99,31 @@ class _ScheduleBasicPageState extends State<ScheduleBasicPage>
     });
   }
 
-  Future<void> loadData() => _reloadCoordinator.run(() async {
-        if (ClientSyncRuntime.isV1Selected) {
-          await _reloadProjectedEvents();
-          return;
-        }
-        await _loadOfflineDataThenFast();
-        if (!_fullDataGloballyLoaded) {
-          await _loadFullData();
-          _fullDataGloballyLoaded = true;
-        }
-      });
+  Future<void> loadData() async {
+    if (_isLoading) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      if (ClientSyncRuntime.isV1Selected) {
+        await _reloadProjectedEvents();
+        return;
+      }
+      await _loadOfflineDataThenFast();
+      if (!_fullDataGloballyLoaded) {
+        await _loadFullData();
+        _fullDataGloballyLoaded = true;
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
 
   Future<void> _loadOfflineDataThenFast() async {
     if (_events.isEmpty) {

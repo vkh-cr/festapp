@@ -10,7 +10,6 @@ class MapDescriptionPopup extends StatefulWidget {
   final MapPlaceModel place;
   final bool isEditing;
   final VoidCallback onClose;
-  final VoidCallback? onNavigate;
   final VoidCallback? onChangePosition;
 
   /// For toilet places with the cleaning feature on: the derived status (drives
@@ -22,7 +21,6 @@ class MapDescriptionPopup extends StatefulWidget {
     required this.place,
     required this.isEditing,
     required this.onClose,
-    this.onNavigate,
     this.onChangePosition,
     this.cleaningStatus,
     this.onReportCleaning,
@@ -79,14 +77,6 @@ class _MapDescriptionPopupState extends State<MapDescriptionPopup> {
               ],
             ),
             const Padding(padding: EdgeInsets.symmetric(vertical: 4.0)),
-            if (widget.onNavigate != null) ...[
-              FilledButton.tonalIcon(
-                onPressed: widget.onNavigate,
-                icon: const Icon(Icons.directions_outlined),
-                label: Text(MapStrings.navigate),
-              ),
-              const SizedBox(height: 8),
-            ],
             if (widget.cleaningStatus != null) _buildCleaningSection(context),
             Visibility(
                 visible: RightsService.isEditor() ||

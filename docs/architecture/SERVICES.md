@@ -6,18 +6,6 @@
 This document complements **[ai_context.md](ai_context.md)** with implementation
 details on critical services.
 
-## PWA storage lifecycle
-
-The generated `festapp_service_worker.js` is the sole owner of versioned
-`festapp-app-shell-*` retention and deletion. Its one reconcile calculation is
-used for read-only inspection, automatic maintenance and explicit guarded
-prune. Flutter calls it through the typed port in `lib/services/pwa_storage/`;
-`web/festapp_pwa_bridge.js` contains browser transport only. Unknown clients,
-missing live shells, timeouts and Cache API errors fail closed. Font cache,
-Sembast/IndexedDB, authentication and other offline data are outside this
-contract. The pre-Festapp Flutter cleanup and loopback-only development cleanup
-are explicit compatibility boundaries, not alternate owners.
-
 ---
 
 ## RightsService

@@ -6,12 +6,7 @@ import 'package:fstapp/services/connectivity_service.dart';
 /// success clears it immediately. These are pure state transitions — no
 /// platform channels or network involved.
 void main() {
-  setUp(() {
-    ConnectivityService.debugReset();
-    ConnectivityService.debugSetProbe(
-      () => Future<void>.error(StateError('backend unavailable')),
-    );
-  });
+  setUp(ConnectivityService.debugReset);
   tearDown(ConnectivityService.debugReset);
 
   test('a single network failure does not flip to offline', () {
@@ -34,31 +29,10 @@ void main() {
     expect(ConnectivityService.isOfflineNotifier.value, isFalse);
   });
 
-  test('a backend success overrides a stale platform offline signal', () {
-    ConnectivityService.debugSetInterfaceOffline(true);
-    expect(ConnectivityService.isOfflineNotifier.value, isTrue);
-
-    ConnectivityService.reportSuccess();
-
-    expect(ConnectivityService.isOfflineNotifier.value, isFalse);
-  });
-
   test('a success between failures resets the streak (no flip)', () {
     ConnectivityService.reportNetworkFailure();
     ConnectivityService.reportSuccess();
     ConnectivityService.reportNetworkFailure();
-    expect(ConnectivityService.isOfflineNotifier.value, isFalse);
-  });
-
-  test('entering offline probes immediately and clears a stale state',
-      () async {
-    ConnectivityService.debugSetProbe(() async {});
-
-    ConnectivityService.reportNetworkFailure();
-    ConnectivityService.reportNetworkFailure();
-    expect(ConnectivityService.isOfflineNotifier.value, isTrue);
-
-    await Future<void>.delayed(Duration.zero);
     expect(ConnectivityService.isOfflineNotifier.value, isFalse);
   });
 }

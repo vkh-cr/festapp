@@ -14,7 +14,6 @@ import 'package:fstapp/components/timeline/advanced_timeline_view.dart';
 import 'package:fstapp/components/timeline/schedule_helper.dart';
 import 'package:fstapp/components/schedule/event_model.dart';
 import 'package:fstapp/components/schedule/schedule_strings.dart';
-import 'package:fstapp/components/_shared/async_reload_coordinator.dart';
 import 'package:fstapp/components/users/user_strings.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/data_services/auth_service.dart';
@@ -58,7 +57,7 @@ class SchedulePage extends StatefulWidget {
 
 class _SchedulePageState extends State<SchedulePage>
     with WidgetsBindingObserver {
-  final AsyncReloadCoordinator _reloadCoordinator = AsyncReloadCoordinator();
+  static bool _isLoading = false;
   static bool _fullDataGloballyLoaded = false;
   static DateTime? _lastQuickLoadTime;
   static const Duration _quickLoadRateLimit = Duration(seconds: 10);
@@ -103,7 +102,6 @@ class _SchedulePageState extends State<SchedulePage>
 
   @override
   void dispose() {
-    _reloadCoordinator.dispose();
     WidgetsBinding.instance.removeObserver(this);
     _tabsRouter?.removeListener(_onTabSwitch);
     ClientSyncRuntime.projectionEpoch.removeListener(_onProjectionChanged);
@@ -177,20 +175,34 @@ class _SchedulePageState extends State<SchedulePage>
     }
   }
 
-  Future<void> loadData() => _reloadCoordinator.run(() async {
-        _hasOwnedCompanions = AuthService.isLoggedIn() &&
-            (await DbCompanions.getAllCompanions()).isNotEmpty;
+  Future<void> loadData() async {
+    if (_isLoading) return;
 
-        if (ClientSyncRuntime.isV1Selected) {
-          await _reloadProjectedEvents();
-          return;
-        }
-        await _loadOfflineDataThenFast();
-        if (!_fullDataGloballyLoaded) {
-          await _loadFullData();
-          _fullDataGloballyLoaded = true;
-        }
-      });
+    _hasOwnedCompanions = AuthService.isLoggedIn() &&
+        (await DbCompanions.getAllCompanions()).isNotEmpty;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      if (ClientSyncRuntime.isV1Selected) {
+        await _reloadProjectedEvents();
+        return;
+      }
+      await _loadOfflineDataThenFast();
+      if (!_fullDataGloballyLoaded) {
+        await _loadFullData();
+        _fullDataGloballyLoaded = true;
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
 
   Future<void> _loadOfflineDataThenFast() async {
     if (_events.isEmpty) {

@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
 import 'package:fstapp/components/map/map_scene.dart';
 import 'package:fstapp/components/map/place_model.dart';
-import 'package:fstapp/components/schedule/event_model.dart';
-import 'package:fstapp/data_services/data_extensions.dart';
 import 'package:fstapp/services/responsive_service.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -14,102 +12,9 @@ import 'package:fstapp/components/icons/icons_strings.dart';
 import 'package:fstapp/components/html/html_helper.dart';
 import 'package:fstapp/theme_config.dart';
 
-class CounselingHoursRange {
-  final DateTime start;
-  final DateTime end;
-  final int? entryEventId;
-
-  const CounselingHoursRange({
-    required this.start,
-    required this.end,
-    this.entryEventId,
-  });
-}
-
 class MapPageHelper {
   static bool hasMeaningfulPlaceDescription(String? description) =>
       !HtmlHelper.isHtmlEmptyOrNull(description);
-
-  static Map<int, List<CounselingHoursRange>> assignEventsToPlaces(
-    List<PlaceModel> places,
-    List<EventModel> events,
-  ) {
-    final publicEvents = events.filterNotHidden();
-    final visibleEvents = publicEvents
-        .where((event) => !event.isCounselingSlot)
-        .toList()
-        .sortEvents();
-    final counselingByPlace = <int, List<CounselingHoursRange>>{};
-    final counselingEntriesByDay = <DateTime, EventModel>{};
-    for (final entry
-        in publicEvents.where((event) => event.isCounselingEntry)) {
-      counselingEntriesByDay.putIfAbsent(_eventDay(entry), () => entry);
-    }
-    for (final place in places) {
-      place.events
-        ..clear()
-        ..addAll(visibleEvents.where((event) => event.place?.id == place.id));
-      final placeId = place.id;
-      if (placeId == null) continue;
-      final slots = publicEvents.where(
-        (event) => event.isCounselingSlot && event.place?.id == placeId,
-      );
-      final slotsByDay = <DateTime, List<EventModel>>{};
-      for (final slot in slots) {
-        final day = _eventDay(slot);
-        slotsByDay.putIfAbsent(day, () => []).add(slot);
-      }
-      final ranges = slotsByDay.entries.map((entry) {
-        final ordered = entry.value.sortEvents();
-        final end = ordered
-            .map((slot) => slot.endTime)
-            .reduce((a, b) => a.isAfter(b) ? a : b);
-        return CounselingHoursRange(
-          start: ordered.first.startTime,
-          end: end,
-          entryEventId: counselingEntriesByDay[entry.key]?.id,
-        );
-      }).toList()
-        ..sort((a, b) => a.start.compareTo(b.start));
-      if (ranges.isNotEmpty) counselingByPlace[placeId] = ranges;
-    }
-    return counselingByPlace;
-  }
-
-  static DateTime _eventDay(EventModel event) {
-    final start = event.startTime;
-    return DateTime(start.year, start.month, start.day);
-  }
-
-  static Uri navigationUri({
-    required double latitude,
-    required double longitude,
-    required String label,
-    required bool isWeb,
-    required TargetPlatform platform,
-  }) {
-    final coordinates = '$latitude,$longitude';
-    if (!isWeb && platform == TargetPlatform.android) {
-      return Uri(
-        scheme: 'geo',
-        path: coordinates,
-        queryParameters: {'q': '$coordinates ($label)'},
-      );
-    }
-    if (!isWeb && platform == TargetPlatform.iOS) {
-      return Uri.https('maps.apple.com', '/', {
-        'daddr': coordinates,
-        'dirflg': 'w',
-      });
-    }
-    return Uri.https('mapy.com', '/zakladni', {
-      'source': 'coor',
-      'id': '$longitude,$latitude',
-      'x': '$longitude',
-      'y': '$latitude',
-      'z': '17',
-    });
-  }
 
   static Color _parsePathColor(String? value) {
     final hex = value?.replaceFirst('#', '');

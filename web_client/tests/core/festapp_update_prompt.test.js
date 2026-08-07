@@ -289,7 +289,7 @@ describe('festapp_update_prompt.js', () => {
             'the controlled new shell should reload exactly once');
     });
 
-    test('an old page after accepted cutover performs non-destructive recovery once', async () => {
+    test('an old page after accepted cutover cleans Festapp state once without repeating the banner', async () => {
         const { window } = boot({
             buildVersion: '1.0.0+1',
             latestVersion: '1.0.0+2',
@@ -303,8 +303,8 @@ describe('festapp_update_prompt.js', () => {
         assert.strictEqual(banner(window), null, 'accepted version must not be offered again');
         assert.strictEqual(window.__navigationErrors.length, 1,
             'failed cutover should perform one cache-busted navigation');
-        assert.strictEqual(window.__festappUnregisterCalls, 0);
-        assert.deepStrictEqual([...window.__deletedCaches], []);
+        assert.strictEqual(window.__festappUnregisterCalls, 1);
+        assert.deepStrictEqual([...window.__deletedCaches], ['festapp-app-shell-1.0.0+1']);
     });
 
     test('version check stays silent when the server build matches', async () => {

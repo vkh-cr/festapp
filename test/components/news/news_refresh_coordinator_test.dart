@@ -1,12 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fstapp/components/_shared/async_reload_coordinator.dart';
+import 'package:fstapp/components/news/news_refresh_coordinator.dart';
 
 void main() {
   test('replays a refresh requested while the current load is in flight',
       () async {
-    final coordinator = AsyncReloadCoordinator();
+    final coordinator = NewsRefreshCoordinator();
     final firstLoadStarted = Completer<void>();
     final releaseFirstLoad = Completer<void>();
     final projectedViews = <int>[];

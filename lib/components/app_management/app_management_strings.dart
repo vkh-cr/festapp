@@ -39,20 +39,7 @@ class AppManagementStrings {
   static String get enableNotificationsFailed =>
       'Administration.enableNotificationsFailed'
           .tr(); // "Failed to enable notifications."
-  static String get pwaPromptNotSupported => 'Administration.pwaPromptNotSupported'
-      .tr(); // "This platform or browser does not support the PWA install prompt or the app is already installed."
-  static String get storageTitle => 'Administration.storageTitle'.tr();
-  static String get inspectStorage => 'Administration.inspectStorage'.tr();
-  static String get pruneShells => 'Administration.pruneShells'.tr();
-  static String get pruneShellsConfirm =>
-      'Administration.pruneShellsConfirm'.tr();
-  static String storageUsage({required String usage, required String quota}) =>
-      'Administration.storageUsage'
-          .tr(namedArgs: {'usage': usage, 'quota': quota});
-  static String get storageBlocked => 'Administration.storageBlocked'.tr();
-  static String storageReady(
-          {required String retained, required String deletable}) =>
-      'Administration.storageReady'.tr(
-        namedArgs: {'retained': retained, 'deletable': deletable},
-      );
+  static String get pwaPromptNotSupported =>
+      'Administration.pwaPromptNotSupported'
+          .tr(); // "This platform or browser does not support the PWA install prompt or the app is already installed."
 }

@@ -20,7 +20,6 @@ final class MapSurfaceModel {
   final MapViewportCoordinator viewport;
   final ValueChanged<LatLng> onMapTap;
   final ValueChanged<int> onPlaceTap;
-  final ValueChanged<int>? onPlaceLongPress;
   final VoidCallback? onCameraReady;
   final VoidCallback? onCameraChanged;
   final ValueChanged<double>? onZoomChanged;
@@ -33,7 +32,6 @@ final class MapSurfaceModel {
     required this.viewport,
     required this.onMapTap,
     required this.onPlaceTap,
-    this.onPlaceLongPress,
     this.onCameraReady,
     this.onCameraChanged,
     this.onZoomChanged,

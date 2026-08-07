@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fstapp/main.dart';
-import 'package:fstapp/startup/startup_failure_policy.dart';
 
 void main() {
   test('opens the forced occasion when the web URL has no path', () {
@@ -71,47 +70,5 @@ void main() {
 
     expect(find.byKey(FestappBootstrap.loadingKey), findsNothing);
     expect(find.text('offline shell'), findsOneWidget);
-  });
-
-  test(
-      'session recovery timeout does not turn a connected public startup offline',
-      () {
-    expect(
-      shouldEnterOfflineAfterSessionInitializationFailure(
-        wasAlreadyOffline: false,
-        supabaseInitialized: true,
-      ),
-      isFalse,
-    );
-  });
-
-  test('session initialization failure preserves a real offline state', () {
-    expect(
-      shouldEnterOfflineAfterSessionInitializationFailure(
-        wasAlreadyOffline: true,
-        supabaseInitialized: true,
-      ),
-      isTrue,
-    );
-    expect(
-      shouldEnterOfflineAfterSessionInitializationFailure(
-        wasAlreadyOffline: false,
-        supabaseInitialized: false,
-      ),
-      isTrue,
-    );
-  });
-
-  test(
-      'clean cold start gets a longer occasion-loading window than cached startup',
-      () {
-    expect(
-      occasionLoadTimeout(hasCachedSettings: false),
-      const Duration(seconds: 15),
-    );
-    expect(
-      occasionLoadTimeout(hasCachedSettings: true),
-      const Duration(seconds: 5),
-    );
   });
 }

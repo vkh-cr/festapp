@@ -20,7 +20,6 @@ abstract interface class MapViewportController {
     LatLng destination, {
     double? zoom,
     Curve curve = Curves.easeInOut,
-    Duration? duration,
   });
 
   Future<void> fitCoordinates(
@@ -62,14 +61,8 @@ class MapViewportCoordinator implements MapViewportController {
     LatLng destination, {
     double? zoom,
     Curve curve = Curves.easeInOut,
-    Duration? duration,
   }) =>
-      _active.animateTo(
-        destination,
-        zoom: zoom,
-        curve: curve,
-        duration: duration,
-      );
+      _active.animateTo(destination, zoom: zoom, curve: curve);
 
   @override
   Future<void> fitCoordinates(

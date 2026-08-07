@@ -11,7 +11,6 @@ BEGIN
   SELECT array_agg(expected.name) INTO v_missing
   FROM unnest(ARRAY[
     'get_private_client_sync_v1','get_client_commits_v1','get_client_commit_v1',
-    'get_client_activity_v1',
     'claim_client_projection_dirty_v1','get_public_client_sync_component_v1',
     'complete_client_sync_publication_classes_v1','mark_news_read_client_sync_v1',
     'save_event_client_sync_v1','delete_event_client_sync_v1',
@@ -105,18 +104,6 @@ BEGIN
       'public.get_client_commit_v1(uuid)'::regprocedure)
       LIKE '%get_is_manager_on_unit(c.unit)%',
     'audit detail accepts the same unit-manager scope as the list');
-  PERFORM assert_true(pg_get_functiondef(
-      'public.get_client_activity_v1(bigint,timestamptz,timestamptz)'::regprocedure)
-      NOT LIKE '%actor_display%'
-      AND pg_get_functiondef(
-        'public.get_client_activity_v1(bigint,timestamptz,timestamptz)'::regprocedure)
-        NOT LIKE '%actor_id%',
-    'activity overview exposes no actor identity');
-  PERFORM assert_true(has_function_privilege(
-      'authenticated',
-      'public.get_client_activity_v1(bigint,timestamptz,timestamptz)',
-      'EXECUTE'),
-    'authenticated managers can load aggregate activity');
   PERFORM assert_true(pg_get_functiondef(
       'public.save_speaker_client_sync_v1(bigint,uuid,bigint,jsonb)'::regprocedure)
       LIKE '%requested_topic.topic_id%',

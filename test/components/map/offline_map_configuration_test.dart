@@ -63,54 +63,6 @@ void main() {
     );
   });
 
-  test(
-      'forced offline map never exposes the online renderer while probing connectivity',
-      () {
-    final configuration = OfflineMapConfiguration.fromLayer(
-      MapLayer(
-        offlineMapRenderer: OfflineMapRenderer.maplibre,
-        offlineMapBundleManifestURL: 'https://maps.test/v2/manifest.json',
-        forceOfflineMap: true,
-      ),
-    );
-
-    expect(
-      configuration.useOfflineWhileConnectivityLoads(isKnownOffline: false),
-      isTrue,
-    );
-  });
-
-  test(
-      'known offline startup never exposes the online renderer while probing connectivity',
-      () {
-    final configuration = OfflineMapConfiguration.fromLayer(
-      MapLayer(
-        offlineMapRenderer: OfflineMapRenderer.legacy,
-        offlineMapPackageURL: 'https://maps.test/v1/map.mbtiles',
-        offlineMapStyleURL: 'https://maps.test/v1/style.json',
-        offlineMapLayerName: 'versatiles-shortbread',
-      ),
-    );
-
-    expect(
-      configuration.useOfflineWhileConnectivityLoads(isKnownOffline: true),
-      isTrue,
-    );
-  });
-
-  test('missing authoritative map settings never fall back to public tiles',
-      () {
-    final configuration = OfflineMapConfiguration.fromLayer(MapLayer());
-
-    expect(
-      configuration.useOfflineWhileConnectivityLoads(
-        isKnownOffline: false,
-        hasAuthoritativeConfiguration: false,
-      ),
-      isTrue,
-    );
-  });
-
   test('initialization is skipped only for an untouched online-only layer', () {
     final untouched = OfflineMapConfiguration.fromLayer(MapLayer());
     final explicit = OfflineMapConfiguration.fromLayer(

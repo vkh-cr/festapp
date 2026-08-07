@@ -305,9 +305,6 @@
   },
   "FeatureMap": {
     "changeLocation": "Zmień lokalizację",
-    "navigate": "Nawiguj",
-    "loadingMap": "Ładowanie mapy…",
-    "counselingHours": "Godziny konsultacji",
     "drawPath": "Rysuj trasę",
     "importRouteHint": "Wyeksportuj trasę z Mapy.com (lub Strava, Garmin, komoot…) jako GPX i upuść ją tutaj.",
     "importRoute": "Importuj trasę",
