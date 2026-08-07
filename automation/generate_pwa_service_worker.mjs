@@ -381,24 +381,16 @@ self.addEventListener('fetch', (event) => {
   }
 
   event.respondWith((async () => {
-    // Navigation fetches create a new WindowClient. Browsers expose that new
-    // identity as resultingClientId while clientId is commonly empty. Every
-    // subsequent subresource request uses the resulting id, so record and
-    // select the shell under that same canonical identity or the page deadlocks
-    // before its version-reporting script can load.
-    const clientId = request.mode === 'navigate'
-      ? (event.resultingClientId || event.clientId)
-      : event.clientId;
     // A full-page navigation is the explicit cutover boundary for that tab.
     // Runtime requests from an older, still-open tab stay on its mapped shell.
-    if (request.mode === 'navigate' && clientId) {
-      clientCacheNames.delete(clientId);
-      recordClientVersion(clientId, BUILD_VERSION);
-    } else if (clientId && !clientVersions.has(clientId)) {
-      const reported = await waitForClientVersion(clientId);
+    if (request.mode === 'navigate' && event.clientId) {
+      clientCacheNames.delete(event.clientId);
+      recordClientVersion(event.clientId, BUILD_VERSION);
+    } else if (event.clientId && !clientVersions.has(event.clientId)) {
+      const reported = await waitForClientVersion(event.clientId);
       if (!reported) return Response.error();
     }
-    const selectedCacheName = clientCacheNames.get(clientId) || CACHE_NAME;
+    const selectedCacheName = clientCacheNames.get(event.clientId) || CACHE_NAME;
     const cache = await caches.open(selectedCacheName);
     const cached = await cache.match(request, { ignoreSearch: true });
     if (cached) return cached;
@@ -424,7 +416,7 @@ self.addEventListener('fetch', (event) => {
       // loading placeholder forever after the incompatible chunk fails.
       if (selectedCacheName !== CACHE_NAME) {
         if (isFlutterBootstrapExecutable(url.pathname)) {
-          clientCacheNames.delete(clientId);
+          clientCacheNames.delete(event.clientId);
           const currentCache = await caches.open(CACHE_NAME);
           const currentExecutable = await currentCache.match(request, {
             ignoreSearch: true,
@@ -433,8 +425,8 @@ self.addEventListener('fetch', (event) => {
           return recoverCurrentExecutable(request, currentCache, true);
         }
         try {
-          const client = clientId
-            ? await self.clients.get(clientId)
+          const client = event.clientId
+            ? await self.clients.get(event.clientId)
             : null;
           if (client) await client.navigate(client.url);
         } catch (_) {
