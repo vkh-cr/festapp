@@ -116,6 +116,11 @@ const PRECACHE_PATHS = new Set(PRECACHE_URLS.map((url) =>
 const clientVersions = new Map();
 const clientCacheNames = new Map();
 let cutoverClientId = null;
+const EMERGENCY_RECOVERY_CACHE_NAMES = new Set([
+  'festapp-app-shell-0.19.85+418',
+  'festapp-app-shell-0.19.85+419',
+  'festapp-app-shell-0.19.85+420',
+]);
 
 async function precacheAtomically() {
   const cache = await caches.open(CACHE_NAME);
@@ -126,8 +131,16 @@ async function precacheAtomically() {
   await cache.addAll(CORE_URLS);
 }
 
+async function requiresEmergencyCutover() {
+  const names = await caches.keys();
+  return names.some((name) => EMERGENCY_RECOVERY_CACHE_NAMES.has(name));
+}
+
 self.addEventListener('install', (event) => {
-  event.waitUntil(precacheAtomically());
+  event.waitUntil((async () => {
+    await precacheAtomically();
+    if (await requiresEmergencyCutover()) await self.skipWaiting();
+  })());
 });
 
 async function deleteUnusedShellsWhenSafe() {
@@ -185,12 +198,14 @@ self.addEventListener('activate', (event) => {
       includeUncontrolled: true,
     });
     const names = await caches.keys();
+    const emergencyCutover = names.some((name) =>
+      EMERGENCY_RECOVERY_CACHE_NAMES.has(name));
     const previousCacheName = names
       .filter((name) => name.startsWith(CACHE_PREFIX) && name !== CACHE_NAME)
       .at(-1);
     // Route already-open tabs to the previous shell before claiming them. The
     // requesting tab is about to reload and must receive this worker's shell.
-    if (previousCacheName) {
+    if (previousCacheName && !emergencyCutover) {
       for (const client of windowClients) {
         if (client.id !== cutoverClientId) {
           clientCacheNames.set(client.id, previousCacheName);
@@ -199,7 +214,13 @@ self.addEventListener('activate', (event) => {
     }
     await self.clients.claim();
     for (const client of windowClients) {
-      client.postMessage({ type: 'FESTAPP_REPORT_VERSION' });
+      if (emergencyCutover) {
+        clientVersions.set(client.id, BUILD_VERSION);
+        clientCacheNames.delete(client.id);
+        try { await client.navigate(client.url); } catch (_) {}
+      } else {
+        client.postMessage({ type: 'FESTAPP_REPORT_VERSION' });
+      }
     }
     await deleteUnusedShellsWhenSafe();
   })());

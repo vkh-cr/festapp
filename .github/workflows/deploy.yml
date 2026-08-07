@@ -60,7 +60,7 @@ jobs:
           node-version: '20'
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.44.8'
+          flutter-version: '3.38.7'
           channel: 'stable'
 
       - name: Build (Flutter + Web Client) via shared script
