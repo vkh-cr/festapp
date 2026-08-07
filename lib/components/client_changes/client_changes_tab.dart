@@ -37,6 +37,7 @@ class _ClientChangesTabState extends State<ClientChangesTab> {
   late DateTime _from;
   late DateTime _to;
   int _loadEpoch = 0;
+  int _rangeDays = 7;
   bool _error = false;
   bool _offline = false;
   bool _loading = false;
@@ -95,6 +96,18 @@ class _ClientChangesTabState extends State<ClientChangesTab> {
     });
   }
 
+  void _setRangeDays(int days) {
+    if (days == _rangeDays) return;
+    final today = DateUtils.dateOnly(DateTime.now());
+    setState(() {
+      _rangeDays = days;
+      _from = today.subtract(Duration(days: days - 1));
+      _to = today.add(const Duration(days: 1));
+      _buckets = const [];
+    });
+    _load();
+  }
+
   @override
   Widget build(BuildContext context) {
     if (!_clientSyncEnabled) {
@@ -140,13 +153,31 @@ class _ClientChangesTabState extends State<ClientChangesTab> {
                         style: Theme.of(context).textTheme.headlineSmall,
                       ),
                       const SizedBox(height: 4),
-                      Text(ClientChangesStrings.subtitle),
+                      Text(ClientChangesStrings.subtitle(_rangeDays)),
+                      const SizedBox(height: 12),
+                      SegmentedButton<int>(
+                        segments: [
+                          for (final days in const [7, 14])
+                            ButtonSegment<int>(
+                              value: days,
+                              label: Text(
+                                ClientChangesStrings.rangeDays(days),
+                              ),
+                            ),
+                        ],
+                        selected: {_rangeDays},
+                        onSelectionChanged: (selection) =>
+                            _setRangeDays(selection.single),
+                      ),
                       const SizedBox(height: 24),
                       if (_buckets.isEmpty && !_loading)
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 40),
-                          child:
-                              Center(child: Text(ClientChangesStrings.empty)),
+                          child: Center(
+                            child: Text(
+                              ClientChangesStrings.empty(_rangeDays),
+                            ),
+                          ),
                         )
                       else
                         ClientActivityHeatmap(

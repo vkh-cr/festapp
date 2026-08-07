@@ -49,6 +49,41 @@ void main() {
     expect(find.byType(ListTile), findsNothing);
   });
 
+  testWidgets('can switch the aggregate activity range to fourteen days',
+      (tester) async {
+    final requestedRanges = <Duration>[];
+
+    Future<List<ClientActivityBucket>> load({
+      required int occasionId,
+      required DateTime from,
+      required DateTime to,
+    }) async {
+      requestedRanges.add(to.difference(from));
+      return const [];
+    }
+
+    await tester.pumpWidget(testApp(
+      ClientChangesTab(
+        clientSyncEnabled: true,
+        activityLoader: load,
+        isOffline: () async => false,
+        occasionId: 1,
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    final rangeSelector = tester.widget<SegmentedButton<int>>(
+      find.byType(SegmentedButton<int>),
+    );
+    rangeSelector.onSelectionChanged!({14});
+    await tester.pumpAndSettle();
+
+    expect(requestedRanges, [
+      const Duration(days: 7),
+      const Duration(days: 14),
+    ]);
+  });
+
   testWidgets('renders activity by half-hour and category without users',
       (tester) async {
     final today = DateUtils.dateOnly(DateTime.now());
