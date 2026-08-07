@@ -105,6 +105,12 @@ class DbEventFeedback {
         .toList();
   }
 
+  static Future<void> deleteForEdit(int occasionId, int feedbackId) =>
+      _commands.deleteForEdit(
+        occasionId: occasionId,
+        feedbackId: feedbackId,
+      );
+
   static void _ensureOk(dynamic res) {
     if (res is Map && res['code'] != null && res['code'] != 200) {
       throw EventFeedbackException(

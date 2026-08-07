@@ -2,22 +2,33 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:csv/csv.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/event_feedback/db_event_feedback.dart';
 import 'package:fstapp/components/event_feedback/event_feedback_strings.dart';
 import 'package:fstapp/components/single_data_grid/single_data_grid_header.dart';
 import 'package:fstapp/data_services/rights_service.dart';
+import 'package:fstapp/services/dialog_helper.dart';
+import 'package:fstapp/services/exception_handler.dart';
+import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:trina_grid/trina_grid.dart';
 
-/// Program → Feedback admin subtab: occasion-wide, read-only data grid of all
-/// event feedback with a CSV export and refresh. Columns and widths mirror the
-/// deployed build exactly (event · from · to · rating · comment · respondent ·
-/// anonymous · submitted_at · updated_at).
+/// Program → Feedback admin subtab: occasion-wide data grid of all event
+/// feedback with CSV export, refresh, and an admin-only delete action. Data
+/// columns and widths mirror the deployed build exactly (event · from · to ·
+/// rating · comment · respondent · anonymous · submitted_at · updated_at).
 class EventFeedbackAdminContent extends StatefulWidget {
-  const EventFeedbackAdminContent({super.key});
+  const EventFeedbackAdminContent({
+    super.key,
+    this.loadOverride,
+    this.deleteOverride,
+  });
+
+  final Future<List<Map<String, dynamic>>> Function(int occasionId)?
+      loadOverride;
+  final Future<void> Function(int occasionId, int feedbackId)? deleteOverride;
 
   @override
   State<EventFeedbackAdminContent> createState() =>
@@ -29,6 +40,8 @@ class _EventFeedbackAdminContentState extends State<EventFeedbackAdminContent> {
   bool _loading = true;
   bool _exporting = false;
 
+  bool get _canDelete => RightsService.isAdmin();
+
   @override
   void initState() {
     super.initState();
@@ -39,9 +52,11 @@ class _EventFeedbackAdminContentState extends State<EventFeedbackAdminContent> {
     setState(() => _loading = true);
     try {
       final occ = RightsService.currentOccasionId();
-      final rows = occ == null
-          ? <Map<String, dynamic>>[]
-          : await DbEventFeedback.exportForEdit(occ);
+      final rows = widget.loadOverride != null
+          ? await widget.loadOverride!(occ ?? 0)
+          : occ == null
+              ? <Map<String, dynamic>>[]
+              : await DbEventFeedback.exportForEdit(occ);
       if (!mounted) return;
       setState(() {
         _rows = rows;
@@ -50,6 +65,39 @@ class _EventFeedbackAdminContentState extends State<EventFeedbackAdminContent> {
     } catch (_) {
       if (mounted) setState(() => _loading = false);
     }
+  }
+
+  Future<void> _deleteFeedback(int feedbackId) async {
+    final rowIndex =
+        _rows.indexWhere((item) => item['feedback_id'] == feedbackId);
+    final occasionId = RightsService.currentOccasionId();
+    if (rowIndex < 0 || occasionId == null) return;
+    final row = _rows[rowIndex];
+
+    final confirmed = await DialogHelper.showConfirmationDialog(
+      context,
+      CommonStrings.confirmRemoval,
+      '${EventFeedbackStrings.removeFeedback}: '
+      '${row['event_title'] ?? ''}',
+      confirmButtonMessage: CommonStrings.delete,
+    );
+    if (!confirmed || !mounted) return;
+
+    final deleted = await ExceptionHandler.guardVoid(
+      context,
+      futureFunction: () =>
+          widget.deleteOverride?.call(
+            occasionId,
+            feedbackId,
+          ) ??
+          DbEventFeedback.deleteForEdit(occasionId, feedbackId),
+    );
+    if (!deleted || !mounted) return;
+
+    setState(() => _rows.removeWhere(
+          (item) => item['feedback_id'] == feedbackId,
+        ));
+    ToastHelper.Show(context, EventFeedbackStrings.feedbackRemoved);
   }
 
   /// Ordered display cells for one feedback row (matches the deployed columns).
@@ -150,6 +198,27 @@ class _EventFeedbackAdminContentState extends State<EventFeedbackAdminContent> {
 
   Widget _grid(BuildContext context) {
     final columns = <TrinaColumn>[
+      if (_canDelete)
+        TrinaColumn(
+          title: '',
+          field: 'delete',
+          type: TrinaColumnType.number(),
+          readOnly: true,
+          enableFilterMenuItem: false,
+          enableSorting: false,
+          enableDropToResize: false,
+          enableColumnDrag: false,
+          enableContextMenu: false,
+          cellPadding: EdgeInsets.zero,
+          width: 50,
+          renderer: (rendererContext) => IconButton(
+            tooltip: CommonStrings.delete,
+            onPressed: () => _deleteFeedback(
+              (rendererContext.cell.value as num).toInt(),
+            ),
+            icon: const Icon(Icons.delete_forever),
+          ),
+        ),
       _col('event', EventFeedbackStrings.event, 240),
       _col('from', EventFeedbackStrings.from, 130),
       _col('to', EventFeedbackStrings.to, 130),
@@ -174,6 +243,7 @@ class _EventFeedbackAdminContentState extends State<EventFeedbackAdminContent> {
     final rows = _rows.map((r) {
       final c = _cells(r);
       return TrinaRow(cells: {
+        if (_canDelete) 'delete': TrinaCell(value: r['feedback_id']),
         for (var i = 0; i < fields.length; i++)
           fields[i]: TrinaCell(value: c[i]),
       });
@@ -183,8 +253,7 @@ class _EventFeedbackAdminContentState extends State<EventFeedbackAdminContent> {
     // so it MUST sit on a white surface — otherwise the black cell text renders
     // on the dark scaffold and the whole grid looks black.
     return Container(
-      decoration:
-          BoxDecoration(color: ThemeConfig.whiteColor(context)),
+      decoration: BoxDecoration(color: ThemeConfig.whiteColor(context)),
       child: TrinaGrid(
         columns: columns,
         rows: rows,
@@ -192,7 +261,7 @@ class _EventFeedbackAdminContentState extends State<EventFeedbackAdminContent> {
         onLoaded: (e) => e.stateManager.setShowColumnFilter(true),
         configuration: SingleDataGridHeader.defaultTrinaGridConfiguration(
           context,
-          context.locale.languageCode,
+          Localizations.localeOf(context).languageCode,
         ),
       ),
     );

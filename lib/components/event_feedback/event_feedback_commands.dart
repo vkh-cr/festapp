@@ -17,6 +17,11 @@ abstract interface class EventFeedbackCommands {
     required int eventId,
     required String? anonymousClientId,
   });
+
+  Future<void> deleteForEdit({
+    required int occasionId,
+    required int feedbackId,
+  });
 }
 
 class SupabaseEventFeedbackCommands implements EventFeedbackCommands {
@@ -78,6 +83,29 @@ class SupabaseEventFeedbackCommands implements EventFeedbackCommands {
     if (response.code != 200 ||
         (response.status != 'applied' && response.status != 'unchanged')) {
       throw StateError('Feedback delete command failed');
+    }
+    await response.applyReplacements();
+  }
+
+  @override
+  Future<void> deleteForEdit({
+    required int occasionId,
+    required int feedbackId,
+  }) async {
+    final response = ClientCommandResponse.from(await _transport.invoke(
+      'delete_event_feedback_for_edit_client_sync_v1',
+      {
+        'p_occasion': occasionId,
+        'p_feedback': feedbackId,
+      },
+    ));
+    if (response.status == 'rejected') {
+      throw EventFeedbackException(
+          response.code, response.data['message'] as String?);
+    }
+    if (response.code != 200 ||
+        (response.status != 'applied' && response.status != 'unchanged')) {
+      throw StateError('Admin feedback delete command failed');
     }
     await response.applyReplacements();
   }

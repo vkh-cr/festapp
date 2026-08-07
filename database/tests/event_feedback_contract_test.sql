@@ -12,12 +12,15 @@ DECLARE
     v_event          bigint;
     v_limited_event  bigint;
     v_editor         uuid;
+    v_admin          uuid;
     v_user           uuid;
     v_editor_login   text := 'feedback_contract_editor_' || gen_random_uuid();
+    v_admin_login    text := 'feedback_contract_admin_' || gen_random_uuid();
     v_user_login     text := 'feedback_contract_user_' || gen_random_uuid();
     v_client         uuid := gen_random_uuid();
     v_other_client   uuid := gen_random_uuid();
     v_first_id       bigint;
+    v_admin_target_id bigint;
     v_res            jsonb;
 BEGIN
     PERFORM create_user_for_test(
@@ -28,7 +31,12 @@ BEGIN
         v_user_login,
         gen_random_uuid() || '@test.local'
     );
+    PERFORM create_user_for_test(
+        v_admin_login,
+        gen_random_uuid() || '@test.local'
+    );
     v_editor := get_user_id(v_editor_login);
+    v_admin := get_user_id(v_admin_login);
     v_user := get_user_id(v_user_login);
 
     INSERT INTO public.occasions (
@@ -46,6 +54,11 @@ BEGIN
         ))
     )
     RETURNING id INTO v_oc;
+
+    INSERT INTO public.organization_users (organization, "user", is_admin)
+    SELECT organization, v_admin, true
+    FROM public.occasions
+    WHERE id = v_oc;
 
     INSERT INTO public.occasions (
         title, link, start_time, end_time, is_open, features
@@ -146,6 +159,11 @@ BEGIN
         'owner client deletes it'
     );
 
+    v_res := public.submit_event_feedback(
+        v_event, 'happy', 'admin deletion target', v_client
+    );
+    v_admin_target_id := (v_res->'data'->>'id')::bigint;
+
     -- Limited event requires an authoritative participant relation.
     PERFORM set_config('request.jwt.claim.sub', v_user::text, true);
     v_res := public.submit_event_feedback(v_limited_event, 'sad');
@@ -166,6 +184,52 @@ BEGIN
 
     v_res := public.get_event_feedback_export_for_edit(v_oc);
     PERFORM assert_eq(v_res->>'code', '403', 'regular user cannot export');
+
+    BEGIN
+        PERFORM public.delete_event_feedback_for_edit_client_sync_v1(
+            v_oc, v_admin_target_id, gen_random_uuid()
+        );
+        RAISE EXCEPTION 'regular user deleted another feedback row';
+    EXCEPTION
+        WHEN insufficient_privilege THEN NULL;
+    END;
+
+    PERFORM assert_true(
+        EXISTS (
+            SELECT 1 FROM public.event_feedback WHERE id = v_admin_target_id
+        ),
+        'regular user cannot delete another feedback row'
+    );
+
+    PERFORM set_config('request.jwt.claim.sub', v_editor::text, true);
+    BEGIN
+        PERFORM public.delete_event_feedback_for_edit_client_sync_v1(
+            v_oc, v_admin_target_id, gen_random_uuid()
+        );
+        RAISE EXCEPTION 'occasion editor deleted another feedback row';
+    EXCEPTION
+        WHEN insufficient_privilege THEN NULL;
+    END;
+    PERFORM assert_true(
+        EXISTS (
+            SELECT 1 FROM public.event_feedback WHERE id = v_admin_target_id
+        ),
+        'occasion editor without is_admin cannot delete another feedback row'
+    );
+
+    PERFORM set_config('request.jwt.claim.sub', v_admin::text, true);
+    v_res := public.get_event_feedback_export_for_edit(v_oc);
+    PERFORM assert_eq(v_res->>'code', '200', 'admin can load feedback table');
+    v_res := public.delete_event_feedback_for_edit_client_sync_v1(
+        v_oc, v_admin_target_id, gen_random_uuid()
+    );
+    PERFORM assert_eq(v_res->>'status', 'applied', 'admin delete is applied');
+    PERFORM assert_false(
+        EXISTS (
+            SELECT 1 FROM public.event_feedback WHERE id = v_admin_target_id
+        ),
+        'admin deletes another feedback row'
+    );
 
     PERFORM set_config('request.jwt.claim.sub', v_editor::text, true);
     v_res := public.get_event_feedback_export_for_edit(v_oc);
