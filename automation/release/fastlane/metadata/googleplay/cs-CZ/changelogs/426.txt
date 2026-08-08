@@ -1,0 +1,1 @@
+Opravy stability, práce s mapou, offline režimu a vzhledu systémové navigační lišty.

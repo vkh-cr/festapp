@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('Android themes keep system navigation on the Festapp dark chrome', () {
+  test('Android themes keep system navigation on the CSM dark chrome', () {
     for (final path in [
       'android/app/src/main/res/values/styles.xml',
       'android/app/src/main/res/values-night/styles.xml',

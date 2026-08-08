@@ -186,6 +186,8 @@ workers/*/node_modules/
 # Production build backups (mirrored CF Pages deployments — large binaries).
 # NOTE: gitignored, so `git clean -xfd` WOULD delete these. Keep a copy elsewhere too.
 /backups/
+/build/release/
+/.bundle/
 
 # Serena MCP (local code-navigation cache/config)
 .serena/

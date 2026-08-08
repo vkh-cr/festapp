@@ -15,6 +15,58 @@ raise "Cannot read canonical project version: #{version_error}" unless version_s
 PROJECT_VERSION = JSON.parse(version_json)
 TARGET_VERSION = MANIFEST.fetch('target').fetch('version')
 TARGET_BUILD = PROJECT_VERSION.fetch('build')
+PLAY_PACKAGE = 'fstapp.jm2025'
+
+def play_key_path!
+  path = File.expand_path(ENV.fetch('GOOGLE_PLAY_JSON_KEY'))
+  UI.user_error!("Google Play credential not found: #{path}") unless File.file?(path)
+  UI.user_error!('Google Play credential must remain outside the repository') if path.start_with?(File.expand_path('../../..', __dir__) + File::SEPARATOR)
+  path
+end
+
+def play_aab_path!
+  path = File.expand_path(ENV.fetch('PLAY_AAB_PATH', File.expand_path('../../../build/app/outputs/bundle/release/app-release.aab', __dir__)))
+  UI.user_error!("AAB not found: #{path}") unless File.file?(path)
+  path
+end
+
+def play_metadata_path!
+  path = File.expand_path('../../../build/release/google-play-metadata', __dir__)
+  UI.user_error!("Staged Play metadata not found: #{path}") unless File.directory?(path)
+  path
+end
+
+def play_version!
+  code = PROJECT_VERSION.fetch('build').to_i
+  UI.user_error!('Invalid canonical Android version code') unless code.positive?
+  code
+end
+
+def play_source_sha!
+  sha, error, status = Open3.capture3('git', '-C', File.expand_path('../../..', __dir__), 'rev-parse', 'HEAD')
+  UI.user_error!("Cannot read source SHA: #{error}") unless status.success?
+  sha.strip
+end
+
+def relevant_play_version_codes
+  %w[internal alpha beta production].to_h do |track|
+    codes = google_play_track_version_codes(
+      package_name: PLAY_PACKAGE,
+      track: track,
+      json_key: play_key_path!
+    ).map(&:to_i)
+    [track, codes]
+  end
+end
+
+def assert_new_play_version!
+  tracks = relevant_play_version_codes
+  maximum = tracks.values.flatten.max || 0
+  code = play_version!
+  UI.user_error!("Version code #{code} is not greater than Play maximum #{maximum}") unless code > maximum
+  UI.message("PLAY_PACKAGE=#{PLAY_PACKAGE} TARGET_VERSION_CODE=#{code} MAX_VERSION_CODE=#{maximum}")
+  tracks.each { |track, codes| UI.message("PLAY_TRACK=#{track} VERSION_CODES=#{codes.sort.join(',')}") }
+end
 
 def app_store_connect_key_path!
   path = File.expand_path(ENV.fetch('APP_STORE_CONNECT_KEY_PATH'))
@@ -22,6 +74,52 @@ def app_store_connect_key_path!
   mode = File.stat(path).mode & 0o777
   UI.user_error!("App Store Connect key must not be accessible by group/others: #{path}") unless (mode & 0o077).zero?
   path
+end
+
+platform :android do
+  desc 'Read-only package and relevant-track version-code inspection'
+  lane :play_check do
+    assert_new_play_version!
+    UI.success("Read-only Google Play check passed for #{PLAY_PACKAGE}")
+  end
+
+  desc 'Exactly gated binary-only upload to internal testing as draft'
+  lane :play_internal_draft do
+    UI.user_error!('Internal lane requires PLAY_TARGET_TRACK=internal') unless ENV['PLAY_TARGET_TRACK'] == 'internal'
+    expected = "#{PLAY_PACKAGE}|#{play_version!}|#{play_source_sha!}|internal"
+    UI.user_error!("Set PLAY_CONFIRMATION exactly to #{expected}") unless ENV['PLAY_CONFIRMATION'] == expected
+    assert_new_play_version!
+    upload_to_play_store(
+      package_name: PLAY_PACKAGE,
+      json_key: play_key_path!,
+      aab: play_aab_path!,
+      track: 'internal',
+      release_status: 'draft',
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      validate_only: false
+    )
+  end
+
+  desc 'Exactly gated full production release for the canonical package and version'
+  lane :play_production do
+    UI.user_error!('Production lane requires PLAY_TARGET_TRACK=production') unless ENV['PLAY_TARGET_TRACK'] == 'production'
+    expected = "#{PLAY_PACKAGE}|#{play_version!}|#{play_source_sha!}|production"
+    UI.user_error!("Set PLAY_CONFIRMATION exactly to #{expected}") unless ENV['PLAY_CONFIRMATION'] == expected
+    assert_new_play_version!
+    upload_to_play_store(
+      package_name: PLAY_PACKAGE,
+      json_key: play_key_path!,
+      aab: play_aab_path!,
+      track: 'production',
+      release_status: 'completed',
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      validate_only: false
+    )
+  end
 end
 
 def api_key
