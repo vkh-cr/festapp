@@ -117,4 +117,33 @@ void main() {
     expect(user.companionOwnerName, 'Owner Name');
     expect(user.companionOrigin, 'admin_assigned');
   });
+
+  test('invitation status comes from accepted email evidence, not profile JSON',
+      () {
+    final user = DbUsers.parseOccasionEditorData({
+      'code': 200,
+      'data': {
+        'occasion_users': [
+          {
+            'user': 'recipient',
+            'data': {'is_invited': false},
+          }
+        ],
+        'forms': <dynamic>[],
+        'services': <String, dynamic>{},
+      }
+    }, invitationStatuses: [
+      {
+        'user': 'recipient',
+        'send_count': 2,
+        'first_sent_at': '2026-07-29T08:00:00Z',
+        'last_sent_at': '2026-07-30T08:00:00Z',
+      }
+    ]).users.single;
+
+    expect(user.isInvited, isTrue);
+    expect(user.invitationSendCount, 2);
+    expect(user.firstInvitationSentAt, DateTime.utc(2026, 7, 29, 8));
+    expect(user.lastInvitationSentAt, DateTime.utc(2026, 7, 30, 8));
+  });
 }

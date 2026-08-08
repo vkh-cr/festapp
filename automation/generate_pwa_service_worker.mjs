@@ -31,6 +31,7 @@ const BUILD_VERSION = ${JSON.stringify(version)};
 const CACHE_NAME = ${JSON.stringify(cacheName)};
 const CACHE_PREFIX = 'festapp-app-shell-';
 const FONT_CACHE_NAME = 'festapp-used-fonts-v1';
+const OCCASION_MEDIA_CACHE_NAME = 'festapp-occasion-media-v1';
 const PRECACHE_URLS = ${JSON.stringify(assets, null, 2)};
 const CORE_URLS = ${JSON.stringify(coreAssets, null, 2)};
 const FLUTTER_ENTRY = ${JSON.stringify(flutterEntry)};
@@ -400,6 +401,16 @@ self.addEventListener('fetch', (event) => {
         await cache.put(request, response.clone());
       }
       return response;
+    })());
+    return;
+  }
+  // Media listed by occasion_config is prefetched into a stable CacheStorage
+  // sidecar by Flutter. Serve that exact response to normal image requests on
+  // cold offline PWA starts; unrelated cross-origin requests remain untouched.
+  if (request.destination === 'image' && url.origin !== self.location.origin) {
+    event.respondWith((async () => {
+      const mediaCache = await caches.open(OCCASION_MEDIA_CACHE_NAME);
+      return (await mediaCache.match(request)) || fetch(request);
     })());
     return;
   }

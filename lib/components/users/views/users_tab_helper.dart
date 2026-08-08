@@ -120,12 +120,8 @@ class UsersTabHelper {
     var users = getCheckedUsers(singleDataGrid);
     if (users.isEmpty) return;
 
-    var alreadyInvitedUsers = users
-        .where((user) => user.data?[Tb.occasion_users.data_isInvited] == true)
-        .toList();
-    var newUsers = users
-        .where((user) => user.data?[Tb.occasion_users.data_isInvited] != true)
-        .toList();
+    var alreadyInvitedUsers = users.where((user) => user.isInvited).toList();
+    var newUsers = users.where((user) => !user.isInvited).toList();
 
     if (alreadyInvitedUsers.isNotEmpty) {
       var reinviteConfirm = await DialogHelper.showConfirmationDialog(
@@ -161,7 +157,16 @@ class UsersTabHelper {
       return () async {
         while (retryAttempts[user]! < retryLimit) {
           try {
-            await AuthService.sendSignInCode(user);
+            final statusRecorded = await AuthService.sendSignInCode(user);
+            if (!statusRecorded) {
+              ToastHelper.Show(
+                context,
+                UserStrings.invitationStatusFailed(
+                    user: user.data![Tb.occasion_users.data_email]),
+                severity: ToastSeverity.NotOk,
+              );
+              return;
+            }
             ToastHelper.Show(
               context,
               UserStrings.invitedUser(

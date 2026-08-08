@@ -120,11 +120,13 @@ class AuthService {
         body: {"email": email, "organization": AppConfig.organization});
   }
 
-  static Future<dynamic> sendSignInCode(OccasionUserModel ou) async {
-    return await _supabase.functions.invoke("send-sign-in-code", body: {
+  static Future<bool> sendSignInCode(OccasionUserModel ou) async {
+    final response =
+        await _supabase.functions.invoke("send-sign-in-code", body: {
       "oc": ou.occasion,
       "usr": ou.user,
     });
+    return response.data?["status"] == "sent";
   }
 
   static Future<bool> sendAppLinks(OccasionUserModel ou) async {

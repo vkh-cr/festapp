@@ -1247,7 +1247,8 @@
     "passwordResetFailed": "The password reset email could not be sent. Please try again later.",
     "passwordResetEmailMissing": "This account has no email address for password reset. Please contact support.",
     "passwordChangedSignInRequired": "Your password was changed. Please sign in with the new password.",
-    "passwordChangeFailedGeneric": "The password could not be changed. Please request a new link."
+    "passwordChangeFailedGeneric": "The password could not be changed. Please request a new link.",
+    "invitationStatusFailed": "The sign-in code was sent to {user}, but its audit record could not be saved. The e-mail will not be sent again automatically."
   },
   "Common": {
     "fieldCannotBeEmpty": "Field cannot be empty",
@@ -1634,7 +1635,6 @@
   },
   "FeatureMap": {
     "changeLocation": "Change location",
-    "counselingHours": "Counseling hours",
     "drawPath": "Draw path",
     "importRouteHint": "Export your route from Mapy.com (or Strava, Garmin, komoot…) as GPX and drop it here.",
     "forceOfflineMap": "Force offline map",
@@ -1649,8 +1649,6 @@
     "mapLayerTextLink": "Map Layer Text Link",
     "mapLayerUrl": "Map Layer URL",
     "mapZoom": "Map Zoom",
-    "navigate": "Navigate",
-    "loadingMap": "Loading map…",
     "newSegment": "New segment",
     "noRouteInGpx": "No route found in the GPX file.",
     "offlineMapLayerName": "Offline Map Layer Name",
@@ -1683,7 +1681,10 @@
     "mapBaseModeDescription": "Selects only the map base. Places, paths and status data may still refresh from the internet.",
     "mapBaseModeOnline": "Online map",
     "mapBaseModeLegacy": "Legacy vector offline map",
-    "mapBaseModeMapLibre": "MapLibre offline map"
+    "mapBaseModeMapLibre": "MapLibre offline map",
+    "counselingHours": "Counseling hours",
+    "navigate": "Navigate",
+    "loadingMap": "Loading map…"
   },
   "FeatureInformation": {
     "gameCheckPoint": "Check point {title}",
@@ -1934,7 +1935,10 @@
     "unexpectedCommandError": "The registration could not be completed. Please try again.",
     "enterManualCode": "Enter code manually",
     "manualCode": "Login code",
-    "manualCodeValidity": "Valid for 30 minutes."
+    "manualCodeValidity": "Valid for 30 minutes.",
+    "findParticipant": "Select an existing participant",
+    "searchParticipant": "Search by name or e-mail",
+    "noParticipantsFound": "No matching participants found."
   },
   "Offline": {
     "youAreOffline": "You are offline — showing the last downloaded data.",
@@ -1952,6 +1956,23 @@
     "notActive": "Changes will start being recorded after the new sync mode is activated. Earlier history is not reconstructed.",
     "retry": "Try again",
     "loadError": "The changes overview could not be loaded.",
+    "publicationPending": "Awaiting publication",
+    "published": "Published",
+    "deletedActor": "Deleted or unknown user",
+    "filters": "Filters",
+    "all": "All",
+    "component": "Component",
+    "changeClass": "Change class",
+    "publication": "Publication",
+    "details": "Details",
+    "actorSearch": "Search by user",
+    "previousPage": "Previous page",
+    "nextPage": "Next page",
+    "page": "Page {page}",
+    "itemCount": {
+      "one": "1 change",
+      "other": "{count} changes"
+    },
     "subtitle": "Changes saved on each day during the last {days} days.",
     "rangeDays": "{days} days",
     "totalChanges": "{count} changes total",

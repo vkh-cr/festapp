@@ -40,6 +40,7 @@ function createDependencies(
 
 const input = {
   to: "user@example.com",
+  recipientUser: "00000000-0000-4000-8000-000000000042",
   templateCode: "TEST",
   context: { organization: 9, unit: 3, occasion: 7 },
   substitutions: { name: "Ada" },
@@ -72,6 +73,7 @@ Deno.test("deliverEmail resolves, wraps, sends, and logs through one path", asyn
     organization: 9,
     occasion: 7,
     unit: 3,
+    recipient_user: input.recipientUser,
   }]);
   assertEquals(result, { templateId: 42, logged: true });
 });

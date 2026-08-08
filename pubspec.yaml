@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 0.19.85+426
+version: 0.19.88+435
 
 environment:
   sdk: '>=3.0.0 <3.32.8'
@@ -96,10 +96,7 @@ dependencies:
   mbtiles: ^0.4.0
   sqlite3_flutter_libs: ^0.5.32
   file_saver: ^0.3.1
-  youtube_player_flutter: ^9.1.3
-#    git:
-#      url: https://github.com/MusabBoltX/youtube_player_flutter_patch_fix.git
-#      ref: 97b3618b9891eb2b05a1b71ee75c432a2dce6d1a
+  youtube_player_flutter: ^10.0.1
   flutter_widget_from_html_core: ^0.17.0
   fwfh_cached_network_image: ^0.16.1
   multi_split_view: ^3.6.1
@@ -134,12 +131,20 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
 
-# maplibre_ios 0.3.5 publishes its Swift plugin class without a stable public
-# Objective-C declaration during a clean Release build. Keep this path override
-# until upstream exposes MapLibrePlugin.h before the Runner registrant compiles.
+# Local MapLibre adapters preserve style-image pixel ratios across Android and
+# iOS. The iOS copy also exposes the plugin class during a clean Release build.
+# Each package documents its removal condition in FESTAPP_PATCH.md.
 dependency_overrides:
+  # The Quill editor fork still declares Android WebView 3.x, but only uses
+  # APIs retained by 4.x. Keep one WebView implementation for the current
+  # YouTube player until the editor updates its dependency constraint.
+  webview_flutter_android: ^4.12.0
+  maplibre_android:
+    path: packages/maplibre_android
   maplibre_ios:
     path: packages/maplibre_ios
+  maplibre_platform_interface:
+    path: packages/maplibre_platform_interface
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

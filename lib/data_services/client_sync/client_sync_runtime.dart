@@ -9,6 +9,7 @@ import 'package:fstapp/data_services/client_sync/client_sync_projection_tracker.
 import 'package:fstapp/data_services/client_sync/client_sync_remote.dart';
 import 'package:fstapp/data_services/client_sync/client_sync_service.dart';
 import 'package:fstapp/data_services/client_sync/client_sync_store.dart';
+import 'package:fstapp/data_services/client_sync/occasion_media_cache.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Process-wide owner of the selected legacy/v1 context mode.
@@ -29,6 +30,7 @@ class ClientSyncRuntime {
   static final ClientSyncProjectionTracker _projectionTracker =
       ClientSyncProjectionTracker();
   static String? _searchProjectionSignature;
+  static final OccasionMediaCache _mediaCache = OccasionMediaCache();
 
   static bool get isV1Selected => _v1Selected;
   static bool get hasPrivateIdentity => _context?.privateScope != null;
@@ -74,6 +76,8 @@ class ClientSyncRuntime {
       publicComponentRemote: publicRemote,
       privateRemote: SupabasePrivateSyncRemote(supabase),
       store: _store,
+      cacheOccasionMedia: (_, urls, {required refreshExisting}) =>
+          _mediaCache.cacheAll(urls, refreshExisting: refreshExisting),
     );
   }
 

@@ -190,7 +190,7 @@ SET canonical_writers = array_append(
     'delete_event_feedback_for_edit_client_sync_v1'
 )
 WHERE component = 'private_feedback'
-  AND source_relation = 'public.event_feedback'
+  AND source_relation = 'public.event_feedback'::regclass
   AND NOT canonical_writers @> ARRAY[
       'delete_event_feedback_for_edit_client_sync_v1'
   ]::text[];

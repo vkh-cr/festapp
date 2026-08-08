@@ -6,7 +6,9 @@ Reception is a default-disabled per-occasion feature. Its role lives only in
 `occasion_users.is_receptionist`; it does not imply the general user editor
 capability. SQL reception commands re-check both feature and capability. They
 expose only a minimal group/accommodation catalog and at most ten masked exact
-name matches, never a participant roster.
+name matches to receptionists. Occasion administrators additionally receive a
+bounded, server-filtered occasion roster and may issue a login QR for any
+current occasion participant.
 
 `create_reception_user_v1` is the single idempotent identity/membership command.
 QR issue/rotation is separate so no plaintext credential enters its replay

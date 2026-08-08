@@ -51,4 +51,21 @@ Deno.test("registration sends credentials only after a created user is confirmed
     status: 200,
   });
   assertEquals(sent.length, 1);
+  assertEquals(sent[0].recipientUser, "user-id");
+});
+
+Deno.test("registration rejects success without an auditable user id", async () => {
+  const sent: Array<Record<string, unknown>> = [];
+  const result = await finishRegistration({
+    ...input,
+    creationResult: { data: { code: 200 }, error: null },
+  }, async (message) => {
+    sent.push(message);
+  });
+
+  assertEquals(result, {
+    body: { error: "Invalid created user identifier" },
+    status: 500,
+  });
+  assertEquals(sent, []);
 });

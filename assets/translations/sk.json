@@ -87,6 +87,7 @@
     "deleteAccount": "Zmazať účet",
     "deleteCompanion": "Odstrániť spoločníka",
     "inviteFailed": "Nepodarilo sa pozvať {user}. Počet pokusov: ({retries}).",
+    "invitationStatusFailed": "Prihlasovací kód bol používateľovi {user} odoslaný, ale auditný záznam sa nepodarilo uložiť. E-mail sa automaticky neposiela znova.",
     "fillPassword": "Vyplňte heslo!",
     "companionInfo": "Spoločník je samostatný účastník bez vlastného zariadenia. Maximálny počet: {max_companions}.",
     "noGroup": "Bez skupinky",

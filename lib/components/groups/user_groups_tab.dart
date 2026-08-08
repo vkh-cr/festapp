@@ -14,6 +14,7 @@ import 'package:fstapp/components/users/db_users.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/html/html_editor_page.dart';
 import 'package:fstapp/router_service.dart';
+import 'package:fstapp/components/map/map_page.dart';
 import 'package:trina_grid/trina_grid.dart';
 
 import '../map/place_model.dart';
@@ -82,7 +83,7 @@ class _UserGroupsTabState extends State<UserGroupsTab> {
             );
       final coordinates = await RouterService.navigatePageInfo(
         context,
-        MapRoute(place: customPlace),
+        MapEditorRoute(mode: PlaceMapEditorMode(customPlace)),
       );
       if (!mounted || coordinates == null) return;
       customPlace.latLng = coordinates;

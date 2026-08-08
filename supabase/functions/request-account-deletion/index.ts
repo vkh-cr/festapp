@@ -55,6 +55,7 @@ Deno.serve(async (request) => {
   try {
     await deliverEmail({
       to: deliveryEmail,
+      recipientUser: user.id,
       templateCode: "ACCOUNT_DELETION_CONFIRM",
       context: { organization: organizationId },
       substitutions: {

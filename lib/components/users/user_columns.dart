@@ -353,7 +353,14 @@ class UserColumns {
         ],
         APPROVER: [_statusColumn(UserStrings.approver, APPROVER)],
         APPROVED: [_statusColumn(UserStrings.approved, APPROVED)],
-        INVITED: [_statusColumn(UserStrings.invited, INVITED)],
+        INVITED: [
+          _statusColumn(
+            UserStrings.invited,
+            INVITED,
+            canUpdateUser: () => false,
+            readOnly: true,
+          )
+        ],
         APP_LINKS_SENT: [
           _statusColumn(
             UserStrings.appLinksSent,
@@ -379,13 +386,14 @@ class UserColumns {
   }
 
   static TrinaColumn _statusColumn(String title, String field,
-      {bool Function()? canUpdateUser}) {
+      {bool Function()? canUpdateUser, bool readOnly = false}) {
     return TrinaColumn(
       title: title,
       field: field,
       type: TrinaColumnType.text(),
       applyFormatterInEditing: true,
       enableEditingMode: false,
+      readOnly: readOnly,
       width: 100,
       renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(
           rendererContext,

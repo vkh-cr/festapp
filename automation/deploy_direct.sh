@@ -2,13 +2,9 @@
 # ==============================================================================
 # DIRECT CLOUDFLARE PAGES DEPLOY (no git push)
 #
-# Builds the site locally (shared automation/cloudflare_build.sh: Flutter web +
+# Builds the site locally (automation/cloudflare_build.sh: Flutter web +
 # Web Client + _worker.js) and uploads it straight to the Cloudflare Pages
-# project via wrangler — bypassing the git-push -> GitHub Actions pipeline.
-#
-# This is the alternative to a git push. Use whichever fits:
-#   - git push origin prod/<instance>   -> CI builds & deploys (audited, slower)
-#   - automation/deploy_direct.sh        -> immediate local build & upload
+# project via Wrangler. This is the canonical production web deployment path.
 #
 # Requirements:
 #   - CLOUDFLARE_API_TOKEN in the environment, OR pass --env-file <path> to a

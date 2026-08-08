@@ -395,6 +395,38 @@ class LegacyMapViewportController implements MapViewportController {
   double get directionLayoutZoom => controller.mapController.camera.zoom - 1;
 
   @override
+  Future<CameraApplyResult> applyCamera(CameraCommand command) async {
+    // A retained map can be put under TickerMode while an earlier camera
+    // animation is still pending. If that animation resumes after navigation,
+    // it would overwrite this required destination. Navigation state wins over
+    // cosmetic motion, so cancel every pending animation before the raw move.
+    controller.stopAnimations();
+    controller.mapController.move(
+      command.destination,
+      command.zoom + 1,
+    );
+    final raw = controller.mapController.camera;
+    final actual = MapCameraState(center: raw.center, zoom: raw.zoom - 1);
+    final centerMatches = const Distance().as(
+          LengthUnit.Meter,
+          actual.center,
+          command.destination,
+        ) <=
+        command.centerToleranceMeters;
+    final zoomMatches =
+        (actual.zoom - command.zoom).abs() <= command.zoomTolerance;
+    return CameraApplyResult(
+      status: centerMatches && zoomMatches
+          ? CameraApplyStatus.applied
+          : CameraApplyStatus.retryable,
+      surfaceId: command.surfaceId,
+      command: command,
+      actual: actual,
+      reason: centerMatches && zoomMatches ? null : 'actualCameraMismatch',
+    );
+  }
+
+  @override
   Future<void> animateTo(
     LatLng destination, {
     double? zoom,

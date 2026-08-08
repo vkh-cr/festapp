@@ -5,6 +5,7 @@ export type RegistrationCreationResult = {
 
 export type RegistrationEmail = {
   to: string;
+  recipientUser: string;
   templateCode: "SIGN_IN_CODE";
   context: { organization: number };
   substitutions: {
@@ -52,8 +53,13 @@ export async function finishRegistration(
     };
   }
 
+  if (typeof result.id !== "string") {
+    return { body: { error: "Invalid created user identifier" }, status: 500 };
+  }
+
   await deliver({
     to: input.userEmail,
+    recipientUser: result.id,
     templateCode: "SIGN_IN_CODE",
     context: { organization: input.organizationId },
     substitutions: {

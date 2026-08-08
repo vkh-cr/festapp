@@ -21,7 +21,11 @@ void main() {
     'updated_at': '2026-08-07T11:00:00Z',
   };
 
-  Widget app({required bool isAdmin}) {
+  Widget app({
+    required bool isAdmin,
+    Future<List<Map<String, dynamic>>> Function(int occasionId)? loadOverride,
+    Future<void> Function(int occasionId, int feedbackId)? deleteOverride,
+  }) {
     RightsService.occasionLinkModelNotifier.value = OccasionLinkModel(
       isAdmin: isAdmin,
       occasion: OccasionModel(
@@ -35,7 +39,8 @@ void main() {
     return MaterialApp(
       home: Scaffold(
         body: EventFeedbackAdminContent(
-          loadOverride: (_) async => [feedbackRow],
+          loadOverride: loadOverride ?? (_) async => [feedbackRow],
+          deleteOverride: deleteOverride,
         ),
       ),
     );
@@ -57,5 +62,38 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byIcon(Icons.delete_forever), findsNothing);
+  });
+
+  testWidgets('admin delete is deferred until changes are saved',
+      (tester) async {
+    final deletedIds = <int>[];
+    var deleted = false;
+    await tester.pumpWidget(app(
+      isAdmin: true,
+      loadOverride: (_) async => deleted ? [] : [feedbackRow],
+      deleteOverride: (occasionId, feedbackId) async {
+        expect(occasionId, 7);
+        deletedIds.add(feedbackId);
+        deleted = true;
+      },
+    ));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byIcon(Icons.delete_forever));
+    await tester.pump();
+
+    expect(deletedIds, isEmpty);
+
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Common.saveChanges'));
+    await tester.pumpAndSettle();
+
+    expect(deletedIds, isEmpty);
+    expect(find.byType(AlertDialog), findsOneWidget);
+
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Common.ok'));
+    await tester.pumpAndSettle();
+
+    expect(deletedIds, [41]);
+    expect(find.text('Program item'), findsNothing);
   });
 }

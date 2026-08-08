@@ -87,6 +87,7 @@
     "deleteAccount": "Usuń konto",
     "deleteCompanion": "Usuń towarzysza",
     "inviteFailed": "Nie udało się zaprosić {user}. Liczba prób: ({retries}).",
+    "invitationStatusFailed": "Kod logowania został wysłany do {user}, ale nie udało się zapisać wpisu audytowego. Wiadomość nie zostanie wysłana ponownie automatycznie.",
     "fillPassword": "Wpisz hasło!",
     "companionInfo": "Towarzysz jest osobnym uczestnikiem bez własnego urządzenia. Maksymalna liczba: {max_companions}.",
     "noGroup": "Bez grupy",

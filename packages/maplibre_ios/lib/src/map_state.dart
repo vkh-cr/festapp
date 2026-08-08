@@ -17,6 +17,7 @@ final class MapLibreMapStateIos extends MapLibreMapState {
   late final int _viewId;
   MLNMapView? _mapView;
   bool _pendingStyleLoaded = true;
+  bool _locationEnabled = false;
 
   @override
   StyleControllerIos? style;
@@ -40,6 +41,7 @@ final class MapLibreMapStateIos extends MapLibreMapState {
     _viewId = viewId;
     final mapView = MapLibreRegistry.getMapWithViewId(viewId)!;
     _mapView = mapView;
+    _applyActivityState(mapView);
     final flutterApi = FlutterApi$Builder.implementAsListener(
       // Gesture callbacks
       onDoubleTapWithScreenLocation_: (screenLocation) {
@@ -172,7 +174,8 @@ final class MapLibreMapStateIos extends MapLibreMapState {
     final mapView = _mapView;
     if (mapView == null) return;
 
-    mapView.showsUserLocation = true;
+    _locationEnabled = true;
+    mapView.showsUserLocation = widget.active;
     // TODO: apply bearingRenderMode
     mapView.showsUserHeadingIndicator =
         bearingRenderMode != BearingRenderMode.none;
@@ -223,12 +226,24 @@ final class MapLibreMapStateIos extends MapLibreMapState {
   }) async {
     final mapView = _mapView;
     if (mapView == null) return;
-    if (zoom != null) mapView.zoomLevel = zoom;
+    Helpers.cancelTransitionsWithMapView(mapView);
     final ffiCamera = mapView.camera;
     if (pitch != null) ffiCamera.pitch = pitch;
     if (bearing != null) ffiCamera.heading = bearing;
     if (center != null) {
       ffiCamera.centerCoordinate = center.toCLLocationCoordinate2D();
+    }
+    if (zoom != null) {
+      // Apply center and zoom as one native camera transaction. Assigning
+      // zoomLevel first can publish an intermediate camera based on the old
+      // center; an immediate setCamera then races that update on iOS and the
+      // requested center is intermittently lost.
+      ffiCamera.altitude = Helpers.zoomLevelToAltitudeWithZoomLevel(
+        zoom,
+        pitch: ffiCamera.pitch,
+        latitude: ffiCamera.centerCoordinate.latitude,
+        size: mapView.frame.size,
+      );
     }
     mapView.setCamera$3(
       ffiCamera,
@@ -247,9 +262,18 @@ final class MapLibreMapStateIos extends MapLibreMapState {
 
   @override
   void didUpdateWidget(covariant MapLibreMap oldWidget) {
+    if (widget.active != oldWidget.active) {
+      final mapView = _mapView;
+      if (mapView != null) _applyActivityState(mapView);
+    }
     _updateOptions(oldWidget);
     layerManager?.updateLayers(widget.layers);
     super.didUpdateWidget(oldWidget);
+  }
+
+  void _applyActivityState(MLNMapView mapView) {
+    mapView.preferredFramesPerSecond = widget.active ? 60 : 1;
+    mapView.showsUserLocation = widget.active && _locationEnabled;
   }
 
   Future<void> _updateOptions(MapLibreMap oldWidget) async {

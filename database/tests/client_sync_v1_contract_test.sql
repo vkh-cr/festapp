@@ -107,10 +107,10 @@ BEGIN
     'audit detail accepts the same unit-manager scope as the list');
   PERFORM assert_true(pg_get_functiondef(
       'public.get_client_activity_v1(bigint,timestamptz,timestamptz)'::regprocedure)
-      NOT LIKE '%actor_display%'
+      NOT LIKE '%''actorDisplay''%'
       AND pg_get_functiondef(
         'public.get_client_activity_v1(bigint,timestamptz,timestamptz)'::regprocedure)
-        NOT LIKE '%actor_id%',
+        NOT LIKE '%''actorId''%',
     'activity overview exposes no actor identity');
   PERFORM assert_true(pg_get_functiondef(
       'public.get_client_activity_v1(bigint,timestamptz,timestamptz)'::regprocedure)

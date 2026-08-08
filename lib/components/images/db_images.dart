@@ -138,7 +138,9 @@ class DbImages {
       final filePath = segments.sublist(bucketIndex + 1).join('/');
       await _supabase.storage.from(_bucketName).remove([filePath]);
     }
-    await _supabase.from(Tb.images.table).delete().eq(Tb.images.link, imageUrl);
+    await _supabase.rpc('remove_image_records', params: {
+      'p_links': [imageUrl],
+    });
   }
 
   static Future<String> createCopyOfImage(
@@ -167,10 +169,10 @@ class DbImages {
     final newPublicUrl =
         _supabase.storage.from(_bucketName).getPublicUrl(newPath);
 
-    await _supabase.from(Tb.images.table).insert({
-      Tb.images.link: newPublicUrl,
-      Tb.images.occasion: occasion,
-      Tb.images.unit: unit,
+    await _supabase.rpc('add_image_record', params: {
+      'p_link': newPublicUrl,
+      'p_occasion_id': occasion,
+      'p_unit_id': unit,
     });
 
     return newPublicUrl;
@@ -239,10 +241,8 @@ class DbImages {
       await _supabase.storage.from(_bucketName).remove(supabasePaths);
     }
 
-    await _supabase
-        .from(Tb.images.table)
-        .delete()
-        .inFilter(Tb.images.link, removedImages)
-        .eq(Tb.images.occasion, occasion);
+    await _supabase.rpc('remove_image_records', params: {
+      'p_links': removedImages,
+    });
   }
 }

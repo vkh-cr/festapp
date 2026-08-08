@@ -4,7 +4,6 @@ import 'package:fstapp/components/map/map_scene.dart';
 import 'package:maplibre/maplibre.dart';
 
 class MapLibreSceneController {
-  static const placeIconScale = 1.0;
   static const fallbackPlaceIconSize = 36.0;
   static const placeSourceId = 'festapp-places-source';
   static const placeLayerId = 'festapp-places-layer';
@@ -62,9 +61,7 @@ class MapLibreSceneController {
       sourceId: placeSourceId,
       layout: {
         'icon-image': ['get', 'icon_key'],
-        // The registered widget raster is 58 logical pixels wide, matching the
-        // Legacy Flutter pin. Keep it at full scale for renderer parity.
-        'icon-size': placeIconScale,
+        'icon-size': 1,
         'icon-anchor': 'bottom',
         'icon-allow-overlap': true,
         'text-field': ['get', 'label'],

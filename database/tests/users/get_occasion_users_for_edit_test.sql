@@ -73,7 +73,6 @@ BEGIN
                 'sex', 'occasion-sex',
                 'phone', 'occasion-phone',
                 'birthDate', '1999-01-01',
-                'is_invited', false,
                 'note', 'occasion note'
             ),
             '{}'::jsonb
@@ -209,7 +208,7 @@ BEGIN
     PERFORM assert_eq(
         v_user #>> '{data,is_invited}',
         'false',
-        'occasion invitation state is not overwritten by global profile JSON'
+        'invitation state is projected from email evidence, not global profile JSON'
     );
     PERFORM assert_eq(
         v_user #>> '{data,note}',

@@ -73,6 +73,17 @@ class ReceptionService {
         'p_user': userId,
       });
 
+  static Future<List<Map<String, dynamic>>> occasionUsers(String query) async {
+    final value = await _client.rpc('get_reception_occasion_users_v1', params: {
+      'p_occasion': RightsService.currentOccasionId(),
+      'p_query': query,
+    });
+    return (value as List? ?? const [])
+        .whereType<Map>()
+        .map((e) => Map<String, dynamic>.from(e))
+        .toList();
+  }
+
   static Future<List<Map<String, dynamic>>> recent() async {
     final value = await _client.rpc('get_my_recent_reception_registrations_v1',
         params: {'p_occasion': RightsService.currentOccasionId()});

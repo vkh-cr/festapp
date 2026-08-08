@@ -15,6 +15,8 @@ import 'package:fstapp/components/map/map_page_helper.dart';
 import 'package:fstapp/components/map/counseling_hours_panel.dart';
 import 'package:fstapp/components/map/map_path_direction_layout.dart';
 import 'package:fstapp/components/map/map_scene.dart';
+import 'package:fstapp/components/map/public_map_host.dart';
+import 'package:fstapp/components/map/public_map_session.dart';
 import 'package:fstapp/components/map/map_viewport_controller.dart';
 import 'package:fstapp/components/map/map_renderer_host.dart';
 import 'package:fstapp/components/map/map_renderer_benchmark_override.dart';
@@ -27,7 +29,6 @@ import 'package:fstapp/components/timeline/schedule_timeline.dart';
 import 'package:fstapp/components/schedule/db_events.dart';
 import 'package:fstapp/widgets/detail_dialog.dart';
 import 'package:fstapp/data_services/rights_service.dart';
-import 'package:fstapp/components/occasion/occasion_home_page.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/components/map/map_description_popup.dart';
@@ -54,7 +55,6 @@ import 'package:fstapp/data_services/offline_data_service.dart';
 import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
 import 'package:fstapp/components/html/html_helper.dart';
 import 'place_model.dart';
-import '../../services/js/js_interop.dart';
 import 'package:fstapp/services/platform_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
@@ -71,12 +71,112 @@ import 'package:path_provider/path_provider.dart';
 import '../schedule/event_page.dart';
 import '../speakers/counseling_page.dart';
 
+sealed class MapEditorMode {
+  const MapEditorMode();
+}
+
+final class PlaceMapEditorMode extends MapEditorMode {
+  final PlaceModel place;
+
+  const PlaceMapEditorMode(this.place);
+}
+
+final class PathMapEditorMode extends MapEditorMode {
+  final PathGroupsModel pathGroup;
+
+  const PathMapEditorMode(this.pathGroup);
+}
+
 @RoutePage()
+class PublicMapPage extends StatelessWidget {
+  static const overviewDestination = 'overview';
+
+  final String destination;
+  final String? placeType;
+
+  const PublicMapPage({
+    @PathParam('destination') this.destination = 'overview',
+    @QueryParam('placeType') this.placeType,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final placeId = int.tryParse(destination);
+    return _PublicMapHostPage(
+      intent: placeId != null
+          ? MapPlaceIntent(placeId)
+          : placeType != null && placeType!.isNotEmpty
+              ? MapCategoryIntent(placeType!)
+              : null,
+    );
+  }
+}
+
+class _PublicMapHostPage extends StatelessWidget {
+  final MapIntent? intent;
+
+  const _PublicMapHostPage({this.intent});
+
+  @override
+  Widget build(BuildContext context) => Stack(
+        fit: StackFit.expand,
+        children: [
+          const MapPage(key: ValueKey('occasion-public-map-host')),
+          if (intent != null) _PublicMapIntentAdapter(intent: intent),
+        ],
+      );
+}
+
+class _PublicMapIntentAdapter extends StatefulWidget {
+  final MapIntent? intent;
+
+  const _PublicMapIntentAdapter({this.intent});
+
+  @override
+  State<_PublicMapIntentAdapter> createState() =>
+      _PublicMapIntentAdapterState();
+}
+
+class _PublicMapIntentAdapterState extends State<_PublicMapIntentAdapter> {
+  MapIntent? _publishedIntent;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final intent = widget.intent;
+    if (intent == null || intent == _publishedIntent) return;
+    _publishedIntent = intent;
+    final session = PublicMapSessionScope.read(context);
+    scheduleMicrotask(() {
+      if (mounted && identical(_publishedIntent, intent)) {
+        session?.acceptExternalIntent(intent);
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) => const SizedBox.expand();
+}
+
+@RoutePage()
+class MapEditorPage extends StatelessWidget {
+  final MapEditorMode mode;
+
+  const MapEditorPage({required this.mode, super.key});
+
+  @override
+  Widget build(BuildContext context) => switch (mode) {
+        PlaceMapEditorMode(:final place) => MapPage(place: place),
+        PathMapEditorMode(:final pathGroup) =>
+          MapPage(editPathGroup: pathGroup),
+      };
+}
+
 class MapPage extends StatefulWidget {
   // Kept for compatibility with the repository-wide route naming convention.
   // ignore: constant_identifier_names
   static const ROUTE = "map";
-  final int? id;
   final PlaceModel? place;
 
   /// When set, the map opens in path-drawing mode for this group: tapping
@@ -84,15 +184,9 @@ class MapPage extends StatefulWidget {
   /// free-point nodes, and Save returns the drawn path as a CSV string.
   final PathGroupsModel? editPathGroup;
 
-  /// Optional deep-link place-type filter (e.g. `map?placeType=toilet` from the
-  /// Cleaning page) — opens the map showing only that category.
-  final String? placeType;
-
   const MapPage({
-    @pathParam this.id,
     this.place,
     this.editPathGroup,
-    @QueryParam('placeType') this.placeType,
     super.key,
   });
 
@@ -104,11 +198,12 @@ class MapPage extends StatefulWidget {
   State<MapPage> createState() => _MapPageState();
 }
 
-class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
+class _MapPageState extends State<MapPage>
+    with TickerProviderStateMixin
+    implements PublicMapHost {
   // Paths stay hidden until the user selects a group; nothing is drawn by default.
   static const bool _showAllPathsWhenNoGroupSelected = false;
   final MapViewportCoordinator _viewportController = MapViewportCoordinator();
-  final JSInterop jsInterop = JSInterop();
 
   List<IconModel> _icons = [];
   // Derived cleaning status + rating aggregate per toilet place id (empty unless
@@ -137,16 +232,19 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
   bool _useOffline = false;
   MapDownloadState _downloadState = const MapDownloadIdle();
   String? _offlinePackagePath;
-  final Completer<void> _mapReady = Completer<void>();
   LegacyMapConfiguration? _legacyOfflineConfiguration;
   String? _mapLibreStyle;
   String? _offlineMapError;
   int? _popupPlaceId;
-  int? _placeId;
 
   late final ScrollController _iconScrollController;
 
-  bool _showLocation = true;
+  bool _isMapTabActive = false;
+  PublicMapSession? _mapSession;
+  int _catalogEpoch = 0;
+  bool _catalogFinal = false;
+  Future<void>? _presentationFuture;
+  int _publicMapEffectToken = 0;
   bool _isShowingGroupsInEditMode = false;
 
   /// Visible place types (categories) shown as the bottom filter bar. Loaded
@@ -190,36 +288,18 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    _isMapTabActive = _isDrawingPath || widget.place != null;
     _useOffline = kIsWeb && ConnectivityService.isOfflineNotifier.value;
     ConnectivityService.isOfflineNotifier.addListener(_onConnectivityChanged);
-    _placeId = widget.id;
-    if (widget.placeType != null && widget.placeType!.isNotEmpty) {
-      _deepLinkPlaceType = widget.placeType;
-      _selectedPlaceTypeCode = widget.placeType;
-      _placeTypeInitialized = true;
-    }
     _iconScrollController = ScrollController();
-    context.tabsRouter.addListener(() async {
-      if (context.tabsRouter.activeIndex ==
-          OccasionHomePage.baseTabKeys.indexOf(OccasionTab.map)) {
-        setState(() => _showLocation = true);
-        if (kIsWeb) {
-          WidgetsBinding.instance.addPostFrameCallback((_) async {
-            await Future.delayed(Duration(milliseconds: 100));
-            jsInterop.changeUrl(
-                "${RouterService.getCurrentUriWithOccasion()}${MapPage.ROUTE}");
-          });
-        }
-      } else {
-        setState(() => _showLocation = false);
-      }
-    });
   }
 
   @override
   void dispose() {
     ConnectivityService.isOfflineNotifier
         .removeListener(_onConnectivityChanged);
+    final session = _mapSession;
+    session?.detachHost(this);
     if (_isDrawingPath) {
       MapPage.isEditingNotifier.value = false;
     }
@@ -249,6 +329,25 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
   @override
   void didChangeDependencies() async {
     super.didChangeDependencies();
+    final mapSession = !_isDrawingPath && widget.place == null
+        ? PublicMapSessionScope.watch(context)
+        : null;
+    if (!identical(mapSession, _mapSession)) {
+      _mapSession?.detachHost(this);
+      _mapSession = mapSession;
+      _mapSession?.attachHost(this);
+    }
+    final active =
+        mapSession?.isMapVisible ?? (_isDrawingPath || widget.place != null);
+    if (_isMapTabActive != active) {
+      _isMapTabActive = active;
+      _publicMapEffectToken++;
+      scheduleMicrotask(() {
+        if (mounted && identical(_mapSession, mapSession)) {
+          mapSession?.hostChanged();
+        }
+      });
+    }
     // Inherited-widget changes may invoke this lifecycle more than once (for
     // example when Android finishes localization/startup). Map initialization
     // owns controllers, downloads, listeners and a late-final feature snapshot,
@@ -260,10 +359,6 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     // Deferred to after the frame so we never notify listeners mid-build.
     WidgetsBinding.instance.addPostFrameCallback(
         (_) => MapPage.isEditingNotifier.value = _isDrawingPath);
-
-    if (_placeId == null && context.routeData.hasPendingChildren) {
-      _placeId = context.routeData.pendingChildren[0].params.getInt("id");
-    }
 
     final feature = FeatureService.getFeatureDetails(FeatureConstants.map);
     final hasAuthoritativeMapConfiguration = feature is MapFeature;
@@ -305,7 +400,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
 
     var placeModel = widget.place;
     if (placeModel == null || placeModel.latLng == null) {
-      loadData(placeId: _placeId);
+      await loadData();
     } else {
       if (placeModel.latLng.toString().isEmpty) {
         placeModel.latLng = {
@@ -645,6 +740,116 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
   }
 
   @override
+  PublicMapHostSnapshot get snapshot {
+    final renderObject = mounted ? context.findRenderObject() : null;
+    final size = renderObject is RenderBox && renderObject.hasSize
+        ? renderObject.size
+        : null;
+    return PublicMapHostSnapshot(
+      surfaceId: _viewportController.surfaceId,
+      styleEpoch: Object.hash(
+        _useOffline,
+        _mapLibreStyle,
+        _legacyOfflineConfiguration?.sourceName,
+      ),
+      readinessEpoch: _viewportController.readinessEpoch,
+      catalogEpoch: _catalogEpoch,
+      activeLayoutReady: _isMapTabActive &&
+          _viewportController.isReady &&
+          size != null &&
+          size.width > 0 &&
+          size.height > 0 &&
+          _catalogEpoch > 0,
+    );
+  }
+
+  @override
+  Future<PublicMapHostResult> applyIntent(PublicMapEffect effect) async {
+    if (!mounted ||
+        !_isMapTabActive ||
+        effect.snapshot.surfaceId != _viewportController.surfaceId ||
+        !_viewportController.isReady) {
+      return PublicMapHostResult.retryable('hostNotReady');
+    }
+    final effectToken = ++_publicMapEffectToken;
+
+    switch (effect.intent) {
+      case MapCategoryIntent(:final placeType):
+        setState(() {
+          _deepLinkPlaceType = placeType;
+          _selectedPlaceTypeCode = placeType;
+          _placeTypeInitialized = true;
+          _forcedVisiblePlaceId = null;
+        });
+        final current = _viewportController.camera;
+        final command = CameraCommand(
+          surfaceId: _viewportController.surfaceId,
+          destination: current.center,
+          zoom: current.zoom,
+        );
+        return PublicMapHostResult.applied(CameraApplyResult(
+          status: CameraApplyStatus.applied,
+          surfaceId: command.surfaceId,
+          command: command,
+          actual: current,
+        ));
+      case MapPlaceIntent(:final placeId):
+        final marker =
+            _places.firstWhereOrNull((item) => item.place.id == placeId);
+        if (marker == null) {
+          return _catalogFinal
+              ? PublicMapHostResult.unavailable('placeNotInCatalog')
+              : PublicMapHostResult.retryable('catalogRefreshing');
+        }
+        setState(() {
+          _forcedVisiblePlaceId = placeId;
+          _places
+            ..remove(marker)
+            ..add(marker);
+        });
+        final camera = await _viewportController.applyCamera(CameraCommand(
+          surfaceId: effect.snapshot.surfaceId,
+          destination: marker.point,
+          zoom: 18,
+        ));
+        if (!camera.isApplied) {
+          return camera.status == CameraApplyStatus.rejected
+              ? PublicMapHostResult.failed(camera.reason)
+              : PublicMapHostResult.retryable(
+                  camera.reason ?? 'cameraNotApplied',
+                );
+        }
+        if (!mounted ||
+            !_isMapTabActive ||
+            effectToken != _publicMapEffectToken ||
+            effect.snapshot.surfaceId != _viewportController.surfaceId ||
+            effect.snapshot.catalogEpoch != _catalogEpoch) {
+          return PublicMapHostResult.retryable('effectBecameStale');
+        }
+        final presentation = _onPlaceTap(placeId);
+        _presentationFuture = presentation;
+        presentation.catchError((Object error, StackTrace stackTrace) {
+          AppLogger.error('Map place presentation failed: $error\n$stackTrace');
+        }).whenComplete(() {
+          if (identical(_presentationFuture, presentation)) {
+            _presentationFuture = null;
+          }
+        });
+        return PublicMapHostResult.applied(camera);
+    }
+  }
+
+  Future<void> _closePublicMap() async {
+    if (await _mapSession?.closeVisit() ?? false) return;
+    if (!mounted) return;
+    if (context.router.canNavigateBack) {
+      context.router.back();
+    } else {
+      RouterService.popOrHome(context);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final offlineConfiguration = _offlineConfiguration;
     final renderer = MapRendererHost.resolveRenderer(
@@ -657,6 +862,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
       renderer: offlineConfiguration.renderer,
       isOffline: _useOffline,
       model: MapSurfaceModel(
+        active: _isMapTabActive,
         scene: scene,
         icons: _icons,
         initialCenter: _mapCenter!,
@@ -666,7 +872,8 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
         onPlaceTap: _onPlaceTap,
         onPlaceLongPress: _onPlaceLongPress,
         onCameraReady: () {
-          if (!_mapReady.isCompleted) _mapReady.complete();
+          _viewportController.markReady();
+          _mapSession?.hostChanged();
         },
         onCameraChanged: () {
           if (mounted && _popupPlaceId != null) setState(() {});
@@ -690,6 +897,9 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
             style: TextStyle(color: ThemeConfig.appBarColorNegative())),
         leading: PopButton(
           color: ThemeConfig.appBarColorNegative(),
+          onPressed: !_isDrawingPath && widget.place == null
+              ? () => unawaited(_closePublicMap())
+              : null,
         ),
         actions: [
           if (!kIsWeb &&
@@ -908,7 +1118,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
                 colorValue: _drawPathColor().toARGB32(),
               ))
           .toList(growable: false),
-      showCurrentLocation: _showLocation,
+      showCurrentLocation: _isMapTabActive,
     );
   }
 
@@ -1253,12 +1463,12 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     loadData(loadOtherGroups: true);
   }
 
-  Future<void> loadData({int? placeId, bool loadOtherGroups = false}) async {
+  Future<void> loadData({bool loadOtherGroups = false}) async {
+    _catalogFinal = false;
     // Preserve selected marker's ID if in edit mode to potentially re-apply state later if needed,
     // though current logic replaces _places list entirely.
     // The selectedPlace instance itself in _selectedPlaces should persist.
 
-    if (placeId != null) _forcedVisiblePlaceId = placeId;
     var offlinePlaces = await OfflineDataService.getAllPlaces();
     _icons = await OfflineDataService.getAllIcons();
 
@@ -1285,34 +1495,15 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     var offlineList = loadOtherGroups
         ? offlinePlaces
         : offlinePlaces.where((e) => !(e.isHidden)).toList();
-    if (placeId != null) {
-      var p = offlinePlaces.firstWhereOrNull((p) => p.id == placeId);
-      if (p != null && !offlineList.any((item) => item.id == p.id)) {
-        offlineList.add(p);
-      }
-      if (p?.hasCoordinates == true) {
-        _mapCenter = LatLng(p!.getLat(), p.getLng());
-      }
-    }
     await addOfflineEventsToPlace(offlineList);
     // Cache-first paint of the toilet colors, so they show without network;
     // the online pass below overwrites them with the live statuses.
     await _seedCleaningStatusFromCache();
     addPlacesToMap(offlineList);
     _initPlaceTypeSelection();
+    _publishCatalog(isFinal: false);
 
-    var isPlaceSetToOnePlace = false;
     if (mounted) setState(() {});
-    if (placeId != null && !isOnlyEditMode && selectedPlace == null) {
-      // Place content is independent of the renderer. Open it as soon as the
-      // cached place and events are ready; paths and the base map may continue
-      // loading underneath the dialog.
-      final place = offlineList.firstWhereOrNull((p) => p.id == placeId);
-      if (place != null) {
-        setMapToOnePlaceAndShowPopup(placeId, place);
-        isPlaceSetToOnePlace = true;
-      }
-    }
 
     _pathGroups = (await OfflineDataService.getAllPathGroups())
         .where((p) => !(p.isHidden ?? false))
@@ -1336,7 +1527,10 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
 
     // v1 readers consume the closed map_catalog aggregate above. Missing
     // places/types/paths/icons block publication; they are never side-loaded.
-    if (ClientSyncRuntime.isV1Selected) return;
+    if (ClientSyncRuntime.isV1Selected) {
+      _publishCatalog(isFinal: true);
+      return;
+    }
 
     // The cache-first scene above is a complete, usable map state. The
     // forceOfflineMap setting selects only the base-map renderer; live places,
@@ -1348,6 +1542,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
       } else if (mounted) {
         setState(() {});
       }
+      _publishCatalog(isFinal: true);
       return;
     }
 
@@ -1383,18 +1578,6 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
         }
         onlineList.sortPlaces(false);
 
-        if (placeId != null) {
-          var p = onlineList.firstWhereOrNull((p) => p.id == placeId);
-          // Ensure 'p' is added only if not already present to avoid duplicates from loadOtherGroups logic
-          if (p != null && !onlineList.any((item) => item.id == p.id)) {
-            onlineList.add(p);
-          } else if (p != null && loadOtherGroups) {
-            // If loading other groups and p is already there, ensure its data is primary
-            onlineList.removeWhere((item) => item.id == p.id);
-            onlineList.add(p);
-          }
-        }
-
         await addEventsToPlace(onlineList);
         final onlineCleaningByPlace = await _getCleaningStatus();
         final onlinePathGroups = (await DbPlaces.getAllPathGroups())
@@ -1415,6 +1598,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
         _cleaningByPlace = onlineCleaningByPlace;
         addPlacesToMap(onlineList);
         _initPlaceTypeSelection();
+        _publishCatalog(isFinal: false);
         _pathGroups = onlinePathGroups;
         _allGroupPaths = onlineGroupPaths;
 
@@ -1432,20 +1616,16 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
         // This setState call was inside addPlacesToMap, moved here for clarity after all data processing
         if (mounted) setState(() {});
 
-        if (placeId != null &&
-            !isOnlyEditMode &&
-            selectedPlace == null &&
-            !isPlaceSetToOnePlace) {
-          // Avoid auto-focusing if in edit mode already
-          var p = onlineList.firstWhereOrNull((p) => p.id == placeId);
-          if (p != null) {
-            setMapToOnePlaceAndShowPopup(placeId, p);
-          }
-        }
-
         if (_isDrawingPath) _rebuildDrawOverlay();
       },
     );
+    _publishCatalog(isFinal: true);
+  }
+
+  void _publishCatalog({required bool isFinal}) {
+    _catalogFinal = isFinal;
+    _catalogEpoch++;
+    _mapSession?.hostChanged();
   }
 
   Future<void> addOfflineEventsToPlace(List<PlaceModel> places) async {
@@ -1592,37 +1772,6 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     _places.clear();
     _places.addAll(mappedPlaces);
     // setState is called in loadPlaces after this
-  }
-
-  void setMapToOnePlaceAndShowPopup(int placeId, PlaceModel p) {
-    var m = _places.firstWhereOrNull((m) => m.place.id == placeId);
-    if (m == null) return;
-
-    // Keep this place visible even if the active category filter excludes it.
-    _forcedVisiblePlaceId = placeId;
-
-    _places.remove(m);
-    _places.add(m);
-
-    unawaited(_onPlaceTap(placeId));
-    unawaited(setMapToOnePlace(p));
-  }
-
-  Future<void> setMapToOnePlace(PlaceModel place) async {
-    _mapCenter = LatLng(place.getLat(), place.getLng());
-    try {
-      await _mapReady.future.timeout(const Duration(seconds: 5));
-    } on TimeoutException {
-      return;
-    }
-    if (mounted && _viewportController.isAttached) {
-      await _viewportController.animateTo(
-        _mapCenter!,
-        zoom: 18,
-        curve: Curves.easeOutCubic,
-        duration: const Duration(milliseconds: 700),
-      );
-    }
   }
 
   bool isIconVisible(PlaceModel place) {

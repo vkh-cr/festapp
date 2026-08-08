@@ -771,10 +771,12 @@ create table if not exists public.log_emails (
   organization BIGINT NOT NULL DEFAULT '1'::bigint,
   occasion BIGINT NULL,
   unit BIGINT NULL,
+  recipient_user UUID NULL,
   CONSTRAINT log_emails_pkey PRIMARY KEY (id),
   CONSTRAINT log_emails_occasion_fkey FOREIGN KEY (occasion) REFERENCES public.occasions (id),
   CONSTRAINT log_emails_organization_fkey FOREIGN KEY (organization) REFERENCES public.organizations (id),
-  CONSTRAINT log_emails_unit_fkey FOREIGN KEY (unit) REFERENCES public.units (id)
+  CONSTRAINT log_emails_unit_fkey FOREIGN KEY (unit) REFERENCES public.units (id),
+  CONSTRAINT log_emails_recipient_user_fkey FOREIGN KEY (recipient_user) REFERENCES public.user_info (id) ON DELETE SET NULL
 ) TABLESPACE pg_default;
 
 create table if not exists public.events (

@@ -46,9 +46,9 @@ Nová hodnotová třída `PathNode` (v `path_group_model.dart` nebo vlastní sou
 - `_onGroupIconTap` (ř. 986–989): `placeIdsInSelectedGroup` plnit jen z place-ref uzlů (`node.placeId`), volné body přeskočit.
 
 **`lib/components/map/path_groups_content.dart`**
-- Do gridu přidat sloupec s tlačítkem **„Kreslit na mapě"** (vzor: sloupec „Location on map" v `places_content.dart:118–154` — `RouterService.navigatePageInfo(context, MapRoute(editPathGroup: pm))`, návratovou hodnotu zapsat do buňky `path_data`/`Tb.places.table` přes `changeCellValue`). Textový CSV sloupec ponechat jako fallback.
+- Do gridu přidat sloupec s tlačítkem **„Kreslit na mapě"** (vzor: sloupec „Location on map" v `places_content.dart:118–154` — `RouterService.navigatePageInfo(context, MapEditorRoute(mode: PathMapEditorMode(pm)))`, návratovou hodnotu zapsat do buňky `path_data`/`Tb.places.table` přes `changeCellValue`). Textový CSV sloupec ponechat jako fallback.
 
-**`lib/router_service.dart` / AutoRoute** — přidat parametr do `MapRoute` a přegenerovat (`fvm dart run build_runner build --delete-conflicting-outputs`).
+**`lib/router_service.dart` / AutoRoute** — použít oddělený `MapEditorRoute` s `PathMapEditorMode` a přegenerovat router (`fvm dart run build_runner build`). Veřejný `PublicMapRoute` nesmí nést editorové argumenty.
 
 **Uložení do DB** — beze změny cesty: `DbPlaces.updatePathGroup` (`db_places.dart:129–166`) zapisuje `path_data` jako JSON. Nová struktura projde bez migrace.
 

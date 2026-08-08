@@ -103,6 +103,8 @@ class UserStrings {
         'user': user,
         'retries': retries
       }); // "Failed to invite {user}. Number of retries: ({retries})."
+  static String invitationStatusFailed({required String user}) =>
+      'FeatureUser.invitationStatusFailed'.tr(namedArgs: {'user': user});
   static String get sendAppLinks => 'FeatureUser.sendAppLinks'.tr();
   static String get sendAppLinksInfo => 'FeatureUser.sendAppLinksInfo'.tr();
   static String get resendAppLinksConfirm =>

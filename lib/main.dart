@@ -31,6 +31,7 @@ import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/search/global_search_dialog.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/services/web_styles_helper.dart';
+import 'package:fstapp/services/web_bootstrap_bridge.dart';
 import 'package:fstapp/services/app_logger.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/time_travel_widget.dart';
@@ -110,6 +111,9 @@ class _FestappBootstrapState extends State<FestappBootstrap> {
     }
     if (!mounted) return;
     setState(() => _isReady = true);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) WebBootstrapBridge.markAppReady();
+    });
   }
 
   MaterialPageRoute<void> _loadingRoute(RouteSettings settings) =>

@@ -1,6 +1,7 @@
 DO $$
 DECLARE
   v_org bigint; v_other_org bigint; v_unit bigint; v_occasion bigint; v_actor uuid; v_created uuid;
+  v_admin uuid; v_existing uuid;
   v_result jsonb; v_first_payload text; v_second_payload text;
   v_second_token text; v_first_manual_code text; v_second_manual_code text;
   v_duplicate_command uuid:=gen_random_uuid();
@@ -13,8 +14,11 @@ BEGIN
     '[{"code":"reception","is_enabled":true}]'::jsonb,
     '{"accommodation":[{"code":"room-a","title":"Room A"}]}'::jsonb) RETURNING id INTO v_occasion;
   v_actor:=public.create_user_in_organization_with_data_pure(v_org,'actor@test.local','actor@test.local','password',jsonb_build_object('name','Actor','surname','Manager','sex','male'));
+  v_admin:=public.create_user_in_organization_with_data_pure(v_org,'admin@test.local','admin@test.local','password',jsonb_build_object('name','Occasion','surname','Admin','sex','female'));
   PERFORM public.create_user_in_organization_with_data_pure(v_other_org,'new@test.local','new@test.local','password',jsonb_build_object('name','Other','surname','Tenant','sex','unspecified'));
   INSERT INTO public.occasion_users(occasion,"user",is_manager,is_receptionist,data) VALUES(v_occasion,v_actor,true,true,'{}');
+  v_existing:=public.create_user_in_organization_with_data_pure(v_org,'existing@test.local','existing@test.local','password',jsonb_build_object('name','Existing','surname','Participant','sex','female'));
+  INSERT INTO public.occasion_users(occasion,"user",data) VALUES(v_occasion,v_existing,'{}');
   PERFORM set_config('request.jwt.claim.sub',v_actor::text,true);
   PERFORM set_config('request.jwt.claim.role','authenticated',true);
 
@@ -33,6 +37,19 @@ BEGIN
   v_created:=(v_result->>'userId')::uuid;
   PERFORM assert_false((SELECT is_manager OR is_editor OR is_receptionist FROM public.occasion_users WHERE occasion=v_occasion AND "user"=v_created),'created membership has no elevated role');
   PERFORM assert_false(v_result ? 'payload','create receipt never contains the QR plaintext');
+
+  v_result:=public.issue_reception_login_qr_v1(v_occasion,v_existing);
+  PERFORM assert_eq(v_result->>'message','registration_unavailable','a manager cannot issue a login QR for an arbitrary participant');
+  PERFORM assert_eq(public.get_reception_occasion_users_v1(v_occasion,'existing'),'[]'::jsonb,'a non-admin cannot search the participant roster');
+
+  INSERT INTO public.organization_users(organization,"user",is_admin) VALUES(v_org,v_admin,true);
+  PERFORM set_config('request.jwt.claim.sub',v_admin::text,true);
+  v_result:=public.get_reception_occasion_users_v1(v_occasion,'existing');
+  PERFORM assert_eq(jsonb_array_length(v_result),1,'an admin without a reception or manager role can search the participant roster');
+  PERFORM assert_eq(v_result->0->>'userId',v_existing::text,'admin roster search returns the matching participant identity');
+  v_result:=public.issue_reception_login_qr_v1(v_occasion,v_existing);
+  PERFORM assert_eq((v_result->>'code')::int,200,'an admin without a reception or manager role can issue a login QR for any current participant');
+  PERFORM set_config('request.jwt.claim.sub',v_actor::text,true);
 
   v_result:=public.create_reception_user_v1(v_occasion,gen_random_uuid(),jsonb_build_object('name','Duplicate','surname','Account','email','new@test.local','sex','unspecified'),NULL,NULL,false);
   PERFORM assert_eq(v_result->>'message','email_already_exists','same e-mail in the occasion organization is rejected');

@@ -213,6 +213,84 @@ class TimeBlockItem {
   }
 }
 
+/// Chooses the day shown when the public program opens.
+///
+/// Prefer the exact live event/date when available, then retain the original
+/// Festapp behavior of matching today's weekday regardless of which calendar
+/// week contains the occasion. If no weekday matches, use the first day.
+int calculateScheduleInitialDayIndex(
+  List<TimeBlockGroup> dayGroups, {
+  required DateTime now,
+}) {
+  if (dayGroups.isEmpty) return 0;
+
+  for (var index = 0; index < dayGroups.length; index++) {
+    if (dayGroups[index].events.any((event) =>
+        event.startTime.isBefore(now) && event.endTime.isAfter(now))) {
+      return index;
+    }
+  }
+
+  final exactDateIndex = dayGroups.indexWhere((group) {
+    final date = _scheduleGroupDate(group);
+    return date != null &&
+        date.year == now.year &&
+        date.month == now.month &&
+        date.day == now.day;
+  });
+  if (exactDateIndex >= 0) return exactDateIndex;
+
+  final weekdayIndex = dayGroups.indexWhere(
+    (group) => _scheduleGroupDate(group)?.weekday == now.weekday,
+  );
+  return weekdayIndex >= 0 ? weekdayIndex : 0;
+}
+
+/// Keeps the attendee's selected program day for the current app process.
+/// Nothing is persisted to device storage, so a fresh app launch calculates
+/// today's day again.
+class ScheduleDaySessionSelection {
+  final Map<int, DateTime> _selectedDates = {};
+
+  int resolveInitialIndex({
+    required int occasionId,
+    required List<TimeBlockGroup> dayGroups,
+    required DateTime now,
+  }) {
+    if (dayGroups.isEmpty) return 0;
+    final selectedDate = _selectedDates[occasionId];
+    if (selectedDate != null) {
+      final rememberedIndex = dayGroups.indexWhere(
+        (group) => _isSameDate(_scheduleGroupDate(group), selectedDate),
+      );
+      if (rememberedIndex >= 0) return rememberedIndex;
+
+      // Offline/fast/full program projections can temporarily expose only a
+      // subset of days. Show a safe fallback for that snapshot, but keep the
+      // user's remembered date so the later complete projection restores it.
+      return calculateScheduleInitialDayIndex(dayGroups, now: now);
+    }
+
+    final index = calculateScheduleInitialDayIndex(dayGroups, now: now);
+    remember(occasionId, dayGroups[index]);
+    return index;
+  }
+
+  void remember(int occasionId, TimeBlockGroup group) {
+    final date = _scheduleGroupDate(group);
+    if (date != null) _selectedDates[occasionId] = date;
+  }
+
+  bool _isSameDate(DateTime? first, DateTime second) =>
+      first != null &&
+      first.year == second.year &&
+      first.month == second.month &&
+      first.day == second.day;
+}
+
+DateTime? _scheduleGroupDate(TimeBlockGroup group) =>
+    group.dateTime ?? group.events.firstOrNull?.startTime;
+
 /// Helper class for splitting/time-block typing.
 class TimeBlockHelper {
   static TimeBlockType getTimeBlockTypeFromModel(EventModel model) {

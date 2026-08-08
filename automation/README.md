@@ -25,19 +25,13 @@ Scripts), run:
 ./automation/apply_config.sh
 ```
 
-## Deploy targets
+## Web deployment
 
-`automation/project.conf` selects the deploy target on each `prod/*` branch via
-the `DEPLOY_TARGET` key. `.github/workflows/deploy.yml` is a router: it reads
-`DEPLOY_TARGET` and runs the matching job. Branches without a target are
-ignored, so legacy branches keep using their own workflow until they opt in.
-
-| `DEPLOY_TARGET` | Job                         | Extra `project.conf` keys                       |
-|--               |--                           |--                                               |
-| `cloudflare`    | Build + Wrangler Pages deploy | `CLOUDFLARE_PROJECT_NAME=<cf-project>`        |
-| `netlify`       | (CI placeholder — still manual via `netlify_deploy_deno_vars.sh`) | — |
-| `gh-pages`      | (CI placeholder — `web.yml` still owns `prod/festapp`) | —                            |
-| unset / `skip`  | No-op                       | —                                               |
+`automation/deploy_direct.sh` is the canonical production web deployment path.
+It reads `CLOUDFLARE_PROJECT_NAME`, `DOMAIN`, and `VERSION` from
+`automation/project.conf`, runs the shared build, uploads `build/web` directly
+with Wrangler, and verifies that the custom domain repeatedly serves one
+coherent release generation.
 
 See `automation/cloudflare/README.md` for the Cloudflare pipeline (worker
 routing, build steps, env vars).
@@ -48,7 +42,9 @@ routing, build steps, env vars).
   `web/index.html` title, CNAME, theme, fonts and version. Portable across
   GNU sed (Linux CI) and BSD sed (macOS dev).
 - **`cloudflare_build.sh`**: Shared build script for Cloudflare Pages. Invoked
-  by `deploy.yml`. Emits `build/web/_worker.js` (single routing source).
+  by `deploy_direct.sh`. Emits `build/web/_worker.js` (single routing source).
+- **`deploy_direct.sh`**: Builds, uploads, and verifies the configured
+  Cloudflare Pages production release without a git push.
 - **`test_all.sh`**: The master test runner. Executes Web Client unit tests,
   Database regression tests, and automation/scripts tests.
 - **`bootstrap_local_db.sh`**: Rebuilds the isolated local PostgreSQL test

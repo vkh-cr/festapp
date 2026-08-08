@@ -30,6 +30,9 @@ class ReceptionStrings {
   static String get enterManualCode => 'Reception.enterManualCode'.tr();
   static String get manualCode => 'Reception.manualCode'.tr();
   static String get manualCodeValidity => 'Reception.manualCodeValidity'.tr();
+  static String get findParticipant => 'Reception.findParticipant'.tr();
+  static String get searchParticipant => 'Reception.searchParticipant'.tr();
+  static String get noParticipantsFound => 'Reception.noParticipantsFound'.tr();
 
   static String commandError(ReceptionCommandError error) => switch (error) {
         ReceptionCommandError.emailAlreadyExists =>

@@ -8,6 +8,7 @@ import 'package:fstapp/components/single_data_grid/single_data_grid_controller.d
 import 'package:fstapp/components/single_data_grid/single_table_data_grid.dart';
 import 'package:fstapp/components/map/icon_model.dart';
 import 'package:fstapp/components/map/path_group_model.dart';
+import 'package:fstapp/components/map/map_page.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/database_tables/tb.dart';
 import 'package:fstapp/components/map/db_places.dart';
@@ -149,7 +150,9 @@ class _PathGroupsContentState extends State<PathGroupsContent> {
               onPressed: () async {
                 final pm = PathGroupsModel.fromPlutoJson(ctx.row.toJson());
                 final value = await RouterService.navigatePageInfo(
-                    context, MapRoute(editPathGroup: pm));
+                  context,
+                  MapEditorRoute(mode: PathMapEditorMode(pm)),
+                );
                 if (value != null) {
                   final cell = ctx.row.cells[Tb.places.table]!;
                   ctx.stateManager

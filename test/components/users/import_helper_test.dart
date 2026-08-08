@@ -59,6 +59,83 @@ void main() {
     expect(users.single, isNot(contains(ImportHelper.groupColumn)));
   });
 
+  test('CSV import accepts a UTF-8 BOM and surrounding header whitespace', () {
+    final users = ImportHelper.getUsersFromCsv(
+      '\ufeffE-mailová adresa, Jméno: , Příjmení: \n'
+      'jan@example.com,Jan,Novák',
+    );
+
+    expect(users.single[Tb.occasion_users.data_email], 'jan@example.com');
+  });
+
+  test('CSV import rejects an empty file instead of crashing', () {
+    expect(() => ImportHelper.getUsersFromCsv(''), throwsFormatException);
+  });
+
+  test('CSV import rejects duplicate required headers', () {
+    expect(
+      () => ImportHelper.getUsersFromCsv(
+        'E-mailová adresa,E-mailová adresa,Jméno:,Příjmení:\n'
+        'one@example.com,two@example.com,Jan,Novák',
+      ),
+      throwsFormatException,
+    );
+  });
+
+  test('CSV import rejects a short non-empty row atomically', () {
+    expect(
+      () => ImportHelper.getUsersFromCsv(
+        'E-mailová adresa,Jméno:,Příjmení:,Poznámka:\n'
+        'jan@example.com,Jan',
+      ),
+      throwsFormatException,
+    );
+  });
+
+  test('CSV import rejects blank required values and malformed emails', () {
+    for (final row in [
+      'not-an-email,Jan,Novák',
+      'jan@example.com,,Novák',
+      'jan@example.com,Jan,',
+    ]) {
+      expect(
+        () => ImportHelper.getUsersFromCsv(
+          'E-mailová adresa,Jméno:,Příjmení:\n$row',
+        ),
+        throwsFormatException,
+      );
+    }
+  });
+
+  test('CSV import ignores completely blank trailing rows', () {
+    final users = ImportHelper.getUsersFromCsv(
+      'E-mailová adresa,Jméno:,Příjmení:\n'
+      'jan@example.com,Jan,Novák\n,,',
+    );
+
+    expect(users, hasLength(1));
+  });
+
+  test('CSV import autodetects semicolons, CRLF and quoted delimiters', () {
+    final users = ImportHelper.getUsersFromCsv(
+      'E-mailová adresa;Jméno:;Příjmení:;Poznámka:\r\n'
+      'jan@example.com;Jan;Novák;"Poznámka; s oddělovačem"',
+    );
+
+    expect(
+        users.single[Tb.occasion_users.data_note], 'Poznámka; s oddělovačem');
+  });
+
+  test('CSV import rejects impossible calendar dates', () {
+    expect(
+      () => ImportHelper.getUsersFromCsv(
+        'E-mailová adresa,Jméno:,Příjmení:,Datum narození:\n'
+        'jan@example.com,Jan,Novák,31.2.2026',
+      ),
+      throwsFormatException,
+    );
+  });
+
   test('CSV import preserves duplicate delivery emails with sign-in aliases',
       () {
     final users = ImportHelper.getUsersFromCsv(
@@ -111,6 +188,65 @@ void main() {
                 user[Tb.occasion_users.data_email] as String,
         };
     expect(aliasesByName(reversedOrder), aliasesByName(firstOrder));
+  });
+
+  test('partial reimport of a shared mailbox keeps the same person identity',
+      () {
+    final original = ImportHelper.getUsersFromCsv(
+      'E-mailová adresa,Jméno:,Příjmení:\n'
+      'shared@example.com,Klára,Vomelová\n'
+      'shared@example.com,Marie,Vomelová',
+    );
+    final existing = original
+        .map((row) => OccasionUserModel(
+              user: row[Tb.occasion_users.data_name] == 'Klára'
+                  ? 'user-klara'
+                  : 'user-marie',
+              data: Map<String, dynamic>.from(row),
+            ))
+        .toList();
+    final partial = ImportHelper.getUsersFromCsv(
+      'E-mailová adresa,Jméno:,Příjmení:\n'
+      'shared@example.com,Marie,Vomelová',
+    );
+
+    final rows = CsvImportHelper.buildImportRows(partial, existing);
+
+    expect(rows, hasLength(1));
+    expect(rows.single[CsvImportHelper.payloadUserId], 'user-marie');
+    expect(
+      (rows.single[CsvImportHelper.payloadData]
+          as Map<String, dynamic>)[Tb.occasion_users.data_email],
+      'shared+1@example.com',
+    );
+  });
+
+  test('a later person sharing a mailbox receives the next free alias', () {
+    final existing = [
+      OccasionUserModel(user: 'user-klara', data: {
+        Tb.occasion_users.data_email: 'shared@example.com',
+        Tb.occasion_users.data_name: 'Klára',
+        Tb.occasion_users.data_surname: 'Vomelová',
+      }),
+      OccasionUserModel(user: 'user-marie', data: {
+        Tb.occasion_users.data_email: 'shared+1@example.com',
+        Tb.occasion_users.data_name: 'Marie',
+        Tb.occasion_users.data_surname: 'Vomelová',
+      }),
+    ];
+    final imported = ImportHelper.getUsersFromCsv(
+      'E-mailová adresa,Jméno:,Příjmení:\n'
+      'shared@example.com,Tereza,Vomelová',
+    );
+
+    final rows = CsvImportHelper.buildImportRows(imported, existing);
+
+    expect(rows.single[CsvImportHelper.payloadUserId], isNull);
+    expect(
+      (rows.single[CsvImportHelper.payloadData]
+          as Map<String, dynamic>)[Tb.occasion_users.data_email],
+      'shared+2@example.com',
+    );
   });
 
   test('CSV rejects ambiguous people sharing both mailbox and name', () {
@@ -302,5 +438,9 @@ void main() {
     expect(user.toTrinaRow(context).cells[UserColumns.GROUP]?.value,
         'Testovací skupina CSV');
     expect(groupColumn.readOnly, isTrue);
+
+    final invitedColumn =
+        UserColumns.generateColumns([UserColumns.INVITED]).single;
+    expect(invitedColumn.readOnly, isTrue);
   });
 }

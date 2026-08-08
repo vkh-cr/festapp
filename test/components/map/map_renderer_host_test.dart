@@ -10,7 +10,8 @@ import 'package:fstapp/components/map/map_viewport_controller.dart';
 import 'package:latlong2/latlong.dart';
 
 void main() {
-  MapSurfaceModel model() => MapSurfaceModel(
+  MapSurfaceModel model({bool active = true}) => MapSurfaceModel(
+        active: active,
         scene: const MapScene(),
         icons: const [],
         initialCenter: const LatLng(49.8, 18.2),
@@ -49,6 +50,21 @@ void main() {
 
     expect(find.text('maplibre'), findsOneWidget);
     expect(find.text('legacy'), findsNothing);
+  });
+
+  testWidgets('keeps the concrete surface warm while its tab is inactive',
+      (tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: MapRendererHost(
+        renderer: OfflineMapRenderer.legacy,
+        isOffline: true,
+        model: model(active: false),
+        legacy: LegacyMapConfiguration.offlineUnavailable(MapLayer()),
+      ),
+    ));
+
+    expect(find.byType(LegacyMapSurface), findsOneWidget);
+    expect(find.byType(fm.FlutterMap), findsOneWidget);
   });
 
   testWidgets('keeps offline Legacy as an explicit supported renderer',
@@ -150,6 +166,7 @@ void main() {
     const coordinate = LatLng(49.8, 18.2);
     int? longPressedPlaceId;
     final longPressModel = MapSurfaceModel(
+      active: true,
       scene: MapScene(
         places: [
           MapPlacePresentation(

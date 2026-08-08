@@ -255,12 +255,12 @@ if [ "$RUN_INTEGRATION" = true ]; then
     fi
 fi
 
-# 5. Run Automation Tests (deploy.yml, apply_config.sh smoke).
+# 5. Run Automation Tests (direct deploy contract, apply_config.sh smoke).
 if [ "$RUN_AUTOMATION" = true ]; then
     echo ""
     echo ">>> Automation Scripts Tests..."
 
-    for t in "$SCRIPT_DIR/tests/apply_config.test.sh" "$SCRIPT_DIR/tests/deploy_workflow.test.sh" "$SCRIPT_DIR/tests/migration_layout.test.sh" "$SCRIPT_DIR/tests/update_prompt.test.sh" "$SCRIPT_DIR/tests/update_prompt_behavior.test.mjs" "$SCRIPT_DIR/tests/client_sync_cutover.test.mjs" "$SCRIPT_DIR/tests/pwa_offline.test.mjs" "$SCRIPT_DIR/tests/project_version.test.mjs"; do
+    for t in "$SCRIPT_DIR/tests/apply_config.test.sh" "$SCRIPT_DIR/tests/deploy_direct.test.sh" "$SCRIPT_DIR/tests/migration_layout.test.sh" "$SCRIPT_DIR/tests/update_prompt.test.sh" "$SCRIPT_DIR/tests/update_prompt_behavior.test.mjs" "$SCRIPT_DIR/tests/client_sync_cutover.test.mjs" "$SCRIPT_DIR/tests/pwa_offline.test.mjs" "$SCRIPT_DIR/tests/project_version.test.mjs"; do
         if [ -x "$t" ]; then
             echo "Running $(basename "$t")..."
             set +e

@@ -11,7 +11,7 @@ void main() {
       final styles = File(path).readAsStringSync();
 
       expect(
-        RegExp(r'<item name="android:windowNavigationBarColor">#FF0D1626</item>')
+        RegExp(r'<item name="android:navigationBarColor">#FF0D1626</item>')
             .allMatches(styles)
             .length,
         2,

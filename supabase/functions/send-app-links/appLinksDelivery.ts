@@ -37,6 +37,7 @@ export async function deliverAppLinks(
 ) {
   await dependencies.deliverEmail({
     to: input.deliveryEmail,
+    recipientUser: input.userId,
     templateCode: "APP_LINKS",
     context: {
       organization: input.organizationId,

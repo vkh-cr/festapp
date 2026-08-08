@@ -54,10 +54,12 @@ class CsvImportHelper {
     // PostgREST occasion_users select is capped at 1000 rows and does not
     // overlay user_info.email_readonly, so it cannot safely classify imports.
     var existingUsers = (await DbUsers.getOccasionEditorDataBundle()).users;
-    var toBeCreated = getUsersToBeCreated(addOrUpdateUsers, existingUsers);
-    var toBeUpdated = getUsersToBeUpdated(addOrUpdateUsers, existingUsers);
+    final reconciledUsers =
+        reconcileAccountEmails(addOrUpdateUsers, existingUsers);
+    var toBeCreated = getUsersToBeCreated(reconciledUsers, existingUsers);
+    var toBeUpdated = getUsersToBeUpdated(reconciledUsers, existingUsers);
     var toBeDeleted =
-        _getUsersToBeDeleted(deleteUsers, addOrUpdateUsers, existingUsers);
+        _getUsersToBeDeleted(deleteUsers, reconciledUsers, existingUsers);
 
     final createApproved = await _confirmCreateUsers(context, toBeCreated);
     final updateApproved = await _confirmUpdateUsers(context, toBeUpdated);
@@ -69,7 +71,7 @@ class CsvImportHelper {
     final updatedEmails = toBeUpdated
         .map((user) => user[Tb.occasion_users.data_email] as String)
         .toSet();
-    final acceptedUsers = addOrUpdateUsers.where((user) {
+    final acceptedUsers = reconciledUsers.where((user) {
       final email = user[Tb.occasion_users.data_email] as String;
       if (createdEmails.contains(email) && !createApproved) return false;
       if (updatedEmails.contains(email) && !updateApproved) return false;
@@ -98,8 +100,10 @@ class CsvImportHelper {
   static List<Map<String, dynamic>> buildImportRows(
       Iterable<Map<String, dynamic>> importedUsers,
       List<OccasionUserModel> existingUsers) {
+    final reconciledUsers =
+        reconcileAccountEmails(importedUsers, existingUsers);
     final existingByEmail = _existingByEmail(existingUsers);
-    return importedUsers.map((imported) {
+    return reconciledUsers.map((imported) {
       final email = _normalizedEmail(
         imported[Tb.occasion_users.data_email],
       );
@@ -119,6 +123,84 @@ class CsvImportHelper {
           payloadGroupTitle: imported[ImportHelper.groupColumn],
       };
     }).toList();
+  }
+
+  /// Reuses the canonical account identity for a person already imported from
+  /// a shared mailbox and allocates collision-free +N aliases for new people.
+  /// Matching includes the normalized delivery mailbox, name and surname so a
+  /// partial reimport cannot update the first person who shares the address.
+  @visibleForTesting
+  static List<Map<String, dynamic>> reconcileAccountEmails(
+      Iterable<Map<String, dynamic>> importedUsers,
+      List<OccasionUserModel> existingUsers) {
+    final result =
+        importedUsers.map((user) => Map<String, dynamic>.from(user)).toList();
+    final usedAccountEmails = existingUsers
+        .map((user) =>
+            _normalizedEmail(user.data?[Tb.occasion_users.data_email]))
+        .where((email) => email.isNotEmpty)
+        .toSet();
+    final existingByIdentity = <String, OccasionUserModel>{};
+    for (final existing in existingUsers) {
+      final data = existing.data ?? const <String, dynamic>{};
+      final accountEmail = _normalizedEmail(data[Tb.occasion_users.data_email]);
+      if (accountEmail.isEmpty) continue;
+      final explicitDelivery =
+          _normalizedEmail(data[ImportHelper.deliveryEmailField]);
+      final deliveryEmail = explicitDelivery.isNotEmpty
+          ? explicitDelivery
+          : _removeNumericAlias(accountEmail);
+      final key = _identityKey(deliveryEmail, data);
+      if (existingByIdentity.containsKey(key)) {
+        throw const FormatException(
+          'Existing people sharing an email address are ambiguous.',
+        );
+      }
+      existingByIdentity[key] = existing;
+    }
+
+    final unmatchedByDelivery = <String, List<Map<String, dynamic>>>{};
+    for (final imported in result) {
+      final deliveryEmail = _normalizedEmail(
+        imported[ImportHelper.deliveryEmailField] ??
+            imported[Tb.occasion_users.data_email],
+      );
+      imported[ImportHelper.deliveryEmailField] = deliveryEmail;
+      final existing =
+          existingByIdentity[_identityKey(deliveryEmail, imported)];
+      if (existing != null) {
+        imported[Tb.occasion_users.data_email] = _normalizedEmail(
+          existing.data?[Tb.occasion_users.data_email],
+        );
+      } else {
+        unmatchedByDelivery.putIfAbsent(deliveryEmail, () => []).add(imported);
+      }
+    }
+
+    final reservedDeliveryEmails = result
+        .map((user) => user[ImportHelper.deliveryEmailField] as String)
+        .toSet();
+    final deliveries = unmatchedByDelivery.keys.toList()..sort();
+    for (final deliveryEmail in deliveries) {
+      final users = unmatchedByDelivery[deliveryEmail]!
+        ..sort((first, second) => _identityKey(deliveryEmail, first)
+            .compareTo(_identityKey(deliveryEmail, second)));
+      var suffix = 0;
+      for (final user in users) {
+        var candidate = suffix == 0
+            ? deliveryEmail
+            : _withNumericAlias(deliveryEmail, suffix);
+        while (usedAccountEmails.contains(candidate) ||
+            (candidate != deliveryEmail &&
+                reservedDeliveryEmails.contains(candidate))) {
+          candidate = _withNumericAlias(deliveryEmail, ++suffix);
+        }
+        user[Tb.occasion_users.data_email] = candidate;
+        usedAccountEmails.add(candidate);
+        suffix++;
+      }
+    }
+    return result;
   }
 
   // Helper to get users to be created
@@ -172,6 +254,32 @@ class CsvImportHelper {
 
   static String _normalizedEmail(Object? value) =>
       value?.toString().trim().toLowerCase() ?? '';
+
+  static String _identityKey(String deliveryEmail, Map<String, dynamic> data) {
+    String normalize(Object? value) =>
+        value?.toString().trim().toLowerCase() ?? '';
+    return [
+      deliveryEmail,
+      normalize(data[Tb.occasion_users.data_surname]),
+      normalize(data[Tb.occasion_users.data_name]),
+    ].join('\u0000');
+  }
+
+  static String _removeNumericAlias(String email) {
+    final at = email.lastIndexOf('@');
+    if (at <= 0) return email;
+    final local = email.substring(0, at);
+    final withoutAlias = local.replaceFirst(RegExp(r'\+[0-9]+$'), '');
+    return '$withoutAlias${email.substring(at)}';
+  }
+
+  static String _withNumericAlias(String email, int suffix) {
+    final at = email.lastIndexOf('@');
+    if (at <= 0 || at == email.length - 1) {
+      throw const FormatException('Invalid email address in CSV import.');
+    }
+    return '${email.substring(0, at)}+$suffix${email.substring(at)}';
+  }
 
   static Map<String, OccasionUserModel> _existingByEmail(
       Iterable<OccasionUserModel> users) {

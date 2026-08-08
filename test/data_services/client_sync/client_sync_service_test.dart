@@ -46,6 +46,38 @@ void main() {
     await service.dispose();
   });
 
+  test('catalog activation schedules every occasion media URL for caching',
+      () async {
+    final fixture = _PublicFixture(
+      validMapClosure: true,
+      mediaUrls: const [
+        'https://img.festapp.net/description-a.webp',
+        'https://img.festapp.net/header-b.jpg',
+      ],
+    );
+    final cached = <Uri>[];
+    final service = ClientSyncService(
+      publicHeadRemote: fixture,
+      publicComponentRemote: fixture,
+      privateRemote: _NoPrivateRemote(),
+      store: _MemoryStore(),
+      cacheOccasionMedia: (_, urls, {required refreshExisting}) async {
+        expect(refreshExisting, isTrue);
+        cached.addAll(urls);
+      },
+      clock: () => DateTime.utc(2026, 8, 3),
+    );
+
+    await service.open(context).first;
+    await service.refresh(reason: SyncReason.bootstrap);
+
+    expect(cached, [
+      Uri.parse('https://img.festapp.net/description-a.webp'),
+      Uri.parse('https://img.festapp.net/header-b.jpg'),
+    ]);
+    await service.dispose();
+  });
+
   test('a dangling map icon keeps the previous public generation active',
       () async {
     final fixture = _PublicFixture(validMapClosure: false);
@@ -286,9 +318,16 @@ void main() {
 
 class _PublicFixture implements PublicSyncHeadRemote, PublicComponentRemote {
   _PublicFixture(
-      {required bool validMapClosure, String componentScope = '1/2'}) {
+      {required bool validMapClosure,
+      String componentScope = '1/2',
+      List<String> mediaUrls = const []}) {
     final payloads = <ClientSyncComponent, Object?>{
-      ClientSyncComponent.occasionConfig: <String, Object?>{},
+      ClientSyncComponent.occasionConfig: <String, Object?>{
+        'media': [
+          for (var i = 0; i < mediaUrls.length; i++)
+            {'id': i + 1, 'url': mediaUrls[i]},
+        ],
+      },
       ClientSyncComponent.programCatalog: {'events': <Object?>[]},
       ClientSyncComponent.mapCatalog: {
         'places': [

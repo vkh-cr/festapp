@@ -383,6 +383,14 @@ try {
   assert.doesNotMatch(webClientIndex, /serviceWorker\.getRegistrations\(\)/);
   assert.match(webClientIndex, /performance\.getEntriesByType\('resource'\)/);
   const flutterIndex = await readFile(path.join(projectRoot, 'web/index.html'), 'utf8');
+  const ciBuild = await readFile(
+    path.join(projectRoot, 'automation/ci_build.sh'),
+    'utf8',
+  );
+  const cloudflareBuild = await readFile(
+    path.join(projectRoot, 'automation/cloudflare_build.sh'),
+    'utf8',
+  );
   const appConfig = await readFile(path.join(projectRoot, 'lib/app_config.dart'), 'utf8');
   const oneSignalWorker = await readFile(
     path.join(projectRoot, 'web/push/OneSignalSDKWorker.js'),
@@ -394,6 +402,18 @@ try {
     'installed PWA notifications must remain enabled for this deployment',
   );
   assert.match(flutterIndex, /serviceWorkerPath: "\.\/push\/OneSignalSDKWorker\.js"/);
+  assert.match(worker, /festapp-occasion-media-v1/);
+  assert.match(worker, /request\.destination === 'image'/);
+  assert.doesNotMatch(
+    flutterIndex,
+    /canvasKitForceMultiSurfaceRasterizer/,
+    'Chromium must keep Flutter’s default offscreen rasterizer; the multi-surface fallback uses multiple WebGL contexts and is reserved for Safari/Firefox',
+  );
+  assert.doesNotMatch(ciBuild, /FLUTTER_WEB_CANVASKIT_FORCE_MULTI_SURFACE_RASTERIZER/);
+  assert.doesNotMatch(
+    cloudflareBuild,
+    /FLUTTER_WEB_CANVASKIT_FORCE_MULTI_SURFACE_RASTERIZER/,
+  );
   assert.match(flutterIndex, /serviceWorkerParam: \{ scope: "\/push\/" \}/);
   assert.match(
     flutterIndex,
@@ -411,6 +431,15 @@ try {
   assert.match(flutterIndex, /performance\.getEntriesByType\('resource'\)/);
   assert.match(flutterIndex, /window\.recoverFestappStartup\('bootstrap-error'\)/);
   assert.match(flutterIndex, /festapp-app-ready/);
+  assert.match(flutterIndex, /window\.markFestappAppReady = function/);
+  const engineStarted = flutterIndex.match(
+    /await appRunner\.runApp\(\);[\s\S]*?const loader/,
+  )?.[0] ?? '';
+  assert.doesNotMatch(
+    engineStarted,
+    /__FESTAPP_APP_READY__\s*=\s*true/,
+    'engine startup must not hide an application startup stall from PWA recovery',
+  );
   assert.match(flutterIndex, /__FESTAPP_LOCAL_DEVELOPMENT__/);
   assert.match(flutterIndex, /festappLocalDevelopmentReady/);
   assert.match(flutterIndex, /serviceWorker\.getRegistrations\(\)/);

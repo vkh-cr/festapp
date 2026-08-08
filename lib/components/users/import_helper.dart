@@ -36,16 +36,33 @@ class ImportHelper {
 
   static List<Map<String, dynamic>> getUsersFromCsv(String rawData) {
     final fields = const CsvToListConverter(
-      csvSettingsDetector:
-          FirstOccurrenceSettingsDetector(eols: ['\r\n', '\n']),
+      csvSettingsDetector: FirstOccurrenceSettingsDetector(
+        fieldDelimiters: [',', ';'],
+        eols: ['\r\n', '\n'],
+      ),
     ).convert(rawData);
+
+    if (fields.isEmpty) {
+      throw const FormatException('CSV file is empty.');
+    }
 
     List<Map<String, dynamic>> userList = [];
 
-    var firstRow = fields[0].map((e) => e.toString()).toList();
+    var firstRow = fields[0].map((e) => e.toString().trim()).toList();
+    if (firstRow.isNotEmpty) {
+      firstRow[0] = firstRow[0].replaceFirst('\ufeff', '');
+    }
     Map<String, int> userColumnIndex = {};
     for (var keyValue in migrateColumns.entries) {
-      var index = firstRow.indexOf(keyValue.value);
+      final matchingIndexes = <int>[
+        for (var index = 0; index < firstRow.length; index++)
+          if (firstRow[index] == keyValue.value) index,
+      ];
+      if (matchingIndexes.length > 1) {
+        throw FormatException(
+            'CSV contains duplicate column ${keyValue.value}.');
+      }
+      var index = matchingIndexes.isEmpty ? -1 : matchingIndexes.single;
       if (index == -1 && keyValue.key == groupColumn) {
         index = firstRow
             .indexWhere((header) => header.trim().toLowerCase() == 'skupina');
@@ -61,18 +78,24 @@ class ImportHelper {
       Tb.occasion_users.data_name,
       Tb.occasion_users.data_surname,
     ])) {
-      throw Exception("Table doesn't contain required columns.");
+      throw const FormatException("Table doesn't contain required columns.");
     }
 
     for (int r = 1; r < fields.length; r++) {
+      if (fields[r].every((value) => value.toString().trim().isEmpty)) {
+        continue;
+      }
       Map<String, dynamic> userJsonObject = {};
       for (var entry in userColumnIndex.entries) {
+        if (entry.value >= fields[r].length) {
+          throw FormatException('CSV row ${r + 1} has too few columns.');
+        }
         var trimmedString = fields[r][entry.value].toString().trim();
         if (entry.key == Tb.occasion_users.data_email) {
           if (trimmedString.isEmpty) {
-            break;
+            throw FormatException('CSV row ${r + 1} has no email address.');
           }
-          trimmedString = trimmedString.toLowerCase();
+          trimmedString = _normalizeEmail(trimmedString, r + 1);
         } else if (entry.key == Tb.occasion_users.role) {
           if (trimmedString.isEmpty) {
             continue;
@@ -93,7 +116,7 @@ class ImportHelper {
             continue;
           }
           final format = DateFormat("d.M.y");
-          var dateTime = format.parse(trimmedString);
+          var dateTime = format.parseStrict(trimmedString);
           userJsonObject[entry.key] = dateTime.toIso8601String();
           continue;
         } else if (entry.key == Tb.occasion_users.services_food) {
@@ -118,7 +141,11 @@ class ImportHelper {
         Tb.occasion_users.data_name,
         Tb.occasion_users.data_surname,
       ])) {
-        continue;
+        throw FormatException('CSV row ${r + 1} is missing required values.');
+      }
+      if ((userJsonObject[Tb.occasion_users.data_name] as String).isEmpty ||
+          (userJsonObject[Tb.occasion_users.data_surname] as String).isEmpty) {
+        throw FormatException('CSV row ${r + 1} is missing required values.');
       }
       userList.add(userJsonObject);
     }
@@ -183,6 +210,19 @@ class ImportHelper {
       throw const FormatException('Invalid email address in CSV import.');
     }
     return '${email.substring(0, at)}+$suffix${email.substring(at)}';
+  }
+
+  static String _normalizeEmail(String value, int rowNumber) {
+    final email = value.toLowerCase();
+    final at = email.indexOf('@');
+    if (email.length > 254 ||
+        at <= 0 ||
+        at != email.lastIndexOf('@') ||
+        at == email.length - 1 ||
+        RegExp(r'\s').hasMatch(email)) {
+      throw FormatException('CSV row $rowNumber has an invalid email address.');
+    }
+    return email;
   }
 
   static Map<String, dynamic> createServicesJson(

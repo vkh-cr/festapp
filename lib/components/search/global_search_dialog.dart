@@ -162,9 +162,8 @@ class _GlobalSearchDialogState extends State<GlobalSearchDialog> {
     }
 
     Navigator.of(context).pop();
-    // Routes mirror the deployed build exactly (SearchService nav switch):
-    //   event -> event/<id>, place -> map/<id>, info -> info/<id>,
-    //   song  -> songbook,   game  -> game,     news -> news.
+    // Public places use MapNavigation so warm and cold visits share the same
+    // session contract. Other result types remain direct section routes.
     switch (r.entityType) {
       case 'event':
         RouterService.navigateOccasion(

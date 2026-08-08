@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/reception/reception_service.dart';
@@ -20,18 +22,24 @@ class ReceptionPage extends StatefulWidget {
 }
 
 class _ReceptionPageState extends State<ReceptionPage> {
+  Timer? _searchDebounce;
   final _formKey = GlobalKey<FormState>();
   final _name = TextEditingController(),
       _surname = TextEditingController(),
-      _email = TextEditingController();
+      _email = TextEditingController(),
+      _userSearch = TextEditingController();
   String? _sex;
   int? _group;
   String? _accommodation, _commandId, _userId, _qr, _manualCode, _createdEmail;
-  bool _loading = false, _confirmSameName = false;
+  bool _loading = false,
+      _searchingUsers = false,
+      _confirmSameName = false,
+      _canCancel = false;
   List<Map<String, dynamic>> _groups = [],
       _accommodations = [],
       _matches = [],
-      _recent = [];
+      _recent = [],
+      _occasionUsers = [];
 
   void _draftChanged([VoidCallback? update]) {
     setState(() {
@@ -60,22 +68,31 @@ class _ReceptionPageState extends State<ReceptionPage> {
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
     _qr = null;
     _name.dispose();
     _surname.dispose();
     _email.dispose();
+    _userSearch.dispose();
     super.dispose();
   }
 
   Future<void> _load() async {
     if (!RightsService.canUseReception()) return;
+    final initialQuery = _userSearch.text.trim();
     final data = await ReceptionService.options();
     final recent = await ReceptionService.recent();
+    final occasionUsers = RightsService.isAdmin()
+        ? await ReceptionService.occasionUsers(initialQuery)
+        : <Map<String, dynamic>>[];
     if (!mounted) return;
     setState(() {
       _groups = _maps(data['groups']);
       _accommodations = _maps(data['accommodations']);
       _recent = recent;
+      if (_userSearch.text.trim() == initialQuery) {
+        _occasionUsers = occasionUsers;
+      }
     });
   }
 
@@ -114,6 +131,7 @@ class _ReceptionPageState extends State<ReceptionPage> {
         _createdEmail = result['email']?.toString();
         _qr = issued['payload']?.toString();
         _manualCode = issued['manualCode']?.toString();
+        _canCancel = true;
         _matches = [];
       });
     } catch (error) {
@@ -133,6 +151,7 @@ class _ReceptionPageState extends State<ReceptionPage> {
       _createdEmail = null;
       _commandId = null;
       _confirmSameName = false;
+      _canCancel = false;
       _matches = [];
       _sex = null;
       _group = null;
@@ -167,12 +186,63 @@ class _ReceptionPageState extends State<ReceptionPage> {
         _createdEmail = registration['email']?.toString();
         _qr = issued['payload']?.toString();
         _manualCode = issued['manualCode']?.toString();
+        _canCancel = true;
       });
     } catch (error) {
       if (mounted) await _handleError(error);
     } finally {
       if (mounted) setState(() => _loading = false);
     }
+  }
+
+  Future<void> _searchOccasionUsers(String query) async {
+    if (!RightsService.isAdmin()) return;
+    final requestedQuery = query.trim();
+    setState(() => _searchingUsers = true);
+    final users = await ExceptionHandler.guard<List<Map<String, dynamic>>>(
+      context,
+      futureFunction: () => ReceptionService.occasionUsers(requestedQuery),
+      defaultErrorMessage:
+          ReceptionStrings.commandError(ReceptionCommandError.unexpected),
+    );
+    if (!mounted || _userSearch.text.trim() != requestedQuery) return;
+    setState(() {
+      if (users != null) _occasionUsers = users;
+      _searchingUsers = false;
+    });
+  }
+
+  void _scheduleUserSearch(String query) {
+    _searchDebounce?.cancel();
+    setState(() => _searchingUsers = true);
+    _searchDebounce = Timer(
+      const Duration(milliseconds: 300),
+      () => _searchOccasionUsers(query),
+    );
+  }
+
+  Future<void> _issueExisting(Map<String, dynamic> user) async {
+    setState(() => _loading = true);
+    final userId = user['userId'].toString();
+    final issued = await ExceptionHandler.guard<Map<String, dynamic>>(
+      context,
+      futureFunction: () => ReceptionService.issue(userId),
+      defaultErrorMessage:
+          ReceptionStrings.commandError(ReceptionCommandError.unexpected),
+    );
+    if (!mounted) return;
+    if (issued != null) {
+      _name.text = user['name']?.toString() ?? '';
+      _surname.text = user['surname']?.toString() ?? '';
+      setState(() {
+        _userId = userId;
+        _createdEmail = user['email']?.toString();
+        _qr = issued['payload']?.toString();
+        _manualCode = issued['manualCode']?.toString();
+        _canCancel = false;
+      });
+    }
+    setState(() => _loading = false);
   }
 
   Future<void> _cancel(String user) async {
@@ -220,6 +290,51 @@ class _ReceptionPageState extends State<ReceptionPage> {
                         : Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
+                                if (RightsService.isAdmin()) ...[
+                                  Text(ReceptionStrings.findParticipant,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium),
+                                  const SizedBox(height: 8),
+                                  TextField(
+                                    controller: _userSearch,
+                                    decoration: InputDecoration(
+                                      labelText:
+                                          ReceptionStrings.searchParticipant,
+                                      prefixIcon: const Icon(Icons.search),
+                                      suffixIcon: _searchingUsers
+                                          ? const Padding(
+                                              padding: EdgeInsets.all(12),
+                                              child: CircularProgressIndicator(
+                                                  strokeWidth: 2))
+                                          : null,
+                                    ),
+                                    onChanged: _scheduleUserSearch,
+                                  ),
+                                  if (_occasionUsers.isNotEmpty)
+                                    ..._occasionUsers.map((user) => ListTile(
+                                          leading:
+                                              const Icon(Icons.person_outline),
+                                          title: Text(
+                                              '${user['name'] ?? ''} ${user['surname'] ?? ''}'
+                                                  .trim()),
+                                          subtitle: Text(
+                                              user['email']?.toString() ?? ''),
+                                          trailing: const Icon(Icons.qr_code_2),
+                                          onTap: _loading
+                                              ? null
+                                              : () => _issueExisting(user),
+                                        )),
+                                  if (!_searchingUsers &&
+                                      _userSearch.text.trim().isNotEmpty &&
+                                      _occasionUsers.isEmpty)
+                                    Padding(
+                                      padding: const EdgeInsets.all(12),
+                                      child: Text(
+                                          ReceptionStrings.noParticipantsFound),
+                                    ),
+                                  const Divider(height: 40),
+                                ],
                                 Text(ReceptionStrings.subtitle),
                                 const SizedBox(height: 16),
                                 Form(
@@ -429,9 +544,10 @@ class _ReceptionPageState extends State<ReceptionPage> {
         const SizedBox(height: 16),
         FilledButton.tonal(
             onPressed: _rotate, child: Text(ReceptionStrings.rotate)),
-        TextButton(
-            onPressed: _userId == null ? null : () => _cancel(_userId!),
-            child: Text(ReceptionStrings.cancel)),
+        if (_canCancel)
+          TextButton(
+              onPressed: _userId == null ? null : () => _cancel(_userId!),
+              child: Text(ReceptionStrings.cancel)),
         TextButton(onPressed: _reset, child: Text(ReceptionStrings.create))
       ]);
 }

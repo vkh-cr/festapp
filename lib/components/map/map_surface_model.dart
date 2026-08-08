@@ -13,6 +13,12 @@ abstract final class MapZoomLimits {
 
 /// Renderer-neutral input shared by both concrete map surface adapters.
 final class MapSurfaceModel {
+  /// Whether the owning navigation tab is currently visible.
+  ///
+  /// Native map views must not remain mounted behind an inactive tab: Android
+  /// platform views may continue producing frames even while offstage.
+  final bool active;
+
   final MapScene scene;
   final List<IconModel> icons;
   final LatLng initialCenter;
@@ -26,6 +32,7 @@ final class MapSurfaceModel {
   final ValueChanged<double>? onZoomChanged;
 
   const MapSurfaceModel({
+    required this.active,
     required this.scene,
     required this.icons,
     required this.initialCenter,

@@ -8,6 +8,13 @@ import UIKit
 
 @objc(Helpers)
 public class Helpers: NSObject {
+    @objc public static func cancelTransitions(mapView: MLNMapView) {
+        let selector = NSSelectorFromString("cancelTransitions")
+        if mapView.responds(to: selector) {
+            mapView.perform(selector)
+        }
+    }
+
     @objc public static func setValue(
         target: NSObject, field: String, value: NSObject
     ) {

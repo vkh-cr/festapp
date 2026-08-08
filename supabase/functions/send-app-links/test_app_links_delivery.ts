@@ -40,6 +40,7 @@ Deno.test("application links delivery exposes only appLinks and marks after send
 
   assertEquals(calls, ["deliver", "mark"]);
   assertEquals(emailInput?.templateCode, "APP_LINKS");
+  assertEquals(emailInput?.recipientUser, input.userId);
   assertEquals(emailInput?.substitutions, { appLinks: input.appLinks });
 });
 

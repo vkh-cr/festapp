@@ -23,6 +23,15 @@ DECLARE
     v_admin_target_id bigint;
     v_res            jsonb;
 BEGIN
+    -- The user test helper relies on the schema defaults pointing at tenant 1.
+    -- Keep this contract test self-contained on an empty local baseline.
+    INSERT INTO public.organizations (id, title)
+    VALUES (1, gen_random_uuid()::text)
+    ON CONFLICT (id) DO NOTHING;
+    INSERT INTO public.units (id, title, organization)
+    VALUES (1, gen_random_uuid()::text, 1)
+    ON CONFLICT (id) DO NOTHING;
+
     PERFORM create_user_for_test(
         v_editor_login,
         gen_random_uuid() || '@test.local'
