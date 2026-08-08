@@ -5,7 +5,7 @@
   "signingTeamId": "8WKBB6L8LT",
   "notificationExtensionBundleId": "festapp.jm2025.OneSignalNotificationServiceExtension",
   "source": { "name": "JM 2025", "version": "0.14.25" },
-  "target": { "name": "CSM Ostrava", "version": "0.19.85", "locale": "cs" },
+  "target": { "name": "CSM Ostrava", "version": "0.19.88", "locale": "cs" },
   "organizationId": 9,
   "occasionLink": "csmostrava2026",
   "installationGeneration": "csm_ostrava_2026_v1",
