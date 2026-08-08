@@ -1540,7 +1540,8 @@ class _EventPageState extends State<EventPage> {
   }
 
   void _eventPressed(int id) {
-    RouterService.navigateOccasion(context, "${EventPage.ROUTE}/$id")
+    context.router
+        .push(EventRoute(id: id))
         .then((value) => loadData(_event!.id!));
   }
 

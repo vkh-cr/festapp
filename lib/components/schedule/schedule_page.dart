@@ -25,7 +25,6 @@ import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/occasion/add_new_event_dialog.dart';
 import 'package:fstapp/components/schedule/event_edit_page.dart';
-import 'package:fstapp/components/schedule/event_page.dart';
 import 'package:fstapp/components/map/map_navigation.dart';
 import 'package:fstapp/components/map/public_map_session.dart';
 import 'package:fstapp/components/schedule/my_schedule_page.dart';
@@ -301,8 +300,7 @@ class _SchedulePageState extends State<SchedulePage>
   }
 
   void _eventPressed(int id) {
-    RouterService.navigateOccasion(context, "${EventPage.ROUTE}/$id")
-        .then((_) => loadData());
+    context.router.push(EventRoute(id: id)).then((_) => loadData());
   }
 
   Future<void> _goToMap(int placeId) async {

@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:fstapp/app_router.gr.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/map/place_model.dart';
 import 'package:fstapp/components/schedule/db_events.dart';
@@ -9,7 +10,6 @@ import 'package:fstapp/components/schedule/schedule_strings.dart';
 import 'package:fstapp/components/_shared/async_reload_coordinator.dart';
 import 'package:fstapp/components/users/user_strings.dart';
 import 'package:fstapp/components/schedule/event_model.dart';
-import 'package:fstapp/components/schedule/event_page.dart';
 import 'package:fstapp/components/schedule/my_schedule_page.dart';
 import 'package:fstapp/components/schedule/timetable_page.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
@@ -193,8 +193,7 @@ class _ScheduleLightPageState extends State<ScheduleLightPage>
   }
 
   void _eventPressed(int id) {
-    RouterService.navigateOccasion(context, "${EventPage.ROUTE}/$id")
-        .then((_) => loadData());
+    context.router.push(EventRoute(id: id)).then((_) => loadData());
   }
 
   @override

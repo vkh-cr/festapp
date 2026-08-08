@@ -39,4 +39,31 @@ void main() {
       isTrue,
     );
   });
+
+  test('program event details stay inside the retained occasion shell', () {
+    const scheduleSources = [
+      'lib/components/schedule/schedule_page.dart',
+      'lib/components/schedule/schedule_basic_page.dart',
+      'lib/components/schedule/schedule_light_page.dart',
+      'lib/components/schedule/event_page.dart',
+    ];
+
+    for (final path in scheduleSources) {
+      final source = File(path).readAsStringSync();
+      expect(
+        source,
+        matches(
+          RegExp(r'context\.router\s*\.push\(EventRoute\(id: id\)\)'),
+        ),
+        reason: '$path must push into the nested program router',
+      );
+      expect(
+        source,
+        isNot(contains(
+          r'RouterService.navigateOccasion(context, "${EventPage.ROUTE}/$id")',
+        )),
+        reason: '$path must not rebuild the occasion shell by absolute path',
+      );
+    }
+  });
 }

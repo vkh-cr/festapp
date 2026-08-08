@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/app_router.gr.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/map/place_model.dart';
 import 'package:fstapp/router_service.dart';
@@ -19,7 +20,6 @@ import 'package:fstapp/components/occasion/add_new_event_dialog.dart';
 import 'package:fstapp/components/schedule/my_schedule_page.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
-import 'package:fstapp/components/schedule/event_page.dart';
 import 'package:fstapp/components/schedule/timetable_page.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
@@ -214,8 +214,7 @@ class _ScheduleBasicPageState extends State<ScheduleBasicPage>
   }
 
   void _eventPressed(int id) {
-    RouterService.navigateOccasion(context, "${EventPage.ROUTE}/$id")
-        .then((_) => loadData());
+    context.router.push(EventRoute(id: id)).then((_) => loadData());
   }
 
   @override

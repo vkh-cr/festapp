@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -8,7 +7,6 @@ import 'package:fstapp/components/map/map_location_pin_helper.dart';
 import 'package:fstapp/components/map/map_strings.dart';
 import 'package:fstapp/components/map/map_surface_model.dart';
 import 'package:fstapp/components/map/maplibre/maplibre_scene_controller.dart';
-import 'package:fstapp/components/map/maplibre/maplibre_native_performance.dart';
 import 'package:fstapp/components/map/maplibre/maplibre_place_icon_rasterizer.dart';
 import 'package:fstapp/components/map/maplibre/maplibre_viewport_controller.dart';
 import 'package:latlong2/latlong.dart';
@@ -79,16 +77,7 @@ class _MapLibreMapSurfaceState extends State<MapLibreMapSurface> {
     widget.model.viewport.attach(adapter);
   }
 
-  Future<void> _configureNativePerformance() async {
-    try {
-      await MapLibreNativePerformance.configure();
-    } catch (error) {
-      AppLogger.error('MapLibre native performance setup failed: $error');
-    }
-  }
-
   Future<void> _onStyleLoaded(ml.StyleController style) async {
-    unawaited(_configureNativePerformance());
     _registeredIconVersions.clear();
     await _registerIcons(style);
     final sceneController = MapLibreSceneController(style);
