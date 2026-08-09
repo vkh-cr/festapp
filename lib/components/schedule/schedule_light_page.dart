@@ -290,6 +290,7 @@ class _ScheduleLightPageState extends State<ScheduleLightPage>
             child: LightTimelineView(
               key: _dots.isEmpty ? UniqueKey() : ValueKey(_dots.length),
               events: _dots,
+              sessionOccasionId: RightsService.currentOccasionId(),
               onEventPressed: _eventPressed,
               showAddNewEventButton: RightsService.isEditor,
               onAddNewEvent: (ctx, groups, p) =>

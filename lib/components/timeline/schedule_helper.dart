@@ -322,6 +322,11 @@ class ScheduleDaySessionSelection {
       first.day == second.day;
 }
 
+/// One process-local selection shared by every public Program presentation.
+/// It is intentionally never persisted to device storage.
+final ScheduleDaySessionSelection scheduleDaySessionSelection =
+    ScheduleDaySessionSelection();
+
 class _ScheduleDaySelection {
   const _ScheduleDaySelection({
     required this.date,

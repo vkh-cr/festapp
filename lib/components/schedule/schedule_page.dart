@@ -59,7 +59,7 @@ class SchedulePage extends StatefulWidget {
 class _SchedulePageState extends State<SchedulePage>
     with WidgetsBindingObserver {
   static final ScheduleDaySessionSelection _daySelection =
-      ScheduleDaySessionSelection();
+      scheduleDaySessionSelection;
   final AsyncReloadCoordinator _reloadCoordinator = AsyncReloadCoordinator();
   static bool _fullDataGloballyLoaded = false;
   static DateTime? _lastQuickLoadTime;
