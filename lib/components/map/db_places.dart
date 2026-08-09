@@ -28,17 +28,7 @@ class DbPlaces {
   }
 
   static Future<List<PlaceModel>> getAllPlaces() async {
-    if (ClientSyncRuntime.isV1Selected) {
-      final response = await _supabase.rpc('get_map_editor_bundle_v1', params: {
-        'p_occasion': RightsService.currentOccasionId()!,
-      });
-      final data = (response as Map).cast<String, dynamic>();
-      final places = ((data['places'] as List?) ?? const [])
-          .map((x) => PlaceModel.fromJson((x as Map).cast<String, dynamic>()))
-          .toList();
-      places.sortPlaces();
-      return places;
-    }
+    if (ClientSyncRuntime.isV1Selected) return getAllPlacesForEditor();
     var data = await _supabase
         .from(Tb.places.table)
         .select()
@@ -47,6 +37,26 @@ class DbPlaces {
         List<PlaceModel>.from(data.map((x) => PlaceModel.fromJson(x)));
     toReturn.sortPlaces();
     return toReturn;
+  }
+
+  /// Loads the versioned place rows required by the editor grid.
+  static Future<List<PlaceModel>> getAllPlacesForEditor() async {
+    final response = await _supabase.rpc('get_map_editor_bundle_v1', params: {
+      'p_occasion': RightsService.currentOccasionId()!,
+    });
+    return decodeMapEditorPlacesResponse(response);
+  }
+
+  static List<PlaceModel> decodeMapEditorPlacesResponse(Object? response) {
+    final data = (response as Map).cast<String, dynamic>();
+    if (data['code'] != 200) {
+      throw StateError('Map editor places could not be loaded');
+    }
+    final places = ((data['places'] as List?) ?? const [])
+        .map((x) => PlaceModel.fromJson((x as Map).cast<String, dynamic>()))
+        .toList();
+    places.sortPlaces();
+    return places;
   }
 
   static Future<List<PlaceModel>> getPlacesIn(List<int> ids) async {
@@ -78,42 +88,71 @@ class DbPlaces {
   }
 
   static Future<void> deletePlace(PlaceModel placeModel) async {
-    if (ClientSyncRuntime.isV1Selected) {
-      final result = await _commands.deletePlace(
-          RightsService.currentOccasionId()!, placeModel);
-      if (result.status == MapCommandStatus.conflict) {
-        throw StateError('Place was changed by another editor');
-      }
-      if (result.status == MapCommandStatus.rejected) {
-        throw StateError('Place delete was rejected');
-      }
-      return;
+    await deletePlaceWithCommands(
+      commands: _commands,
+      occasionId: RightsService.currentOccasionId()!,
+      place: placeModel,
+    );
+  }
+
+  /// The only supported place-deletion boundary.
+  ///
+  /// This remains independent of the selected read projection: stale or legacy
+  /// contexts must not fall back to direct table DML because that bypasses the
+  /// map commit/publication contract and may lack table privileges entirely.
+  static Future<void> deletePlaceWithCommands({
+    required MapCommands commands,
+    required int occasionId,
+    required PlaceModel place,
+  }) async {
+    final result = await commands.deletePlace(occasionId, place);
+    if (result.status == MapCommandStatus.conflict) {
+      throw StateError('Place was changed by another editor');
     }
-    await _supabase
-        .from(Tb.places.table)
-        .delete()
-        .eq(Tb.places.id, placeModel.id!);
+    if (result.status == MapCommandStatus.rejected) {
+      throw StateError('Place delete was rejected');
+    }
+  }
+
+  /// Compatibility boundary for the not-yet-cut-over legacy group writer.
+  /// Remove together with the direct-DML branch in the group service.
+  static Future<void> deleteLegacyPrivateGroupPlace(PlaceModel place) async {
+    await _supabase.from(Tb.places.table).delete().eq(Tb.places.id, place.id!);
   }
 
   static Future<PlaceModel> updatePlace(PlaceModel placeModel) async {
-    if (ClientSyncRuntime.isV1Selected) {
-      final result = await _commands.savePlace(
-          RightsService.currentOccasionId()!, placeModel);
-      if (result.status == MapCommandStatus.conflict) {
-        throw StateError('Place was changed by another editor');
-      }
-      if (result.status == MapCommandStatus.rejected || result.entity == null) {
-        throw StateError('Place save was rejected');
-      }
-      return result.entity!;
+    return updatePlaceWithCommands(
+      commands: _commands,
+      occasionId: RightsService.currentOccasionId()!,
+      place: placeModel,
+    );
+  }
+
+  static Future<PlaceModel> updatePlaceWithCommands({
+    required MapCommands commands,
+    required int occasionId,
+    required PlaceModel place,
+  }) async {
+    final result = await commands.savePlace(occasionId, place);
+    if (result.status == MapCommandStatus.conflict) {
+      throw StateError('Place was changed by another editor');
     }
-    var upsertObj = placeModel.toJson();
+    if (result.status == MapCommandStatus.rejected || result.entity == null) {
+      throw StateError('Place save was rejected');
+    }
+    return result.entity!;
+  }
+
+  /// Compatibility boundary for the not-yet-cut-over legacy group writer.
+  static Future<PlaceModel> updateLegacyPrivateGroupPlace(
+      PlaceModel place) async {
+    var upsertObj = place.toJson();
     dynamic data;
-    if (placeModel.id != null) {
+    if (place.id != null) {
       data = await _supabase
           .from(Tb.places.table)
           .update(upsertObj)
-          .eq(Tb.places.id, placeModel.id!)
+          .eq(Tb.places.id, place.id!)
           .select()
           .single();
     } else {

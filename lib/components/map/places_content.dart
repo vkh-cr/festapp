@@ -65,7 +65,7 @@ class _PlacesContentState extends State<PlacesContent> {
   void initController() {
     controller ??= SingleDataGridController<PlaceModel>(
       context: context,
-      loadData: DbPlaces.getAllPlaces,
+      loadData: DbPlaces.getAllPlacesForEditor,
       fromPlutoJson: PlaceModel.fromPlutoJson,
       firstColumnType: DataGridFirstColumn.deleteAndDuplicate,
       idColumn: Tb.places.id,

@@ -134,7 +134,8 @@ class DbGroups {
         model.persistedPlaceWasPrivate ? model.persistedPlaceId : null;
     if (model.place != null) {
       if (model.place!.id == null || model.shouldSavePlace) {
-        model.place = await DbPlaces.updatePlace(model.place!);
+        model.place =
+            await DbPlaces.updateLegacyPrivateGroupPlace(model.place!);
       }
     }
     final upsertObj = buildUserGroupUpsert(model);
@@ -162,7 +163,9 @@ class DbGroups {
     final assignedPlaceId = model.place?.id;
     if (previousPrivatePlaceId != null &&
         previousPrivatePlaceId != assignedPlaceId) {
-      await DbPlaces.deletePlace(PlaceModel(id: previousPrivatePlaceId));
+      await DbPlaces.deleteLegacyPrivateGroupPlace(
+        PlaceModel(id: previousPrivatePlaceId),
+      );
     }
     model.persistedPlaceId = assignedPlaceId;
     model.persistedPlaceWasPrivate =
@@ -241,7 +244,7 @@ class DbGroups {
         .eq(Tb.user_group_info.id, model.id!);
 
     if (model.place?.isPrivateGroupLocation ?? false) {
-      await DbPlaces.deletePlace(model.place!);
+      await DbPlaces.deleteLegacyPrivateGroupPlace(model.place!);
     }
   }
 
