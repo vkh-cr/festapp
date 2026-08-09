@@ -214,6 +214,24 @@ BEGIN
     WHERE s.cutover_ready),
     'additive migration cannot make a source writer cutover-ready by itself');
   PERFORM assert_true(NOT EXISTS (
+      SELECT 1 FROM public.occasions o
+      WHERE COALESCE((o.data->>'client_sync_v1')::boolean,false))
+    OR NOT EXISTS (
+      SELECT 1 FROM public.client_sync_component_sources s
+      WHERE s.registry_version=(
+        SELECT max(v.registry_version) FROM public.client_sync_component_sources v)
+        AND NOT s.cutover_ready),
+    'enabled client sync cannot coexist with an unready registry source');
+  PERFORM assert_true(NOT EXISTS (
+      SELECT 1 FROM public.occasions o
+      WHERE COALESCE((o.data->>'client_sync_v1')::boolean,false))
+    OR NOT EXISTS (
+      SELECT 1 FROM information_schema.role_table_grants g
+      WHERE g.grantee IN ('anon','authenticated')
+        AND g.table_schema='public' AND g.table_name='images'
+        AND g.privilege_type IN ('INSERT','UPDATE','DELETE')),
+    'enabled client sync closes ordinary occasion image DML');
+  PERFORM assert_true(NOT EXISTS (
     SELECT 1 FROM public.client_sync_component_sources s
     CROSS JOIN LATERAL unnest(s.canonical_writers) writer(name)
     WHERE s.disposition IN ('migrate','boundary') AND NOT EXISTS (

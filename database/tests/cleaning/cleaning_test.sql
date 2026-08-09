@@ -482,3 +482,40 @@ BEGIN
 
     RAISE NOTICE 'test 10 (notification opt-out) passed';
 END $$ LANGUAGE plpgsql;
+
+-- ---------------------------------------------------------------------------
+-- 11. A toilet owns its cleaning history. Deleting the toilet through the
+--     canonical map command must also remove its reports instead of failing on
+--     cleaning_reports_place_fkey.
+-- ---------------------------------------------------------------------------
+DO $$
+DECLARE
+    v_oc bigint := (SELECT v FROM _cln WHERE k = 'occasion');
+    v_wc3 bigint := (SELECT v FROM _cln WHERE k = 'wc3');
+    v_res jsonb;
+BEGIN
+    PERFORM assert_true(
+      EXISTS (SELECT 1 FROM public.cleaning_reports WHERE place = v_wc3),
+      'WC 03 has cleaning history before deletion'
+    );
+
+    PERFORM set_config('request.jwt.claim.sub', get_user_id('cln_editor')::text, true);
+    v_res := public.delete_place_client_sync_v1(
+      v_oc,
+      v_wc3,
+      gen_random_uuid(),
+      0
+    );
+
+    PERFORM assert_eq(v_res->>'status', 'applied', 'toilet deletion is applied');
+    PERFORM assert_true(
+      NOT EXISTS (SELECT 1 FROM public.places WHERE id = v_wc3),
+      'toilet is deleted'
+    );
+    PERFORM assert_true(
+      NOT EXISTS (SELECT 1 FROM public.cleaning_reports WHERE place = v_wc3),
+      'owned cleaning history is deleted with the toilet'
+    );
+
+    RAISE NOTICE 'test 11 (delete toilet with cleaning history) passed';
+END $$ LANGUAGE plpgsql;

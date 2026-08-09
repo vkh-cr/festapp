@@ -82,7 +82,7 @@ class _ReceptionPageState extends State<ReceptionPage> {
     final initialQuery = _userSearch.text.trim();
     final data = await ReceptionService.options();
     final recent = await ReceptionService.recent();
-    final occasionUsers = RightsService.isAdmin()
+    final occasionUsers = RightsService.canManageReceptionParticipants()
         ? await ReceptionService.occasionUsers(initialQuery)
         : <Map<String, dynamic>>[];
     if (!mounted) return;
@@ -196,7 +196,7 @@ class _ReceptionPageState extends State<ReceptionPage> {
   }
 
   Future<void> _searchOccasionUsers(String query) async {
-    if (!RightsService.isAdmin()) return;
+    if (!RightsService.canManageReceptionParticipants()) return;
     final requestedQuery = query.trim();
     setState(() => _searchingUsers = true);
     final users = await ExceptionHandler.guard<List<Map<String, dynamic>>>(
@@ -290,7 +290,8 @@ class _ReceptionPageState extends State<ReceptionPage> {
                         : Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                                if (RightsService.isAdmin()) ...[
+                                if (RightsService
+                                    .canManageReceptionParticipants()) ...[
                                   Text(ReceptionStrings.findParticipant,
                                       style: Theme.of(context)
                                           .textTheme
@@ -312,19 +313,33 @@ class _ReceptionPageState extends State<ReceptionPage> {
                                     onChanged: _scheduleUserSearch,
                                   ),
                                   if (_occasionUsers.isNotEmpty)
-                                    ..._occasionUsers.map((user) => ListTile(
-                                          leading:
-                                              const Icon(Icons.person_outline),
-                                          title: Text(
-                                              '${user['name'] ?? ''} ${user['surname'] ?? ''}'
-                                                  .trim()),
-                                          subtitle: Text(
-                                              user['email']?.toString() ?? ''),
-                                          trailing: const Icon(Icons.qr_code_2),
-                                          onTap: _loading
-                                              ? null
-                                              : () => _issueExisting(user),
-                                        )),
+                                    ConstrainedBox(
+                                      constraints:
+                                          const BoxConstraints(maxHeight: 240),
+                                      child: ListView.builder(
+                                        primary: false,
+                                        shrinkWrap: true,
+                                        itemCount: _occasionUsers.length,
+                                        itemBuilder: (context, index) {
+                                          final user = _occasionUsers[index];
+                                          return ListTile(
+                                            leading: const Icon(
+                                                Icons.person_outline),
+                                            title: Text(
+                                                '${user['name'] ?? ''} ${user['surname'] ?? ''}'
+                                                    .trim()),
+                                            subtitle: Text(
+                                                user['email']?.toString() ??
+                                                    ''),
+                                            trailing:
+                                                const Icon(Icons.qr_code_2),
+                                            onTap: _loading
+                                                ? null
+                                                : () => _issueExisting(user),
+                                          );
+                                        },
+                                      ),
+                                    ),
                                   if (!_searchingUsers &&
                                       _userSearch.text.trim().isNotEmpty &&
                                       _occasionUsers.isEmpty)

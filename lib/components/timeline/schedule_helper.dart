@@ -250,7 +250,7 @@ int calculateScheduleInitialDayIndex(
 /// Nothing is persisted to device storage, so a fresh app launch calculates
 /// today's day again.
 class ScheduleDaySessionSelection {
-  final Map<int, DateTime> _selectedDates = {};
+  final Map<int, _ScheduleDaySelection> _selections = {};
 
   int resolveInitialIndex({
     required int occasionId,
@@ -258,34 +258,80 @@ class ScheduleDaySessionSelection {
     required DateTime now,
   }) {
     if (dayGroups.isEmpty) return 0;
-    final selectedDate = _selectedDates[occasionId];
-    if (selectedDate != null) {
+    final selection = _selections[occasionId];
+    if (selection != null) {
       final rememberedIndex = dayGroups.indexWhere(
-        (group) => _isSameDate(_scheduleGroupDate(group), selectedDate),
+        (group) => _isSameDate(_scheduleGroupDate(group), selection.date),
       );
-      if (rememberedIndex >= 0) return rememberedIndex;
+      final daySetIdentity = _daySetIdentity(dayGroups);
+      if (rememberedIndex >= 0 &&
+          (selection.isLocked || selection.daySetIdentity == daySetIdentity)) {
+        return rememberedIndex;
+      }
 
-      // Offline/fast/full program projections can temporarily expose only a
-      // subset of days. Show a safe fallback for that snapshot, but keep the
-      // user's remembered date so the later complete projection restores it.
-      return calculateScheduleInitialDayIndex(dayGroups, now: now);
+      if (selection.isLocked) {
+        // Offline/fast/full program projections can temporarily expose only a
+        // subset of days. Show a safe fallback for that snapshot, but keep the
+        // user's remembered date so the later complete projection restores it.
+        return calculateScheduleInitialDayIndex(dayGroups, now: now);
+      }
     }
 
     final index = calculateScheduleInitialDayIndex(dayGroups, now: now);
-    remember(occasionId, dayGroups[index]);
+    final selectedGroup = dayGroups[index];
+    final selectedDate = _scheduleGroupDate(selectedGroup);
+    if (selectedDate != null) {
+      _selections[occasionId] = _ScheduleDaySelection(
+        date: selectedDate,
+        daySetIdentity: _daySetIdentity(dayGroups),
+        isLocked: _isAutomaticSelectionDefinitive(selectedGroup, now),
+      );
+    }
     return index;
   }
 
   void remember(int occasionId, TimeBlockGroup group) {
     final date = _scheduleGroupDate(group);
-    if (date != null) _selectedDates[occasionId] = date;
+    if (date != null) {
+      _selections[occasionId] = _ScheduleDaySelection(
+        date: date,
+        daySetIdentity: '',
+        isLocked: true,
+      );
+    }
   }
+
+  bool _isAutomaticSelectionDefinitive(TimeBlockGroup group, DateTime now) {
+    if (group.events.any((event) =>
+        event.startTime.isBefore(now) && event.endTime.isAfter(now))) {
+      return true;
+    }
+    final date = _scheduleGroupDate(group);
+    return date != null &&
+        (_isSameDate(date, now) || date.weekday == now.weekday);
+  }
+
+  String _daySetIdentity(List<TimeBlockGroup> dayGroups) => dayGroups
+      .map((group) => _scheduleGroupDate(group)?.millisecondsSinceEpoch ?? 0)
+      .join('_');
 
   bool _isSameDate(DateTime? first, DateTime second) =>
       first != null &&
       first.year == second.year &&
       first.month == second.month &&
       first.day == second.day;
+}
+
+class _ScheduleDaySelection {
+  const _ScheduleDaySelection({
+    required this.date,
+    required this.daySetIdentity,
+    required this.isLocked,
+  });
+
+  final DateTime date;
+  final String daySetIdentity;
+  final bool isLocked;
 }
 
 DateTime? _scheduleGroupDate(TimeBlockGroup group) =>

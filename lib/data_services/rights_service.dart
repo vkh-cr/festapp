@@ -178,6 +178,8 @@ class RightsService {
   static bool isReceptionist() =>
       occasionLinkModelNotifier.value?.occasionUser?.isReceptionist ?? false;
 
+  static bool canManageReceptionParticipants() => isManager() || isAdmin();
+
   static bool canUseReception() =>
       FeatureService.isFeatureEnabled(FeatureConstants.reception) &&
       (isReceptionist() || isManager() || isAdmin());

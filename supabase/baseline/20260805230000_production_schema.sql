@@ -39872,7 +39872,7 @@ ALTER TABLE ONLY "public"."cleaning_reports"
 
 
 ALTER TABLE ONLY "public"."cleaning_reports"
-    ADD CONSTRAINT "cleaning_reports_place_fkey" FOREIGN KEY ("place") REFERENCES "public"."places"("id");
+    ADD CONSTRAINT "cleaning_reports_place_fkey" FOREIGN KEY ("place") REFERENCES "public"."places"("id") ON DELETE CASCADE;
 
 
 

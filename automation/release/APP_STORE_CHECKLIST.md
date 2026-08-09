@@ -1,6 +1,6 @@
 # CSM Ostrava App Store checklist
 
-Target: existing Apple ID `6745415882`, bundle ID `festapp.jm2025`. No new app may be created. Release is automatic after Apple approval. The iOS target version is explicit in `app_store_config.json`; its numeric build comes from the `+build` part of `VERSION` in `automation/project.conf`.
+Target: existing Apple ID `6745415882`, bundle ID `festapp.jm2025`. No new app may be created. The iOS target version is explicit in `app_store_config.json`; its numeric build comes from the `+build` part of `VERSION` in `automation/project.conf`.
 
 | Gate | Status | Owner | Evidence / required action |
 |---|---|---|---|
@@ -26,7 +26,7 @@ Target: existing Apple ID `6745415882`, bundle ID `festapp.jm2025`. No new app m
 | Live-JM to CSM upgrade | pending external | QA owner | Online and first-launch-offline device checklist against the uploaded App Store build; TestFlight is not part of this release path |
 | Disposable account deletion | production lifecycle passed 2026-08-06 | Privacy + QA owner | A unique production account completed create/login/request-email/final-delete/completion-email lifecycle; Auth and profile rows were removed, the audit identity was anonymized, and the completion notification was logged and delivered |
 | Target build selection | passed 2026-08-08 | Release engineer | Canonical gated selector required one `VALID` build and exact API readback selected build `436` for version `0.19.88`; the read-only submission gate passed |
-| Submit for review | submitted 2026-08-08 | App Store Account Holder | Exact build `436` was selected, precheck passed, and the gated submission succeeded with `automatic_release=true`; App Store Connect readback is `WAITING_FOR_REVIEW` for version `0.19.88` |
-| Public release | waiting for Apple approval | App Store Account Holder | Release type is `AFTER_APPROVAL`; App Store Connect publishes the approved version automatically |
+| Submit for review | submitted 2026-08-08 | App Store Account Holder | Exact build `436` was selected, precheck passed, and the gated submission succeeded with `automatic_release=true`; after approval, App Store Connect nevertheless exposed version `0.19.88` as `PENDING_DEVELOPER_RELEASE` with release type `MANUAL` |
+| Public release | released 2026-08-08 | App Store Account Holder | An exact-identity-gated release request for Apple ID `6745415882`, bundle `festapp.jm2025`, version `0.19.88` was accepted by App Store Connect (`HTTP 201`); immediate API readback is `READY_FOR_SALE`. The Czech public catalog still returned `0.19.85` immediately afterward, pending Apple cache propagation |
 
 Old-binary compatibility owner: backend owner. Review date: 2026-10-01 or after an approved adoption threshold, whichever is later.

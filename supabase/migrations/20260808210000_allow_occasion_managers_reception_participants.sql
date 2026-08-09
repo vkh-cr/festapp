@@ -1,29 +1,4 @@
-CREATE OR REPLACE FUNCTION public.reception_rate_limit_v1(p_operation text,p_limit integer DEFAULT 30)
-RETURNS boolean LANGUAGE plpgsql SECURITY DEFINER SET search_path=public,extensions AS $$
-DECLARE v_count integer; v_bucket timestamptz:=date_trunc('minute',now());
-BEGIN
-  IF auth.uid() IS NULL THEN RETURN false; END IF;
-  INSERT INTO public.reception_rate_limits(actor,operation,bucket,count)
-  VALUES(auth.uid(),p_operation,v_bucket,1)
-  ON CONFLICT(actor,operation,bucket) DO UPDATE SET count=public.reception_rate_limits.count+1
-  RETURNING count INTO v_count;
-  RETURN v_count<=p_limit;
-END $$;
-
-CREATE OR REPLACE FUNCTION public.get_reception_registration_options_v1(p_occasion bigint)
-RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path=public,extensions AS $$
-DECLARE v_services jsonb;
-BEGIN
-  IF NOT public.get_can_use_reception(p_occasion) THEN
-    RETURN jsonb_build_object('code',403,'message','reception_unavailable');
-  END IF;
-  SELECT COALESCE(o.services,'{}'::jsonb) INTO v_services FROM public.occasions o WHERE o.id=p_occasion;
-  RETURN jsonb_build_object('code',200,'groups',COALESCE((SELECT jsonb_agg(jsonb_build_object('id',g.id,'title',g.title) ORDER BY g.title)
-    FROM public.user_group_info g WHERE g.occasion=p_occasion AND g.type IS NULL),'[]'::jsonb),
-    'accommodations',COALESCE((SELECT jsonb_agg(jsonb_build_object('code',x.item->>'code','title',x.item->>'title','placeTitle',p.title) ORDER BY x.ordinality)
-      FROM jsonb_array_elements(CASE WHEN jsonb_typeof(v_services->'accommodation')='array' THEN v_services->'accommodation' ELSE '[]'::jsonb END)
-      WITH ORDINALITY x(item,ordinality) LEFT JOIN public.places p ON p.occasion=p_occasion AND p.id=CASE WHEN x.item->>'reference' ~ '^[0-9]+$' THEN (x.item->>'reference')::bigint END),'[]'::jsonb));
-END $$;
+BEGIN;
 
 CREATE OR REPLACE FUNCTION public.create_reception_user_v1(p_occasion bigint,p_command_id uuid,p_profile jsonb,p_group_id bigint DEFAULT NULL,p_accommodation_code text DEFAULT NULL,p_confirm_same_name boolean DEFAULT false)
 RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path=public,extensions AS $$
@@ -129,89 +104,7 @@ FROM (
   LIMIT 50
 ) q; $$;
 
-CREATE OR REPLACE FUNCTION public.resolve_reception_login_qr_v1(p_occasion bigint,p_token_hash text)
-RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path=public,extensions AS $$
-DECLARE v_user uuid; v_email text;
-BEGIN
-  IF auth.role()<>'service_role' THEN RAISE EXCEPTION 'not_authorized'; END IF;
-  SELECT c."user",(o.organization::text||'+'||au.email_readonly) INTO v_user,v_email
-  FROM public.user_login_qr_credentials c JOIN public.occasion_users ou ON (ou.occasion,ou."user")=(c.occasion,c."user")
-  JOIN public.user_info au ON au.id=c."user" JOIN public.occasions o ON o.id=c.occasion
-  WHERE c.occasion=p_occasion
-    AND (c.token_hash=p_token_hash OR (c.manual_token_hash=p_token_hash AND c.manual_expires_at>now()))
-    AND c.revoked_at IS NULL
-    AND jsonb_path_exists(COALESCE(o.features,'[]'::jsonb),'$[*] ? (@.code == "reception" && @.is_enabled == true)') FOR UPDATE OF c;
-  IF v_user IS NULL THEN RETURN NULL; END IF;
-  RETURN jsonb_build_object('userId',v_user,'authEmail',v_email);
-END $$;
+REVOKE ALL ON FUNCTION public.get_reception_occasion_users_v1(bigint,text) FROM PUBLIC,anon;
+GRANT EXECUTE ON FUNCTION public.create_reception_user_v1(bigint,uuid,jsonb,bigint,text,boolean),public.get_reception_occasion_users_v1(bigint,text),public.issue_reception_login_qr_v1(bigint,uuid) TO authenticated,service_role;
 
-CREATE OR REPLACE FUNCTION public.revoke_reception_login_qr_v1(p_occasion bigint,p_user uuid)
-RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path=public,extensions AS $$
-DECLARE v_actor uuid:=auth.uid();
-BEGIN
-  IF NOT public.get_can_use_reception(p_occasion) THEN
-    RETURN jsonb_build_object('code',403,'message','reception_unavailable');
-  END IF;
-  IF NOT public.reception_rate_limit_v1('revoke',30) THEN
-    RETURN jsonb_build_object('code',429,'message','rate_limited');
-  END IF;
-  IF NOT EXISTS(
-    SELECT 1 FROM public.reception_registrations r
-    WHERE r.occasion=p_occasion AND r."user"=p_user AND r.status='active'
-      AND ((r.created_by=v_actor AND r.created_at>now()-interval '30 minutes')
-        OR public.get_is_manager_on_occasion(p_occasion)
-        OR public.get_is_admin_on_occasion(p_occasion))
-  ) THEN
-    RETURN jsonb_build_object('code',403,'message','registration_unavailable');
-  END IF;
-  UPDATE public.user_login_qr_credentials
-  SET revoked_at=now()
-  WHERE occasion=p_occasion AND "user"=p_user AND revoked_at IS NULL;
-  RETURN jsonb_build_object('code',200,'status','revoked');
-END $$;
-
-CREATE OR REPLACE FUNCTION public.mark_reception_login_qr_used_v1(p_occasion bigint,p_token_hash text)
-RETURNS void LANGUAGE plpgsql SECURITY DEFINER SET search_path=public,extensions AS $$
-BEGIN
-  IF auth.role()<>'service_role' THEN RAISE EXCEPTION 'not_authorized'; END IF;
-  UPDATE public.user_login_qr_credentials c SET
-    last_used_at=now(),
-    use_count=use_count+1,
-    manual_token_hash=CASE WHEN c.manual_token_hash=p_token_hash THEN NULL ELSE c.manual_token_hash END,
-    manual_expires_at=CASE WHEN c.manual_token_hash=p_token_hash THEN NULL ELSE c.manual_expires_at END
-  FROM public.occasion_users ou,public.occasions o
-  WHERE c.occasion=p_occasion
-    AND (c.token_hash=p_token_hash OR (c.manual_token_hash=p_token_hash AND c.manual_expires_at>now()))
-    AND c.revoked_at IS NULL
-    AND (ou.occasion,ou."user")=(c.occasion,c."user") AND o.id=c.occasion
-    AND jsonb_path_exists(COALESCE(o.features,'[]'::jsonb),'$[*] ? (@.code == "reception" && @.is_enabled == true)');
-END $$;
-
-CREATE OR REPLACE FUNCTION public.cancel_reception_registration_v1(p_occasion bigint,p_user uuid)
-RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path=public,extensions AS $$
-DECLARE v_r public.reception_registrations%rowtype; v_actor uuid:=auth.uid();
-BEGIN
-  SELECT * INTO v_r FROM public.reception_registrations WHERE occasion=p_occasion AND "user"=p_user FOR UPDATE;
-  IF NOT FOUND THEN RETURN jsonb_build_object('code',404,'message','registration_unavailable'); END IF;
-  IF NOT public.get_can_use_reception(p_occasion) OR NOT (public.get_is_manager_on_occasion(p_occasion) OR public.get_is_admin_on_occasion(p_occasion) OR (v_r.created_by=v_actor AND (v_r.status='cancelled' OR v_r.created_at>now()-interval '30 minutes'))) THEN
-    RETURN jsonb_build_object('code',403,'message','registration_unavailable'); END IF;
-  IF v_r.status='cancelled' THEN RETURN jsonb_build_object('code',200,'status',CASE WHEN v_r.auth_revoked_at IS NULL THEN 'domain_blocked_auth_revocation_pending' ELSE 'cancelled' END,'targetUser',p_user); END IF;
-  UPDATE public.reception_registrations SET status='cancelled',cancelled_by=v_actor,cancelled_at=now() WHERE occasion=p_occasion AND "user"=p_user;
-  PERFORM public.delete_occasion_user(p_user,p_occasion);
-  RETURN jsonb_build_object('code',200,'status','domain_blocked_auth_revocation_pending','targetUser',p_user);
-END $$;
-
-CREATE OR REPLACE FUNCTION public.mark_reception_auth_revoked_v1(p_occasion bigint,p_user uuid)
-RETURNS void LANGUAGE plpgsql SECURITY DEFINER SET search_path=public,extensions AS $$
-BEGIN IF auth.role()<>'service_role' THEN RAISE EXCEPTION 'not_authorized'; END IF;
-UPDATE public.reception_registrations SET auth_revoked_at=now() WHERE occasion=p_occasion AND "user"=p_user AND status='cancelled'; END $$;
-
-CREATE OR REPLACE FUNCTION public.get_my_recent_reception_registrations_v1(p_occasion bigint)
-RETURNS jsonb LANGUAGE sql STABLE SECURITY DEFINER SET search_path=public,extensions AS $$
-SELECT CASE WHEN public.get_can_use_reception(p_occasion) THEN COALESCE(jsonb_agg(jsonb_build_object('userId',r."user",'name',ui.name,'surname',ui.surname,'email',ui.email_readonly,'createdAt',r.created_at,'qrUsed',c.last_used_at IS NOT NULL) ORDER BY r.created_at DESC),'[]'::jsonb) ELSE '[]'::jsonb END
-FROM public.reception_registrations r JOIN public.user_info ui ON ui.id=r."user" LEFT JOIN public.user_login_qr_credentials c ON (c.occasion,c."user")=(r.occasion,r."user")
-WHERE r.occasion=p_occasion AND r.created_by=auth.uid() AND r.status='active' AND r.created_at>now()-interval '30 minutes'; $$;
-
-REVOKE ALL ON FUNCTION public.reception_rate_limit_v1(text,integer),public.get_reception_occasion_users_v1(bigint,text),public.resolve_reception_login_qr_v1(bigint,text),public.mark_reception_login_qr_used_v1(bigint,text),public.mark_reception_auth_revoked_v1(bigint,uuid) FROM PUBLIC,anon,authenticated;
-GRANT EXECUTE ON FUNCTION public.resolve_reception_login_qr_v1(bigint,text),public.mark_reception_login_qr_used_v1(bigint,text),public.mark_reception_auth_revoked_v1(bigint,uuid) TO service_role;
-GRANT EXECUTE ON FUNCTION public.get_reception_registration_options_v1(bigint),public.create_reception_user_v1(bigint,uuid,jsonb,bigint,text,boolean),public.issue_reception_login_qr_v1(bigint,uuid),public.get_reception_occasion_users_v1(bigint,text),public.revoke_reception_login_qr_v1(bigint,uuid),public.cancel_reception_registration_v1(bigint,uuid),public.get_my_recent_reception_registrations_v1(bigint) TO authenticated,service_role;
+COMMIT;

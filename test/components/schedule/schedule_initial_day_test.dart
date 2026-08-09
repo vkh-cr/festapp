@@ -124,6 +124,33 @@ void main() {
     );
   });
 
+  test('automatic startup day stays stable when reopening Program', () {
+    final selection = ScheduleDaySessionSelection();
+    final groups = [
+      day(DateTime(2026, 8, 7)),
+      day(DateTime(2026, 8, 8)),
+      day(DateTime(2026, 8, 9)),
+    ];
+
+    expect(
+      selection.resolveInitialIndex(
+        occasionId: 9,
+        dayGroups: groups,
+        now: now,
+      ),
+      1,
+    );
+    expect(
+      selection.resolveInitialIndex(
+        occasionId: 9,
+        dayGroups: groups,
+        now: DateTime(2026, 8, 9, 12),
+      ),
+      1,
+      reason: 'the automatic choice runs once per app session',
+    );
+  });
+
   test('session selection is isolated per occasion', () {
     final selection = ScheduleDaySessionSelection();
     final groups = [
@@ -177,6 +204,39 @@ void main() {
       ),
       2,
       reason: 'the complete snapshot restores the manual choice',
+    );
+  });
+
+  test('provisional first dataset does not lock Tuesday before Sunday arrives',
+      () {
+    final selection = ScheduleDaySessionSelection();
+    final sunday = DateTime(2026, 8, 9, 12);
+    final partialGroups = [day(DateTime(2026, 8, 4))]; // Tuesday only.
+    final completeGroups = [
+      day(DateTime(2026, 8, 4)),
+      day(DateTime(2026, 8, 5)),
+      day(DateTime(2026, 8, 6)),
+      day(DateTime(2026, 8, 7)),
+      day(DateTime(2026, 8, 8)),
+      day(DateTime(2026, 8, 9)),
+    ];
+
+    expect(
+      selection.resolveInitialIndex(
+        occasionId: 9,
+        dayGroups: partialGroups,
+        now: sunday,
+      ),
+      0,
+    );
+    expect(
+      selection.resolveInitialIndex(
+        occasionId: 9,
+        dayGroups: completeGroups,
+        now: sunday,
+      ),
+      5,
+      reason: 'the first incomplete projection must not become a user choice',
     );
   });
 }

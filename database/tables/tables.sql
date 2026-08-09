@@ -225,7 +225,7 @@ create table if not exists public.cleaning_reports (
   data         JSONB NULL,
   CONSTRAINT cleaning_reports_pkey PRIMARY KEY (id),
   CONSTRAINT cleaning_reports_occasion_fkey FOREIGN KEY (occasion) REFERENCES public.occasions (id),
-  CONSTRAINT cleaning_reports_place_fkey FOREIGN KEY (place) REFERENCES public.places (id),
+  CONSTRAINT cleaning_reports_place_fkey FOREIGN KEY (place) REFERENCES public.places (id) ON DELETE CASCADE,
   CONSTRAINT cleaning_reports_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.user_info (id),
   CONSTRAINT cleaning_reports_resolved_by_fkey FOREIGN KEY (resolved_by) REFERENCES public.user_info (id),
   -- problem_type list kept in sync with: report_cleaning_issue.sql,

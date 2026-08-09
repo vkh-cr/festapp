@@ -129,14 +129,13 @@ class _UsersTabState extends State<UsersTab> {
           },
           isEnabled: RightsService.canUpdateUsers,
         ),
-      if (!_hasCsmAppLinks)
-        DataGridAction(
-          name: UserStrings.invite,
-          action: (SingleDataGridController p0, [_]) async {
-            await UsersTabHelper.invite(context, p0, refreshData);
-          },
-          isEnabled: RightsService.canUpdateUsers,
-        ),
+      DataGridAction(
+        name: UserStrings.invite,
+        action: (SingleDataGridController p0, [_]) async {
+          await UsersTabHelper.invite(context, p0, refreshData);
+        },
+        isEnabled: RightsService.canUpdateUsers,
+      ),
       if (FeatureService.allowsAdminCompanionAssignment() &&
           _canManageCompanions)
         DataGridAction(

@@ -112,7 +112,7 @@ class UsersTabHelper {
     }, nonAdded, CommonStrings.add);
   }
 
-  /// Sends sign-in codes in non-CSM applications that retain invitations.
+  /// Sends sign-in codes to the checked users.
   static Future<void> invite(
       BuildContext context,
       SingleDataGridController singleDataGrid,
