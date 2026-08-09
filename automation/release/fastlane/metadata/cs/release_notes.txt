@@ -1,1 +1,1 @@
-Aktualizace zlepšuje stabilitu mapy, navigaci mezi programem a mapou a spolehlivost offline režimu.
+Program se při prvním otevření automaticky nastaví na aktuální den. Aktualizace také opravuje správu míst v mapě a zlepšuje spolehlivost offline režimu.
