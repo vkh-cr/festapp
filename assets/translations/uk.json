@@ -407,6 +407,7 @@
   "FeatureMap": {
     "changeLocation": "Змінити місцезнаходження",
     "navigate": "Навігація",
+    "chooseNavigationApp": "Виберіть навігаційний застосунок",
     "loadingMap": "Завантаження карти…",
     "counselingHours": "Години консультацій",
     "drawPath": "Намалювати маршрут",

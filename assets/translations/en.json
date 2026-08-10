@@ -1684,7 +1684,8 @@
     "mapBaseModeMapLibre": "MapLibre offline map",
     "counselingHours": "Counseling hours",
     "navigate": "Navigate",
-    "loadingMap": "Loading map…"
+    "loadingMap": "Loading map…",
+    "chooseNavigationApp": "Choose a navigation app"
   },
   "FeatureInformation": {
     "gameCheckPoint": "Check point {title}",

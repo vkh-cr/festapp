@@ -1684,7 +1684,8 @@
     "mapBaseModeMapLibre": "MapLibre offline mapa",
     "counselingHours": "Poradenské hodiny",
     "navigate": "Navigovat",
-    "loadingMap": "Načítám mapu…"
+    "loadingMap": "Načítám mapu…",
+    "chooseNavigationApp": "Vyberte navigaci"
   },
   "FeatureInformation": {
     "gameCheckPoint": "Stanoviště {title}",

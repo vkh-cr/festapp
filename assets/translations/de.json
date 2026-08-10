@@ -307,6 +307,7 @@
   "FeatureMap": {
     "changeLocation": "Standort ändern",
     "navigate": "Navigieren",
+    "chooseNavigationApp": "Navigations-App auswählen",
     "loadingMap": "Karte wird geladen…",
     "counselingHours": "Beratungszeiten",
     "drawPath": "Weg zeichnen",

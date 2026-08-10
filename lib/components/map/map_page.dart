@@ -65,6 +65,8 @@ import 'package:fstapp/widgets/pop_button.dart';
 import 'package:collection/collection.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:fstapp/components/map/map_strings.dart';
+import 'package:fstapp/components/map/external_map_navigation.dart';
+import 'package:fstapp/components/map/ios_navigation_app_picker.dart';
 import 'package:fstapp/services/launch_url_service.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -1190,16 +1192,38 @@ class _MapPageState extends State<MapPage>
     }
   }
 
-  Future<bool> _navigateToPlace(MapPlaceModel place) =>
-      LaunchUrlService.openExternalUrl(
-        MapPageHelper.navigationUri(
-          latitude: place.latLng.latitude,
-          longitude: place.latLng.longitude,
-          label: place.title,
-          isWeb: kIsWeb,
-          platform: defaultTargetPlatform,
-        ).toString(),
+  Future<bool> _navigateToPlace(MapPlaceModel place) async {
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
+      final apps = await ExternalMapNavigation.availableIosApps();
+      if (!mounted) return false;
+      final selected = await showModalBottomSheet<IosNavigationApp>(
+        context: context,
+        showDragHandle: true,
+        builder: (sheetContext) => IosNavigationAppPicker(
+          apps: apps,
+          title: MapStrings.chooseNavigationApp,
+          onSelected: (app) => Navigator.of(sheetContext).pop(app),
+        ),
       );
+      if (selected == null) return false;
+      return ExternalMapNavigation.launchIos(
+        app: selected,
+        latitude: place.latLng.latitude,
+        longitude: place.latLng.longitude,
+        label: place.title,
+      );
+    }
+
+    return LaunchUrlService.openExternalUrl(
+      MapPageHelper.navigationUri(
+        latitude: place.latLng.latitude,
+        longitude: place.latLng.longitude,
+        label: place.title,
+        isWeb: kIsWeb,
+        platform: defaultTargetPlatform,
+      ).toString(),
+    );
+  }
 
   Future<void> _onPlaceLongPress(int placeId) async {
     final marker = _places.firstWhereOrNull(

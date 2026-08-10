@@ -3,6 +3,11 @@ import 'package:easy_localization/easy_localization.dart';
 /// Localized strings for the map feature (map page, places, path drawing).
 /// Keys live under the "FeatureMap" namespace in assets/translations/*.json.
 class MapStrings {
+  static const appleMaps = 'Apple Maps';
+  static const googleMaps = 'Google Maps';
+  static const waze = 'Waze';
+  static const mapyCom = 'Mapy.com';
+
   // Places / locations
   static String get changeLocation =>
       'FeatureMap.changeLocation'.tr(); // "Change location"
@@ -16,6 +21,8 @@ class MapStrings {
   static String get saveLocation =>
       'FeatureMap.saveLocation'.tr(); // "Save location"
   static String get navigate => 'FeatureMap.navigate'.tr(); // "Navigate"
+  static String get chooseNavigationApp =>
+      'FeatureMap.chooseNavigationApp'.tr(); // "Choose navigation app"
   static String get loadingMap =>
       'FeatureMap.loadingMap'.tr(); // "Loading map…"
   static String get counselingHours =>

@@ -307,6 +307,7 @@
   "FeatureMap": {
     "changeLocation": "Zmeniť polohu",
     "navigate": "Navigovať",
+    "chooseNavigationApp": "Vyberte navigáciu",
     "loadingMap": "Načítava sa mapa…",
     "counselingHours": "Poradenské hodiny",
     "drawPath": "Kresliť cestu",
