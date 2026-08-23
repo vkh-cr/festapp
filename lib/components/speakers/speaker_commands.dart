@@ -71,6 +71,11 @@ abstract interface class SpeakerCommands {
     int speakerId, {
     DateTime? from,
   });
+  Future<CounselingSlotsCommandResult> deleteCounselingSlot({
+    required int speakerId,
+    required int eventId,
+    required int expectedVersion,
+  });
 }
 
 class SupabaseSpeakerCommands implements SpeakerCommands {
@@ -125,6 +130,24 @@ class SupabaseSpeakerCommands implements SpeakerCommands {
     return CounselingSlotsCommandResult(
       status: SpeakerCommandStatus.values.byName(response.status),
       count: (response.data['deleted'] as num?)?.toInt() ?? 0,
+    );
+  }
+
+  @override
+  Future<CounselingSlotsCommandResult> deleteCounselingSlot({
+    required int speakerId,
+    required int eventId,
+    required int expectedVersion,
+  }) async {
+    final response = await _invoke('delete_counseling_slot_client_sync_v1', {
+      'p_speaker': speakerId,
+      'p_event_id': eventId,
+      'p_expected_version': expectedVersion,
+    });
+    return CounselingSlotsCommandResult(
+      status: SpeakerCommandStatus.values.byName(response.status),
+      count: response.data['deleted'] == true ? 1 : 0,
+      eventIds: response.data['deleted'] == true ? [eventId] : const [],
     );
   }
 

@@ -232,15 +232,12 @@ class _SpeakerEditorDialogState extends State<SpeakerEditorDialog> {
 
     final ok = await ExceptionHandler.guardVoid(
       context,
-      // delete_event unbinds any sign-ups server-side, so booked slots delete
-      // cleanly too.
-      futureFunction: () => DbEvents.deleteEvent(EventModel(
-        id: slot.id,
-        startTime: slot.startTime ?? DateTime.now(),
-        endTime: slot.endTime ?? DateTime.now(),
-        occasionId: _occasionId,
-        aggregateVersion: slot.aggregateVersion,
-      )),
+      // The slot-specific server command rejects ordinary events and the
+      // counseling entry point even if a stale/wrong row id reaches this UI.
+      futureFunction: () => DbSpeakers.deleteCounselingSlot(
+        widget.speaker.id!,
+        slot,
+      ),
     );
     if (ok && mounted) {
       _changed = true;

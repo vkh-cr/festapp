@@ -21,55 +21,52 @@ class OfflineBanner extends StatelessWidget {
         if (!isOffline) return const SizedBox.shrink();
         return Material(
           color: ThemeConfig.grey300(context),
-          child: SafeArea(
-            bottom: false,
-            child: FutureBuilder<DateTime?>(
-              future: OfflineDataService.getLastSyncedAt(),
-              builder: (context, snapshot) {
-                final last = snapshot.data;
-                return Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-                  child: Row(
-                    children: [
-                      Icon(Icons.cloud_off,
-                          size: 17, color: ThemeConfig.grey700(context)),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text.rich(
-                          TextSpan(children: [
-                            // "Offline" is the emphasised bit — but gently:
-                            // semibold, a muted-dark grey, not full black.
+          child: FutureBuilder<DateTime?>(
+            future: OfflineDataService.getLastSyncedAt(),
+            builder: (context, snapshot) {
+              final last = snapshot.data;
+              return Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                child: Row(
+                  children: [
+                    Icon(Icons.cloud_off,
+                        size: 17, color: ThemeConfig.grey700(context)),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text.rich(
+                        TextSpan(children: [
+                          // "Offline" is the emphasised bit — but gently:
+                          // semibold, a muted-dark grey, not full black.
+                          TextSpan(
+                            text: OfflineStrings.offline,
+                            style: TextStyle(
+                              color: ThemeConfig.grey800(context),
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12.5,
+                            ),
+                          ),
+                          // The last-sync time stays muted and secondary, as a
+                          // humanized "… ago" rather than a raw date.
+                          if (last != null)
                             TextSpan(
-                              text: OfflineStrings.offline,
+                              text:
+                                  "  ·  ${OfflineStrings.updatedAt(TimeHelper.timeAgo(last, context.locale.languageCode))}",
                               style: TextStyle(
-                                color: ThemeConfig.grey800(context),
-                                fontWeight: FontWeight.w600,
+                                color: ThemeConfig.grey600(context),
                                 fontSize: 12.5,
                               ),
                             ),
-                            // The last-sync time stays muted and secondary, as a
-                            // humanized "… ago" rather than a raw date.
-                            if (last != null)
-                              TextSpan(
-                                text:
-                                    "  ·  ${OfflineStrings.updatedAt(TimeHelper.timeAgo(last, context.locale.languageCode))}",
-                                style: TextStyle(
-                                  color: ThemeConfig.grey600(context),
-                                  fontSize: 12.5,
-                                ),
-                              ),
-                          ]),
-                          maxLines: 1,
-                          softWrap: false,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                        ]),
+                        maxLines: 1,
+                        softWrap: false,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ],
-                  ),
-                );
-              },
-            ),
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
         );
       },

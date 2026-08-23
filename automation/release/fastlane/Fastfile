@@ -15,6 +15,58 @@ raise "Cannot read canonical project version: #{version_error}" unless version_s
 PROJECT_VERSION = JSON.parse(version_json)
 TARGET_VERSION = MANIFEST.fetch('target').fetch('version')
 TARGET_BUILD = PROJECT_VERSION.fetch('build')
+PLAY_PACKAGE = MANIFEST.fetch('androidPackage')
+
+def play_key_path!
+  path = File.expand_path(ENV.fetch('GOOGLE_PLAY_JSON_KEY'))
+  UI.user_error!("Google Play credential not found: #{path}") unless File.file?(path)
+  UI.user_error!('Google Play credential must remain outside the repository') if path.start_with?(File.expand_path('../../..', __dir__) + File::SEPARATOR)
+  path
+end
+
+def play_aab_path!
+  path = File.expand_path(ENV.fetch('PLAY_AAB_PATH', File.expand_path('../../../build/app/outputs/bundle/release/app-release.aab', __dir__)))
+  UI.user_error!("AAB not found: #{path}") unless File.file?(path)
+  path
+end
+
+def play_metadata_path!
+  path = File.expand_path('../../../build/release/google-play-metadata', __dir__)
+  UI.user_error!("Staged Play metadata not found: #{path}") unless File.directory?(path)
+  path
+end
+
+def play_version!
+  code = PROJECT_VERSION.fetch('build').to_i
+  UI.user_error!('Invalid canonical Android version code') unless code.positive?
+  code
+end
+
+def play_source_sha!
+  sha, error, status = Open3.capture3('git', '-C', File.expand_path('../../..', __dir__), 'rev-parse', 'HEAD')
+  UI.user_error!("Cannot read source SHA: #{error}") unless status.success?
+  sha.strip
+end
+
+def relevant_play_version_codes
+  %w[internal alpha beta production].to_h do |track|
+    codes = google_play_track_version_codes(
+      package_name: PLAY_PACKAGE,
+      track: track,
+      json_key: play_key_path!
+    ).map(&:to_i)
+    [track, codes]
+  end
+end
+
+def assert_new_play_version!
+  tracks = relevant_play_version_codes
+  maximum = tracks.values.flatten.max || 0
+  code = play_version!
+  UI.user_error!("Version code #{code} is not greater than Play maximum #{maximum}") unless code > maximum
+  UI.message("PLAY_PACKAGE=#{PLAY_PACKAGE} TARGET_VERSION_CODE=#{code} MAX_VERSION_CODE=#{maximum}")
+  tracks.each { |track, codes| UI.message("PLAY_TRACK=#{track} VERSION_CODES=#{codes.sort.join(',')}") }
+end
 
 def app_store_connect_key_path!
   path = File.expand_path(ENV.fetch('APP_STORE_CONNECT_KEY_PATH'))
@@ -22,6 +74,52 @@ def app_store_connect_key_path!
   mode = File.stat(path).mode & 0o777
   UI.user_error!("App Store Connect key must not be accessible by group/others: #{path}") unless (mode & 0o077).zero?
   path
+end
+
+platform :android do
+  desc 'Read-only package and relevant-track version-code inspection'
+  lane :play_check do
+    assert_new_play_version!
+    UI.success("Read-only Google Play check passed for #{PLAY_PACKAGE}")
+  end
+
+  desc 'Exactly gated binary-only upload to internal testing as draft'
+  lane :play_internal_draft do
+    UI.user_error!('Internal lane requires PLAY_TARGET_TRACK=internal') unless ENV['PLAY_TARGET_TRACK'] == 'internal'
+    expected = "#{PLAY_PACKAGE}|#{play_version!}|#{play_source_sha!}|internal"
+    UI.user_error!("Set PLAY_CONFIRMATION exactly to #{expected}") unless ENV['PLAY_CONFIRMATION'] == expected
+    assert_new_play_version!
+    upload_to_play_store(
+      package_name: PLAY_PACKAGE,
+      json_key: play_key_path!,
+      aab: play_aab_path!,
+      track: 'internal',
+      release_status: 'draft',
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      validate_only: false
+    )
+  end
+
+  desc 'Exactly gated full production release for the canonical package and version'
+  lane :play_production do
+    UI.user_error!('Production lane requires PLAY_TARGET_TRACK=production') unless ENV['PLAY_TARGET_TRACK'] == 'production'
+    expected = "#{PLAY_PACKAGE}|#{play_version!}|#{play_source_sha!}|production"
+    UI.user_error!("Set PLAY_CONFIRMATION exactly to #{expected}") unless ENV['PLAY_CONFIRMATION'] == expected
+    assert_new_play_version!
+    upload_to_play_store(
+      package_name: PLAY_PACKAGE,
+      json_key: play_key_path!,
+      aab: play_aab_path!,
+      track: 'production',
+      release_status: 'completed',
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      validate_only: false
+    )
+  end
 end
 
 def api_key
@@ -99,7 +197,10 @@ platform :ios do
     app = target_app!('READ_ONLY_ASC_CHECK')
     editable = app.get_edit_app_store_version
     if editable
+      expected_copyright = File.read(File.expand_path('metadata/copyright.txt', __dir__)).strip
+      UI.user_error!("Copyright readback mismatch: #{editable.copyright.inspect}") unless editable.copyright == expected_copyright
       UI.success("EDITABLE VERSION: #{editable.version_string} (#{editable.app_store_state})")
+      UI.message("COPYRIGHT: #{editable.copyright}")
       UI.message("LOCALES: #{editable.get_app_store_version_localizations.map(&:locale).join(', ')}")
     else
       live = app.get_live_app_store_version
@@ -144,7 +245,7 @@ platform :ios do
     profile_path = File.join(signing_dir, "#{extension_id}.mobileprovision")
     get_provisioning_profile(
       api_key: api_key, app_identifier: extension_id, cert_id: certs.first.id,
-      provisioning_name: 'CSM Ostrava OneSignal AppStore',
+      provisioning_name: MANIFEST.fetch('signingProfiles').fetch('notificationExtension'),
       filename: File.basename(profile_path), output_path: signing_dir, force: true
     )
     FileUtils.chmod(0o600, profile_path)
@@ -171,8 +272,8 @@ platform :ios do
     UI.user_error!('Distribution certificate creation did not return an ID') if cert_id.to_s.empty?
 
     {
-      BUNDLE_ID => 'CSM Ostrava AppStore',
-      MANIFEST.fetch('notificationExtensionBundleId') => 'CSM Ostrava OneSignal AppStore'
+      BUNDLE_ID => MANIFEST.fetch('signingProfiles').fetch('app'),
+      MANIFEST.fetch('notificationExtensionBundleId') => MANIFEST.fetch('signingProfiles').fetch('notificationExtension')
     }.each do |identifier, profile_name|
       get_provisioning_profile(
         api_key: api_key, app_identifier: identifier, cert_id: cert_id,
@@ -442,6 +543,87 @@ platform :ios do
       overwrite_screenshots: false, sync_screenshots: true, submit_for_review: false,
       automatic_release: false, run_precheck_before_submit: false, force: true
     )
+  end
+
+  desc 'Select exactly one processed target build; never submit or release'
+  lane :select_build do
+    exact_gate!('SELECT_BUILD')
+    app = target_app!('SELECT_EXACT_BUILD')
+    editable = app.get_edit_app_store_version
+    UI.user_error!("No editable target version") unless editable&.version_string == TARGET_VERSION
+
+    builds = Spaceship::ConnectAPI::Build.all(
+      app_id: app.id, version: TARGET_VERSION, build_number: TARGET_BUILD,
+      platform: Spaceship::ConnectAPI::Platform::IOS
+    )
+    UI.user_error!("Expected exactly one #{TARGET_VERSION} (#{TARGET_BUILD}) build, found #{builds.size}") unless builds.one?
+    build = builds.first
+    UI.user_error!("Build #{TARGET_BUILD} is #{build.processing_state}, expected VALID") unless build.processing_state == Spaceship::ConnectAPI::Build::ProcessingState::VALID
+
+    selected = begin
+      editable.get_build
+    rescue RuntimeError => error
+      raise unless error.message == 'No data'
+      nil
+    end
+    if selected && selected.id != build.id
+      unless editable.app_store_state == Spaceship::ConnectAPI::AppStoreVersion::AppVersionState::DEVELOPER_REJECTED
+        UI.user_error!("Refusing to replace selected build #{selected.version} while state is #{editable.app_store_state}")
+      end
+      editable.select_build(build_id: build.id)
+    elsif selected.nil?
+      editable.select_build(build_id: build.id)
+    end
+
+    readback = editable.get_build
+    UI.user_error!("Build selection readback failed") unless readback&.id == build.id && readback.version.to_s == TARGET_BUILD
+    UI.success("Selected exact build #{TARGET_VERSION} (#{TARGET_BUILD})")
+  end
+
+  desc 'Read-only status of the exact target build'
+  lane :build_check do
+    app = target_app!('READ_ONLY_BUILD_CHECK')
+    builds = Spaceship::ConnectAPI::Build.all(
+      app_id: app.id, version: TARGET_VERSION, build_number: TARGET_BUILD,
+      platform: Spaceship::ConnectAPI::Platform::IOS
+    )
+    UI.user_error!("Expected at most one #{TARGET_VERSION} (#{TARGET_BUILD}) build, found #{builds.size}") if builds.size > 1
+    if builds.empty?
+      UI.message("BUILD #{TARGET_VERSION} (#{TARGET_BUILD}) NOT_VISIBLE")
+    else
+      UI.message("BUILD #{TARGET_VERSION} (#{TARGET_BUILD}) STATE=#{builds.first.processing_state}")
+    end
+  end
+
+  desc 'Cancel only the in-progress review submission for the exact target version'
+  lane :cancel_review_submission do
+    exact_gate!('CANCEL_REVIEW_SUBMISSION')
+    app = target_app!('CANCEL_REVIEW_SUBMISSION')
+    editable = app.get_edit_app_store_version
+    UI.user_error!("No editable target version") unless editable&.version_string == TARGET_VERSION
+
+    submission = app.get_in_progress_review_submission(
+      platform: Spaceship::ConnectAPI::Platform::IOS
+    )
+    UI.user_error!("No in-progress review submission") unless submission
+    reviewed_version = submission.app_store_version_for_review
+    if reviewed_version && reviewed_version.id != editable.id
+      UI.user_error!("Refusing review submission for a different version")
+    end
+
+    submission.cancel_submission
+    40.times do
+      sleep(3)
+      break unless app.get_in_progress_review_submission(
+        platform: Spaceship::ConnectAPI::Platform::IOS
+      )
+    end
+    if app.get_in_progress_review_submission(platform: Spaceship::ConnectAPI::Platform::IOS)
+      UI.user_error!("Review submission cancellation did not complete")
+    end
+    refreshed = app.get_edit_app_store_version
+    UI.user_error!("Target version is no longer editable") unless refreshed&.version_string == TARGET_VERSION
+    UI.success("Cancelled review submission for exact target #{TARGET_VERSION}")
   end
 
   desc 'Read-only submission completeness summary'

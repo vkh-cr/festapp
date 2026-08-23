@@ -5,7 +5,11 @@ import process from 'node:process';
 import fs from 'node:fs';
 import { createHash } from 'node:crypto';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { managementQuery, parseKeyValueFile } from '../lib/supabase_management.mjs';
+import {
+  loadCanonicalSupabaseTarget,
+  managementQuery,
+  parseKeyValueFile,
+} from '../lib/supabase_management.mjs';
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(scriptDirectory, '../..');
@@ -14,20 +18,14 @@ function sqlLiteral(value) { return `'${String(value).replaceAll("'", "''")}'`; 
 
 export function loadHealthTarget(root = projectRoot) {
   const config = parseKeyValueFile(path.join(root, 'automation/project.conf'));
-  const local = parseKeyValueFile(path.join(root, '.env.local'));
-  const supabaseUrl = config.get('SUPABASE_URL');
-  const projectRef = supabaseUrl?.match(/^https:\/\/([a-z0-9]+)\.supabase\.co$/)?.[1];
-  const organization = Number(config.get('ORGANIZATION_ID'));
-  const occasionLink = config.get('FORCE_OCCASION_LINK');
+  const canonical = loadCanonicalSupabaseTarget(root);
   const headOrigin = config.get('SYNC_HEAD_ORIGIN');
-  const accessToken = process.env.SUPABASE_ACCESS_TOKEN || local.get('SUPABASE_ACCESS_TOKEN');
   const wrangler=fs.readFileSync(path.join(root,'workers/sync-publisher/wrangler.toml'),'utf8');
   const artifactRetentionDays=Number(wrangler.match(/^SYNC_ARTIFACT_RETENTION_DAYS\s*=\s*"(\d+)"/m)?.[1]);
-  if (!projectRef || !Number.isSafeInteger(organization) || !occasionLink || !headOrigin || !accessToken
-      || !Number.isSafeInteger(artifactRetentionDays) || artifactRetentionDays<7) {
+  if (!headOrigin || !Number.isSafeInteger(artifactRetentionDays) || artifactRetentionDays<7) {
     throw new Error('valid project config and SUPABASE_ACCESS_TOKEN are required');
   }
-  return { projectRef, organization, occasionLink, headOrigin, artifactRetentionDays, accessToken };
+  return { ...canonical, headOrigin, artifactRetentionDays };
 }
 
 export function buildHealthSql({ organization, occasionLink, artifactRetentionDays }) {
@@ -133,16 +131,21 @@ async function endpointHealth(target, occasionId) {
   };
 }
 
-export async function main(args=process.argv.slice(2)) {
-  const target=loadHealthTarget();
-  const row=(await managementQuery({...target,query:buildHealthSql(target)}))[0]?.result;
+export async function collectClientSyncHealth(
+  target = loadHealthTarget(),
+  { query = managementQuery, endpoint = endpointHealth } = {},
+) {
+  const row=(await query({...target,query:buildHealthSql(target)}))[0]?.result;
   if (!row?.occasion) throw new Error('configured occasion is absent from the configured Supabase project');
-  const endpoint=await endpointHealth(target,row.occasion.id);
-  const report={projectRef:target.projectRef,...row,endpoint,r2:{bucket:'festapp-public',prefix:'client-sync/v1/'}};
-  const evaluation=evaluateHealth(report);
-  const output={...report,health:evaluation};
+  const endpointReport=await endpoint(target,row.occasion.id);
+  const report={projectRef:target.projectRef,...row,endpoint:endpointReport,r2:{bucket:'festapp-public',prefix:'client-sync/v1/'}};
+  return {...report,health:evaluateHealth(report)};
+}
+
+export async function main(args=process.argv.slice(2)) {
+  const output=await collectClientSyncHealth();
   console.log(JSON.stringify(output,args.includes('--pretty')?null:undefined,args.includes('--pretty')?2:undefined));
-  if (!evaluation.ok) process.exitCode=1;
+  if (!output.health.ok) process.exitCode=1;
 }
 
 if (process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href) {

@@ -1,4 +1,4 @@
-import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/client_changes/client_change_model.dart';
@@ -9,28 +9,23 @@ import 'package:fstapp/services/connectivity_service.dart';
 import 'package:fstapp/services/exception_handler.dart';
 import 'package:intl/intl.dart';
 
-typedef ClientChangesPageLoader = Future<ClientChangesPage> Function({
+typedef ClientActivityLoader = Future<List<ClientActivityDay>> Function({
   required int occasionId,
-  DateTime? beforeTime,
-  String? beforeId,
-  required Map<String, dynamic> filters,
+  required DateTime from,
+  required DateTime to,
 });
-typedef ClientChangeDetailLoader = Future<ClientChangeDetail> Function(
-    String commitId);
 
 class ClientChangesTab extends StatefulWidget {
   const ClientChangesTab({
     super.key,
     this.clientSyncEnabled,
-    this.pageLoader,
-    this.detailLoader,
+    this.activityLoader,
     this.isOffline,
     this.occasionId,
   });
 
   final bool? clientSyncEnabled;
-  final ClientChangesPageLoader? pageLoader;
-  final ClientChangeDetailLoader? detailLoader;
+  final ClientActivityLoader? activityLoader;
   final Future<bool> Function()? isOffline;
   final int? occasionId;
 
@@ -40,38 +35,14 @@ class ClientChangesTab extends StatefulWidget {
 
 class _ClientChangesTabState extends State<ClientChangesTab> {
   DbClientChanges? _repository;
-  final _actorController = TextEditingController();
-  Timer? _actorSearchDebounce;
-  final _items = <ClientChangeSummary>[];
-  DateTime? _cursorTime;
-  String? _cursorId;
-  final _pageTimes = <DateTime?>[null];
-  final _pageIds = <String?>[null];
-  int _pageIndex = 0;
+  List<ClientActivityDay> _days = const [];
+  late DateTime _from;
+  late DateTime _to;
   int _loadEpoch = 0;
+  int _rangeDays = 7;
   bool _error = false;
   bool _offline = false;
   bool _loading = false;
-  bool _hasMore = true;
-  String? _componentFilter;
-  String? _classFilter;
-  String? _actorFilter;
-
-  static const _components = <String>[
-    'occasion_config',
-    'program_catalog',
-    'map_catalog',
-    'content_catalog',
-    'unit_catalog',
-    'live_public',
-    'private_program',
-    'private_profile',
-    'private_inventory',
-    'private_activity',
-    'private_news',
-    'private_feedback',
-  ];
-  static const _classes = <String>['structural', 'live', 'private', 'bulk'];
 
   bool get _clientSyncEnabled =>
       widget.clientSyncEnabled ??
@@ -81,19 +52,13 @@ class _ClientChangesTabState extends State<ClientChangesTab> {
   @override
   void initState() {
     super.initState();
+    final today = DateUtils.dateOnly(DateTime.now());
+    _from = today.subtract(const Duration(days: 6));
+    _to = today.add(const Duration(days: 1));
     if (_clientSyncEnabled) {
-      if (widget.pageLoader == null || widget.detailLoader == null) {
-        _repository = DbClientChanges();
-      }
+      if (widget.activityLoader == null) _repository = DbClientChanges();
       _load();
     }
-  }
-
-  @override
-  void dispose() {
-    _actorSearchDebounce?.cancel();
-    _actorController.dispose();
-    super.dispose();
   }
 
   Future<void> _load() async {
@@ -114,151 +79,33 @@ class _ClientChangesTabState extends State<ClientChangesTab> {
       });
       return;
     }
-    final page = await ExceptionHandler.guard(
+    final result = await ExceptionHandler.guard(
       context,
-      futureFunction: () => (widget.pageLoader ?? _repository!.list)(
+      futureFunction: () => (widget.activityLoader ?? _repository!.activity)(
         occasionId: widget.occasionId ?? RightsService.currentOccasionId()!,
-        beforeTime: _cursorTime,
-        beforeId: _cursorId,
-        filters: {
-          if (_componentFilter != null) 'component': _componentFilter,
-          if (_classFilter != null) 'changeClass': _classFilter,
-          if (_actorFilter != null) 'actor': _actorFilter,
-        },
+        from: _from,
+        to: _to,
       ),
     );
     if (!mounted || epoch != _loadEpoch) return;
     setState(() {
-      if (page != null) {
-        _items
-          ..clear()
-          ..addAll(page.items);
-        _cursorTime = page.nextTime;
-        _cursorId = page.nextId;
-        _hasMore = page.hasMore;
-      } else {
+      if (result == null) {
         _error = true;
+      } else {
+        _days = result;
       }
       _loading = false;
     });
   }
 
-  Future<void> _showDetail(ClientChangeSummary change) async {
-    final detail = await ExceptionHandler.guard(
-      context,
-      futureFunction: () =>
-          (widget.detailLoader ?? _repository!.detail)(change.commitId),
-    );
-    if (detail == null) return;
-    if (!mounted) return;
-    await showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-            '${change.source} · ${DateFormat.yMd().add_Hm().format(change.occurredAt)}'),
-        content: SizedBox(
-          width: 680,
-          child: ListView(
-            shrinkWrap: true,
-            children: [
-              ...detail.items.map((item) => ListTile(
-                    title: Text(item['safeLabel']?.toString() ??
-                        item['entityType'].toString()),
-                    subtitle: Text(
-                        '${item['operation']} · ${((item['changedFields'] as List?) ?? const []).join(', ')}'),
-                  )),
-              const Divider(),
-              Text(ClientChangesStrings.publication),
-              ...(((detail.summary['components'] as List?) ?? const []).map(
-                (raw) {
-                  final component = (raw as Map).cast<String, dynamic>();
-                  final published =
-                      component['publicationStatus'] == 'published';
-                  return ListTile(
-                    dense: true,
-                    leading:
-                        Icon(published ? Icons.cloud_done : Icons.cloud_upload),
-                    title: Text(component['component'].toString()),
-                    subtitle: Text(published
-                        ? ClientChangesStrings.published
-                        : ClientChangesStrings.publicationPending),
-                    trailing: Text('${component['revision']}'),
-                  );
-                },
-              )),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Icon(Icons.close))
-        ],
-      ),
-    );
-  }
-
-  void _setFilters({String? component, String? changeClass}) {
+  void _setRangeDays(int days) {
+    if (days == _rangeDays) return;
+    final today = DateUtils.dateOnly(DateTime.now());
     setState(() {
-      _componentFilter = component;
-      _classFilter = changeClass;
-      _actorFilter = _normalizedActorFilter;
-      _items.clear();
-      _cursorTime = null;
-      _cursorId = null;
-      _pageIndex = 0;
-      _pageTimes
-        ..clear()
-        ..add(null);
-      _pageIds
-        ..clear()
-        ..add(null);
-      _hasMore = true;
-    });
-    _load();
-  }
-
-  String? get _normalizedActorFilter {
-    final value = _actorController.text.trim();
-    return value.isEmpty ? null : value;
-  }
-
-  void _applyActorFilter() {
-    _actorSearchDebounce?.cancel();
-    _setFilters(component: _componentFilter, changeClass: _classFilter);
-  }
-
-  void _scheduleActorFilter() {
-    _actorSearchDebounce?.cancel();
-    _actorSearchDebounce = Timer(
-      const Duration(milliseconds: 350),
-      _applyActorFilter,
-    );
-  }
-
-  void _nextPage() {
-    if (!_hasMore || _loading || _cursorTime == null || _cursorId == null) {
-      return;
-    }
-    final nextIndex = _pageIndex + 1;
-    if (_pageTimes.length == nextIndex) {
-      _pageTimes.add(_cursorTime);
-      _pageIds.add(_cursorId);
-    }
-    setState(() {
-      _pageIndex = nextIndex;
-      _cursorTime = _pageTimes[nextIndex];
-      _cursorId = _pageIds[nextIndex];
-    });
-    _load();
-  }
-
-  void _previousPage() {
-    if (_pageIndex == 0 || _loading) return;
-    setState(() {
-      _pageIndex--;
-      _cursorTime = _pageTimes[_pageIndex];
-      _cursorId = _pageIds[_pageIndex];
+      _rangeDays = days;
+      _from = today.subtract(Duration(days: days - 1));
+      _to = today.add(const Duration(days: 1));
+      _days = const [];
     });
     _load();
   }
@@ -272,118 +119,274 @@ class _ClientChangesTabState extends State<ClientChangesTab> {
           children: [
             const Icon(Icons.history_toggle_off),
             const SizedBox(height: 8),
-            Text(
-              ClientChangesStrings.notActive,
-              textAlign: TextAlign.center,
-            ),
+            Text(ClientChangesStrings.notActive, textAlign: TextAlign.center),
           ],
         ),
       );
     }
-    return Column(children: [
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-        child: Wrap(spacing: 12, runSpacing: 4, children: [
-          const Icon(Icons.filter_list),
-          SizedBox(
-              width: 240,
-              child: DropdownButton<String?>(
-                isExpanded: true,
-                value: _componentFilter,
-                hint: Text(ClientChangesStrings.component),
-                items: [
-                  DropdownMenuItem<String?>(
-                      value: null, child: Text(ClientChangesStrings.all)),
-                  ..._components.map((value) => DropdownMenuItem<String?>(
-                      value: value, child: Text(value))),
-                ],
-                onChanged: (value) =>
-                    _setFilters(component: value, changeClass: _classFilter),
-              )),
-          SizedBox(
-              width: 220,
-              child: DropdownButton<String?>(
-                isExpanded: true,
-                value: _classFilter,
-                hint: Text(ClientChangesStrings.changeClass),
-                items: [
-                  DropdownMenuItem<String?>(
-                      value: null, child: Text(ClientChangesStrings.all)),
-                  ..._classes.map((value) => DropdownMenuItem<String?>(
-                      value: value, child: Text(value))),
-                ],
-                onChanged: (value) => _setFilters(
-                    component: _componentFilter, changeClass: value),
-              )),
-          SizedBox(
-            width: 280,
-            child: TextField(
-              controller: _actorController,
-              textInputAction: TextInputAction.search,
-              decoration: InputDecoration(
-                isDense: true,
-                hintText: ClientChangesStrings.actorSearch,
-                prefixIcon: const Icon(Icons.person_search),
-                suffixIcon: IconButton(
-                  onPressed: _applyActorFilter,
-                  icon: const Icon(Icons.search),
+
+    return Column(
+      children: [
+        if (_loading) const LinearProgressIndicator(),
+        Expanded(
+          child: _error && _days.isEmpty
+              ? Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(_offline
+                          ? ClientChangesStrings.onlineOnly
+                          : ClientChangesStrings.loadError),
+                      TextButton(
+                        onPressed: _load,
+                        child: Text(ClientChangesStrings.retry),
+                      ),
+                    ],
+                  ),
+                )
+              : RefreshIndicator(
+                  onRefresh: _load,
+                  child: ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.all(16),
+                    children: [
+                      Text(
+                        ClientChangesStrings.title,
+                        style: Theme.of(context).textTheme.headlineSmall,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(ClientChangesStrings.subtitle(_rangeDays)),
+                      const SizedBox(height: 12),
+                      SegmentedButton<int>(
+                        segments: [
+                          for (final days in const [7, 14])
+                            ButtonSegment<int>(
+                              value: days,
+                              label: Text(
+                                ClientChangesStrings.rangeDays(days),
+                              ),
+                            ),
+                        ],
+                        selected: {_rangeDays},
+                        onSelectionChanged: (selection) =>
+                            _setRangeDays(selection.single),
+                      ),
+                      const SizedBox(height: 24),
+                      if (_days.isEmpty && !_loading)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 40),
+                          child: Center(
+                            child: Text(
+                              ClientChangesStrings.empty(_rangeDays),
+                            ),
+                          ),
+                        )
+                      else
+                        ClientActivityBarChart(
+                          days: _days,
+                          from: _from,
+                          to: _to,
+                        ),
+                    ],
+                  ),
+                ),
+        ),
+      ],
+    );
+  }
+}
+
+class ClientActivityBarChart extends StatelessWidget {
+  const ClientActivityBarChart({
+    super.key,
+    required this.days,
+    required this.from,
+    required this.to,
+  });
+
+  final List<ClientActivityDay> days;
+  final DateTime from;
+  final DateTime to;
+
+  static String _key(DateTime date) => '${date.year}-${date.month}-${date.day}';
+
+  static int _niceMaximum(int value) {
+    if (value <= 1) return 1;
+    final magnitude = math.pow(10, value.toString().length - 1).toInt();
+    final normalized = value / magnitude;
+    final nice = normalized <= 1
+        ? 1
+        : normalized <= 2
+            ? 2
+            : normalized <= 5
+                ? 5
+                : 10;
+    return nice * magnitude;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final byDay = {for (final day in days) _key(day.day): day};
+    final visibleDays = <ClientActivityDay>[];
+    for (var day = DateUtils.dateOnly(from);
+        day.isBefore(to);
+        day = day.add(const Duration(days: 1))) {
+      visibleDays.add(byDay[_key(day)] ??
+          ClientActivityDay(
+            day: day,
+            actionCount: 0,
+            changedItemCount: 0,
+            activeActorCount: 0,
+          ));
+    }
+    final total = visibleDays.fold<int>(0, (sum, day) => sum + day.actionCount);
+    final rawMaximum = visibleDays.fold<int>(
+      0,
+      (maximum, day) => math.max(maximum, day.actionCount),
+    );
+    final maximum = _niceMaximum(rawMaximum);
+
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              ClientChangesStrings.totalChanges(total),
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+            ),
+            const SizedBox(height: 16),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final minimumWidth = visibleDays.length * 48.0 + 44;
+                final width = math.max(constraints.maxWidth, minimumWidth);
+                return SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: SizedBox(
+                    width: width,
+                    height: 240,
+                    child: _chart(context, visibleDays, maximum),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _chart(
+    BuildContext context,
+    List<ClientActivityDay> visibleDays,
+    int maximum,
+  ) {
+    final textStyle = Theme.of(context).textTheme.labelSmall;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 40,
+          height: 190,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text('$maximum', style: textStyle),
+              Text('${maximum ~/ 2}', style: textStyle),
+              Text('0', style: textStyle),
+            ],
+          ),
+        ),
+        const SizedBox(width: 4),
+        Expanded(
+          child: Stack(
+            children: [
+              ...[0.0, 0.5, 1.0].map(
+                (position) => Positioned(
+                  left: 0,
+                  right: 0,
+                  top: position * 180,
+                  child: Divider(
+                    height: 1,
+                    color: Theme.of(context).colorScheme.outlineVariant,
+                  ),
                 ),
               ),
-              onChanged: (_) => _scheduleActorFilter(),
-              onSubmitted: (_) => _applyActorFilter(),
-            ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: visibleDays
+                    .map((day) => Expanded(
+                          child: _dayColumn(context, day, maximum),
+                        ))
+                    .toList(growable: false),
+              ),
+            ],
           ),
-        ]),
+        ),
+      ],
+    );
+  }
+
+  Widget _dayColumn(
+    BuildContext context,
+    ClientActivityDay day,
+    int maximum,
+  ) {
+    final barHeight = day.actionCount == 0
+        ? 0.0
+        : math.max(4.0, 150 * day.actionCount / maximum);
+    final dateLabel = DateFormat('E d.M.').format(day.day);
+    final semantics = ClientChangesStrings.dayChanges(
+      dateLabel,
+      day.actionCount,
+    );
+    return Semantics(
+      label: semantics,
+      child: Tooltip(
+        message: semantics,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: Column(
+            children: [
+              SizedBox(
+                height: 180,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text('${day.actionCount}',
+                        style: Theme.of(context).textTheme.labelSmall),
+                    const SizedBox(height: 3),
+                    AnimatedContainer(
+                      key: ValueKey('activity-${_key(day.day)}'),
+                      duration: const Duration(milliseconds: 280),
+                      curve: Curves.easeOutCubic,
+                      width: 28,
+                      height: barHeight,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primary,
+                        borderRadius: const BorderRadius.vertical(
+                          top: Radius.circular(6),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                dateLabel,
+                maxLines: 1,
+                style: Theme.of(context).textTheme.labelSmall,
+              ),
+            ],
+          ),
+        ),
       ),
-      if (_loading) const LinearProgressIndicator(),
-      Expanded(
-          child: _error && _items.isEmpty
-              ? Center(
-                  child: Column(mainAxisSize: MainAxisSize.min, children: [
-                  Text(_offline
-                      ? ClientChangesStrings.onlineOnly
-                      : ClientChangesStrings.loadError),
-                  TextButton(
-                      onPressed: _load,
-                      child: Text(ClientChangesStrings.retry)),
-                ]))
-              : _items.isEmpty && _loading
-                  ? const Center(child: CircularProgressIndicator())
-                  : _items.isEmpty
-                      ? Center(child: Text(ClientChangesStrings.empty))
-                      : ListView.builder(
-                          itemCount: _items.length,
-                          itemBuilder: (context, index) {
-                            final change = _items[index];
-                            return ListTile(
-                              onTap: () => _showDetail(change),
-                              leading: const Icon(Icons.history),
-                              title: Text(
-                                  '${change.source} · ${ClientChangesStrings.itemCount(change.itemCount)}'),
-                              subtitle: Text(change.actorDisplay ??
-                                  ClientChangesStrings.deletedActor),
-                              trailing: Text(DateFormat.yMd()
-                                  .add_Hm()
-                                  .format(change.occurredAt)),
-                            );
-                          },
-                        )),
-      SafeArea(
-        top: false,
-        child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-          IconButton(
-            tooltip: ClientChangesStrings.previousPage,
-            onPressed: _pageIndex > 0 && !_loading ? _previousPage : null,
-            icon: const Icon(Icons.chevron_left),
-          ),
-          Text(ClientChangesStrings.page(_pageIndex + 1)),
-          IconButton(
-            tooltip: ClientChangesStrings.nextPage,
-            onPressed: _hasMore && !_loading ? _nextPage : null,
-            icon: const Icon(Icons.chevron_right),
-          ),
-        ]),
-      ),
-    ]);
+    );
   }
 }

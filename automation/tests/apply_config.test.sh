@@ -41,7 +41,8 @@ mkdir -p "$TMP_ROOT/automation" \
          "$TMP_ROOT/web" \
          "$TMP_ROOT/web_client/src" \
          "$TMP_ROOT/web_client/public" \
-         "$TMP_ROOT/lib"
+         "$TMP_ROOT/lib" \
+         "$TMP_ROOT/assets/icons"
 
 cp "$PROJECT_ROOT/automation/apply_config.sh" "$TMP_ROOT/automation/apply_config.sh"
 cp "$FIXTURE_CONF" "$TMP_ROOT/automation/project.conf"
@@ -65,6 +66,9 @@ cp "$PROJECT_ROOT/ios/OneSignalNotificationServiceExtension/Info.plist" "$TMP_RO
 cp "$PROJECT_ROOT/ios/OneSignalNotificationServiceExtension/OneSignalNotificationServiceExtensionRelease.entitlements" "$TMP_ROOT/ios/OneSignalNotificationServiceExtension/OneSignalNotificationServiceExtensionRelease.entitlements"
 cp "$PROJECT_ROOT/web/apple-app-site-association" "$TMP_ROOT/web/apple-app-site-association"
 cp "$PROJECT_ROOT/web/.well-known/apple-app-site-association" "$TMP_ROOT/web/.well-known/apple-app-site-association"
+cp "$PROJECT_ROOT/assets/icons/fstapplogo.svg" "$TMP_ROOT/assets/icons/fstapplogo.svg"
+cp "$PROJECT_ROOT/assets/icons/fstapplogo.dark.svg" "$TMP_ROOT/assets/icons/fstapplogo.dark.svg"
+cp "$PROJECT_ROOT/web/android-chrome-192x192.png" "$TMP_ROOT/web/android-chrome-192x192.png"
 
 # theme_config.css is optional but typically present.
 if [ -f "$PROJECT_ROOT/web_client/src/theme_config.css" ]; then
@@ -118,8 +122,19 @@ if grep -F -q '<svg class="initial-logo"' "$PROJECT_ROOT/web/index.html"; then
     assert_contains "$TMP_ROOT/web/index.html" '<svg class="initial-logo"'
     assert_missing "$TMP_ROOT/web/index.html" '<img class="initial-logo"'
 else
-    assert_contains "$TMP_ROOT/web/index.html" '<img class="initial-logo" src="fstapplogo.png"'
+    assert_contains "$TMP_ROOT/web/index.html" '<img class="initial-logo" src="android-chrome-192x192.png"'
 fi
+
+echo
+echo "--- installable PWA manifests ---"
+for manifest in "$TMP_ROOT/web/site.webmanifest" "$TMP_ROOT/web_client/public/site.webmanifest"; do
+    assert_contains "$manifest" '"name": "Test App Name"'
+    # Preserve the historical root identity so existing installations update
+    # instead of becoming a competing nested PWA after an occasion cutover.
+    assert_contains "$manifest" '"id": "/"'
+    assert_contains "$manifest" '"start_url": "/test-occasion/"'
+    assert_contains "$manifest" '"scope": "/"'
+done
 
 echo
 echo "--- installable PWA manifests ---"
@@ -160,7 +175,7 @@ assert_contains "$TMP_ROOT/lib/app_config.dart" 'static const String webLink = "
 assert_contains "$TMP_ROOT/lib/app_config.dart" 'static const String? forceOccasionLink = "test-occasion";'
 assert_contains "$TMP_ROOT/lib/app_config.dart" "static const String oneSignalAppId = '11111111-2222-3333-4444-555555555555';"
 assert_contains "$TMP_ROOT/lib/app_config.dart" "static const String pushAppGeneration = 'test_generation_v1';"
-assert_contains "$TMP_ROOT/lib/app_config.dart" "static const String programLogoAsset = 'assets/icons/fstapplogo_program.svg';"
+assert_contains "$TMP_ROOT/lib/app_config.dart" "static const String programLogoAsset = 'assets/icons/fstapplogo.svg';"
 
 echo
 echo "--- native tenant identity ---"

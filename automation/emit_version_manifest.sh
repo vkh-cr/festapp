@@ -11,7 +11,7 @@
 # against window.__FESTAPP_BUILD_VERSION__ (baked into index.html by
 # automation/configure_version.js). When they differ it shows a reload banner.
 # The stamped main.dart copy lets a specific build be fetched cache-busted and
-# matches the deployed csmostrava layout (main.dart.js AND main.dart.<ver>.js).
+# matches deployed tenant layouts (main.dart.js AND main.dart.<ver>.js).
 #
 # Split out of cloudflare_build.sh so it can be unit tested without a Flutter
 # build (see automation/tests/update_prompt.test.sh).

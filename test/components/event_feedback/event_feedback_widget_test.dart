@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fstapp/components/event_feedback/event_feedback_model.dart';
@@ -15,6 +17,11 @@ Future<void> _pump(
   bool requiresSignIn = false,
   bool isParticipant = false,
   EventFeedbackModel? existing,
+  Future<EventFeedbackModel?> Function(int eventId)? loadFeedback,
+  Future<bool> Function()? isOffline,
+  Future<Map<String, dynamic>?> Function(int eventId)? loadCachedFeedback,
+  Duration loadTimeout = const Duration(seconds: 12),
+  bool settle = true,
 }) async {
   await tester.pumpWidget(
     MaterialApp(
@@ -25,12 +32,19 @@ Future<void> _pump(
           isEditorPreview: isEditorPreview,
           requiresSignIn: requiresSignIn,
           isParticipant: isParticipant,
-          loadFeedbackOverride: (_) async => existing,
+          loadFeedbackOverride: loadFeedback ?? (_) async => existing,
+          isOfflineOverride: isOffline,
+          loadCachedFeedbackOverride: loadCachedFeedback,
+          loadTimeout: loadTimeout,
         ),
       ),
     ),
   );
-  await tester.pumpAndSettle();
+  if (settle) {
+    await tester.pumpAndSettle();
+  } else {
+    await tester.pump();
+  }
 }
 
 EventFeedbackModel _rated(String rating, {String? note}) =>
@@ -40,6 +54,41 @@ FilledButton _submitButton(WidgetTester tester) =>
     tester.widget<FilledButton>(find.byType(FilledButton));
 
 void main() {
+  testWidgets('known offline state never waits on the remote feedback request',
+      (tester) async {
+    final neverCompletes = Completer<EventFeedbackModel?>();
+    var remoteCalls = 0;
+
+    await _pump(
+      tester,
+      isOpen: true,
+      loadFeedback: (_) {
+        remoteCalls++;
+        return neverCompletes.future;
+      },
+      isOffline: () async => true,
+      loadCachedFeedback: (_) async => null,
+    );
+
+    expect(remoteCalls, 0);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+    expect(find.text('Offline.feedbackStateUnknown'), findsOneWidget);
+  });
+
+  testWidgets('a feedback timeout leaves loading and shows offline state',
+      (tester) async {
+    await _pump(
+      tester,
+      isOpen: true,
+      loadFeedback: (_) async => throw TimeoutException('feedback load'),
+      isOffline: () async => false,
+      loadCachedFeedback: (_) async => null,
+    );
+
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+    expect(find.text('Offline.feedbackStateUnknown'), findsOneWidget);
+  });
+
   testWidgets('closed window shows the "opens when starts" message, no tiles',
       (tester) async {
     await _pump(tester, isOpen: false);
@@ -81,7 +130,8 @@ void main() {
     expect(find.text('EventFeedback.removeFeedback'), findsOneWidget);
   });
 
-  testWidgets('already rated (signed-in): tile preselected, update label, remove',
+  testWidgets(
+      'already rated (signed-in): tile preselected, update label, remove',
       (tester) async {
     await _pump(tester,
         isOpen: true, existing: _rated('happy', note: 'super akce'));
@@ -100,8 +150,7 @@ void main() {
 
   testWidgets('editing the comment after rating switches to "save comment"',
       (tester) async {
-    await _pump(tester,
-        isOpen: true, existing: _rated('sad', note: 'puvodni'));
+    await _pump(tester, isOpen: true, existing: _rated('sad', note: 'puvodni'));
     expect(find.text('EventFeedback.updateFeedback'), findsOneWidget);
 
     await tester.enterText(find.byType(TextField), 'novy komentar');

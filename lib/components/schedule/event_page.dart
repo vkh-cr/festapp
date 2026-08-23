@@ -58,6 +58,7 @@ import 'package:fstapp/components/speakers/counseling_page.dart';
 import 'package:fstapp/components/speakers/counseling_picker.dart';
 import 'package:fstapp/database_tables/tb.dart';
 import '../map/map_navigation.dart';
+import '../map/public_map_session.dart';
 
 @RoutePage()
 class EventPage extends StatefulWidget {
@@ -1209,9 +1210,12 @@ class _EventPageState extends State<EventPage> {
       double iconSize, double fontSize) {
     return InkWell(
       borderRadius: BorderRadius.circular(6),
-      onTap: () {
-        MapNavigation.openPlace(context, _event!.place!.id!)
-            .then((value) => loadData(_event!.id!));
+      onTap: () async {
+        final result =
+            await MapNavigation.openPlace(context, _event!.place!.id!);
+        if (mounted && result.kind == MapVisitKind.returned) {
+          await loadData(_event!.id!);
+        }
       },
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -1536,7 +1540,8 @@ class _EventPageState extends State<EventPage> {
   }
 
   void _eventPressed(int id) {
-    RouterService.navigateOccasion(context, "${EventPage.ROUTE}/$id")
+    context.router
+        .push(EventRoute(id: id))
         .then((value) => loadData(_event!.id!));
   }
 

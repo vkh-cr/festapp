@@ -373,7 +373,7 @@ class DbOrders {
   static Future<Uint8List?> downloadContractPdf(int orderId) async {
     try {
       final response = await _supabase.functions.invoke(
-          "generate-hvezdamorska-agreement",
+          "generate-order-agreement",
           body: {"orderId": orderId});
 
       final String? base64Str = response.data['file'];

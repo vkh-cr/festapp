@@ -63,18 +63,24 @@ class DbUsers {
   static const String groupTitleKey = 'group_title';
 
   static Future<OccasionEditorData> getOccasionEditorDataBundle() async {
-    final result = await _supabase.rpc(
-        ClientSyncRuntime.isV1Selected
-            ? 'get_occasion_users_editor_bundle_v1'
-            : 'get_occasion_users_for_edit',
-        params: {
-          ClientSyncRuntime.isV1Selected ? 'p_occasion' : 'p_occasion_id':
-              RightsService.currentOccasionId()!,
-        });
-    return parseOccasionEditorData(result);
+    final occasionId = RightsService.currentOccasionId()!;
+    final results = await Future.wait<dynamic>([
+      _supabase.rpc(
+          ClientSyncRuntime.isV1Selected
+              ? 'get_occasion_users_editor_bundle_v1'
+              : 'get_occasion_users_for_edit',
+          params: {
+            ClientSyncRuntime.isV1Selected ? 'p_occasion' : 'p_occasion_id':
+                occasionId,
+          }),
+      _supabase.rpc('get_occasion_sign_in_email_statuses',
+          params: {'p_occasion': occasionId}),
+    ]);
+    return parseOccasionEditorData(results[0], invitationStatuses: results[1]);
   }
 
-  static OccasionEditorData parseOccasionEditorData(dynamic result) {
+  static OccasionEditorData parseOccasionEditorData(dynamic result,
+      {dynamic invitationStatuses}) {
     final payload = OccasionEditorPayload.fromRpc(result);
     if (payload.isSuccess) {
       final users = List<OccasionUserModel>.from(
@@ -93,6 +99,22 @@ class DbUsers {
       };
 
       final formMap = {for (var form in forms) form.key: form};
+      final usersById = {for (final user in users) user.user: user};
+
+      for (final status in invitationStatuses is List
+          ? invitationStatuses
+          : const <dynamic>[]) {
+        if (status is! Map) continue;
+        final user = usersById[status['user']];
+        if (user == null) continue;
+        user.invitationSendCount = status['send_count'] as int? ?? 0;
+        final firstSentAt = status['first_sent_at'] as String?;
+        final lastSentAt = status['last_sent_at'] as String?;
+        user.firstInvitationSentAt =
+            firstSentAt == null ? null : DateTime.parse(firstSentAt);
+        user.lastInvitationSentAt =
+            lastSentAt == null ? null : DateTime.parse(lastSentAt);
+      }
 
       for (final user in users) {
         user.services ??= {};

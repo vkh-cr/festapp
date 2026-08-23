@@ -1,16 +1,15 @@
 # Cloudflare Pages Deployment
 
-Universal, conf-driven deploy used by `.github/workflows/deploy.yml`. To add a
-new project, create a `prod/<name>` branch and set two keys in
+Universal, conf-driven deploy used by `automation/deploy_direct.sh`. To add a
+new project, create a `prod/<name>` branch and set the Pages project in
 `automation/project.conf` on that branch:
 
 ```ini
-DEPLOY_TARGET=cloudflare
 CLOUDFLARE_PROJECT_NAME=<exact CF Pages project name>
 ```
 
-Push to `prod/<name>` triggers the workflow, which PATCHes the CF Pages
-project's production branch to match, then deploys.
+Run `automation/deploy_direct.sh`; it builds locally, uploads through Wrangler,
+and verifies the custom domain before reporting success.
 
 ## One-time Cloudflare Pages dashboard setup
 
@@ -19,8 +18,8 @@ For each `prod/*` branch you want to deploy on Cloudflare:
 1. **Create project** → "Direct Upload" (no Git integration needed; the deploy
    pushes builds via Wrangler). Project name must match
    `CLOUDFLARE_PROJECT_NAME` in `automation/project.conf` on that branch.
-2. **Production branch** is set automatically by the workflow on every deploy;
-   no manual step.
+2. **Production branch** must match the `prod/<name>` branch tag used by the
+   direct deploy script.
 3. **Environment variables** (Production + Preview):
    - `SUPABASE_URL`
    - `SUPABASE_ANON_KEY`
@@ -29,9 +28,9 @@ For each `prod/*` branch you want to deploy on Cloudflare:
    the `/form/<slug>` OG inject. Without them the worker falls back to a
    minimal sitemap and uses default meta tags.
 4. **Custom domain**: add the production hostname (e.g. `csmostrava.festapp.net`).
-5. **Repo secrets** (one-time, GitHub repo or org level):
+5. **Local release credentials**:
    - `CLOUDFLARE_API_TOKEN` — token with `Cloudflare Pages:Edit` for the account.
-   - `CLOUDFLARE_ACCOUNT_ID`.
+   - `CLOUDFLARE_ACCOUNT_ID` (optional; the Festapp account is the default).
 
 ## How routing works (`_worker.js`)
 
@@ -92,7 +91,6 @@ Why a worker (instead of `_redirects` + Pages Functions):
 1. Branch off main: `git checkout -b prod/<name>`.
 2. Edit `automation/project.conf` on that branch:
    ```ini
-   DEPLOY_TARGET=cloudflare
    CLOUDFLARE_PROJECT_NAME=<name>
    APP_NAME="Display Name"
    APP_TITLE_SHORT="Short"
@@ -104,4 +102,5 @@ Why a worker (instead of `_redirects` + Pages Functions):
    ...
    ```
 3. Create the CF Pages project in dashboard (`<name>`), set env vars + custom domain.
-4. `git push origin prod/<name>` — `deploy.yml` builds and deploys.
+4. Export `CLOUDFLARE_API_TOKEN` (or pass `--env-file`) and run
+   `./automation/deploy_direct.sh`.

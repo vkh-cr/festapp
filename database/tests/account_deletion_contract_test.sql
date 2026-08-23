@@ -57,6 +57,8 @@ BEGIN
   v_result := public.claim_account_deletion(v_hash);
   PERFORM assert_eq(v_result->>'status','processing','explicit POST claim starts deletion');
   PERFORM assert_eq(v_result->>'userId',v_user::text,'claim derives seeded user from token');
+  PERFORM assert_eq(v_result->>'completionEmail',lower(v_email),
+    'claim preserves the delivery address before transactional profile cleanup');
   v_result := public.claim_account_deletion(v_hash);
   PERFORM assert_eq(v_result->>'status','processing','concurrent/replayed claim resumes one job');
 

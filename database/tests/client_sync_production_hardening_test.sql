@@ -12,6 +12,8 @@ DECLARE
   v_news_old bigint;
   v_news_new bigint;
   v_live jsonb;
+  v_config jsonb;
+  v_media_revision bigint;
   v_token uuid;
   v_command uuid:=gen_random_uuid();
   v_client uuid:=gen_random_uuid();
@@ -36,6 +38,8 @@ BEGIN
   v_user_two:=get_user_id('client_sync_live_two');
   INSERT INTO public.occasion_users(occasion,"user",is_approved) VALUES
     (v_occasion,v_user_one,true),(v_occasion,v_user_two,true);
+  UPDATE public.occasion_users SET is_editor=true
+    WHERE occasion=v_occasion AND "user"=v_user_one;
   INSERT INTO public.event_users(event,"user") VALUES(v_event,v_user_one);
   INSERT INTO public.event_users_saved(event,"user") VALUES
     (v_event,v_user_one),(v_event,v_user_two);
@@ -51,9 +55,36 @@ BEGIN
     (component,scope_type,scope_id,entity_id,source_revision)
   VALUES ('live_public','occasion',v_occasion,0,1);
 
+  PERFORM set_config('request.jwt.claim.sub',v_user_one::text,true);
+  PERFORM set_config('request.jwt.claim.role','authenticated',true);
+  PERFORM public.add_image_record(
+    'https://img.festapp.net/offline-description.webp',v_occasion,NULL);
+  SELECT source_revision INTO v_media_revision
+  FROM public.client_sync_scopes WHERE component='occasion_config'
+    AND scope_type='occasion' AND scope_id=v_occasion;
+  PERFORM assert_eq(v_media_revision::text,'1',
+    'adding occasion media advances occasion_config');
+
+  PERFORM set_config('request.jwt.claim.role','service_role',true);
+  v_config:=public.get_public_client_sync_component_v1(
+    'occasion_config','occasion',v_occasion);
+  PERFORM assert_eq(v_config#>>'{payload,media,0,url}',
+    'https://img.festapp.net/offline-description.webp',
+    'occasion_config publishes the complete media manifest');
+
+  PERFORM set_config('request.jwt.claim.role','authenticated',true);
+  PERFORM public.remove_image_records(
+    ARRAY['https://img.festapp.net/offline-description.webp']);
+  SELECT source_revision INTO v_media_revision
+  FROM public.client_sync_scopes WHERE component='occasion_config'
+    AND scope_type='occasion' AND scope_id=v_occasion;
+  PERFORM assert_eq(v_media_revision::text,'2',
+    'removing occasion media advances occasion_config');
+
   PERFORM set_config('request.jwt.claim.role','service_role',true);
   SELECT claim_token INTO STRICT v_token
-  FROM public.claim_client_projection_dirty_scopes_v1(ARRAY[v_occasion],10);
+  FROM public.claim_client_projection_dirty_scopes_v1(ARRAY[v_occasion],10)
+  WHERE component='live_public';
   PERFORM assert_eq(public.release_client_projection_claims_v1(ARRAY[v_token]),1,
     'failed publisher class releases its exact claim');
   PERFORM assert_true(EXISTS (SELECT 1 FROM public.client_projection_dirty_keys
@@ -107,6 +138,7 @@ BEGIN
     'compaction preserves a response-less command tombstone');
 
   PERFORM set_config('request.jwt.claim.role','anon',true);
+  PERFORM set_config('request.jwt.claim.sub','',true);
   v_response:=public.begin_anonymous_client_mutation_v1(
     v_command,'hardening.expired',v_occasion,v_client,repeat('a',64));
   PERFORM assert_eq(v_response->>'disposition','replay',

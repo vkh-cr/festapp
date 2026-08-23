@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fstapp/app_config.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/features/import_feature.dart';
@@ -28,6 +29,7 @@ class UsersTab extends StatefulWidget {
 }
 
 class _UsersTabState extends State<UsersTab> {
+  static bool get _hasCsmAppLinks => AppConfig.organization == 9;
   static bool get _canManageCompanions => RightsService.isEditor();
 
   static List<String> getColumnIdentifiers() {
@@ -76,6 +78,8 @@ class _UsersTabState extends State<UsersTab> {
       ]);
     }
 
+    if (_hasCsmAppLinks) identifiers.add(UserColumns.APP_LINKS_SENT);
+
     return identifiers;
   }
 
@@ -116,6 +120,14 @@ class _UsersTabState extends State<UsersTab> {
                 (await DbUsers.getAllUsersBasics()).cast<IHasId>(),
                 refreshData);
           },
+        ),
+      if (_hasCsmAppLinks)
+        DataGridAction(
+          name: UserStrings.sendAppLinks,
+          action: (SingleDataGridController p0, [_]) async {
+            await UsersTabHelper.sendAppLinks(context, p0, refreshData);
+          },
+          isEnabled: RightsService.canUpdateUsers,
         ),
       DataGridAction(
         name: UserStrings.invite,

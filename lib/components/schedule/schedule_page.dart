@@ -14,6 +14,7 @@ import 'package:fstapp/components/timeline/advanced_timeline_view.dart';
 import 'package:fstapp/components/timeline/schedule_helper.dart';
 import 'package:fstapp/components/schedule/event_model.dart';
 import 'package:fstapp/components/schedule/schedule_strings.dart';
+import 'package:fstapp/components/_shared/async_reload_coordinator.dart';
 import 'package:fstapp/components/users/user_strings.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/data_services/auth_service.dart';
@@ -24,8 +25,8 @@ import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/occasion/add_new_event_dialog.dart';
 import 'package:fstapp/components/schedule/event_edit_page.dart';
-import 'package:fstapp/components/schedule/event_page.dart';
 import 'package:fstapp/components/map/map_navigation.dart';
+import 'package:fstapp/components/map/public_map_session.dart';
 import 'package:fstapp/components/schedule/my_schedule_page.dart';
 import 'package:fstapp/components/schedule/timetable_page.dart';
 import 'package:fstapp/components/occasion/occasion_home_page.dart';
@@ -57,7 +58,9 @@ class SchedulePage extends StatefulWidget {
 
 class _SchedulePageState extends State<SchedulePage>
     with WidgetsBindingObserver {
-  static bool _isLoading = false;
+  static final ScheduleDaySessionSelection _daySelection =
+      scheduleDaySessionSelection;
+  final AsyncReloadCoordinator _reloadCoordinator = AsyncReloadCoordinator();
   static bool _fullDataGloballyLoaded = false;
   static DateTime? _lastQuickLoadTime;
   static const Duration _quickLoadRateLimit = Duration(seconds: 10);
@@ -102,6 +105,7 @@ class _SchedulePageState extends State<SchedulePage>
 
   @override
   void dispose() {
+    _reloadCoordinator.dispose();
     WidgetsBinding.instance.removeObserver(this);
     _tabsRouter?.removeListener(_onTabSwitch);
     ClientSyncRuntime.projectionEpoch.removeListener(_onProjectionChanged);
@@ -175,34 +179,20 @@ class _SchedulePageState extends State<SchedulePage>
     }
   }
 
-  Future<void> loadData() async {
-    if (_isLoading) return;
+  Future<void> loadData() => _reloadCoordinator.run(() async {
+        _hasOwnedCompanions = AuthService.isLoggedIn() &&
+            (await DbCompanions.getAllCompanions()).isNotEmpty;
 
-    _hasOwnedCompanions = AuthService.isLoggedIn() &&
-        (await DbCompanions.getAllCompanions()).isNotEmpty;
-
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      if (ClientSyncRuntime.isV1Selected) {
-        await _reloadProjectedEvents();
-        return;
-      }
-      await _loadOfflineDataThenFast();
-      if (!_fullDataGloballyLoaded) {
-        await _loadFullData();
-        _fullDataGloballyLoaded = true;
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
-  }
+        if (ClientSyncRuntime.isV1Selected) {
+          await _reloadProjectedEvents();
+          return;
+        }
+        await _loadOfflineDataThenFast();
+        if (!_fullDataGloballyLoaded) {
+          await _loadFullData();
+          _fullDataGloballyLoaded = true;
+        }
+      });
 
   Future<void> _loadOfflineDataThenFast() async {
     if (_events.isEmpty) {
@@ -310,12 +300,12 @@ class _SchedulePageState extends State<SchedulePage>
   }
 
   void _eventPressed(int id) {
-    RouterService.navigateOccasion(context, "${EventPage.ROUTE}/$id")
-        .then((_) => loadData());
+    context.router.push(EventRoute(id: id)).then((_) => loadData());
   }
 
-  void _goToMap(int placeId) {
-    MapNavigation.openPlace(context, placeId).then((_) => loadData());
+  Future<void> _goToMap(int placeId) async {
+    final result = await MapNavigation.openPlace(context, placeId);
+    if (mounted && result.kind == MapVisitKind.returned) await loadData();
   }
 
   void _openAddDialog(
@@ -360,53 +350,6 @@ class _SchedulePageState extends State<SchedulePage>
     );
   }
 
-  int _calculateTargetTabIndex(List<TimeBlockGroup> currentDatedEvents) {
-    if (currentDatedEvents.isEmpty) {
-      return 0;
-    }
-
-    DateTime now = TimeHelper.now();
-    int targetIndex = 0;
-    int? currentEventDayIndex;
-
-    for (int dayIdx = 0; dayIdx < currentDatedEvents.length; dayIdx++) {
-      final dayGroup = currentDatedEvents[dayIdx];
-      for (final event in dayGroup.events) {
-        if (event.startTime.isBefore(now) && event.endTime.isAfter(now)) {
-          currentEventDayIndex = dayIdx;
-          break;
-        }
-      }
-      if (currentEventDayIndex != null) break;
-    }
-
-    if (currentEventDayIndex != null) {
-      targetIndex = currentEventDayIndex;
-    } else {
-      int todayIndexInList = -1;
-      for (int dayIdx = 0; dayIdx < currentDatedEvents.length; dayIdx++) {
-        final dayGroup = currentDatedEvents[dayIdx];
-        if (dayGroup.dateTime != null &&
-            dayGroup.dateTime!.year == now.year &&
-            dayGroup.dateTime!.month == now.month &&
-            dayGroup.dateTime!.day == now.day) {
-          todayIndexInList = dayIdx;
-          break;
-        }
-      }
-      if (todayIndexInList != -1) {
-        targetIndex = todayIndexInList;
-      } else {
-        targetIndex = 0;
-      }
-    }
-
-    if (targetIndex < 0 || targetIndex >= currentDatedEvents.length) {
-      targetIndex = currentDatedEvents.isNotEmpty ? 0 : 0;
-    }
-    return targetIndex;
-  }
-
   @override
   Widget build(BuildContext context) {
     final bool isLargeScreen = MediaQuery.of(context).size.height > 860;
@@ -431,7 +374,14 @@ class _SchedulePageState extends State<SchedulePage>
           .toUpperCase();
     });
 
-    int currentTargetTabIndex = _calculateTargetTabIndex(datedEvents);
+    final occasionId = RightsService.currentOccasionId()!;
+    final currentTargetTabIndex = _dots.isEmpty
+        ? 0
+        : _daySelection.resolveInitialIndex(
+            occasionId: occasionId,
+            dayGroups: datedEvents,
+            now: TimeHelper.now(),
+          );
 
     final scheduleFeature =
         FeatureService.getFeatureDetails(FeatureConstants.schedule);
@@ -445,136 +395,149 @@ class _SchedulePageState extends State<SchedulePage>
         bottom: false,
         child: DefaultTabController(
           key: ValueKey<String>(
-              "SchedulePage_TabController_${currentTargetTabIndex}_${datedEvents.length}"),
+            'SchedulePage_TabController_${occasionId}_'
+            '${datedEvents.map((group) => group.dateTime?.millisecondsSinceEpoch ?? 0).join('_')}_'
+            '$currentTargetTabIndex',
+          ),
           initialIndex: currentTargetTabIndex,
           length: datedEvents.length,
-          child: NestedScrollView(
-            controller: _scrollController,
-            headerSliverBuilder: (ctx, inner) => [
-              SliverAppBar(
-                collapsedHeight: 62,
-                expandedHeight: isLargeScreen ? 62 : 62,
-                pinned: isLargeScreen,
-                floating: false,
-                automaticallyImplyLeading: false,
-                flexibleSpace: FlexibleSpaceBar(
-                  background: Padding(
-                    padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        GestureDetector(
-                          onTap: () => RouterService.navigate(context,
-                              "${UnitPage.ROUTE}/${RightsService.currentUnit()!.id!}"),
-                          onDoubleTap: () async {
-                            final info = await PackageInfo.fromPlatform();
-                            ToastHelper.Show(context,
-                                "${info.appName} ${info.version}+${info.buildNumber}");
-                            if (RightsService.isEditor()) {
-                              TimeHelper.toggleTimeTravel?.call();
-                              setState(() {});
-                            }
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: LogoWidget(
-                                height: 64,
-                                forceDark: true,
-                                programVariant: true),
-                          ),
-                        ),
-                        const Spacer(),
-                        if (FeatureService.isFeatureEnabled(
-                            FeatureConstants.mySchedule))
-                          _IconWithLabel(
-                            icon: Icons.favorite,
-                            label: CommonStrings.mySchedule,
-                            onPressed: () {
-                              RouterService.navigateOccasion(
-                                      context, MySchedulePage.ROUTE)
-                                  .then((_) => loadData());
+          child: _TabSelectionObserver(
+            onChanged: (index) {
+              if (_dots.isNotEmpty && index < datedEvents.length) {
+                _daySelection.remember(occasionId, datedEvents[index]);
+              }
+            },
+            child: NestedScrollView(
+              controller: _scrollController,
+              headerSliverBuilder: (ctx, inner) => [
+                SliverAppBar(
+                  collapsedHeight: 62,
+                  expandedHeight: isLargeScreen ? 62 : 62,
+                  pinned: isLargeScreen,
+                  floating: false,
+                  automaticallyImplyLeading: false,
+                  flexibleSpace: FlexibleSpaceBar(
+                    background: Padding(
+                      padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          GestureDetector(
+                            onTap: () => RouterService.navigate(context,
+                                "${UnitPage.ROUTE}/${RightsService.currentUnit()!.id!}"),
+                            onDoubleTap: () async {
+                              final info = await PackageInfo.fromPlatform();
+                              ToastHelper.Show(context,
+                                  "${info.appName} ${info.version}+${info.buildNumber}");
+                              if (RightsService.isEditor()) {
+                                TimeHelper.toggleTimeTravel?.call();
+                                setState(() {});
+                              }
                             },
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: LogoWidget(
+                                  height: 64,
+                                  forceDark: true,
+                                  programVariant: true),
+                            ),
                           ),
-                        if (FeatureService.isFeatureEnabled(
-                            FeatureConstants.timetable))
-                          _IconWithLabel(
-                            icon: Icons.calendar_month,
-                            label: CommonStrings.schedule,
-                            onPressed: () {
-                              RouterService.navigateOccasion(
-                                      context, TimetablePage.ROUTE)
-                                  .then((_) => loadData());
-                            },
-                          ),
-                        // GlobalSearch moves the profile/sign-in from the bottom
-                        // nav into the app bar (matches production).
-                        if (FeatureService.isFeatureEnabled(
-                            FeatureConstants.globalSearch))
-                          _IconWithLabel(
-                            icon: AuthService.isLoggedIn()
-                                ? Icons.account_circle
-                                : Icons.account_circle_outlined,
-                            label: AuthService.isLoggedIn()
-                                ? (RightsService.currentUser()?.name ??
-                                    ScheduleStrings.profile)
-                                : UserStrings.signIn,
-                            onPressed: () {
-                              final f = AuthService.isLoggedIn()
-                                  ? RouterService.navigateOccasion(
-                                      context, UserPage.ROUTE)
-                                  : RouterService.navigate(
-                                      context, LoginPage.ROUTE);
-                              f.then((_) => loadData());
-                            },
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              SliverPersistentHeader(
-                pinned: true,
-                delegate: _SliverToBoxAdapterDelegate(
-                  dayGroups: datedEvents,
-                  child: AdvancedTimelineView(
-                    weekdays: weekdays,
-                    groups: datedEvents,
-                    maxTabBarWidth: StylesConfig.formMaxWidth,
-                  ),
-                ),
-              ),
-            ],
-            body: Container(
-              color: Theme.of(context).scaffoldBackgroundColor,
-              child: TabBarView(
-                children: [
-                  for (var i = 0; i < datedEvents.length; i++)
-                    DayList(
-                      dayGroup: datedEvents[i],
-                      onToggle: (id) =>
-                          setState(() => _openId = _openId == id ? null : id),
-                      openId: _openId,
-                      controller: AdvancedTimelineController(
-                        events: _dots,
-                        onEventPressed: _eventPressed,
-                        showAddNewEventButton: () =>
-                            (RightsService.isEditor() && subScheduleIsEnabled),
-                        onAddNewEvent: _openAddDialog,
-                        onSignInEvent: _handleSignIn,
-                        onSignOutEvent: _handleSignOut,
-                        onAddToProgramEvent: _handleAdd,
-                        onRemoveFromProgramEvent: _handleRemove,
-                        onEditEvent: (c, ev) => RouterService.navigateOccasion(
-                                context, "${EventEditPage.ROUTE}/$ev")
-                            .then((_) => loadData()),
-                        onPlaceTap: (c, pl) => _goToMap(pl.id),
-                        isUserApprover: _isUserApprover,
-                        onScanButtonPressed: _handleScanButtonPressed,
-                        onCompanionButtonPressed: _handleCompanionButtonPressed,
-                        hasOwnedCompanions: _hasOwnedCompanions,
+                          const Spacer(),
+                          if (FeatureService.isFeatureEnabled(
+                              FeatureConstants.mySchedule))
+                            _IconWithLabel(
+                              icon: Icons.favorite,
+                              label: CommonStrings.mySchedule,
+                              onPressed: () {
+                                RouterService.navigateOccasion(
+                                        context, MySchedulePage.ROUTE)
+                                    .then((_) => loadData());
+                              },
+                            ),
+                          if (FeatureService.isFeatureEnabled(
+                              FeatureConstants.timetable))
+                            _IconWithLabel(
+                              icon: Icons.calendar_month,
+                              label: CommonStrings.schedule,
+                              onPressed: () {
+                                RouterService.navigateOccasion(
+                                        context, TimetablePage.ROUTE)
+                                    .then((_) => loadData());
+                              },
+                            ),
+                          // GlobalSearch moves the profile/sign-in from the bottom
+                          // nav into the app bar (matches production).
+                          if (FeatureService.isFeatureEnabled(
+                              FeatureConstants.globalSearch))
+                            _IconWithLabel(
+                              icon: AuthService.isLoggedIn()
+                                  ? Icons.account_circle
+                                  : Icons.account_circle_outlined,
+                              label: AuthService.isLoggedIn()
+                                  ? (RightsService.currentUser()?.name ??
+                                      ScheduleStrings.profile)
+                                  : UserStrings.signIn,
+                              onPressed: () {
+                                final f = AuthService.isLoggedIn()
+                                    ? RouterService.navigateOccasion(
+                                        context, UserPage.ROUTE)
+                                    : RouterService.navigate(
+                                        context, LoginPage.ROUTE);
+                                f.then((_) => loadData());
+                              },
+                            ),
+                        ],
                       ),
                     ),
-                ],
+                  ),
+                ),
+                SliverPersistentHeader(
+                  pinned: true,
+                  delegate: _SliverToBoxAdapterDelegate(
+                    dayGroups: datedEvents,
+                    child: AdvancedTimelineView(
+                      weekdays: weekdays,
+                      groups: datedEvents,
+                      maxTabBarWidth: StylesConfig.formMaxWidth,
+                    ),
+                  ),
+                ),
+              ],
+              body: Container(
+                color: Theme.of(context).scaffoldBackgroundColor,
+                child: TabBarView(
+                  children: [
+                    for (var i = 0; i < datedEvents.length; i++)
+                      DayList(
+                        dayGroup: datedEvents[i],
+                        onToggle: (id) =>
+                            setState(() => _openId = _openId == id ? null : id),
+                        openId: _openId,
+                        controller: AdvancedTimelineController(
+                          events: _dots,
+                          onEventPressed: _eventPressed,
+                          showAddNewEventButton: () =>
+                              (RightsService.isEditor() &&
+                                  subScheduleIsEnabled),
+                          onAddNewEvent: _openAddDialog,
+                          onSignInEvent: _handleSignIn,
+                          onSignOutEvent: _handleSignOut,
+                          onAddToProgramEvent: _handleAdd,
+                          onRemoveFromProgramEvent: _handleRemove,
+                          onEditEvent: (c, ev) =>
+                              RouterService.navigateOccasion(
+                                      context, "${EventEditPage.ROUTE}/$ev")
+                                  .then((_) => loadData()),
+                          onPlaceTap: (c, pl) => _goToMap(pl.id),
+                          isUserApprover: _isUserApprover,
+                          onScanButtonPressed: _handleScanButtonPressed,
+                          onCompanionButtonPressed:
+                              _handleCompanionButtonPressed,
+                          hasOwnedCompanions: _hasOwnedCompanions,
+                        ),
+                      ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -582,6 +545,48 @@ class _SchedulePageState extends State<SchedulePage>
       ),
     );
   }
+}
+
+class _TabSelectionObserver extends StatefulWidget {
+  const _TabSelectionObserver({required this.child, required this.onChanged});
+
+  final Widget child;
+  final ValueChanged<int> onChanged;
+
+  @override
+  State<_TabSelectionObserver> createState() => _TabSelectionObserverState();
+}
+
+class _TabSelectionObserverState extends State<_TabSelectionObserver> {
+  TabController? _controller;
+  int? _lastIndex;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final controller = DefaultTabController.of(context);
+    if (identical(controller, _controller)) return;
+    _controller?.removeListener(_onControllerChanged);
+    _controller = controller;
+    _lastIndex = controller.index;
+    controller.addListener(_onControllerChanged);
+  }
+
+  void _onControllerChanged() {
+    final index = _controller?.index;
+    if (index == null || index == _lastIndex) return;
+    _lastIndex = index;
+    widget.onChanged(index);
+  }
+
+  @override
+  void dispose() {
+    _controller?.removeListener(_onControllerChanged);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }
 
 class _SliverToBoxAdapterDelegate extends SliverPersistentHeaderDelegate {

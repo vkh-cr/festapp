@@ -2,12 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fstapp/components/icons/icons_strings.dart';
 import 'package:fstapp/components/icons/place_type_model.dart';
+import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/map/icon_model.dart';
+import 'package:fstapp/components/map/map_place_model.dart';
 import 'package:fstapp/components/map/map_page_helper.dart';
+import 'package:fstapp/components/map/map_location_pin_helper.dart';
 import 'package:fstapp/components/map/map_scene.dart';
 import 'package:fstapp/components/map/path_group_model.dart';
 import 'package:fstapp/components/map/path_node.dart';
 import 'package:fstapp/components/map/place_model.dart';
+import 'package:fstapp/components/schedule/event_model.dart';
+import 'package:latlong2/latlong.dart';
 
 /// The place-type filter bar shown at the bottom of the map: one chip per
 /// visible place type plus a trailing "Other" chip, single-select.
@@ -40,6 +45,7 @@ void main() {
     required List<PlaceTypeModel> types,
     String? selectedCode,
     required void Function(String? code) onTap,
+    bool showOther = true,
   }) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -54,6 +60,7 @@ void main() {
                   otherCode,
                   onTap,
                   icons,
+                  showOther: showOther,
                 ),
               ),
             ],
@@ -80,6 +87,58 @@ void main() {
     expect(find.byIcon(Icons.more_horiz), findsOneWidget);
     // The type with an unknown icon id falls back to the generic pin.
     expect(find.byIcon(Icons.place), findsOneWidget);
+  });
+
+  testWidgets('hides Other chip when it has no visible places', (tester) async {
+    await pumpBar(
+      tester,
+      types: placeTypes,
+      selectedCode: "ubytovani",
+      showOther: false,
+      onTap: (_) {},
+    );
+
+    expect(find.byIcon(Icons.more_horiz), findsNothing);
+    expect(find.byType(Tooltip), findsNWidgets(placeTypes.length));
+  });
+
+  test('Other availability ignores hidden places', () {
+    MapPlacePresentation marker({required String? type, bool hidden = false}) {
+      final place = MapPlaceModel(
+        id: 1,
+        title: 'Place',
+        type: type,
+        latLng: const LatLng(49.82, 18.26),
+        isHidden: hidden,
+      );
+      return MapPlacePresentation(
+        place: place,
+        coordinate: place.latLng,
+        pinColorValue: Colors.blue.toARGB32(),
+      );
+    }
+
+    expect(
+      MapPageHelper.hasOtherVisiblePlaces(
+        [marker(type: null, hidden: true)],
+        placeTypes,
+      ),
+      isFalse,
+    );
+    expect(
+      MapPageHelper.hasOtherVisiblePlaces(
+        [marker(type: 'unlisted')],
+        placeTypes,
+      ),
+      isTrue,
+    );
+    expect(
+      MapPageHelper.hasOtherVisiblePlaces(
+        [marker(type: 'ubytovani')],
+        placeTypes,
+      ),
+      isFalse,
+    );
   });
 
   testWidgets('place type names are not permanently shown in the compact bar',
@@ -207,6 +266,134 @@ void main() {
     );
     expect(
       MapPageHelper.hasMeaningfulPlaceDescription('<p><img src="map.jpg"></p>'),
+      isTrue,
+    );
+  });
+
+  test('place popup includes nested program levels', () {
+    final place = PlaceModel(id: 7, title: 'Stage');
+    EventModel event(
+      int id,
+      String title, {
+      List<int>? children,
+      bool hidden = false,
+      Map<String, dynamic>? data,
+    }) =>
+        EventModel(
+          id: id,
+          title: title,
+          place: PlaceModel(id: 7, title: 'Stage'),
+          startTime: DateTime(2026, 8, 7, 10, id),
+          endTime: DateTime(2026, 8, 7, 11, id),
+          childEventIds: children,
+          isHidden: hidden,
+          data: data,
+        );
+    final events = [
+      event(1, 'Parent', children: [2]),
+      event(2, 'Child', children: [3]),
+      event(3, 'Grandchild'),
+      event(4, 'Hidden', hidden: true),
+      event(5, 'Counseling slot',
+          data: {FeatureConstants.isCounselingSlot: true}),
+      EventModel(
+        id: 6,
+        title: 'Later counseling slot',
+        place: PlaceModel(id: 7, title: 'Stage'),
+        startTime: DateTime(2026, 8, 7, 14),
+        endTime: DateTime(2026, 8, 7, 15),
+        data: {FeatureConstants.isCounselingSlot: true},
+      ),
+      EventModel(
+        id: 7,
+        title: 'Next-day counseling slot',
+        place: PlaceModel(id: 7, title: 'Stage'),
+        startTime: DateTime(2026, 8, 8, 9),
+        endTime: DateTime(2026, 8, 8, 10),
+        data: {FeatureConstants.isCounselingSlot: true},
+      ),
+      EventModel(
+        id: 8,
+        title: 'Friday counseling entry',
+        startTime: DateTime(2026, 8, 7, 9),
+        endTime: DateTime(2026, 8, 7, 9, 30),
+        data: {FeatureConstants.counselingEntry: true},
+      ),
+      EventModel(
+        id: 9,
+        title: 'Saturday counseling entry',
+        startTime: DateTime(2026, 8, 8, 8),
+        endTime: DateTime(2026, 8, 8, 8, 30),
+        data: {FeatureConstants.counselingEntry: true},
+      ),
+    ];
+
+    final counseling = MapPageHelper.assignEventsToPlaces([place], events);
+
+    expect(place.events.map((event) => event.title),
+        ['Parent', 'Child', 'Grandchild']);
+    expect(counseling[7], hasLength(2));
+    expect(counseling[7]!.first.start, DateTime(2026, 8, 7, 10, 5));
+    expect(counseling[7]!.first.end, DateTime(2026, 8, 7, 15));
+    expect(counseling[7]!.first.entryEventId, 8);
+    expect(counseling[7]!.last.start, DateTime(2026, 8, 8, 9));
+    expect(counseling[7]!.last.end, DateTime(2026, 8, 8, 10));
+    expect(counseling[7]!.last.entryEventId, 9);
+  });
+
+  test('place navigation uses the platform map protocol', () {
+    final android = MapPageHelper.navigationUri(
+      latitude: 49.8209,
+      longitude: 18.2625,
+      label: 'Main stage',
+      isWeb: false,
+      platform: TargetPlatform.android,
+    );
+    final ios = MapPageHelper.navigationUri(
+      latitude: 49.8209,
+      longitude: 18.2625,
+      label: 'Main stage',
+      isWeb: false,
+      platform: TargetPlatform.iOS,
+    );
+    final web = MapPageHelper.navigationUri(
+      latitude: 49.8209,
+      longitude: 18.2625,
+      label: 'Main stage',
+      isWeb: true,
+      platform: TargetPlatform.android,
+    );
+
+    expect(android.scheme, 'geo');
+    expect(android.queryParameters['q'], '49.8209,18.2625 (Main stage)');
+    expect(ios.host, 'maps.apple.com');
+    expect(ios.queryParameters['daddr'], '49.8209,18.2625');
+    expect(web.host, 'mapy.com');
+    expect(web.queryParameters['id'], '18.2625,49.8209');
+  });
+
+  test('compact pins are exactly the places without a resolvable icon', () {
+    expect(
+      MapLocationPinHelper.hasCustomIcon(
+        MapPlaceModel(
+          id: 1,
+          title: 'No icon',
+          latLng: const LatLng(49.82, 18.26),
+        ),
+        icons,
+      ),
+      isFalse,
+    );
+    expect(
+      MapLocationPinHelper.hasCustomIcon(
+        MapPlaceModel(
+          id: 2,
+          title: 'Own icon',
+          icon: 171,
+          latLng: const LatLng(49.82, 18.26),
+        ),
+        icons,
+      ),
       isTrue,
     );
   });

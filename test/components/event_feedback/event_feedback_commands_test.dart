@@ -39,4 +39,29 @@ void main() {
     expect(parameters['p_client_id'], '10000000-0000-0000-0000-000000000001');
     expect(parameters['p_command_id'], isNotNull);
   });
+
+  test('admin delete targets one feedback row through the sync command',
+      () async {
+    late String functionName;
+    late Map<String, dynamic> parameters;
+    final commands = SupabaseEventFeedbackCommands.withTransport(
+      ClientCommandTransport((name, params) async {
+        functionName = name;
+        parameters = params;
+        return {
+          'status': 'applied',
+          'code': 200,
+          'data': {'deleted': true},
+          'sync': {'replacements': <Object>[]},
+        };
+      }, maxAttempts: 1),
+    );
+
+    await commands.deleteForEdit(occasionId: 7, feedbackId: 41);
+
+    expect(functionName, 'delete_event_feedback_for_edit_client_sync_v1');
+    expect(parameters['p_occasion'], 7);
+    expect(parameters['p_feedback'], 41);
+    expect(parameters['p_command_id'], isNotNull);
+  });
 }

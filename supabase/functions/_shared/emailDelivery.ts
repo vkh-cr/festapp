@@ -39,6 +39,8 @@ type ResolvedEmail = {
 
 export type DeliverEmailInput = {
   to: string;
+  /** Auth/user_info recipient when the message concerns one concrete account. */
+  recipientUser?: string;
   templateCode?: string;
   context: EmailContext;
   substitutions: Record<string, unknown>;
@@ -66,6 +68,7 @@ type EmailLog = {
   organization: number;
   occasion?: number | null;
   unit?: number | null;
+  recipient_user?: string | null;
 };
 
 export type EmailDeliveryDependencies = {
@@ -132,6 +135,7 @@ export function createEmailDelivery(
   return async function deliverEmail(
     {
       to,
+      recipientUser,
       templateCode = "",
       context,
       substitutions,
@@ -191,6 +195,7 @@ export function createEmailDelivery(
         organization: context.organization,
         occasion: context.occasion,
         unit: context.unit,
+        recipient_user: recipientUser,
       });
     } catch (error) {
       // The email is already accepted by SMTP. Failing the request here could

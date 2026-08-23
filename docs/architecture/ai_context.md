@@ -50,6 +50,15 @@ mechanical metadata such as `updated_at` or audit timestamps are allowed; they
 must not encode domain decisions, permissions, patch semantics, or workflow
 transitions.
 
+## Critical: Canonical Main and Tenant Overlays
+
+`main` is the only owner of shared application and release-tooling code.
+Production branches contain only the source/data paths allowed by the policy at
+their recorded main SHA plus deterministic outputs from `apply_config.sh`.
+Read [tenant_overlays.md](tenant_overlays.md) before changing production branch
+configuration or performing a branch cutover. Never load drift policy from the
+production branch being checked.
+
 ## Data Hierarchy
 
 Organization (tenant/domain) > Unit (real-world org) > Occasion (event instance). Features configured per Occasion. "Unit" is used because "Organization" was reserved for the domain level.

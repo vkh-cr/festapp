@@ -119,7 +119,7 @@ class OccasionUsersTb {
   String get data_sex => "sex";
   String get data_birthDate => "birthDate";
   String get data_phone => "phone";
-  String get data_isInvited => "is_invited";
+  String get data_appLinksSent => "app_links_sent";
   String get data_is_volunteer => "is_volunteer";
   String get data_note => "note";
   String get data_diet => "diet";

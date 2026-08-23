@@ -1,12 +1,13 @@
-import 'dart:async';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:fstapp/components/map/map_direction_marker.dart';
 import 'package:fstapp/components/map/map_location_pin_helper.dart';
+import 'package:fstapp/components/map/map_strings.dart';
 import 'package:fstapp/components/map/map_surface_model.dart';
 import 'package:fstapp/components/map/maplibre/maplibre_scene_controller.dart';
-import 'package:fstapp/components/map/maplibre/maplibre_native_performance.dart';
+import 'package:fstapp/components/map/maplibre/maplibre_place_icon_rasterizer.dart';
 import 'package:fstapp/components/map/maplibre/maplibre_viewport_controller.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:maplibre/maplibre.dart' as ml;
@@ -30,11 +31,15 @@ class _MapLibreMapSurfaceState extends State<MapLibreMapSurface> {
   ml.MapController? _controller;
   MapLibreViewportController? _viewportAdapter;
   MapLibreSceneController? _sceneController;
-  final Set<String> _registeredIconKeys = {};
+  final Map<String, int> _registeredIconVersions = {};
+  bool _isStyleReady = false;
 
   @override
   void didUpdateWidget(covariant MapLibreMapSurface oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.style != widget.style) {
+      _isStyleReady = false;
+    }
     if (!identical(oldWidget.model.viewport, widget.model.viewport) &&
         _viewportAdapter != null) {
       oldWidget.model.viewport.detach(_viewportAdapter!);
@@ -49,39 +54,37 @@ class _MapLibreMapSurfaceState extends State<MapLibreMapSurface> {
   @override
   void dispose() {
     final adapter = _viewportAdapter;
-    if (adapter != null) widget.model.viewport.detach(adapter);
+    if (adapter != null) {
+      adapter.invalidate();
+      widget.model.viewport.detach(adapter);
+    }
     _controller = null;
     _viewportAdapter = null;
     _sceneController = null;
-    _registeredIconKeys.clear();
+    _registeredIconVersions.clear();
     super.dispose();
   }
 
   void _onMapCreated(ml.MapController controller) {
     final oldAdapter = _viewportAdapter;
-    if (oldAdapter != null) widget.model.viewport.detach(oldAdapter);
+    if (oldAdapter != null) {
+      oldAdapter.invalidate();
+      widget.model.viewport.detach(oldAdapter);
+    }
     _controller = controller;
     final adapter = MapLibreViewportController(controller);
     _viewportAdapter = adapter;
     widget.model.viewport.attach(adapter);
-    unawaited(_configureNativePerformance());
-  }
-
-  Future<void> _configureNativePerformance() async {
-    try {
-      await MapLibreNativePerformance.configure();
-    } catch (error) {
-      AppLogger.error('MapLibre native performance setup failed: $error');
-    }
   }
 
   Future<void> _onStyleLoaded(ml.StyleController style) async {
-    _registeredIconKeys.clear();
+    _registeredIconVersions.clear();
     await _registerIcons(style);
     final sceneController = MapLibreSceneController(style);
     _sceneController = sceneController;
     await sceneController.register(widget.model.scene);
     await _enableLocationIfAllowed();
+    if (mounted) setState(() => _isStyleReady = true);
     widget.model.onZoomChanged?.call(_controller?.getCamera().zoom ?? 0);
     widget.model.onCameraReady?.call();
   }
@@ -99,7 +102,16 @@ class _MapLibreMapSurfaceState extends State<MapLibreMapSurface> {
     }
     if (permission == LocationPermission.whileInUse ||
         permission == LocationPermission.always) {
-      await controller.enableLocation();
+      // A continuously pulsing/animating puck requests frames even while the
+      // map itself is idle. A static location + accuracy indicator preserves
+      // the useful information without turning an idle map into a 60 FPS view.
+      await controller.enableLocation(
+        pulse: false,
+        pulseFade: false,
+        accuracyAnimation: false,
+        compassAnimation: false,
+        bearingRenderMode: ml.BearingRenderMode.none,
+      );
     }
   }
 
@@ -107,43 +119,103 @@ class _MapLibreMapSurfaceState extends State<MapLibreMapSurface> {
     if (!mounted || !identical(_controller?.style, style)) return;
     final iconsToRegister = <String, _MapImageRegistration>{};
     for (final place in widget.model.scene.places) {
-      if (_registeredIconKeys.contains(place.iconKey)) continue;
       final color = Color(place.pinColorValue);
-      iconsToRegister[place.iconKey] = _MapImageRegistration(
-        widget: MapLocationPinHelper.type2icon(
-              context,
-              place.place,
-              widget.model.icons,
-              pinColor: color,
-            ) ??
-            Icon(Icons.location_pin, size: 52, color: color),
-        size: const Size(58, 52),
+      final svg = MapLocationPinHelper.resolveIconData(
+        place.place,
+        widget.model.icons,
       );
+      final registration = _MapImageRegistration(
+        widget: Icon(
+          Icons.location_pin,
+          size: MapLibreSceneController.fallbackPlaceIconSize,
+          color: color,
+        ),
+        size: const Size(58, 52),
+        svg: svg,
+        pinColor: color,
+        rasterScale: _imageRasterScale,
+        version: Object.hash(svg, color, _imageRasterScale),
+      );
+      if (_registeredIconVersions[place.iconKey] == registration.version) {
+        continue;
+      }
+      iconsToRegister[place.iconKey] = registration;
     }
     for (final direction in widget.model.scene.directions) {
-      if (_registeredIconKeys.contains(direction.iconKey)) continue;
-      iconsToRegister[direction.iconKey] = _MapImageRegistration(
+      final registration = _MapImageRegistration(
         widget: MapDirectionMarker(
           color: Color(direction.colorValue),
           bodyPixels: direction.bodyPixels,
         ),
         size: MapDirectionMarker.sizeFor(direction.bodyPixels),
+        rasterScale: _imageRasterScale,
+        version: Object.hash(
+          direction.colorValue,
+          direction.bodyPixels,
+          _imageRasterScale,
+        ),
       );
+      if (_registeredIconVersions[direction.iconKey] == registration.version) {
+        continue;
+      }
+      iconsToRegister[direction.iconKey] = registration;
     }
-    for (final icon in iconsToRegister.entries) {
-      if (!mounted || !identical(_controller?.style, style)) return;
-      await style.addImageFromWidget(
-        id: icon.key,
-        widget: icon.value.widget,
-        logicalSize: icon.value.size,
-        // maplibre_ios creates UIImage with scale=1 and therefore interprets
-        // raw PNG pixels as logical points. Keep the registered raster at 1x;
-        // Android applies its target density when decoding the same bytes.
-        imageSize: icon.value.size,
-      );
-      _registeredIconKeys.add(icon.key);
+    final rasterCache = <String, ui.Image>{};
+    try {
+      for (final icon in iconsToRegister.entries) {
+        if (!mounted || !identical(_controller?.style, style)) return;
+        final registration = icon.value;
+        final svg = registration.svg;
+        if (svg != null && registration.pinColor != null) {
+          try {
+            final cacheKey = '${registration.rasterScale}\u0000$svg';
+            final raster = rasterCache[cacheKey] ??=
+                await MapLibrePlaceIconRasterizer.rasterize(
+              svg,
+              pixelRatio: registration.rasterScale,
+            );
+            if (!mounted || !identical(_controller?.style, style)) return;
+            await style.addImageFromWidget(
+              id: icon.key,
+              widget: MapLocationPinHelper.rasterIcon(
+                context,
+                raster,
+                pinColor: registration.pinColor!,
+              ),
+              logicalSize: registration.size,
+              imageSize: registration.size * registration.rasterScale,
+            );
+          } catch (error) {
+            AppLogger.error(
+              'MapLibre SVG pin rasterization failed for ${icon.key}: $error',
+            );
+            await _addWidgetImage(style, icon.key, registration);
+          }
+        } else {
+          await _addWidgetImage(style, icon.key, registration);
+        }
+        _registeredIconVersions[icon.key] = registration.version;
+      }
+    } finally {
+      for (final raster in rasterCache.values) {
+        raster.dispose();
+      }
     }
   }
+
+  Future<void> _addWidgetImage(
+    ml.StyleController style,
+    String id,
+    _MapImageRegistration registration,
+  ) =>
+      style.addImageFromWidget(
+        id: id,
+        widget: registration.widget,
+        logicalSize: registration.size,
+        imageSize: registration.size * registration.rasterScale,
+      );
+
+  double get _imageRasterScale => MediaQuery.devicePixelRatioOf(context);
 
   Future<void> _updateSceneAndIcons() async {
     final style = _controller?.style;
@@ -155,13 +227,19 @@ class _MapLibreMapSurfaceState extends State<MapLibreMapSurface> {
 
   void _onEvent(ml.MapEvent event) {
     if (event is ml.MapEventMoveCamera || event is ml.MapEventCameraIdle) {
+      _viewportAdapter?.notifyCameraChanged();
       widget.model.onCameraChanged?.call();
     }
     final controller = _controller;
     if (event is ml.MapEventCameraIdle && controller != null) {
       widget.model.onZoomChanged?.call(controller.getCamera().zoom);
     }
-    if (event is! ml.MapEventClick || controller == null) return;
+    if (event is! ml.MapEventUserInput || controller == null) {
+      return;
+    }
+    if (event is! ml.MapEventClick && event is! ml.MapEventLongClick) {
+      return;
+    }
     final features = controller.featuresAtPoint(
       event.screenPoint,
       layerIds: const [MapLibreSceneController.placeLayerId],
@@ -170,39 +248,88 @@ class _MapLibreMapSurfaceState extends State<MapLibreMapSurface> {
       final rawId = features.first.properties['place_id'];
       final placeId = rawId is num ? rawId.toInt() : int.tryParse('$rawId');
       if (placeId != null) {
-        widget.model.onPlaceTap(placeId);
+        if (event is ml.MapEventLongClick) {
+          widget.model.onPlaceLongPress?.call(placeId);
+        } else {
+          widget.model.onPlaceTap(placeId);
+        }
         return;
       }
     }
-    widget.model.onMapTap(LatLng(event.point.lat, event.point.lon));
+    if (event is ml.MapEventClick) {
+      widget.model.onMapTap(LatLng(event.point.lat, event.point.lon));
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return ml.MapLibreMap(
-      // The current package has no disableLocation API. Recreating the native
-      // view when visibility changes guarantees that leaving the map tab stops
-      // the location layer instead of keeping it alive invisibly.
-      key: ValueKey(
-        'maplibre-location-${widget.model.scene.showCurrentLocation}',
-      ),
-      options: ml.MapOptions(
-        initStyle: widget.style,
-        initCenter: ml.Geographic(
-          lon: widget.model.initialCenter.longitude,
-          lat: widget.model.initialCenter.latitude,
+    final colors = Theme.of(context).colorScheme;
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        ml.MapLibreMap(
+          active: widget.model.active,
+          options: ml.MapOptions(
+            initStyle: widget.style,
+            initCenter: ml.Geographic(
+              lon: widget.model.initialCenter.longitude,
+              lat: widget.model.initialCenter.latitude,
+            ),
+            initZoom: widget.model.initialZoom,
+            minZoom: 0,
+            maxZoom: MapZoomLimits.interactionMaximum,
+            // The feasibility benchmark selected Hybrid Composition without the
+            // expensive texture mode. Keep this explicit; never inherit defaults.
+            androidTextureMode: false,
+            androidMode: ml.AndroidPlatformViewMode.hc,
+          ),
+          onMapCreated: _onMapCreated,
+          onStyleLoaded: _onStyleLoaded,
+          onEvent: _onEvent,
         ),
-        initZoom: widget.model.initialZoom,
-        minZoom: 0,
-        maxZoom: 18,
-        // The feasibility benchmark selected Hybrid Composition without the
-        // expensive texture mode. Keep this explicit; never inherit defaults.
-        androidTextureMode: false,
-        androidMode: ml.AndroidPlatformViewMode.hc,
-      ),
-      onMapCreated: _onMapCreated,
-      onStyleLoaded: _onStyleLoaded,
-      onEvent: _onEvent,
+        IgnorePointer(
+          child: AnimatedOpacity(
+            opacity: _isStyleReady ? 0 : 1,
+            duration: const Duration(milliseconds: 450),
+            curve: Curves.easeOutCubic,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [colors.surfaceContainer, colors.surface],
+                ),
+              ),
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.map_outlined,
+                      size: 42,
+                      color: colors.primary,
+                    ),
+                    const SizedBox(height: 14),
+                    SizedBox(
+                      width: 28,
+                      height: 28,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 3,
+                        color: colors.primary,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      MapStrings.loadingMap,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -210,6 +337,17 @@ class _MapLibreMapSurfaceState extends State<MapLibreMapSurface> {
 class _MapImageRegistration {
   final Widget widget;
   final Size size;
+  final String? svg;
+  final Color? pinColor;
+  final double rasterScale;
+  final int version;
 
-  const _MapImageRegistration({required this.widget, required this.size});
+  const _MapImageRegistration({
+    required this.widget,
+    required this.size,
+    this.svg,
+    this.pinColor,
+    this.rasterScale = 1,
+    required this.version,
+  });
 }

@@ -94,6 +94,7 @@ Deno.serve(async (req) => {
   try {
     await deliverEmail({
       to: deliveryEmail,
+      recipientUser: userId,
       templateCode: "RESET_PASSWORD",
       context,
       substitutions: subs,

@@ -258,6 +258,30 @@ class DbSpeakers {
     return ((res['data'] as Map)['deleted'] as num).toInt();
   }
 
+  static Future<void> deleteCounselingSlot(
+      int speakerId, SpeakerEventRef slot) async {
+    if (ClientSyncRuntime.isV1Selected) {
+      final result = await _commands.deleteCounselingSlot(
+        speakerId: speakerId,
+        eventId: slot.id,
+        expectedVersion: slot.aggregateVersion,
+      );
+      if (result.status == SpeakerCommandStatus.conflict) {
+        throw StateError('Counseling slot was changed by another editor');
+      }
+      if (result.status == SpeakerCommandStatus.rejected || result.count != 1) {
+        throw StateError(
+            'Only a counseling slot owned by this speaker can be deleted');
+      }
+      return;
+    }
+    final res = await _supabase.rpc('delete_counseling_slot', params: {
+      'p_speaker': speakerId,
+      'p_event': slot.id,
+    });
+    _ensureOk(res);
+  }
+
   static void _ensureOk(dynamic res) {
     if (res is Map && res['code'] != null && res['code'] != 200) {
       throw SpeakersException(

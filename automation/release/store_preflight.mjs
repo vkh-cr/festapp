@@ -15,8 +15,8 @@ if (!process.argv.includes('--local') || !process.argv.includes('--read-only')) 
   fail('preflight must be invoked with --local --read-only');
 }
 if (manifest.schemaVersion !== 2) fail('unsupported app-store manifest schema');
-if (manifest.appleId !== '6745415882' || manifest.bundleId !== 'festapp.jm2025') fail('immutable Apple identity mismatch');
-if (manifest.signingTeamId !== '8WKBB6L8LT') fail('signing team mismatch');
+if (!/^\d+$/.test(manifest.appleId ?? '') || !manifest.bundleId) fail('immutable Apple identity is missing');
+if (!manifest.signingTeamId) fail('signing team is missing');
 if (manifest.releaseMode !== 'automatic_after_approval') fail('release mode must be automatic after Apple approval');
 
 const review = manifest.review;
@@ -25,9 +25,6 @@ if (!review?.contact?.firstName || !review?.contact?.lastName || !review?.contac
 }
 if (!review?.demoAccount?.email || !review?.demoAccount?.authEmail || !review?.demoAccount?.passwordKeychainService) {
   fail('canonical reviewer demo account is incomplete');
-}
-if (review?.demoAccount?.email !== 'test@test.com' || review?.demoAccount?.authEmail !== '9+test@test.com') {
-  fail('reviewer-visible and effective auth emails are not pinned correctly');
 }
 if (!review?.notesPath) fail('canonical reviewer notes path is missing');
 else requireFile(path.join('automation/release', review.notesPath));
@@ -96,8 +93,25 @@ if (!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(manifest.target.version ?? '')) 
 if ('build' in manifest.target) fail('app-store manifest must not duplicate the canonical build number');
 
 const project = fs.readFileSync(path.join(root, 'ios/Runner.xcodeproj/project.pbxproj'), 'utf8');
-if (!project.includes('PRODUCT_BUNDLE_IDENTIFIER = festapp.jm2025;')) fail('main bundle identifier is not pinned');
-if (!project.includes('DEVELOPMENT_TEAM = 8WKBB6L8LT;')) fail('expected signing team is absent');
+if (!project.includes(`PRODUCT_BUNDLE_IDENTIFIER = ${manifest.bundleId};`)) fail('main bundle identifier disagrees with manifest');
+if (!project.includes(`DEVELOPMENT_TEAM = ${manifest.signingTeamId};`)) fail('signing team disagrees with manifest');
+const runnerInfo = fs.readFileSync(path.join(root, 'ios/Runner/Info.plist'), 'utf8');
+const whenInUse = runnerInfo.match(/<key>NSLocationWhenInUseUsageDescription<\/key>\s*<string>([^<]+)<\/string>/);
+if (!whenInUse?.[1]?.trim()) fail('Runner Info.plist is missing a non-empty NSLocationWhenInUseUsageDescription');
+const alwaysAndWhenInUse = runnerInfo.match(/<key>NSLocationAlwaysAndWhenInUseUsageDescription<\/key>\s*<string>([^<]+)<\/string>/);
+if (!alwaysAndWhenInUse?.[1]?.trim()) {
+  fail('Runner Info.plist is missing NSLocationAlwaysAndWhenInUseUsageDescription required by MapLibre');
+}
+const podfile = fs.readFileSync(path.join(root, 'ios/Podfile'), 'utf8');
+if (!/target\.name == ['"]geolocator_apple['"]/.test(podfile) ||
+    !/BYPASS_PERMISSION_LOCATION_ALWAYS=1/.test(podfile)) {
+  fail('geolocator_apple must compile with the background-location permission bypass');
+}
+if (!/ENV\[['"]ONESIGNAL_DISABLE_LOCATION['"]\]\s*=\s*['"]true['"]/.test(podfile) ||
+    !/pod ['"]OneSignalXCFramework\/OneSignal['"], ['"]5\.5\.3['"]/.test(podfile) ||
+    !/pod ['"]OneSignalXCFramework\/OneSignalInAppMessages['"], ['"]5\.5\.3['"]/.test(podfile)) {
+  fail('OneSignal must resolve without its unused native location module');
+}
 const notificationExtensionInfo = fs.readFileSync(
   path.join(root, 'ios/OneSignalNotificationServiceExtension/Info.plist'),
   'utf8',
@@ -124,11 +138,25 @@ for (const configuration of ['Debug', 'Release', 'Profile']) {
 const fastfile = fs.readFileSync(path.join(root, 'automation/release/fastlane/Fastfile'), 'utf8');
 if (/produce\s*\(|lane\s+:publish_ipa/.test(fastfile)) fail('unsafe app creation or monolithic release path found');
 const submitLane = fastfile.match(/lane :submit_for_review do([\s\S]*?)^  end/m)?.[1] ?? '';
+const selectBuildLane = fastfile.match(/lane :select_build do([\s\S]*?)^  end/m)?.[1] ?? '';
+const cancelReviewLane = fastfile.match(/lane :cancel_review_submission do([\s\S]*?)^  end/m)?.[1] ?? '';
+if (!/exact_gate!\('SELECT_BUILD'\)/.test(selectBuildLane) ||
+    !/Build\.all/.test(selectBuildLane) || !/processing_state/.test(selectBuildLane) ||
+    !/select_build\(build_id: build\.id\)/.test(selectBuildLane)) {
+  fail('build selection must be an exact gated processed-build operation');
+}
+if (!/exact_gate!\('CANCEL_REVIEW_SUBMISSION'\)/.test(cancelReviewLane) ||
+    !/get_in_progress_review_submission/.test(cancelReviewLane) ||
+    !/cancel_submission/.test(cancelReviewLane)) {
+  fail('review cancellation must be an exact gated target operation');
+}
 if (!/automatic_release:\s*true/.test(submitLane) || /automatic_release:\s*false/.test(submitLane)) {
   fail('Fastlane submission must use automatic release after Apple approval');
 }
 if (/release_approved_version|manual ASC action/.test(fastfile)) fail('obsolete manual release path found');
-if (/9\+test@test\.com|bujnmi@gmail\.com|festapp-csm-reviewer/.test(fastfile)) {
+if (review?.demoAccount?.authEmail && fastfile.includes(review.demoAccount.authEmail) ||
+    review?.contact?.email && fastfile.includes(review.contact.email) ||
+    review?.demoAccount?.passwordKeychainService && fastfile.includes(review.demoAccount.passwordKeychainService)) {
   fail('Fastfile duplicates app-specific reviewer configuration');
 }
 
@@ -162,6 +190,10 @@ if (/navrženým?|před zveřejněním|bez tohoto schválení/i.test(legalText))
 }
 
 const metadataDir = path.join(root, 'automation/release/fastlane/metadata/cs');
+const copyrightFile = path.join(root, 'automation/release/fastlane/metadata/copyright.txt');
+if (!fs.existsSync(copyrightFile) || !/^\d{4}\s+\S.+/.test(fs.readFileSync(copyrightFile, 'utf8').trim())) {
+  fail('App Store copyright must contain a four-digit year and rights holder');
+}
 const limits = { name: 30, subtitle: 30, keywords: 100, promotional_text: 170, description: 4000, release_notes: 4000 };
 for (const [name, limit] of Object.entries(limits)) {
   const file = path.join(metadataDir, `${name}.txt`);

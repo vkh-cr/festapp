@@ -105,6 +105,17 @@ for needle in 'verify_web_deployment.mjs' '"https://${DOMAIN}" "${VERSION}"'; do
     fi
 done
 
+# 9. Unified production branches replay main-owned drift/schema policy and the
+# tenant identity matrix before any target-specific deploy job can run.
+for needle in 'tenant-drift:' 'check_tenant_branch_drift.sh' 'tenant-overlay.schema.json' 'tenant_config_matrix.test.sh'; do
+    if grep -F -q "$needle" "$WORKFLOW" "$PROJECT_ROOT/automation/check_tenant_branch_drift.sh"; then
+        echo "  ok: tenant gate contains '$needle'"
+    else
+        echo "  FAIL: tenant gate missing '$needle'"
+        fail=1
+    fi
+done
+
 echo
 if [ $fail -ne 0 ]; then
     echo "❌ deploy workflow test FAILED"

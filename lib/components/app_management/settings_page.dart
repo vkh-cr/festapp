@@ -6,6 +6,7 @@ import 'package:fstapp/router_service.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/app_management/app_management_strings.dart';
 import 'package:fstapp/components/app_management/language_model.dart';
+import 'package:fstapp/components/app_management/pwa_storage_advanced_settings.dart';
 import 'package:fstapp/services/dialog_helper.dart';
 import 'package:fstapp/services/notification_helper.dart';
 import 'package:fstapp/app_config.dart';
@@ -95,157 +96,162 @@ class _SettingsPageState extends State<SettingsPage> {
           padding: const EdgeInsets.all(16.0),
           child: ConstrainedBox(
             constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (AppConfig.availableLanguages().length > 1) ...[
-                  Text(CommonStrings.languageSettings,
-                      style: const TextStyle(fontSize: 20)),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        CommonStrings.currentLanguage(
-                            language: _currentLanguage?.name ?? '---'),
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                      IconButton(
-                        onPressed: () async {
-                          await DialogHelper.chooseLanguage(context);
-                          await loadSettings();
-                        },
-                        icon: const Icon(Icons.translate),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                ],
-                if (AppConfig.isNotificationsCurrentlySupported()) ...[
-                  Text(AppManagementStrings.notificationSettings,
-                      style: const TextStyle(fontSize: 20)),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(AppManagementStrings.enableNotifications,
-                          style: const TextStyle(fontSize: 16)),
-                      Switch(
-                        value: _notificationsEnabled,
-                        onChanged: (value) async {
-                          bool success;
-                          if (value) {
-                            success =
-                                await NotificationHelper.turnNotificationOn();
-                          } else {
-                            await NotificationHelper.turnNotificationOff();
-                            success = true;
-                          }
-                          if (!success) {
-                            setState(() {
-                              _notificationError = true;
-                            });
-                          }
-                          await loadSettings();
-                        },
-                      ),
-                    ],
-                  ),
-                  if (_notificationError)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8.0),
-                      child: Text(
-                        AppManagementStrings.enableNotificationsFailed,
-                        style: TextStyle(color: ThemeConfig.redColor(context)),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                ],
-                const SizedBox(height: 24),
-                if (ThemeConfig.isDarkModeEnabled)
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(CommonStrings.appearance,
-                          style: const TextStyle(fontSize: 20)),
-                      const SizedBox(height: 16),
-                      ToggleButtons(
-                        isSelected: [
-                          _themeMode == AdaptiveThemeMode.dark,
-                          _themeMode == AdaptiveThemeMode.system,
-                          _themeMode == AdaptiveThemeMode.light,
-                        ],
-                        onPressed: (int index) {
-                          if (index == 0) {
-                            _setThemeMode(AdaptiveThemeMode.dark);
-                          } else if (index == 1) {
-                            _setThemeMode(AdaptiveThemeMode.system);
-                          } else if (index == 2) {
-                            _setThemeMode(AdaptiveThemeMode.light);
-                          }
-                        },
-                        borderRadius: BorderRadius.circular(8.0),
-                        children: [
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 12.0),
-                            child: Text(CommonStrings.dark),
-                          ),
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 12.0),
-                            child: Text(CommonStrings.auto),
-                          ),
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 12.0),
-                            child: Text(CommonStrings.light),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
-                    ],
-                  ),
-                if (kIsWeb) // Only show if running on web
-                  Center(
-                    child: Column(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (AppConfig.availableLanguages().length > 1) ...[
+                    Text(CommonStrings.languageSettings,
+                        style: const TextStyle(fontSize: 20)),
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        ButtonsHelper.bigButton(
-                          context: context,
-                          label: AppManagementStrings.installApp,
-                          onPressed:
-                              _canInstallPWA ? handleInstallButtonPress : null,
-                          color: _canInstallPWA
-                              ? ThemeConfig.blackColor(context)
-                              : Colors.grey,
-                          textColor: ThemeConfig.whiteColor(context),
+                        Text(
+                          CommonStrings.currentLanguage(
+                              language: _currentLanguage?.name ?? '---'),
+                          style: const TextStyle(fontSize: 16),
                         ),
-                        if (!_isAppInstalled &&
-                            (!_isPlatformSupported || !_isPromptEnabled))
-                          Padding(
-                            padding: const EdgeInsets.only(top: 8.0),
-                            child: Text(
-                              AppManagementStrings.pwaPromptNotSupported,
-                              style: TextStyle(
-                                  color: ThemeConfig.redColor(context)),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        if (_isAppInstalled)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 8.0),
-                            child: Text(
-                              AppManagementStrings.appAlreadyInstalled,
-                              style: TextStyle(
-                                  fontSize: 16,
-                                  color: ThemeConfig.blackColor(context)),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
+                        IconButton(
+                          onPressed: () async {
+                            await DialogHelper.chooseLanguage(context);
+                            await loadSettings();
+                          },
+                          icon: const Icon(Icons.translate),
+                        ),
                       ],
                     ),
-                  ),
-              ],
+                    const SizedBox(height: 24),
+                  ],
+                  if (AppConfig.isNotificationsCurrentlySupported()) ...[
+                    Text(AppManagementStrings.notificationSettings,
+                        style: const TextStyle(fontSize: 20)),
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(AppManagementStrings.enableNotifications,
+                            style: const TextStyle(fontSize: 16)),
+                        Switch(
+                          value: _notificationsEnabled,
+                          onChanged: (value) async {
+                            bool success;
+                            if (value) {
+                              success =
+                                  await NotificationHelper.turnNotificationOn();
+                            } else {
+                              await NotificationHelper.turnNotificationOff();
+                              success = true;
+                            }
+                            if (!success) {
+                              setState(() {
+                                _notificationError = true;
+                              });
+                            }
+                            await loadSettings();
+                          },
+                        ),
+                      ],
+                    ),
+                    if (_notificationError)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: Text(
+                          AppManagementStrings.enableNotificationsFailed,
+                          style:
+                              TextStyle(color: ThemeConfig.redColor(context)),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                  ],
+                  const SizedBox(height: 24),
+                  if (ThemeConfig.isDarkModeEnabled)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(CommonStrings.appearance,
+                            style: const TextStyle(fontSize: 20)),
+                        const SizedBox(height: 16),
+                        ToggleButtons(
+                          isSelected: [
+                            _themeMode == AdaptiveThemeMode.dark,
+                            _themeMode == AdaptiveThemeMode.system,
+                            _themeMode == AdaptiveThemeMode.light,
+                          ],
+                          onPressed: (int index) {
+                            if (index == 0) {
+                              _setThemeMode(AdaptiveThemeMode.dark);
+                            } else if (index == 1) {
+                              _setThemeMode(AdaptiveThemeMode.system);
+                            } else if (index == 2) {
+                              _setThemeMode(AdaptiveThemeMode.light);
+                            }
+                          },
+                          borderRadius: BorderRadius.circular(8.0),
+                          children: [
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 12.0),
+                              child: Text(CommonStrings.dark),
+                            ),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 12.0),
+                              child: Text(CommonStrings.auto),
+                            ),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 12.0),
+                              child: Text(CommonStrings.light),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 24),
+                      ],
+                    ),
+                  if (kIsWeb) // Only show if running on web
+                    Center(
+                      child: Column(
+                        children: [
+                          ButtonsHelper.bigButton(
+                            context: context,
+                            label: AppManagementStrings.installApp,
+                            onPressed: _canInstallPWA
+                                ? handleInstallButtonPress
+                                : null,
+                            color: _canInstallPWA
+                                ? ThemeConfig.blackColor(context)
+                                : Colors.grey,
+                            textColor: ThemeConfig.whiteColor(context),
+                          ),
+                          if (!_isAppInstalled &&
+                              (!_isPlatformSupported || !_isPromptEnabled))
+                            Padding(
+                              padding: const EdgeInsets.only(top: 8.0),
+                              child: Text(
+                                AppManagementStrings.pwaPromptNotSupported,
+                                style: TextStyle(
+                                    color: ThemeConfig.redColor(context)),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          if (_isAppInstalled)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 8.0),
+                              child: Text(
+                                AppManagementStrings.appAlreadyInstalled,
+                                style: TextStyle(
+                                    fontSize: 16,
+                                    color: ThemeConfig.blackColor(context)),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  if (kIsWeb) const PwaStorageAdvancedSettings(),
+                ],
+              ),
             ),
           ),
         ),

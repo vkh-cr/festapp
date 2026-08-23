@@ -98,7 +98,9 @@ RETURNS jsonb
 LANGUAGE plpgsql SECURITY DEFINER
 SET search_path = public, extensions
 AS $$
-DECLARE v_request public.account_deletion_requests%ROWTYPE;
+DECLARE
+  v_request public.account_deletion_requests%ROWTYPE;
+  v_completion_email text;
 BEGIN
   PERFORM public.require_service_role();
   SELECT * INTO v_request FROM public.account_deletion_requests
@@ -115,6 +117,8 @@ BEGIN
   IF v_request.status <> 'email_sent' THEN RETURN jsonb_build_object('status', 'invalid'); END IF;
   IF v_request.expires_at <= clock_timestamp() THEN RETURN jsonb_build_object('status', 'expired'); END IF;
 
+  v_completion_email := public.get_user_delivery_email(v_request.user_id);
+
   UPDATE public.account_deletion_requests SET
     status='deletion_pending', used_token_hash=token_hash, token_hash=NULL,
     masked_email=NULL, claimed_at=clock_timestamp(), attempt_count=attempt_count+1,
@@ -126,6 +130,7 @@ BEGIN
   PERFORM public.cleanup_account_deletion_domain(v_request.id);
   RETURN jsonb_build_object('status','processing','requestId',v_request.id,
     'userId',v_request.user_id,'organization',v_request.organization,
+    'completionEmail',v_completion_email,
     'publicDeleted',true,'authDeleted',false,'onesignalDeleted',false);
 END;
 $$;

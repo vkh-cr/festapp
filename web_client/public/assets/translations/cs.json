@@ -854,7 +854,14 @@
     "androidInstallHint": "Otevři tuto webovou stránku na svém telefonu s Androidem v prohlížeči, jako je Chrome nebo Edge, a klikni na tlačítko Nainstalovat teď.",
     "appAlreadyInstalled": "Aplikace je již nainstalována.",
     "pwaPromptNotSupported": "Tato platforma nebo prohlížeč nepodporuje instalaci PWA nebo je aplikace již nainstalována.",
-    "installOptionsLoadFailed": "Nepodařilo se načíst možnosti instalace."
+    "installOptionsLoadFailed": "Nepodařilo se načíst možnosti instalace.",
+    "storageTitle": "Úložiště aplikace",
+    "inspectStorage": "Zkontrolovat úložiště",
+    "pruneShells": "Uvolnit nepoužívané verze",
+    "pruneShellsConfirm": "Odstraní se pouze nepoužívané verze aplikace. Přihlášení, offline data a fonty zůstanou zachované.",
+    "storageUsage": "Využití prohlížeče: {usage} MiB z {quota} MiB",
+    "storageBlocked": "Aplikace teď nic neodstraní. Vaše data zůstávají v bezpečí.",
+    "storageReady": "Zachované verze: {retained}; k odstranění: {deletable}"
   },
   "GroupStrings": {
     "newGroup": "Nová skupina",
@@ -1174,6 +1181,7 @@
     "forgotPasswordQuestion": "Zapomněli jste heslo?",
     "forgotYourPassword": "Zapomněli jste heslo?",
     "sendResetEmail": "Odeslat e-mail pro obnovení",
+    "existingAccountRecoveryHelp": "Účet už máte? Zadejte stejný e-mail. Pošleme vám bezpečný odkaz, kterým si nastavíte nové heslo.",
     "changePasswordTitle": "Změnit heslo",
     "createPasswordToContinue": "Vytvořte nové heslo pro pokračování.",
     "iAm": "Já jsem",
@@ -1239,7 +1247,8 @@
     "passwordResetFailed": "E-mail pro změnu hesla se nepodařilo odeslat. Zkuste to prosím znovu později.",
     "passwordResetEmailMissing": "Účet nemá e-mail pro změnu hesla. Kontaktujte prosím podporu.",
     "passwordChangedSignInRequired": "Heslo bylo změněno. Přihlaste se prosím novým heslem.",
-    "passwordChangeFailedGeneric": "Heslo se nepodařilo změnit. Zkuste si prosím vyžádat nový odkaz."
+    "passwordChangeFailedGeneric": "Heslo se nepodařilo změnit. Zkuste si prosím vyžádat nový odkaz.",
+    "invitationStatusFailed": "Přihlašovací kód byl uživateli {user} odeslán, ale auditní záznam se nepodařilo uložit. E-mail se automaticky neposílá znovu."
   },
   "Common": {
     "fieldCannotBeEmpty": "Pole nemůže být prázdné",
@@ -1672,7 +1681,11 @@
     "mapBaseModeDescription": "Určuje pouze mapový podklad. Místa, trasy a stavová data se mohou dál aktualizovat z internetu.",
     "mapBaseModeOnline": "Online mapa",
     "mapBaseModeLegacy": "Legacy vektorová offline mapa",
-    "mapBaseModeMapLibre": "MapLibre offline mapa"
+    "mapBaseModeMapLibre": "MapLibre offline mapa",
+    "counselingHours": "Poradenské hodiny",
+    "navigate": "Navigovat",
+    "loadingMap": "Načítám mapu…",
+    "chooseNavigationApp": "Vyberte navigaci"
   },
   "FeatureInformation": {
     "gameCheckPoint": "Stanoviště {title}",
@@ -1911,16 +1924,22 @@
     "no": "Ne",
     "issueQr": "Vygenerovat QR",
     "signingIn": "Přihlašuji…",
-    "verifyingQr": "Ověřuji přihlašovací QR.",
+    "verifyingQr": "Ověřuji přihlašovací údaje.",
     "signedIn": "Uživatel přihlášen",
     "openingApp": "Hotovo. Otevírám aplikaci.",
-    "emailAlreadyExists": "Tento e-mail už používá existující účet. Pro svou nedávnou registraci použijte níže Vygenerovat QR, jinak zadejte jiný e-mail.",
+    "emailAlreadyExists": "Tento e-mail už patří účtu v této organizaci. Uživatel se může přihlásit svým heslem nebo na přihlašovací stránce zvolit Zapomněli jste heslo?",
     "commandConflict": "Údaje se od předchozího pokusu změnily. Zkontrolujte je a odešlete formulář znovu.",
     "rateLimited": "Proběhlo příliš mnoho pokusů. Chvíli počkejte a zkuste to znovu.",
     "receptionUnavailable": "Recepce teď není dostupná nebo k ní nemáte oprávnění.",
     "registrationUnavailable": "Tuto registraci už nelze spravovat.",
     "invalidInput": "Zkontrolujte zadané údaje a zkuste to znovu.",
-    "unexpectedCommandError": "Registraci se nepodařilo dokončit. Zkuste to prosím znovu."
+    "unexpectedCommandError": "Registraci se nepodařilo dokončit. Zkuste to prosím znovu.",
+    "enterManualCode": "Zadat kód ručně",
+    "manualCode": "Přihlašovací kód",
+    "manualCodeValidity": "Platí 30 minut.",
+    "findParticipant": "Vybrat existujícího účastníka",
+    "searchParticipant": "Hledat podle jména nebo e-mailu",
+    "noParticipantsFound": "Žádní odpovídající účastníci nebyli nalezeni."
   },
   "Offline": {
     "youAreOffline": "Jsi offline — zobrazují se naposledy stažená data.",
@@ -1932,12 +1951,12 @@
     "feedbackStateUnknown": "Bez připojení nelze zjistit stav zpětné vazby."
   },
   "ClientChanges": {
-    "title": "Změny",
-    "onlineOnly": "Historie změn je dostupná pouze online.",
-    "empty": "Zatím nejsou zaznamenány žádné změny.",
-    "notActive": "Historie začne zaznamenávat nové změny po aktivaci nového synchronizačního režimu. Existující stav databáze se jako historie změn zpětně nevytváří.",
+    "title": "Změny v aplikaci",
+    "onlineOnly": "Přehled změn je dostupný pouze online.",
+    "empty": "Za posledních {days} dní nebyla zaznamenána žádná změna.",
+    "notActive": "Změny se začnou zaznamenávat po aktivaci nového synchronizačního režimu. Starší historie se zpětně nevytváří.",
     "retry": "Zkusit znovu",
-    "loadError": "Historii změn se nepodařilo načíst.",
+    "loadError": "Přehled změn se nepodařilo načíst.",
     "publicationPending": "Čeká na publikaci",
     "published": "Publikováno",
     "deletedActor": "Smazaný nebo neznámý uživatel",
@@ -1955,6 +1974,10 @@
       "one": "1 změna",
       "other": "{count} změn",
       "few": "{count} změny"
-    }
+    },
+    "subtitle": "Počet změn uložených v jednotlivých dnech za posledních {days} dní.",
+    "rangeDays": "{days} dní",
+    "totalChanges": "Celkem {count} změn",
+    "dayChanges": "{day}: {count} změn"
   }
 }

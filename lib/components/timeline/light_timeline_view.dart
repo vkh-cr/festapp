@@ -17,11 +17,12 @@ import 'package:fstapp/theme_config.dart';
 /// for expandable parent events.
 ///
 /// Mirrors the advanced view's pattern: all day-grouping happens in
-/// build() and a fresh DefaultTabController is keyed by (length, target
-/// initial index) so tab state regenerates correctly when events load
-/// asynchronously.
+/// build() and a fresh DefaultTabController is keyed by occasion, dated-day
+/// identity, and target index so tab state regenerates correctly when events
+/// load asynchronously.
 class LightTimelineView extends StatefulWidget {
   final List<TimeBlockItem> events;
+  final int? sessionOccasionId;
   final void Function(int eventId)? onEventPressed;
   final bool Function()? showAddNewEventButton;
   final void Function(BuildContext context, List<TimeBlockGroup> groups,
@@ -31,6 +32,7 @@ class LightTimelineView extends StatefulWidget {
   const LightTimelineView({
     super.key,
     required this.events,
+    this.sessionOccasionId,
     this.onEventPressed,
     this.showAddNewEventButton,
     this.onAddNewEvent,
@@ -68,51 +70,68 @@ class _LightTimelineViewState extends State<LightTimelineView> {
       );
     }
 
-    final initialIndex = _computeInitialIndex(days);
+    final initialIndex = widget.sessionOccasionId == null
+        ? _computeInitialIndex(days)
+        : scheduleDaySessionSelection.resolveInitialIndex(
+            occasionId: widget.sessionOccasionId!,
+            dayGroups: days,
+            now: TimeHelper.now(),
+          );
 
     return Container(
       color: ThemeConfig.whiteColor(context),
       child: DefaultTabController(
         key: ValueKey<String>(
-            "LightTimelineView_TabController_${initialIndex}_${days.length}"),
+          'LightTimelineView_TabController_${widget.sessionOccasionId}_'
+          '${days.map((day) => day.dateTime?.millisecondsSinceEpoch ?? 0).join('_')}_'
+          '$initialIndex',
+        ),
         length: days.length,
         initialIndex: initialIndex,
-        child: Column(
-          children: [
-            // Brand-identity day tab strip — thin white dividers + thin
-            // underline on the active day on a saturated app-bar background.
-            // Built to match the configured visual identity (thin lines on
-            // solid color), not the advanced pill style.
-            // Day tabs — mirrors the advanced view's structure (chevrons,
-            // weekday+date+today dot) but uses a thin rounded underline
-            // instead of a filled pill so the strip stays airy.
-            _LightDayTabBar(
-              weekdays: _weekdays(context),
-              days: days,
-            ),
-            Expanded(
-              child: Center(
-                child: ConstrainedBox(
-                  constraints:
-                      const BoxConstraints(maxWidth: StylesConfig.formMaxWidth),
-                  child: TabBarView(
-                    children: days
-                        .map((day) => _DayList(
-                              day: day,
-                              openId: _openId,
-                              onToggle: (id) => setState(
-                                  () => _openId = (_openId == id) ? null : id),
-                              onEventPressed: widget.onEventPressed,
-                              showAddNewEventButton:
-                                  widget.showAddNewEventButton,
-                              onAddNewEvent: widget.onAddNewEvent,
-                            ))
-                        .toList(),
+        child: _LightTabSelectionObserver(
+          onChanged: (index) {
+            final occasionId = widget.sessionOccasionId;
+            if (occasionId != null && index < days.length) {
+              scheduleDaySessionSelection.remember(occasionId, days[index]);
+            }
+          },
+          child: Column(
+            children: [
+              // Brand-identity day tab strip — thin white dividers + thin
+              // underline on the active day on a saturated app-bar background.
+              // Built to match the configured visual identity (thin lines on
+              // solid color), not the advanced pill style.
+              // Day tabs — mirrors the advanced view's structure (chevrons,
+              // weekday+date+today dot) but uses a thin rounded underline
+              // instead of a filled pill so the strip stays airy.
+              _LightDayTabBar(
+                weekdays: _weekdays(context),
+                days: days,
+              ),
+              Expanded(
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(
+                        maxWidth: StylesConfig.formMaxWidth),
+                    child: TabBarView(
+                      children: days
+                          .map((day) => _DayList(
+                                day: day,
+                                openId: _openId,
+                                onToggle: (id) => setState(() =>
+                                    _openId = (_openId == id) ? null : id),
+                                onEventPressed: widget.onEventPressed,
+                                showAddNewEventButton:
+                                    widget.showAddNewEventButton,
+                                onAddNewEvent: widget.onAddNewEvent,
+                              ))
+                          .toList(),
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -151,6 +170,53 @@ class _LightTimelineViewState extends State<LightTimelineView> {
     }
     return 0;
   }
+}
+
+class _LightTabSelectionObserver extends StatefulWidget {
+  const _LightTabSelectionObserver({
+    required this.child,
+    required this.onChanged,
+  });
+
+  final Widget child;
+  final ValueChanged<int> onChanged;
+
+  @override
+  State<_LightTabSelectionObserver> createState() =>
+      _LightTabSelectionObserverState();
+}
+
+class _LightTabSelectionObserverState
+    extends State<_LightTabSelectionObserver> {
+  TabController? _controller;
+  int? _lastIndex;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final controller = DefaultTabController.of(context);
+    if (identical(controller, _controller)) return;
+    _controller?.removeListener(_onControllerChanged);
+    _controller = controller;
+    _lastIndex = controller.index;
+    controller.addListener(_onControllerChanged);
+  }
+
+  void _onControllerChanged() {
+    final index = _controller?.index;
+    if (index == null || index == _lastIndex) return;
+    _lastIndex = index;
+    widget.onChanged(index);
+  }
+
+  @override
+  void dispose() {
+    _controller?.removeListener(_onControllerChanged);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }
 
 // ---------------------------------------------------------------------------

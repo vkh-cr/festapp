@@ -262,25 +262,36 @@ BEGIN
 END $$ LANGUAGE plpgsql;
 
 -- ---------------------------------------------------------------------------
--- 6. Resolve: non-crew → 403; crew resolves the whole place → all open reports
---    closed and the toilet goes back to green.
+-- 6. Resolve: non-crew → 403; the receipted client-sync command resolves the
+--    whole place, records a valid update audit item, and returns the toilet to
+--    green.
 -- ---------------------------------------------------------------------------
 DO $$
 DECLARE
     v_oc   bigint := (SELECT v FROM _cln WHERE k = 'occasion');
     v_wc1  bigint := (SELECT v FROM _cln WHERE k = 'wc1');
     v_res  jsonb;
+    v_command uuid := gen_random_uuid();
+    v_commit uuid;
     v_open int;
     v_s_wc1 text;
+    v_operation text;
 BEGIN
     PERFORM set_config('request.jwt.claim.sub', get_user_id('cln_reporter')::text, true);
     v_res := public.resolve_cleaning_place(v_wc1);
     PERFORM assert_eq(v_res->>'code', '403', 'resolve as non-crew → 403');
 
     PERFORM set_config('request.jwt.claim.sub', get_user_id('cln_crew')::text, true);
-    v_res := public.resolve_cleaning_place(v_wc1);
-    PERFORM assert_eq(v_res->>'code', '200', 'resolve as crew → 200');
+    v_res := public.resolve_cleaning_place_client_sync_v1(v_wc1, v_command);
+    PERFORM assert_eq(v_res->>'status', 'applied', 'client-sync resolve is applied');
+    PERFORM assert_eq(v_res->>'code', '200', 'client-sync resolve as crew → 200');
     PERFORM assert_true((v_res->'data'->>'resolved')::int >= 1, 'resolve closed at least one report');
+    v_commit := (v_res#>>'{mutation,commitId}')::uuid;
+
+    SELECT operation INTO v_operation
+    FROM public.client_commit_items
+    WHERE commit_id = v_commit AND entity_type = 'cleaning_place';
+    PERFORM assert_eq(v_operation, 'update', 'resolve audit uses the valid update operation');
 
     SELECT count(*) INTO v_open FROM public.cleaning_reports
      WHERE place = v_wc1 AND resolved_at IS NULL;
@@ -470,4 +481,41 @@ BEGIN
     PERFORM assert_true(v_to ? get_user_id('cln_crew')::text, 'unmuted crew is notified again');
 
     RAISE NOTICE 'test 10 (notification opt-out) passed';
+END $$ LANGUAGE plpgsql;
+
+-- ---------------------------------------------------------------------------
+-- 11. A toilet owns its cleaning history. Deleting the toilet through the
+--     canonical map command must also remove its reports instead of failing on
+--     cleaning_reports_place_fkey.
+-- ---------------------------------------------------------------------------
+DO $$
+DECLARE
+    v_oc bigint := (SELECT v FROM _cln WHERE k = 'occasion');
+    v_wc3 bigint := (SELECT v FROM _cln WHERE k = 'wc3');
+    v_res jsonb;
+BEGIN
+    PERFORM assert_true(
+      EXISTS (SELECT 1 FROM public.cleaning_reports WHERE place = v_wc3),
+      'WC 03 has cleaning history before deletion'
+    );
+
+    PERFORM set_config('request.jwt.claim.sub', get_user_id('cln_editor')::text, true);
+    v_res := public.delete_place_client_sync_v1(
+      v_oc,
+      v_wc3,
+      gen_random_uuid(),
+      0
+    );
+
+    PERFORM assert_eq(v_res->>'status', 'applied', 'toilet deletion is applied');
+    PERFORM assert_true(
+      NOT EXISTS (SELECT 1 FROM public.places WHERE id = v_wc3),
+      'toilet is deleted'
+    );
+    PERFORM assert_true(
+      NOT EXISTS (SELECT 1 FROM public.cleaning_reports WHERE place = v_wc3),
+      'owned cleaning history is deleted with the toilet'
+    );
+
+    RAISE NOTICE 'test 11 (delete toilet with cleaning history) passed';
 END $$ LANGUAGE plpgsql;

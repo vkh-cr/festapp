@@ -454,6 +454,109 @@ BEGIN
         'earlier row is rolled back with the entire RPC');
 END $$;
 
+-- Invalid account and delivery addresses are rejected before any write.
+DO $$
+DECLARE
+    v_context _csv_import_context%rowtype;
+    v_rejected boolean := false;
+BEGIN
+    SELECT * INTO v_context FROM _csv_import_context;
+    PERFORM set_config(
+        'request.jwt.claim.sub', get_user_id('csv_manager')::text, true);
+    BEGIN
+        PERFORM public.import_occasion_users_from_csv(
+            v_context.occasion,
+            jsonb_build_array(jsonb_build_object(
+                'data', jsonb_build_object(
+                    'email', 'not-an-email', 'name', 'Invalid',
+                    'surname', 'Address'
+                )
+            )),
+            '[]'::jsonb
+        );
+    EXCEPTION WHEN OTHERS THEN
+        v_rejected := SQLERRM = 'INVALID_EMAIL';
+    END;
+    PERFORM assert_true(v_rejected,
+        'malformed account email rejects the entire batch');
+
+    v_rejected := false;
+    BEGIN
+        PERFORM public.import_occasion_users_from_csv(
+            v_context.occasion,
+            jsonb_build_array(jsonb_build_object(
+                'email_delivery', 'not-an-email',
+                'data', jsonb_build_object(
+                    'email', 'valid@test.local', 'name', 'Invalid',
+                    'surname', 'Delivery'
+                )
+            )),
+            '[]'::jsonb
+        );
+    EXCEPTION WHEN OTHERS THEN
+        v_rejected := SQLERRM = 'INVALID_EMAIL';
+    END;
+    PERFORM assert_true(v_rejected,
+        'malformed delivery email rejects the entire batch');
+END $$;
+
+-- Ambiguous last-row-wins input is rejected before account resolution.
+DO $$
+DECLARE
+    v_context _csv_import_context%rowtype;
+    v_rejected boolean := false;
+BEGIN
+    SELECT * INTO v_context FROM _csv_import_context;
+    PERFORM set_config(
+        'request.jwt.claim.sub', get_user_id('csv_manager')::text, true);
+    BEGIN
+        PERFORM public.import_occasion_users_from_csv(
+            v_context.occasion,
+            jsonb_build_array(
+                jsonb_build_object('data', jsonb_build_object(
+                    'email', 'duplicate@test.local', 'name', 'First',
+                    'surname', 'Person')),
+                jsonb_build_object('data', jsonb_build_object(
+                    'email', ' DUPLICATE@test.local ', 'name', 'Second',
+                    'surname', 'Person'))
+            ),
+            '[]'::jsonb
+        );
+    EXCEPTION WHEN OTHERS THEN
+        v_rejected := SQLERRM = 'DUPLICATE_ACCOUNT_EMAIL';
+    END;
+    PERFORM assert_true(v_rejected,
+        'duplicate canonical account email is never last-row-wins');
+END $$;
+
+-- An import batch cannot both update and delete the same participant.
+DO $$
+DECLARE
+    v_context _csv_import_context%rowtype;
+    v_rejected boolean := false;
+BEGIN
+    SELECT * INTO v_context FROM _csv_import_context;
+    PERFORM set_config(
+        'request.jwt.claim.sub', get_user_id('csv_manager')::text, true);
+    BEGIN
+        PERFORM public.import_occasion_users_from_csv(
+            v_context.occasion,
+            jsonb_build_array(jsonb_build_object(
+                'user_id', v_context.existing_user,
+                'data', jsonb_build_object(
+                    'email', 'csv_existing@test.local', 'name', 'Bujn',
+                    'surname', 'Mi'
+                )
+            )),
+            jsonb_build_array(v_context.existing_user)
+        );
+    EXCEPTION WHEN OTHERS THEN
+        v_rejected := SQLERRM = 'CONFLICTING_IMPORT_OPERATION';
+    END;
+    PERFORM assert_true(v_rejected,
+        'one participant cannot be updated and deleted in the same batch');
+END $$;
+
 -- A regular participant cannot invoke the bulk import boundary.
 DO $$
 DECLARE

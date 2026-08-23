@@ -17,6 +17,9 @@ class OccasionUserModel extends ITrinaRowModel {
 
   DateTime? createdAt;
   DateTime? lastSignInAt;
+  DateTime? firstInvitationSentAt;
+  DateTime? lastInvitationSentAt;
+  int invitationSendCount;
   DateTime? orderCreatedAt;
   int? occasion;
   String? user;
@@ -55,6 +58,9 @@ class OccasionUserModel extends ITrinaRowModel {
   OccasionUserModel(
       {this.createdAt,
       this.lastSignInAt,
+      this.firstInvitationSentAt,
+      this.lastInvitationSentAt,
+      this.invitationSendCount = 0,
       this.orderCreatedAt,
       this.occasion,
       this.user,
@@ -80,6 +86,8 @@ class OccasionUserModel extends ITrinaRowModel {
       this.managedCompanionNames = const [],
       this.form,
       this.aggregateVersion = 0});
+
+  bool get isInvited => invitationSendCount > 0;
 
   factory OccasionUserModel.fromJson(Map<String, dynamic> json) {
     return OccasionUserModel(
@@ -241,8 +249,9 @@ class OccasionUserModel extends ITrinaRowModel {
           value: DateTime.tryParse(
                   data?[Tb.occasion_users.data_birthDate] ?? "") ??
               DateTime.fromMicrosecondsSinceEpoch(0)),
-      UserColumns.INVITED:
-          TrinaCell(value: data?[Tb.occasion_users.data_isInvited].toString()),
+      UserColumns.INVITED: TrinaCell(value: isInvited.toString()),
+      UserColumns.APP_LINKS_SENT: TrinaCell(
+          value: data?[Tb.occasion_users.data_appLinksSent].toString()),
       UserColumns.IS_VOLUNTEER: TrinaCell(
           value: data?[Tb.occasion_users.data_is_volunteer].toString()),
       UserColumns.NOTE:
@@ -345,8 +354,8 @@ class OccasionUserModel extends ITrinaRowModel {
         Tb.occasion_users.data_email: json[UserColumns.EMAIL]?.trim(),
         Tb.occasion_users.data_phone: json[UserColumns.PHONE]?.trim(),
         Tb.occasion_users.data_birthDate: bd?.toIso8601String(),
-        Tb.occasion_users.data_isInvited:
-            json[UserColumns.INVITED] == "true" ? true : false,
+        Tb.occasion_users.data_appLinksSent:
+            json[UserColumns.APP_LINKS_SENT] == "true" ? true : false,
         Tb.occasion_users.data_is_volunteer:
             json[UserColumns.IS_VOLUNTEER] == "true" ? true : false,
         Tb.occasion_users.data_note: json[UserColumns.NOTE]?.trim(),

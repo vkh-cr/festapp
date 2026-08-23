@@ -17,6 +17,7 @@ import 'package:fstapp/components/map/place_type_column_builder.dart';
 import 'package:trina_grid/trina_grid.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/map/map_strings.dart';
+import 'package:fstapp/components/map/map_page.dart';
 
 import 'place_model.dart';
 
@@ -64,7 +65,7 @@ class _PlacesContentState extends State<PlacesContent> {
   void initController() {
     controller ??= SingleDataGridController<PlaceModel>(
       context: context,
-      loadData: DbPlaces.getAllPlaces,
+      loadData: DbPlaces.getAllPlacesForEditor,
       fromPlutoJson: PlaceModel.fromPlutoJson,
       firstColumnType: DataGridFirstColumn.deleteAndDuplicate,
       idColumn: Tb.places.id,
@@ -148,7 +149,9 @@ class _PlacesContentState extends State<PlacesContent> {
               onPressed: () async {
                 var pm = PlaceModel.fromPlutoJson(ctx.row.toJson());
                 var value = await RouterService.navigatePageInfo(
-                    context, MapRoute(place: pm));
+                  context,
+                  MapEditorRoute(mode: PlaceMapEditorMode(pm)),
+                );
                 if (value != null) {
                   var cell = ctx.row.cells[Tb.places.coordinates]!;
                   ctx.stateManager

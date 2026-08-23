@@ -4,7 +4,6 @@ import 'package:trina_grid/trina_grid.dart';
 import 'data_grid_strings.dart';
 import 'pluto_abstract.dart';
 import 'single_data_grid_header.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:collection/collection.dart';
 import 'package:fstapp/theme_config.dart';
 
@@ -119,7 +118,7 @@ class _SingleTableDataGridState<T extends ITrinaRowModel>
         ),
         configuration: SingleDataGridHeader.defaultTrinaGridConfiguration(
           widget.controller.context,
-          widget.controller.context.locale.languageCode,
+          Localizations.localeOf(widget.controller.context).languageCode,
         ),
         ),
       ),

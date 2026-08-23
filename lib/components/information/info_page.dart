@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:auto_route/auto_route.dart';
-import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fstapp/app_router.gr.dart';
 import 'package:fstapp/data_services/auth_service.dart';
@@ -11,6 +10,7 @@ import 'package:fstapp/data_services/offline_data_service.dart';
 import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/information/information_model.dart';
+import 'package:fstapp/components/information/information_expansion_state.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
@@ -45,6 +45,8 @@ class _InfoPageState extends State<InfoPage> {
   List<InformationModel>? _informationList;
   Map<int, bool> _isItemLoading = {};
   List<GlobalKey> _itemKeys = [];
+  final Set<int> _expandedInformationIds = {};
+  bool _hasInitializedExpansion = false;
 
   String title = InformationStrings.information;
 
@@ -70,6 +72,12 @@ class _InfoPageState extends State<InfoPage> {
     super.didChangeDependencies();
     if (widget.id == null && context.routeData.hasPendingChildren) {
       widget.id = context.routeData.pendingChildren[0].params.getInt("id");
+    }
+    if (!_hasInitializedExpansion) {
+      if (widget.id != null) {
+        _expandedInformationIds.add(widget.id!);
+      }
+      _hasInitializedExpansion = true;
     }
     loadData();
   }
@@ -238,23 +246,18 @@ class _InfoPageState extends State<InfoPage> {
     var allInfo = await DbInformation.getAllActiveInformation();
     await OfflineDataService.saveAllInfo(allInfo);
     await loadDataOffline();
-    if (widget.id != null) {
-      var focused = allInfo.firstWhereOrNull((b) => b.id == widget.id);
-      if (focused != null && _informationList != null) {
-        var index = _informationList!.indexWhere((i) => i.id == focused.id);
-        await handleExpansion(index, true);
-        // _scrollToExpandedItem(index);
-      }
-    }
     setState(() {});
   }
 
   Future<void> handleExpansion(int panelIndex, bool isExpanded) async {
     setState(() {
-      for (var element in _informationList!) {
-        element.isExpanded = false;
-      }
-      _informationList![panelIndex].isExpanded = isExpanded;
+      final item = _informationList![panelIndex];
+      item.isExpanded = isExpanded;
+      updateExpandedInformationIds(
+        _expandedInformationIds,
+        item.id,
+        isExpanded,
+      );
     });
 
     // ensure header of expanded item is visible
@@ -283,12 +286,10 @@ class _InfoPageState extends State<InfoPage> {
   }
 
   Future<void> loadDataOffline() async {
-    _informationList =
-        (await OfflineDataService.getAllInfo()).filterByType(null);
-    // collapse all panels by default
-    for (var item in _informationList!) {
-      item.isExpanded = false;
-    }
+    _informationList = applyInformationExpansionState(
+      (await OfflineDataService.getAllInfo()).filterByType(null),
+      _expandedInformationIds,
+    );
     // initialize keys for ensuring visibility
     _itemKeys = List.generate(_informationList!.length, (_) => GlobalKey());
 

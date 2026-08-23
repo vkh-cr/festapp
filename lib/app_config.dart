@@ -54,8 +54,8 @@ class AppConfig {
   }
 
   static List<LanguageModel> availableLanguages() => [
-    LanguageModel(const Locale("cs"), "Čeština"),
-  ];
+        LanguageModel(const Locale("cs"), "Čeština"),
+      ];
 
   /// This is the single definition place for the prefix structure.
   /// It combines the organization ID and the separator (e.g., "2+").

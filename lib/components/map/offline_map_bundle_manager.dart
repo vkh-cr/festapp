@@ -1,10 +1,11 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fstapp/components/map/offline_map_bundle_manifest.dart';
+import 'package:fstapp/components/map/offline_map_file_downloader.dart';
 import 'package:http/http.dart' as http;
 
 typedef OfflineMapAssetUriResolver = Uri Function(
@@ -36,32 +37,51 @@ class OfflineMapBundleManager {
     http.Client? client,
     this.assetUriResolver,
     this.debugAllowInsecureHttp = false,
+    this.retryDelay = const Duration(milliseconds: 300),
+    this.maximumAttempts = 3,
   }) : _client = client ?? http.Client() {
     if (debugAllowInsecureHttp && !kDebugMode) {
       throw StateError('Insecure map transport is debug-only.');
     }
+    if (maximumAttempts < 1) {
+      throw ArgumentError.value(maximumAttempts, 'maximumAttempts');
+    }
+    _fileDownloader = OfflineMapFileDownloader(
+      client: _client,
+      retryDelay: retryDelay,
+      maximumAttempts: maximumAttempts,
+    );
   }
 
   static const _readyFileName = '.ready.json';
   static const _manifestFileName = 'manifest.json';
   static const _maximumManifestBytes = 2 * 1024 * 1024;
   static const _parallelDownloads = 6;
+  static final Map<String, Future<void>> _operationTails = {};
 
   final Directory rootDirectory;
   final http.Client _client;
+  late final OfflineMapFileDownloader _fileDownloader;
   final OfflineMapAssetUriResolver? assetUriResolver;
   final bool debugAllowInsecureHttp;
+  final Duration retryDelay;
+  final int maximumAttempts;
+
+  void close() => _client.close();
 
   Future<OfflineMapBundleInstallation> install(
     Uri manifestUri, {
     VoidCallback? onDownloadRequired,
     void Function(OfflineMapBundleProgress progress)? onProgress,
   }) =>
-      _install(
-        manifestUri,
-        onDownloadRequired: onDownloadRequired,
-        onProgress: onProgress,
-        useReadyCache: true,
+      _serialize(
+        () => _install(
+          manifestUri,
+          onDownloadRequired: onDownloadRequired,
+          onProgress: onProgress,
+          useReadyCache: true,
+          forceDownload: false,
+        ),
       );
 
   Future<OfflineMapBundleInstallation> update(
@@ -69,11 +89,14 @@ class OfflineMapBundleManager {
     VoidCallback? onDownloadRequired,
     void Function(OfflineMapBundleProgress progress)? onProgress,
   }) =>
-      _install(
-        manifestUri,
-        onDownloadRequired: onDownloadRequired,
-        onProgress: onProgress,
-        useReadyCache: false,
+      _serialize(
+        () => _install(
+          manifestUri,
+          onDownloadRequired: onDownloadRequired,
+          onProgress: onProgress,
+          useReadyCache: false,
+          forceDownload: true,
+        ),
       );
 
   /// Opens and verifies an installed bundle without issuing a network request.
@@ -85,15 +108,22 @@ class OfflineMapBundleManager {
   Future<OfflineMapBundleInstallation> _install(
     Uri manifestUri, {
     required bool useReadyCache,
+    required bool forceDownload,
     VoidCallback? onDownloadRequired,
     void Function(OfflineMapBundleProgress progress)? onProgress,
   }) async {
     _requireAllowedUri(manifestUri);
     if (useReadyCache) {
-      final cached = await _openCachedForManifestUri(manifestUri);
-      if (cached != null) return cached;
+      try {
+        final cached = await _openCachedForManifestUri(manifestUri);
+        if (cached != null) return cached;
+      } catch (_) {
+        await _discardCachedInstallation(manifestUri);
+      }
     }
-    final manifestBytes = await _downloadManifest(manifestUri);
+    final manifestBytes = await _withRetries(
+      () => _downloadManifest(manifestUri),
+    );
     final manifestHash = sha256.convert(manifestBytes).toString();
     final decoded = jsonDecode(utf8.decode(manifestBytes));
     final manifest = OfflineMapBundleManifest.parse(
@@ -107,10 +137,16 @@ class OfflineMapBundleManager {
     );
     final staging = Directory('${target.path}.part');
 
-    final ready = await _openReady(target, manifest, manifestHash);
-    if (ready != null) {
-      await _rememberManifestUri(manifestUri, ready);
-      return ready;
+    if (!forceDownload) {
+      try {
+        final ready = await _openReady(target, manifest, manifestHash);
+        if (ready != null) {
+          await _rememberManifestUri(manifestUri, ready);
+          return ready;
+        }
+      } catch (_) {
+        if (await target.exists()) await target.delete(recursive: true);
+      }
     }
     onDownloadRequired?.call();
 
@@ -132,16 +168,17 @@ class OfflineMapBundleManager {
           await destination.parent.create(recursive: true);
           final uri = assetUriResolver?.call(asset) ?? asset.url;
           _requireAllowedUri(uri);
-          final received = await _downloadAsset(
+          final file = await _fileDownloader.download(
             uri: uri,
             destination: destination,
-            asset: asset,
+            expectedBytes: asset.bytes,
+            expectedSha256: asset.sha256,
             onChunk: (count) {
               downloaded += count;
               onProgress?.call(OfflineMapBundleProgress(downloaded, total));
             },
           );
-          if (received != asset.bytes) {
+          if (await file.length() != asset.bytes) {
             throw OfflineMapBundleException('Size mismatch: ${asset.path}.');
           }
         }
@@ -156,12 +193,7 @@ class OfflineMapBundleManager {
         flush: true,
       );
       await target.parent.create(recursive: true);
-      if (await target.exists()) {
-        throw OfflineMapBundleException(
-          'Immutable bundle version already exists but is not ready.',
-        );
-      }
-      await staging.rename(target.path);
+      await _publishStaging(staging: staging, target: target);
       final installation = OfflineMapBundleInstallation._(
         directory: target,
         manifest: manifest,
@@ -171,6 +203,86 @@ class OfflineMapBundleManager {
     } catch (_) {
       if (await staging.exists()) await staging.delete(recursive: true);
       rethrow;
+    }
+  }
+
+  Future<T> _serialize<T>(Future<T> Function() operation) async {
+    // Different manifest URLs can still resolve to the same immutable target.
+    // Serializing the whole bundle root prevents them from sharing a staging
+    // or backup directory concurrently.
+    final key = rootDirectory.absolute.path;
+    final previous = _operationTails[key];
+    final release = Completer<void>();
+    _operationTails[key] = release.future;
+    if (previous != null) await previous;
+    try {
+      return await operation();
+    } finally {
+      release.complete();
+      if (identical(_operationTails[key], release.future)) {
+        _operationTails.remove(key);
+      }
+    }
+  }
+
+  Future<void> _discardCachedInstallation(Uri manifestUri) async {
+    final pointer = File(_pointerPath(manifestUri));
+    if (!await pointer.exists()) return;
+    try {
+      final decoded = jsonDecode(await pointer.readAsString()) as Map;
+      final sourceName = decoded['source_name'];
+      final artifactVersion = decoded['artifact_version'];
+      if (sourceName is String &&
+          artifactVersion is String &&
+          _isSafeSegment(sourceName) &&
+          _isSafeSegment(artifactVersion)) {
+        final target = Directory(
+          '${rootDirectory.path}/$sourceName/$artifactVersion',
+        );
+        if (await target.exists()) await target.delete(recursive: true);
+      }
+    } catch (_) {
+      // A malformed pointer is itself stale cache state. Removing it is enough
+      // to let the immutable manifest rebuild the canonical installation.
+    }
+    if (await pointer.exists()) await pointer.delete();
+  }
+
+  Future<void> _publishStaging({
+    required Directory staging,
+    required Directory target,
+  }) async {
+    final backup = Directory('${target.path}.old');
+    if (await backup.exists()) await backup.delete(recursive: true);
+    final hadTarget = await target.exists();
+    if (hadTarget) await target.rename(backup.path);
+    try {
+      await staging.rename(target.path);
+    } catch (_) {
+      if (!await target.exists() && await backup.exists()) {
+        await backup.rename(target.path);
+      }
+      rethrow;
+    }
+    try {
+      if (await backup.exists()) await backup.delete(recursive: true);
+    } catch (_) {
+      // The new ready target is already published. A stale backup is safe and
+      // is cleaned before the next refresh; cleanup failure must not turn a
+      // successful installation into a user-visible download failure.
+    }
+  }
+
+  Future<T> _withRetries<T>(Future<T> Function() operation) async {
+    for (var attempt = 1;; attempt++) {
+      try {
+        return await operation();
+      } catch (_) {
+        if (attempt >= maximumAttempts) rethrow;
+        if (retryDelay > Duration.zero) {
+          await Future<void>.delayed(retryDelay * attempt);
+        }
+      }
     }
   }
 
@@ -288,48 +400,6 @@ class OfflineMapBundleManager {
       }
     }
     return bytes;
-  }
-
-  Future<int> _downloadAsset({
-    required Uri uri,
-    required File destination,
-    required OfflineMapBundleAsset asset,
-    required void Function(int bytes) onChunk,
-  }) async {
-    final response = await _client.send(http.Request('GET', uri));
-    if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw HttpException(
-        'Asset download failed (${response.statusCode}): ${asset.path}',
-      );
-    }
-    final part = File('${destination.path}.part');
-    final output = part.openWrite();
-    final digestOutput = AccumulatorSink<Digest>();
-    final digestInput = sha256.startChunkedConversion(digestOutput);
-    var received = 0;
-    try {
-      await for (final chunk in response.stream) {
-        output.add(chunk);
-        digestInput.add(chunk);
-        received += chunk.length;
-        onChunk(chunk.length);
-      }
-      await output.flush();
-      await output.close();
-      digestInput.close();
-      if (digestOutput.events.single.toString() != asset.sha256) {
-        throw OfflineMapBundleException('Checksum mismatch: ${asset.path}.');
-      }
-      if (received != asset.bytes) {
-        throw OfflineMapBundleException('Size mismatch: ${asset.path}.');
-      }
-      await part.rename(destination.path);
-      return received;
-    } catch (_) {
-      await output.close();
-      if (await part.exists()) await part.delete();
-      rethrow;
-    }
   }
 
   void _requireAllowedUri(Uri uri) {

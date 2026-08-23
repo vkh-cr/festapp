@@ -6,6 +6,12 @@ import 'package:fstapp/data_services/client_sync/client_sync_remote.dart';
 import 'package:fstapp/data_services/client_sync/client_sync_store.dart';
 import 'package:fstapp/data_services/client_sync/sync_polling_policy.dart';
 
+typedef CacheOccasionMedia = Future<void> Function(
+  SyncContext context,
+  List<Uri> urls, {
+  required bool refreshExisting,
+});
+
 class ClientSyncService {
   ClientSyncService({
     required PublicSyncHeadRemote publicHeadRemote,
@@ -14,12 +20,14 @@ class ClientSyncService {
     required ClientSyncStore store,
     SyncPollingPolicy? pollingPolicy,
     SyncClock? clock,
+    CacheOccasionMedia? cacheOccasionMedia,
   })  : _publicHeadRemote = publicHeadRemote,
         _publicComponentRemote = publicComponentRemote,
         _privateRemote = privateRemote,
         _store = store,
         _policy = pollingPolicy ?? SyncPollingPolicy(),
-        _clock = clock ?? (() => DateTime.now().toUtc());
+        _clock = clock ?? (() => DateTime.now().toUtc()),
+        _cacheOccasionMedia = cacheOccasionMedia;
 
   static const catalogBudget = 5 * 1024 * 1024;
   static const programCatalogBudget = 1024 * 1024;
@@ -31,6 +39,7 @@ class ClientSyncService {
   final ClientSyncStore _store;
   final SyncPollingPolicy _policy;
   final SyncClock _clock;
+  final CacheOccasionMedia? _cacheOccasionMedia;
   final StreamController<ClientSyncState> _states =
       StreamController<ClientSyncState>.broadcast();
 
@@ -215,6 +224,7 @@ class ClientSyncService {
               lastSuccess: serverTime,
               clearError: true,
               inFlight: false));
+      unawaited(_cacheStoredMediaBestEffort(context));
       return;
     }
     final manifestBytes = await _downloadUnknown(descriptor, catalogBudget);
@@ -288,6 +298,56 @@ class ClientSyncService {
             lastSuccess: serverTime,
             clearError: true,
             inFlight: false));
+    unawaited(_cacheMediaBestEffort(
+      context,
+      payloads,
+      refreshExisting: true,
+    ));
+  }
+
+  Future<void> _cacheStoredMediaBestEffort(SyncContext context) async {
+    final occasionConfig = await _store.readComponent(
+      context.publicScope,
+      SyncFreshnessClass.catalog,
+      ClientSyncComponent.occasionConfig,
+    );
+    await _cacheMediaBestEffort(
+      context,
+      {ClientSyncComponent.occasionConfig: occasionConfig},
+      refreshExisting: false,
+    );
+  }
+
+  Future<void> _cacheMediaBestEffort(
+    SyncContext context,
+    Map<ClientSyncComponent, Object?> payloads, {
+    required bool refreshExisting,
+  }) async {
+    final cache = _cacheOccasionMedia;
+    if (cache == null) return;
+    final envelope = payloads[ClientSyncComponent.occasionConfig];
+    final rawPayload = envelope is Map ? envelope['payload'] : null;
+    final config = rawPayload is Map ? rawPayload : envelope;
+    final urls = <Uri>[];
+    final seen = <String>{};
+    if (config is Map) {
+      for (final item in (config['media'] as List? ?? const [])) {
+        final value = item is Map ? item['url'] : item;
+        final uri = Uri.tryParse(value?.toString() ?? '');
+        if (uri != null &&
+            (uri.scheme == 'https' || uri.scheme == 'http') &&
+            seen.add(uri.toString())) {
+          urls.add(uri);
+        }
+      }
+    }
+    if (urls.isEmpty) return;
+    try {
+      await cache(context, urls, refreshExisting: refreshExisting);
+    } catch (_) {
+      // Media is a retryable sidecar. Never roll back a valid JSON generation
+      // merely because one binary is temporarily unavailable.
+    }
   }
 
   Future<void> _activateLive(SyncContext context, int requestEpoch,

@@ -14,6 +14,10 @@ const projectRoot = path.resolve(scriptDirectory, '..');
 
 const feedbackFunctions = new Map([
   [
+    'delete_event_feedback_for_edit_client_sync_v1',
+    'database/functions/events/delete_event_feedback_for_edit.sql',
+  ],
+  [
     'delete_event_feedback',
     'database/functions/events/delete_event_feedback.sql',
   ],
@@ -49,6 +53,7 @@ const requiredSources = [
   'docs/plans/offline-sync-revision-cache-EXECUTION-PROMPT-2026-08-02.md',
   'docs/plans/offline-sync-preflight-baseline-2026-08-02.md',
   'supabase/migrations/20260806100000_client_sync_production_hardening.sql',
+  'supabase/migrations/20260807150000_allow_admin_feedback_deletion.sql',
   'automation/release/client_sync_health.mjs',
   'automation/release/configure_client_sync_publisher_schedule.mjs',
   'automation/release/client_sync_cutover.mjs',
@@ -115,7 +120,7 @@ function parseLocalFunctionContract(sql, functionName) {
   if (!declaration) throw new Error('canonical CREATE FUNCTION declaration missing');
 
   const revokePublic = new RegExp(
-    `REVOKE\\s+ALL\\s+ON\\s+FUNCTION\\s+public\\.${functionName}\\s*\\([^;]+\\)\\s+FROM\\s+PUBLIC\\s*;`,
+    `REVOKE\\s+ALL\\s+ON\\s+FUNCTION\\s+public\\.${functionName}\\s*\\([^;]+\\)\\s+FROM\\s+PUBLIC(?:\\s*,\\s*[a-z_]+)*\\s*;`,
     'i',
   ).test(sql);
   const grant = sql.match(

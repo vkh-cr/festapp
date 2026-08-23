@@ -46,7 +46,17 @@ BEGIN
   END IF;
   SELECT o.organization,COALESCE(o.services,'{}'::jsonb) INTO v_org,v_catalog FROM public.occasions o WHERE o.id=p_occasion FOR SHARE;
   PERFORM pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended('reception-email:'||v_org::text||':'||v_email,0));
-  IF EXISTS(SELECT 1 FROM public.user_info ui WHERE ui.organization=v_org AND lower(btrim(ui.email_readonly))=v_email) THEN
+  SELECT ui.id INTO v_user
+  FROM public.user_info ui
+  WHERE ui.organization=v_org AND lower(btrim(ui.email_readonly))=v_email;
+  IF v_user IS NOT NULL THEN
+    IF (public.get_is_admin_on_occasion(p_occasion)
+        OR public.get_is_manager_on_occasion(p_occasion))
+      AND EXISTS(SELECT 1 FROM public.occasion_users ou
+        WHERE ou.occasion=p_occasion AND ou."user"=v_user) THEN
+      RETURN jsonb_build_object('code',200,'userId',v_user,'email',v_email,
+        'existing',true,'replayed',false);
+    END IF;
     RETURN jsonb_build_object('code',409,'message','email_already_exists');
   END IF;
   SELECT COALESCE(jsonb_agg(candidate),'[]'::jsonb) INTO v_matches FROM (
@@ -73,16 +83,51 @@ END $$;
 CREATE OR REPLACE FUNCTION public.issue_reception_login_qr_v1(p_occasion bigint,p_user uuid)
 RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path=public,extensions AS $$
 DECLARE v_token text; v_hash text; v_actor uuid:=auth.uid();
+  v_manual text; v_manual_hash text; v_manual_bytes bytea; v_alphabet constant text:='23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
 BEGIN
   IF NOT public.get_can_use_reception(p_occasion) THEN RETURN jsonb_build_object('code',403,'message','reception_unavailable'); END IF;
   IF NOT public.reception_rate_limit_v1('issue',30) THEN RETURN jsonb_build_object('code',429,'message','rate_limited'); END IF;
-  IF NOT EXISTS(SELECT 1 FROM public.reception_registrations r WHERE r.occasion=p_occasion AND r."user"=p_user AND r.status='active' AND (r.created_by=v_actor AND r.created_at>now()-interval '30 minutes' OR public.get_is_manager_on_occasion(p_occasion) OR public.get_is_admin_on_occasion(p_occasion))) THEN
+  IF NOT EXISTS(SELECT 1 FROM public.occasion_users ou WHERE ou.occasion=p_occasion AND ou."user"=p_user)
+    OR NOT (public.get_is_admin_on_occasion(p_occasion)
+      OR public.get_is_manager_on_occasion(p_occasion) OR EXISTS(
+      SELECT 1 FROM public.reception_registrations r
+      WHERE r.occasion=p_occasion AND r."user"=p_user AND r.status='active'
+        AND r.created_by=v_actor AND r.created_at>now()-interval '30 minutes')) THEN
     RETURN jsonb_build_object('code',403,'message','registration_unavailable'); END IF;
   v_token:=translate(encode(gen_random_bytes(32),'base64'),E'+/=\n','-_'); v_hash:=encode(digest(v_token,'sha256'),'hex');
-  INSERT INTO public.user_login_qr_credentials(occasion,"user",token_hash,created_by) VALUES(p_occasion,p_user,v_hash,v_actor)
-  ON CONFLICT(occasion,"user") DO UPDATE SET token_hash=excluded.token_hash,created_by=excluded.created_by,rotated_at=now(),revoked_at=NULL,last_used_at=NULL,use_count=0;
-  RETURN jsonb_build_object('code',200,'payload','festapp-login:v1:'||p_occasion::text||':'||v_token);
+  v_manual_bytes:=gen_random_bytes(8);
+  SELECT string_agg(substr(v_alphabet,(get_byte(v_manual_bytes,i)%32)+1,1),'') INTO v_manual FROM generate_series(0,7) i;
+  v_manual_hash:=encode(digest(v_manual,'sha256'),'hex');
+  INSERT INTO public.user_login_qr_credentials(occasion,"user",token_hash,manual_token_hash,manual_expires_at,created_by)
+  VALUES(p_occasion,p_user,v_hash,v_manual_hash,now()+interval '30 minutes',v_actor)
+  ON CONFLICT(occasion,"user") DO UPDATE SET token_hash=excluded.token_hash,manual_token_hash=excluded.manual_token_hash,
+    manual_expires_at=excluded.manual_expires_at,created_by=excluded.created_by,rotated_at=now(),revoked_at=NULL,last_used_at=NULL,use_count=0;
+  RETURN jsonb_build_object('code',200,'payload','festapp-login:v1:'||p_occasion::text||':'||v_token,
+    'manualCode',left(v_manual,4)||'-'||right(v_manual,4));
 END $$;
+
+CREATE OR REPLACE FUNCTION public.get_reception_occasion_users_v1(p_occasion bigint,p_query text DEFAULT '')
+RETURNS jsonb LANGUAGE sql STABLE SECURITY DEFINER SET search_path=public,extensions AS $$
+SELECT CASE
+  WHEN public.get_can_use_reception(p_occasion)
+    AND (public.get_is_admin_on_occasion(p_occasion)
+      OR public.get_is_manager_on_occasion(p_occasion))
+  THEN COALESCE(jsonb_agg(jsonb_build_object(
+    'userId',q.id,'name',q.name,'surname',q.surname,'email',q.email_readonly
+  ) ORDER BY q.surname,q.name,q.email_readonly),'[]'::jsonb)
+  ELSE '[]'::jsonb
+END
+FROM (
+  SELECT ui.id,ui.name,ui.surname,ui.email_readonly
+  FROM public.occasion_users ou
+  JOIN public.user_info ui ON ui.id=ou."user"
+  WHERE ou.occasion=p_occasion
+    AND (COALESCE(btrim(p_query),'')=''
+      OR public.f_unaccent(COALESCE(ui.name,'')||' '||COALESCE(ui.surname,'')||' '||COALESCE(ui.email_readonly,''))
+        ILIKE '%'||public.f_unaccent(btrim(left(p_query,100)))||'%')
+  ORDER BY ui.surname,ui.name,ui.email_readonly
+  LIMIT 50
+) q; $$;
 
 CREATE OR REPLACE FUNCTION public.resolve_reception_login_qr_v1(p_occasion bigint,p_token_hash text)
 RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path=public,extensions AS $$
@@ -92,7 +137,9 @@ BEGIN
   SELECT c."user",(o.organization::text||'+'||au.email_readonly) INTO v_user,v_email
   FROM public.user_login_qr_credentials c JOIN public.occasion_users ou ON (ou.occasion,ou."user")=(c.occasion,c."user")
   JOIN public.user_info au ON au.id=c."user" JOIN public.occasions o ON o.id=c.occasion
-  WHERE c.occasion=p_occasion AND c.token_hash=p_token_hash AND c.revoked_at IS NULL
+  WHERE c.occasion=p_occasion
+    AND (c.token_hash=p_token_hash OR (c.manual_token_hash=p_token_hash AND c.manual_expires_at>now()))
+    AND c.revoked_at IS NULL
     AND jsonb_path_exists(COALESCE(o.features,'[]'::jsonb),'$[*] ? (@.code == "reception" && @.is_enabled == true)') FOR UPDATE OF c;
   IF v_user IS NULL THEN RETURN NULL; END IF;
   RETURN jsonb_build_object('userId',v_user,'authEmail',v_email);
@@ -127,9 +174,15 @@ CREATE OR REPLACE FUNCTION public.mark_reception_login_qr_used_v1(p_occasion big
 RETURNS void LANGUAGE plpgsql SECURITY DEFINER SET search_path=public,extensions AS $$
 BEGIN
   IF auth.role()<>'service_role' THEN RAISE EXCEPTION 'not_authorized'; END IF;
-  UPDATE public.user_login_qr_credentials c SET last_used_at=now(),use_count=use_count+1
+  UPDATE public.user_login_qr_credentials c SET
+    last_used_at=now(),
+    use_count=use_count+1,
+    manual_token_hash=CASE WHEN c.manual_token_hash=p_token_hash THEN NULL ELSE c.manual_token_hash END,
+    manual_expires_at=CASE WHEN c.manual_token_hash=p_token_hash THEN NULL ELSE c.manual_expires_at END
   FROM public.occasion_users ou,public.occasions o
-  WHERE c.occasion=p_occasion AND c.token_hash=p_token_hash AND c.revoked_at IS NULL
+  WHERE c.occasion=p_occasion
+    AND (c.token_hash=p_token_hash OR (c.manual_token_hash=p_token_hash AND c.manual_expires_at>now()))
+    AND c.revoked_at IS NULL
     AND (ou.occasion,ou."user")=(c.occasion,c."user") AND o.id=c.occasion
     AND jsonb_path_exists(COALESCE(o.features,'[]'::jsonb),'$[*] ? (@.code == "reception" && @.is_enabled == true)');
 END $$;
@@ -159,6 +212,6 @@ SELECT CASE WHEN public.get_can_use_reception(p_occasion) THEN COALESCE(jsonb_ag
 FROM public.reception_registrations r JOIN public.user_info ui ON ui.id=r."user" LEFT JOIN public.user_login_qr_credentials c ON (c.occasion,c."user")=(r.occasion,r."user")
 WHERE r.occasion=p_occasion AND r.created_by=auth.uid() AND r.status='active' AND r.created_at>now()-interval '30 minutes'; $$;
 
-REVOKE ALL ON FUNCTION public.reception_rate_limit_v1(text,integer),public.resolve_reception_login_qr_v1(bigint,text),public.mark_reception_login_qr_used_v1(bigint,text),public.mark_reception_auth_revoked_v1(bigint,uuid) FROM PUBLIC,anon,authenticated;
+REVOKE ALL ON FUNCTION public.reception_rate_limit_v1(text,integer),public.get_reception_occasion_users_v1(bigint,text),public.resolve_reception_login_qr_v1(bigint,text),public.mark_reception_login_qr_used_v1(bigint,text),public.mark_reception_auth_revoked_v1(bigint,uuid) FROM PUBLIC,anon,authenticated;
 GRANT EXECUTE ON FUNCTION public.resolve_reception_login_qr_v1(bigint,text),public.mark_reception_login_qr_used_v1(bigint,text),public.mark_reception_auth_revoked_v1(bigint,uuid) TO service_role;
-GRANT EXECUTE ON FUNCTION public.get_reception_registration_options_v1(bigint),public.create_reception_user_v1(bigint,uuid,jsonb,bigint,text,boolean),public.issue_reception_login_qr_v1(bigint,uuid),public.revoke_reception_login_qr_v1(bigint,uuid),public.cancel_reception_registration_v1(bigint,uuid),public.get_my_recent_reception_registrations_v1(bigint) TO authenticated,service_role;
+GRANT EXECUTE ON FUNCTION public.get_reception_registration_options_v1(bigint),public.create_reception_user_v1(bigint,uuid,jsonb,bigint,text,boolean),public.issue_reception_login_qr_v1(bigint,uuid),public.get_reception_occasion_users_v1(bigint,text),public.revoke_reception_login_qr_v1(bigint,uuid),public.cancel_reception_registration_v1(bigint,uuid),public.get_my_recent_reception_registrations_v1(bigint) TO authenticated,service_role;

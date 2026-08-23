@@ -1,0 +1,33 @@
+# Source/data overlay paths. Shell globs are matched against complete repo paths.
+automation/project.conf
+assets/icons/fstappicon.png
+assets/icons/fstapplogo.dark.svg
+assets/icons/fstapplogo.png
+assets/icons/fstapplogo.svg
+assets/icons/fstapplogo_program.png
+fonts/Gill Sans Regular.ttf
+web_client/src/assets/fonts/GillSansRegular.ttf
+android/app/src/main/res/mipmap-*/ic_launcher.png
+ios/Runner/Assets.xcassets/AppIcon.appiconset/*.png
+web/csmostrava-*.svg
+web/android-chrome-*.png
+web/apple-touch-icon.png
+web/favicon*.png
+web/favicon.ico
+web/favicon.svg
+web/fstapplogo.png
+web/notification-icon-256x256.png
+web/web-app-manifest-*.png
+web/privacy/**
+web/support/**
+web/terms/**
+automation/offline-map/manifests/csmostrava2026/**
+automation/offline-map/style/**
+automation/release/fastlane/metadata/**
+automation/release/fastlane/screenshots/**
+automation/release/legal/**
+automation/release/app_store_config.json
+automation/release/APP_*.md
+automation/release/ExportOptions.plist
+repo-data/store-screenshots/csm-2026/**
+database/recovery/2026-*csmostrava*.sql

@@ -1,6 +1,37 @@
 import { assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.58.0";
-import { exchangeLoginQr } from "./exchange.ts";
+import { exchangeLoginCredential } from "./exchange.ts";
+
+Deno.test("manual code ignores case, spaces, and separators before exchange", async () => {
+  let resolvedHash: string | undefined;
+  const admin = {
+    rpc(name: string, params: Record<string, string>) {
+      if (name === "resolve_reception_login_qr_v1") {
+        resolvedHash = params.p_token_hash;
+        return Promise.resolve({ data: null, error: null });
+      }
+      return Promise.resolve({ data: null, error: null });
+    },
+  } as unknown as SupabaseClient;
+  const anon = {} as SupabaseClient;
+
+  const result = await exchangeLoginCredential(
+    { occasion: 42, manualCode: " k7m4-p9q2 " },
+    admin,
+    anon,
+  );
+
+  assertEquals(result, null);
+  const expected = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode("K7M4P9Q2"),
+  );
+  assertEquals(
+    resolvedHash,
+    [...new Uint8Array(expected)].map((b) => b.toString(16).padStart(2, "0"))
+      .join(""),
+  );
+});
 
 Deno.test("valid login QR returns only a normal session after marking use", async () => {
   const calls: string[] = [];
@@ -46,8 +77,8 @@ Deno.test("valid login QR returns only a normal session after marking use", asyn
     },
   } as unknown as SupabaseClient;
 
-  const result = await exchangeLoginQr(
-    `festapp-login:v1:42:${"A".repeat(43)}`,
+  const result = await exchangeLoginCredential(
+    { payload: `festapp-login:v1:42:${"A".repeat(43)}` },
     admin,
     anon,
   );

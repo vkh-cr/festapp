@@ -41,11 +41,20 @@ void main() {
     );
     expect(RightsService.isReceptionist(), isFalse);
     expect(RightsService.canUseReception(), isTrue);
+    expect(RightsService.canManageReceptionParticipants(), isTrue);
+  });
+
+  test('receptionist cannot browse existing occasion participants', () {
+    RightsService.occasionLinkModelNotifier.value = OccasionLinkModel(
+      occasion: _occasion(true),
+      occasionUser: OccasionUserModel(isReceptionist: true),
+    );
+
+    expect(RightsService.canManageReceptionParticipants(), isFalse);
   });
 
   test('production app-config shape exposes an assigned receptionist', () {
-    RightsService.occasionLinkModelNotifier.value =
-        OccasionLinkModel.fromJson({
+    RightsService.occasionLinkModelNotifier.value = OccasionLinkModel.fromJson({
       'code': 200,
       'client_sync_v1': true,
       'occasion': {

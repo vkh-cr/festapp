@@ -38,10 +38,22 @@ class AuthService {
   }
 
   static Future<void> loginWithQr(String payload) async {
+    await _loginWithReceptionCredential({'payload': payload});
+  }
+
+  static Future<void> loginWithManualCode(String code) async {
+    await _loginWithReceptionCredential({
+      'occasion': RightsService.currentOccasionId(),
+      'manualCode': code,
+    });
+  }
+
+  static Future<void> _loginWithReceptionCredential(
+      Map<String, dynamic> credential) async {
     DbEvents.invalidateSavedProgramMutationScope();
     final response = await _supabase.functions.invoke(
       'exchange-login-qr',
-      body: {'payload': payload},
+      body: credential,
     );
     final body = Map<String, dynamic>.from(response.data as Map);
     final refreshToken = body['refresh_token']?.toString();
@@ -108,11 +120,21 @@ class AuthService {
         body: {"email": email, "organization": AppConfig.organization});
   }
 
-  static Future<dynamic> sendSignInCode(OccasionUserModel ou) async {
-    return await _supabase.functions.invoke("send-sign-in-code", body: {
+  static Future<bool> sendSignInCode(OccasionUserModel ou) async {
+    final response =
+        await _supabase.functions.invoke("send-sign-in-code", body: {
       "oc": ou.occasion,
       "usr": ou.user,
     });
+    return response.data?["status"] == "sent";
+  }
+
+  static Future<bool> sendAppLinks(OccasionUserModel ou) async {
+    final response = await _supabase.functions.invoke("send-app-links", body: {
+      "oc": ou.occasion,
+      "usr": ou.user,
+    });
+    return response.data?["status"] == "sent";
   }
 
   static Future<UserInfoModel> getFullUserInfo() async {

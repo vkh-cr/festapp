@@ -97,8 +97,28 @@ final class OfflineMapConfiguration {
         OfflineMapRenderer.legacy => legacy,
       };
 
+  /// Immutable bundle used by the selected renderer when one is configured.
+  /// MapLibre requires it; Legacy consumes the same MBTiles/style assets but
+  /// retains its URL-based contract as a compatibility boundary for occasions
+  /// that predate bundle manifests.
+  MapLibreOfflineMapContract? bundleFor(OfflineMapContract contract) =>
+      switch (contract) {
+        final MapLibreOfflineMapContract mapLibre => mapLibre,
+        LegacyOfflineMapContract() => mapLibre,
+      };
+
   bool get shouldInitialize =>
       selectedContract != null || forceOffline || hasExplicitRenderer;
+
+  /// Whether the first frame must avoid the online renderer while the
+  /// asynchronous connectivity check is still pending.
+  bool useOfflineWhileConnectivityLoads({
+    required bool isKnownOffline,
+    bool hasAuthoritativeConfiguration = true,
+    bool isWeb = false,
+  }) =>
+      !isWeb &&
+      (forceOffline || isKnownOffline || !hasAuthoritativeConfiguration);
 
   OfflineMapStartupDecision resolveStartup({required bool hasConnection}) {
     final contract = selectedContract;

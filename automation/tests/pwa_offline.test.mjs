@@ -30,11 +30,17 @@ try {
     path.join(projectRoot, 'automation/generate_pwa_service_worker.mjs'),
     tempRoot,
     '1.2.3+4',
-    'forced-occasion',
+    'csmostrava2026',
   ], { encoding: 'utf8' });
 
   assert.equal(result.status, 0, result.stderr);
-  const worker = await readFile(path.join(tempRoot, 'festapp_service_worker.js'), 'utf8');
+  const worker = (await readFile(
+    path.join(tempRoot, 'festapp_service_worker.js'),
+    'utf8',
+  )).replace(
+    'const CLIENT_VERSION_REPORT_TIMEOUT_MS = 1000;',
+    'const CLIENT_VERSION_REPORT_TIMEOUT_MS = 10;',
+  );
   assert.match(worker, /festapp-app-shell-1\.2\.3\+4/);
   assert.match(worker, /"\/flutter\?pwa-cache=1"/);
   assert.match(worker, /"\/webclient\?pwa-cache=1"/);
@@ -52,7 +58,10 @@ try {
   assert.match(worker, /url\.origin === 'https:\/\/fonts\.gstatic\.com'/);
   assert.match(worker, /url\.origin === 'https:\/\/fonts\.googleapis\.com'/);
   assert.match(worker, /festapp-used-fonts-v1/);
-  assert.match(worker, /const FORCED_OCCASION_PATH = "\/forced-occasion";/);
+  assert.match(worker, /festapp-app-shell-0\.19\.85\+418/);
+  assert.match(worker, /event\.resultingClientId \|\| event\.clientId/);
+  assert.match(worker, /if \(emergencyCutover\)/);
+  assert.match(worker, /const FORCED_OCCASION_PATH = "\/csmostrava2026";/);
   assert.match(worker, /cache\.put\(request, response\.clone\(\)\)/);
   const coreUrls = JSON.parse(worker.match(/const CORE_URLS = (\[[\s\S]*?\]);/)[1]);
   assert.ok(coreUrls.includes('/main.dart.js'));
@@ -94,6 +103,12 @@ try {
   const cachedPuts = [];
   const deletedCaches = [];
   const openedCaches = [];
+  let cacheNames = [
+    'festapp-app-shell-1.2.3+2',
+    'festapp-app-shell-1.2.3+3',
+    'festapp-app-shell-1.2.3+4',
+    'festapp-used-fonts-v1',
+  ];
   let claimedExistingClients = 0;
   const navigatedClients = [];
   const clientsById = new Map([
@@ -131,17 +146,17 @@ try {
     Request,
     Response,
     Promise,
+    setTimeout,
+    clearTimeout,
     caches: {
       open: async (name) => {
         openedCaches.push(name);
         return cache;
       },
-      keys: async () => [
-        'festapp-app-shell-1.2.3+3',
-        'festapp-app-shell-1.2.3+4',
-      ],
+      keys: async () => [...cacheNames],
       delete: async (name) => {
         deletedCaches.push(name);
+        cacheNames = cacheNames.filter((candidate) => candidate !== name);
         return true;
       },
     },
@@ -172,6 +187,28 @@ try {
   };
   vm.runInNewContext(worker, context);
 
+  async function dispatchFetch(request, clientId = '', resultingClientId = '') {
+    let responsePromise;
+    handlers.fetch({
+      request,
+      clientId,
+      resultingClientId,
+      respondWith: (promise) => { responsePromise = promise; },
+    });
+    assert.ok(responsePromise, `worker did not handle ${request.url}`);
+    return responsePromise;
+  }
+
+  async function reportVersion(client, version) {
+    let pending = Promise.resolve();
+    handlers.message({
+      data: { type: 'FESTAPP_CLIENT_VERSION', version },
+      source: client,
+      waitUntil: (promise) => { pending = promise; },
+    });
+    await pending;
+  }
+
   // The requesting tab needs controllerchange so its existing update script
   // can reload it. Other tabs are claimed too, but must remain mapped to the
   // cache generation from which their JavaScript is already executing.
@@ -189,6 +226,35 @@ try {
   assert.equal(claimedExistingClients, 1);
   assert.deepEqual(deletedCaches, []);
 
+  // A cold navigation has no clientId: the newly created page is identified
+  // by resultingClientId. Its first scripts must inherit the navigation's
+  // current shell without waiting for a report from a script that has not yet
+  // been allowed to load.
+  const freshNavigation = new Request('https://app.test/csmostrava2026/');
+  Object.defineProperty(freshNavigation, 'mode', { value: 'navigate' });
+  const freshShellResponse = await dispatchFetch(
+    freshNavigation,
+    '',
+    'fresh-tab',
+  );
+  assert.equal(await freshShellResponse.text(), '<html>offline shell</html>');
+  const freshAssetResponse = await dispatchFetch(
+    new Request('https://app.test/assets/translation.json'),
+    'fresh-tab',
+  );
+  assert.equal(await freshAssetResponse.text(), '{}',
+    'a cold page must load subresources before its report script executes');
+
+  const openedBeforeUnknownFetch = openedCaches.length;
+  const unknownGenerationResponse = await dispatchFetch(
+    new Request('https://app.test/assets/translation.json'),
+    'older-open-tab',
+  );
+  assert.equal(unknownGenerationResponse.type, 'error');
+  assert.equal(openedCaches.length, openedBeforeUnknownFetch,
+    'activation must not guess one old cache for an unreported client');
+  await reportVersion(clientsById.get('older-open-tab'), '1.2.3+3');
+
   // controllerchange runs inside the old page before its accepted reload and
   // therefore reports the previous version to the new worker. The updating
   // tab must stay on the new shell instead of being pinned back to the old one.
@@ -197,17 +263,6 @@ try {
     source: { id: 'updating-tab' },
     waitUntil: () => {},
   });
-
-  async function dispatchFetch(request, clientId = '') {
-    let responsePromise;
-    handlers.fetch({
-      request,
-      clientId,
-      respondWith: (promise) => { responsePromise = promise; },
-    });
-    assert.ok(responsePromise, `worker did not handle ${request.url}`);
-    return responsePromise;
-  }
 
   const fontResponse = await dispatchFetch(new Request(fontUrl));
   assert.equal(await fontResponse.text(), 'cached emoji font');
@@ -299,14 +354,43 @@ try {
   assert.deepEqual(cachedPuts, ['https://app.test/main.dart.js']);
   assert.equal(networkCalls, 7);
 
+  await reportVersion(clientsById.get('updating-tab'), '1.2.3+4');
+  await reportVersion(clientsById.get('older-open-tab'), '1.2.3+3');
+  assert.deepEqual(deletedCaches, ['festapp-app-shell-1.2.3+2']);
+  assert.ok(cacheNames.includes('festapp-used-fonts-v1'));
+
+  context.self.navigator.onLine = false;
+  const currentAfterPrune = await dispatchFetch(navigation, 'updating-tab');
+  assert.equal(await currentAfterPrune.text(), '<html>offline shell</html>');
+  assert.equal(openedCaches.at(-1), 'festapp-app-shell-1.2.3+4');
+  const liveAfterPrune = await dispatchFetch(
+    new Request('https://app.test/assets/translation.json'),
+    'older-open-tab',
+  );
+  assert.equal(await liveAfterPrune.text(), '{}');
+  assert.equal(openedCaches.at(-1), 'festapp-app-shell-1.2.3+3');
+
   const webClientIndex = await readFile(
     path.join(projectRoot, 'web_client/index.html'),
     'utf8',
   );
   assert.match(webClientIndex, /serviceWorker\.register\('\/festapp_service_worker\.js'/);
+  assert.match(webClientIndex, /import \{ APP_VERSION \} from '\/src\/version\.js'/);
+  assert.match(webClientIndex, /type: 'FESTAPP_CLIENT_VERSION'/);
+  assert.match(webClientIndex, /version: APP_VERSION/);
+  assert.match(webClientIndex, /controllerchange/);
+  assert.match(webClientIndex, /visibilitychange/);
   assert.doesNotMatch(webClientIndex, /serviceWorker\.getRegistrations\(\)/);
   assert.match(webClientIndex, /performance\.getEntriesByType\('resource'\)/);
   const flutterIndex = await readFile(path.join(projectRoot, 'web/index.html'), 'utf8');
+  const ciBuild = await readFile(
+    path.join(projectRoot, 'automation/ci_build.sh'),
+    'utf8',
+  );
+  const cloudflareBuild = await readFile(
+    path.join(projectRoot, 'automation/cloudflare_build.sh'),
+    'utf8',
+  );
   const appConfig = await readFile(path.join(projectRoot, 'lib/app_config.dart'), 'utf8');
   const oneSignalWorker = await readFile(
     path.join(projectRoot, 'web/push/OneSignalSDKWorker.js'),
@@ -318,6 +402,18 @@ try {
     'installed PWA notifications must remain enabled for this deployment',
   );
   assert.match(flutterIndex, /serviceWorkerPath: "\.\/push\/OneSignalSDKWorker\.js"/);
+  assert.match(worker, /festapp-occasion-media-v1/);
+  assert.match(worker, /request\.destination === 'image'/);
+  assert.doesNotMatch(
+    flutterIndex,
+    /canvasKitForceMultiSurfaceRasterizer/,
+    'Chromium must keep Flutter’s default offscreen rasterizer; the multi-surface fallback uses multiple WebGL contexts and is reserved for Safari/Firefox',
+  );
+  assert.doesNotMatch(ciBuild, /FLUTTER_WEB_CANVASKIT_FORCE_MULTI_SURFACE_RASTERIZER/);
+  assert.doesNotMatch(
+    cloudflareBuild,
+    /FLUTTER_WEB_CANVASKIT_FORCE_MULTI_SURFACE_RASTERIZER/,
+  );
   assert.match(flutterIndex, /serviceWorkerParam: \{ scope: "\/push\/" \}/);
   assert.match(
     flutterIndex,
@@ -335,10 +431,26 @@ try {
   assert.match(flutterIndex, /performance\.getEntriesByType\('resource'\)/);
   assert.match(flutterIndex, /window\.recoverFestappStartup\('bootstrap-error'\)/);
   assert.match(flutterIndex, /festapp-app-ready/);
+  assert.match(flutterIndex, /window\.markFestappAppReady = function/);
+  const engineStarted = flutterIndex.match(
+    /await appRunner\.runApp\(\);[\s\S]*?const loader/,
+  )?.[0] ?? '';
+  assert.doesNotMatch(
+    engineStarted,
+    /__FESTAPP_APP_READY__\s*=\s*true/,
+    'engine startup must not hide an application startup stall from PWA recovery',
+  );
   assert.match(flutterIndex, /__FESTAPP_LOCAL_DEVELOPMENT__/);
   assert.match(flutterIndex, /festappLocalDevelopmentReady/);
   assert.match(flutterIndex, /serviceWorker\.getRegistrations\(\)/);
   assert.match(flutterIndex, /festapp-app-shell-/);
+  assert.match(flutterIndex, /<svg class="initial-logo"/);
+  assert.match(
+    flutterIndex,
+    /svg\.initial-logo\s*\{[\s\S]*?max-width:\s*320px/,
+    'the tenant-specific inline startup logo must keep its CSM sizing',
+  );
+  assert.doesNotMatch(flutterIndex, /<img class="initial-logo"/);
   const updatePrompt = await readFile(
     path.join(projectRoot, 'web/festapp_update_prompt.js'),
     'utf8',
@@ -348,6 +460,7 @@ try {
   assert.match(updatePrompt, /startupRecoveryStorageKey/);
   assert.match(updatePrompt, /navigator\.onLine === false/);
   assert.match(updatePrompt, /FESTAPP_CLIENT_VERSION/);
+  assert.match(updatePrompt, /serviceWorker\.ready\.then\(reportClientVersion\)/);
   assert.match(
     updatePrompt,
     /if \(window\.__FESTAPP_LOCAL_DEVELOPMENT__\) return;/,

@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 
-import { access, readdir, stat, writeFile } from 'node:fs/promises';
+import { writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { collectPwaShellManifest } from './lib/pwa_shell_manifest.mjs';
 
 const buildDir = path.resolve(process.argv[2] || 'build/web');
 const version = process.argv[3];
@@ -17,87 +18,12 @@ if (forcedOccasionLink && !/^[a-zA-Z0-9_-]+$/.test(forcedOccasionLink)) {
 }
 
 const outputName = 'festapp_service_worker.js';
-const excludedNames = new Set([
-  '.last_build_id',
-  '_headers',
-  '_redirects',
-  '_worker.js',
-  'flutter_service_worker.js',
-  outputName,
-]);
-
-function shouldPrecache(relativePath) {
-  const name = path.posix.basename(relativePath);
-  if (excludedNames.has(name)) return false;
-  if (name === 'NOTICES' || name.endsWith('.map') || name.endsWith('.symbols')) {
-    return false;
-  }
-  // emit_version_manifest.sh keeps this diagnostic copy next to main.dart.js.
-  // Caching both would waste several MB without adding an executable resource.
-  // Deferred `main.dart.js_<n>.part.js` files are executable and must remain
-  // in the app shell; otherwise an installed PWA stalls when a deferred route
-  // is opened offline.
-  if (/^main\.dart\..+\.js$/.test(name) &&
-      !/^main\.dart\.js_\d+\.part\.js$/.test(name)) return false;
-  return true;
-}
-
-async function collectFiles(directory, prefix = '') {
-  const entries = await readdir(directory, { withFileTypes: true });
-  const files = [];
-  for (const entry of entries.sort((a, b) => a.name.localeCompare(b.name))) {
-    const relativePath = path.posix.join(prefix, entry.name);
-    if (entry.isDirectory()) {
-      files.push(...await collectFiles(path.join(directory, entry.name), relativePath));
-    } else if (entry.isFile() && shouldPrecache(relativePath)) {
-      files.push(`/${relativePath}`);
-    }
-  }
-  return files;
-}
-
-async function firstExisting(candidates) {
-  for (const candidate of candidates) {
-    try {
-      await access(path.join(buildDir, candidate));
-      return `/${candidate}`;
-    } catch (_) {}
-  }
-  throw new Error(`Missing required entry point: ${candidates.join(' or ')}`);
-}
-
-const flutterEntry = await firstExisting(['flutter', 'flutter.html']);
-const webClientEntry = await firstExisting(['webclient', 'index.html']);
-
-const files = await collectFiles(buildDir);
-function deploymentUrl(url) {
-  if (url === '/flutter') return '/flutter?pwa-cache=1';
-  if (url === '/webclient') return '/webclient?pwa-cache=1';
-  return url.endsWith('/index.html') ? url.slice(0, -'index.html'.length) : url;
-}
-const assets = [...new Set(files.map(deploymentUrl))];
-const standaloneDocuments = files
-  .filter((url) => url !== '/index.html' && url.endsWith('/index.html'))
-  .map(deploymentUrl);
-const standaloneDocumentSet = new Set(standaloneDocuments);
-const installCriticalNames = new Set([
-  '/flutter.js',
-  '/flutter_bootstrap.js',
-  '/main.dart.js',
-  '/festapp_update_prompt.js',
-  '/festapp-version.json',
-  '/manifest.json',
-  '/manifest.webmanifest',
-  '/AssetManifest.json',
-  '/FontManifest.json',
-]);
-const coreAssets = assets.filter((url) =>
-  url === deploymentUrl(flutterEntry) ||
-  url === deploymentUrl(webClientEntry) ||
-  standaloneDocumentSet.has(url) ||
-  installCriticalNames.has(url.split('?')[0]) ||
-  /^\/main\.dart\.js_\d+\.part\.js$/.test(url.split('?')[0])
-);
+const manifest = await collectPwaShellManifest(buildDir);
+const assets = manifest.knownResources;
+const coreAssets = manifest.coreResources;
+const standaloneDocuments = manifest.standaloneDocuments;
+const flutterEntry = manifest.flutterEntry;
+const webClientEntry = manifest.webClientEntry;
 const cacheName = `festapp-app-shell-${version}`;
 const source = `'use strict';
 
@@ -105,17 +31,44 @@ const BUILD_VERSION = ${JSON.stringify(version)};
 const CACHE_NAME = ${JSON.stringify(cacheName)};
 const CACHE_PREFIX = 'festapp-app-shell-';
 const FONT_CACHE_NAME = 'festapp-used-fonts-v1';
+const OCCASION_MEDIA_CACHE_NAME = 'festapp-occasion-media-v1';
 const PRECACHE_URLS = ${JSON.stringify(assets, null, 2)};
 const CORE_URLS = ${JSON.stringify(coreAssets, null, 2)};
-const FLUTTER_ENTRY = ${JSON.stringify(deploymentUrl(flutterEntry))};
-const WEB_CLIENT_ENTRY = ${JSON.stringify(deploymentUrl(webClientEntry))};
+const FLUTTER_ENTRY = ${JSON.stringify(flutterEntry)};
+const WEB_CLIENT_ENTRY = ${JSON.stringify(webClientEntry)};
 const FORCED_OCCASION_PATH = ${JSON.stringify(forcedOccasionLink ? `/${forcedOccasionLink}` : null)};
 const STANDALONE_DOCUMENT_PATHS = new Set(${JSON.stringify(standaloneDocuments, null, 2)});
 const PRECACHE_PATHS = new Set(PRECACHE_URLS.map((url) =>
   new URL(url, self.location.origin).pathname));
 const clientVersions = new Map();
 const clientCacheNames = new Map();
+const pendingClientVersionReports = new Map();
 let cutoverClientId = null;
+let cacheMutationStatusUnknown = false;
+const STORAGE_API_TIMEOUT_MS = 1000;
+const CLIENT_VERSION_REPORT_TIMEOUT_MS = 1000;
+const MAX_EXPLICIT_PRUNE_OPERATIONS = 100;
+// 0.19.85+418 recorded cold navigations under the empty clientId instead of
+// resultingClientId, deadlocking every first-party subresource. A waiting
+// worker cannot be activated by that page because its update script is one of
+// the blocked resources. Only clients carrying this known-bad shell may bypass
+// the normal user-confirmed cutover.
+const EMERGENCY_RECOVERY_CACHE_NAMES = new Set([
+  'festapp-app-shell-0.19.85+418',
+]);
+
+function withStorageTimeout(promise) {
+  let timeoutId;
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => {
+      timeoutId = setTimeout(
+        () => reject(new Error('storage-api-timeout')),
+        STORAGE_API_TIMEOUT_MS,
+      );
+    }),
+  ]).finally(() => clearTimeout(timeoutId));
+}
 
 async function precacheAtomically() {
   const cache = await caches.open(CACHE_NAME);
@@ -126,31 +79,183 @@ async function precacheAtomically() {
   await cache.addAll(CORE_URLS);
 }
 
+async function requiresEmergencyCutover() {
+  try {
+    const names = await withStorageTimeout(caches.keys());
+    return names.some((name) => EMERGENCY_RECOVERY_CACHE_NAMES.has(name));
+  } catch (_) {
+    return false;
+  }
+}
+
+function recordClientVersion(clientId, version) {
+  clientVersions.set(clientId, version);
+  const pending = pendingClientVersionReports.get(clientId);
+  if (pending) {
+    clearTimeout(pending.timeoutId);
+    pending.resolve(true);
+    pendingClientVersionReports.delete(clientId);
+  }
+}
+
+function waitForClientVersion(clientId) {
+  if (clientVersions.has(clientId)) return Promise.resolve(true);
+  const existing = pendingClientVersionReports.get(clientId);
+  if (existing) return existing.promise;
+  let resolveReport;
+  const promise = new Promise((resolve) => { resolveReport = resolve; });
+  const pending = {
+    promise,
+    resolve: resolveReport,
+    timeoutId: setTimeout(() => {
+      pendingClientVersionReports.delete(clientId);
+      resolveReport(false);
+    }, CLIENT_VERSION_REPORT_TIMEOUT_MS),
+  };
+  pendingClientVersionReports.set(clientId, pending);
+  return promise;
+}
+
 self.addEventListener('install', (event) => {
-  event.waitUntil(precacheAtomically());
+  event.waitUntil((async () => {
+    await precacheAtomically();
+    if (await requiresEmergencyCutover()) await self.skipWaiting();
+  })());
 });
 
-async function deleteUnusedShellsWhenSafe() {
-  const windowClients = await self.clients.matchAll({
-    type: 'window',
-    includeUncontrolled: true,
-  });
-  // An unreported client can be an older open tab that still executes from an
-  // older shell. Keep every version until all tabs explicitly report that they
-  // are running this build.
-  if (windowClients.some((client) =>
-    clientVersions.get(client.id) !== BUILD_VERSION)) return;
+async function reconcileShellCaches({ apply = false } = {}) {
+  try {
+    const windowClients = await withStorageTimeout(self.clients.matchAll({
+      type: 'window',
+      includeUncontrolled: true,
+    }));
+    const names = await withStorageTimeout(caches.keys());
+    const shellNames = names.filter((name) => name.startsWith(CACHE_PREFIX));
+    const liveVersions = [];
+    let unknown = 0;
+    for (const client of windowClients) {
+      const version = clientVersions.get(client.id);
+      if (typeof version !== 'string' || version.length === 0) {
+        unknown++;
+      } else {
+        liveVersions.push(version);
+      }
+    }
+    const live = [...new Set(liveVersions)].sort();
+    const retained = [...new Set([
+      CACHE_NAME,
+      ...live.map((version) => CACHE_PREFIX + version),
+    ])].sort();
+    const missing = retained.filter((name) => !shellNames.includes(name));
+    let blocker = cacheMutationStatusUnknown
+      ? 'cache-delete-status-unknown'
+      : unknown > 0
+      ? 'unknown-live-client'
+      : missing.length > 0
+        ? 'missing-live-shell'
+        : null;
+    const deletable = blocker === null
+      ? shellNames.filter((name) => !retained.includes(name)).sort()
+      : [];
+    const deleted = [];
+    if (apply && blocker === null && deletable.length > 0) {
+      // Cache Storage has no transactional multi-delete or cancellation. Apply
+      // one already-approved name per reconciliation so a later API failure can
+      // never leave an unreported partially-completed batch.
+      const name = deletable[0];
+      try {
+        if (await withStorageTimeout(caches.delete(name))) {
+          deleted.push(name);
+        } else {
+          blocker = 'cache-delete-rejected';
+        }
+      } catch (error) {
+        blocker = error?.message === 'storage-api-timeout'
+          ? 'cache-delete-status-unknown'
+          : 'cache-delete-error';
+        if (blocker === 'cache-delete-status-unknown') {
+          // Cache Storage cannot cancel an already-dispatched delete. Keep all
+          // later mutation attempts blocked for this worker lifetime rather
+          // than racing an operation whose eventual result is unknown.
+          cacheMutationStatusUnknown = true;
+        }
+      }
+    }
+    return {
+      current: BUILD_VERSION,
+      live,
+      unknown,
+      retained,
+      deletable,
+      blocker,
+      deleted,
+    };
+  } catch (error) {
+    return {
+      current: BUILD_VERSION,
+      live: [],
+      unknown: 0,
+      retained: [CACHE_NAME],
+      deletable: [],
+      blocker: error?.message === 'storage-api-timeout'
+        ? 'storage-api-timeout'
+        : 'storage-api-error',
+      deleted: [],
+    };
+  }
+}
 
-  const names = await caches.keys();
-  await Promise.all(names
-    .filter((name) => (name.startsWith(CACHE_PREFIX) && name !== CACHE_NAME) ||
-      name.startsWith('flutter-app-cache'))
-    .map((name) => caches.delete(name)));
+async function pruneAllUnusedShellCaches() {
+  const deleted = [];
+  for (let operation = 0; operation < MAX_EXPLICIT_PRUNE_OPERATIONS; operation++) {
+    const result = await reconcileShellCaches({ apply: true });
+    deleted.push(...result.deleted);
+    if (result.blocker !== null || result.deleted.length === 0) {
+      return { ...result, deleted };
+    }
+    if (result.deletable.length === 1) {
+      return { ...result, deletable: [], deleted };
+    }
+  }
+  const result = await reconcileShellCaches({ apply: false });
+  return {
+    ...result,
+    blocker: result.blocker || 'prune-operation-limit',
+    deleted,
+  };
+}
+
+// Cache Storage mutations are serialized. Concurrent client reports, manual
+// pruning and activation must not inspect the same stale set and race to delete
+// it twice.
+let reconcileQueue = Promise.resolve();
+function scheduleShellReconcile(options) {
+  const scheduled = reconcileQueue.then(() => reconcileShellCaches(options));
+  reconcileQueue = scheduled.catch(() => {});
+  return scheduled;
+}
+
+function scheduleExplicitShellPrune() {
+  const scheduled = reconcileQueue.then(() => pruneAllUnusedShellCaches());
+  reconcileQueue = scheduled.catch(() => {});
+  return scheduled;
 }
 
 self.addEventListener('message', (event) => {
   if (event.data?.type === 'FESTAPP_QUERY_BUILD_VERSION') {
     event.ports?.[0]?.postMessage({ version: BUILD_VERSION });
+    return;
+  }
+  if (event.data?.type === 'FESTAPP_INSPECT_SHELLS') {
+    event.waitUntil(scheduleShellReconcile({ apply: false }).then((result) => {
+      event.ports?.[0]?.postMessage(result);
+    }));
+    return;
+  }
+  if (event.data?.type === 'FESTAPP_PRUNE_UNUSED_SHELLS') {
+    event.waitUntil(scheduleExplicitShellPrune().then((result) => {
+      event.ports?.[0]?.postMessage(result);
+    }));
     return;
   }
   if (event.data === 'SKIP_WAITING') {
@@ -164,7 +269,7 @@ self.addEventListener('message', (event) => {
     // client back to the old shell recreates a mixed-generation mobile reload.
     if (event.source.id === cutoverClientId &&
         event.data.version !== BUILD_VERSION) return;
-    clientVersions.set(event.source.id, event.data.version);
+    recordClientVersion(event.source.id, event.data.version);
     if (event.data.version === BUILD_VERSION) {
       clientCacheNames.delete(event.source.id);
       if (event.source.id === cutoverClientId) cutoverClientId = null;
@@ -174,34 +279,46 @@ self.addEventListener('message', (event) => {
         CACHE_PREFIX + event.data.version,
       );
     }
-    event.waitUntil(deleteUnusedShellsWhenSafe());
+    event.waitUntil(scheduleShellReconcile({ apply: true }));
   }
 });
 
 self.addEventListener('activate', (event) => {
   event.waitUntil((async () => {
-    const windowClients = await self.clients.matchAll({
-      type: 'window',
-      includeUncontrolled: true,
-    });
-    const names = await caches.keys();
-    const previousCacheName = names
-      .filter((name) => name.startsWith(CACHE_PREFIX) && name !== CACHE_NAME)
-      .at(-1);
-    // Route already-open tabs to the previous shell before claiming them. The
-    // requesting tab is about to reload and must receive this worker's shell.
-    if (previousCacheName) {
+    let windowClients = [];
+    try {
+      windowClients = await withStorageTimeout(self.clients.matchAll({
+        type: 'window',
+        includeUncontrolled: true,
+      }));
+    } catch (_) {
+      // Activation remains available, but reconciliation below fails closed.
+    }
+    const emergencyCutover = await requiresEmergencyCutover();
+    // Do not guess one "previous" cache for every already-open tab: multiple
+    // old generations can legitimately coexist. After claim, runtime fetches
+    // wait briefly for each page's exact version report and fail closed if it
+    // never arrives. Navigations are the explicit current-version boundary.
+    await self.clients.claim();
+    if (emergencyCutover) {
+      // The broken page never loaded its reporting script. Bind it to this
+      // fully installed shell before reloading so no request can re-enter the
+      // client-version handshake deadlock.
       for (const client of windowClients) {
-        if (client.id !== cutoverClientId) {
-          clientCacheNames.set(client.id, previousCacheName);
+        clientCacheNames.delete(client.id);
+        recordClientVersion(client.id, BUILD_VERSION);
+        try {
+          await client.navigate(client.url);
+        } catch (_) {
+          // A later manual navigation remains recoverable by resultingClientId.
         }
       }
+    } else {
+      for (const client of windowClients) {
+        client.postMessage({ type: 'FESTAPP_REPORT_VERSION' });
+      }
     }
-    await self.clients.claim();
-    for (const client of windowClients) {
-      client.postMessage({ type: 'FESTAPP_REPORT_VERSION' });
-    }
-    await deleteUnusedShellsWhenSafe();
+    await scheduleShellReconcile({ apply: true });
   })());
 });
 
@@ -287,6 +404,16 @@ self.addEventListener('fetch', (event) => {
     })());
     return;
   }
+  // Media listed by occasion_config is prefetched into a stable CacheStorage
+  // sidecar by Flutter. Serve that exact response to normal image requests on
+  // cold offline PWA starts; unrelated cross-origin requests remain untouched.
+  if (request.destination === 'image' && url.origin !== self.location.origin) {
+    event.respondWith((async () => {
+      const mediaCache = await caches.open(OCCASION_MEDIA_CACHE_NAME);
+      return (await mediaCache.match(request)) || fetch(request);
+    })());
+    return;
+  }
   if (url.origin !== self.location.origin) return;
 
   // This is the network truth used to discover a newer completed deployment.
@@ -301,12 +428,24 @@ self.addEventListener('fetch', (event) => {
   }
 
   event.respondWith((async () => {
+    // Navigation fetches create a new WindowClient. Browsers expose that new
+    // identity as resultingClientId while clientId is commonly empty. Every
+    // subsequent subresource request uses the resulting id, so record and
+    // select the shell under that same canonical identity or the page deadlocks
+    // before its version-reporting script can load.
+    const clientId = request.mode === 'navigate'
+      ? (event.resultingClientId || event.clientId)
+      : event.clientId;
     // A full-page navigation is the explicit cutover boundary for that tab.
     // Runtime requests from an older, still-open tab stay on its mapped shell.
-    if (request.mode === 'navigate' && event.clientId) {
-      clientCacheNames.delete(event.clientId);
+    if (request.mode === 'navigate' && clientId) {
+      clientCacheNames.delete(clientId);
+      recordClientVersion(clientId, BUILD_VERSION);
+    } else if (clientId && !clientVersions.has(clientId)) {
+      const reported = await waitForClientVersion(clientId);
+      if (!reported) return Response.error();
     }
-    const selectedCacheName = clientCacheNames.get(event.clientId) || CACHE_NAME;
+    const selectedCacheName = clientCacheNames.get(clientId) || CACHE_NAME;
     const cache = await caches.open(selectedCacheName);
     const cached = await cache.match(request, { ignoreSearch: true });
     if (cached) return cached;
@@ -332,7 +471,7 @@ self.addEventListener('fetch', (event) => {
       // loading placeholder forever after the incompatible chunk fails.
       if (selectedCacheName !== CACHE_NAME) {
         if (isFlutterBootstrapExecutable(url.pathname)) {
-          clientCacheNames.delete(event.clientId);
+          clientCacheNames.delete(clientId);
           const currentCache = await caches.open(CACHE_NAME);
           const currentExecutable = await currentCache.match(request, {
             ignoreSearch: true,
@@ -341,8 +480,8 @@ self.addEventListener('fetch', (event) => {
           return recoverCurrentExecutable(request, currentCache, true);
         }
         try {
-          const client = event.clientId
-            ? await self.clients.get(event.clientId)
+          const client = clientId
+            ? await self.clients.get(clientId)
             : null;
           if (client) await client.navigate(client.url);
         } catch (_) {
@@ -376,8 +515,4 @@ self.addEventListener('fetch', (event) => {
 
 await writeFile(path.join(buildDir, outputName), source);
 
-const totalBytes = (await Promise.all(files.map(async (url) =>
-  (await stat(path.join(buildDir, url.slice(1)))).size
-))).reduce((sum, size) => sum + size, 0);
-
-console.log(`generate_pwa_service_worker: ${assets.length} files, ${(totalBytes / 1024 / 1024).toFixed(1)} MiB, ${cacheName}`);
+console.log(`generate_pwa_service_worker: ${assets.length} files, ${(manifest.knownBytes / 1024 / 1024).toFixed(1)} MiB, ${cacheName}`);

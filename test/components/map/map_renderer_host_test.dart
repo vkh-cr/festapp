@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart' as fm;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fstapp/components/features/map_feature.dart';
 import 'package:fstapp/components/map/legacy_map_surface.dart';
 import 'package:fstapp/components/map/map_renderer_host.dart';
+import 'package:fstapp/components/map/map_place_model.dart';
 import 'package:fstapp/components/map/map_scene.dart';
 import 'package:fstapp/components/map/map_viewport_controller.dart';
 import 'package:latlong2/latlong.dart';
 
 void main() {
-  MapSurfaceModel model() => MapSurfaceModel(
+  MapSurfaceModel model({bool active = true}) => MapSurfaceModel(
+        active: active,
         scene: const MapScene(),
         icons: const [],
         initialCenter: const LatLng(49.8, 18.2),
@@ -49,6 +52,21 @@ void main() {
     expect(find.text('legacy'), findsNothing);
   });
 
+  testWidgets('keeps the concrete surface warm while its tab is inactive',
+      (tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: MapRendererHost(
+        renderer: OfflineMapRenderer.legacy,
+        isOffline: true,
+        model: model(active: false),
+        legacy: LegacyMapConfiguration.offlineUnavailable(MapLayer()),
+      ),
+    ));
+
+    expect(find.byType(LegacyMapSurface), findsOneWidget);
+    expect(find.byType(fm.FlutterMap), findsOneWidget);
+  });
+
   testWidgets('keeps offline Legacy as an explicit supported renderer',
       (tester) async {
     await tester.pumpWidget(MaterialApp(
@@ -61,6 +79,8 @@ void main() {
     ));
 
     expect(find.byType(LegacyMapSurface), findsOneWidget);
+    final map = tester.widget<fm.FlutterMap>(find.byType(fm.FlutterMap));
+    expect(map.options.maxZoom, MapZoomLimits.interactionMaximum);
   });
 
   testWidgets('does not silently fall back when MapLibre is unavailable',
@@ -87,5 +107,105 @@ void main() {
       ),
       OfflineMapRenderer.legacy,
     );
+  });
+
+  test('map renderers allow the maximum supported interaction zoom', () {
+    expect(MapZoomLimits.interactionMaximum, 22);
+  });
+
+  testWidgets('online Legacy overzooms without requesting deeper raster tiles',
+      (tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: MapRendererHost(
+        renderer: OfflineMapRenderer.legacy,
+        isOffline: false,
+        model: model(),
+        legacy: legacy(),
+      ),
+    ));
+
+    final map = tester.widget<fm.FlutterMap>(find.byType(fm.FlutterMap));
+    final tiles = tester.widget<fm.TileLayer>(find.byType(fm.TileLayer));
+    expect(map.options.maxZoom, MapZoomLimits.interactionMaximum);
+    expect(tiles.maxZoom, MapZoomLimits.interactionMaximum);
+    expect(tiles.maxNativeZoom, MapZoomLimits.onlineRasterNativeMaximum);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump(const Duration(seconds: 1));
+  });
+
+  testWidgets('configured online provider keeps an independent OSM base layer',
+      (tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: MapRendererHost(
+        renderer: OfflineMapRenderer.legacy,
+        isOffline: false,
+        model: model(),
+        legacy: LegacyMapConfiguration.online(
+          MapLayer(layerLink: 'https://primary.example/{z}/{x}/{y}.png'),
+        ),
+      ),
+    ));
+
+    final layers = tester.widgetList<fm.TileLayer>(find.byType(fm.TileLayer));
+    expect(layers, hasLength(2));
+    expect(
+      layers.first.urlTemplate,
+      'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+    );
+    expect(layers.last.urlTemplate, 'https://primary.example/{z}/{x}/{y}.png');
+    expect(layers.last.fallbackUrl,
+        'https://tile.openstreetmap.org/{z}/{x}/{y}.png');
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump(const Duration(seconds: 1));
+  });
+
+  testWidgets('Legacy place long press uses the shared navigation callback',
+      (tester) async {
+    const coordinate = LatLng(49.8, 18.2);
+    int? longPressedPlaceId;
+    final longPressModel = MapSurfaceModel(
+      active: true,
+      scene: MapScene(
+        places: [
+          MapPlacePresentation(
+            place: MapPlaceModel(
+              id: 7,
+              title: 'WC',
+              latLng: coordinate,
+            ),
+            coordinate: coordinate,
+            pinColorValue: Colors.orange.toARGB32(),
+          ),
+        ],
+      ),
+      icons: const [],
+      initialCenter: coordinate,
+      initialZoom: 14,
+      viewport: MapViewportCoordinator(),
+      onMapTap: (_) {},
+      onPlaceTap: (_) {},
+      onPlaceLongPress: (placeId) => longPressedPlaceId = placeId,
+    );
+
+    await tester.pumpWidget(MaterialApp(
+      home: MapRendererHost(
+        renderer: OfflineMapRenderer.legacy,
+        isOffline: false,
+        model: longPressModel,
+        legacy: legacy(),
+      ),
+    ));
+
+    final longPressTarget = find.byWidgetPredicate(
+      (widget) => widget is GestureDetector && widget.onLongPress != null,
+    );
+    expect(longPressTarget, findsOneWidget);
+    await tester.longPress(longPressTarget);
+    expect(longPressedPlaceId, 7);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump(const Duration(seconds: 1));
   });
 }

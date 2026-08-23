@@ -13,6 +13,7 @@ import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/schedule/event_edit_page.dart';
 import 'package:fstapp/components/map/map_navigation.dart';
+import 'package:fstapp/components/map/public_map_session.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/components/schedule/event_model.dart';
 import 'package:fstapp/components/schedule/db_events.dart';
@@ -236,8 +237,9 @@ class _MySchedulePageState extends State<MySchedulePage> {
         .then((_) => loadData());
   }
 
-  void _goToMap(int placeId) {
-    MapNavigation.openPlace(context, placeId).then((_) => loadData());
+  Future<void> _goToMap(int placeId) async {
+    final result = await MapNavigation.openPlace(context, placeId);
+    if (mounted && result.kind == MapVisitKind.returned) await loadData();
   }
 
   bool _isUserApprover() => RightsService.isApprover();

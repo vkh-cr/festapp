@@ -225,7 +225,7 @@ create table if not exists public.cleaning_reports (
   data         JSONB NULL,
   CONSTRAINT cleaning_reports_pkey PRIMARY KEY (id),
   CONSTRAINT cleaning_reports_occasion_fkey FOREIGN KEY (occasion) REFERENCES public.occasions (id),
-  CONSTRAINT cleaning_reports_place_fkey FOREIGN KEY (place) REFERENCES public.places (id),
+  CONSTRAINT cleaning_reports_place_fkey FOREIGN KEY (place) REFERENCES public.places (id) ON DELETE CASCADE,
   CONSTRAINT cleaning_reports_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.user_info (id),
   CONSTRAINT cleaning_reports_resolved_by_fkey FOREIGN KEY (resolved_by) REFERENCES public.user_info (id),
   -- problem_type list kept in sync with: report_cleaning_issue.sql,
@@ -771,10 +771,12 @@ create table if not exists public.log_emails (
   organization BIGINT NOT NULL DEFAULT '1'::bigint,
   occasion BIGINT NULL,
   unit BIGINT NULL,
+  recipient_user UUID NULL,
   CONSTRAINT log_emails_pkey PRIMARY KEY (id),
   CONSTRAINT log_emails_occasion_fkey FOREIGN KEY (occasion) REFERENCES public.occasions (id),
   CONSTRAINT log_emails_organization_fkey FOREIGN KEY (organization) REFERENCES public.organizations (id),
-  CONSTRAINT log_emails_unit_fkey FOREIGN KEY (unit) REFERENCES public.units (id)
+  CONSTRAINT log_emails_unit_fkey FOREIGN KEY (unit) REFERENCES public.units (id),
+  CONSTRAINT log_emails_recipient_user_fkey FOREIGN KEY (recipient_user) REFERENCES public.user_info (id) ON DELETE SET NULL
 ) TABLESPACE pg_default;
 
 create table if not exists public.events (
@@ -912,6 +914,8 @@ create table if not exists public.user_login_qr_credentials (
   occasion bigint not null,
   "user" uuid not null,
   token_hash text not null,
+  manual_token_hash text,
+  manual_expires_at timestamptz,
   created_by uuid not null,
   created_at timestamptz not null default now(),
   rotated_at timestamptz null,
@@ -920,10 +924,13 @@ create table if not exists public.user_login_qr_credentials (
   use_count bigint not null default 0,
   constraint user_login_qr_credentials_pkey primary key (occasion, "user"),
   constraint user_login_qr_credentials_hash_key unique (token_hash),
+  constraint user_login_qr_credentials_manual_hash_key unique (manual_token_hash),
   constraint user_login_qr_credentials_membership_fkey foreign key (occasion, "user")
     references public.occasion_users(occasion, "user") on delete cascade,
   constraint user_login_qr_credentials_created_by_fkey foreign key (created_by) references public.user_info(id),
-  constraint user_login_qr_credentials_hash_check check (token_hash ~ '^[0-9a-f]{64}$')
+  constraint user_login_qr_credentials_hash_check check (token_hash ~ '^[0-9a-f]{64}$'),
+  constraint user_login_qr_credentials_manual_hash_check check (manual_token_hash is null or manual_token_hash ~ '^[0-9a-f]{64}$'),
+  constraint user_login_qr_credentials_manual_expiry_check check ((manual_token_hash is null) = (manual_expires_at is null))
 ) tablespace pg_default;
 
 alter table public.user_login_qr_credentials enable row level security;

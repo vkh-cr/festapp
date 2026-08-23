@@ -93,6 +93,7 @@
     "deleteAccount": "Видалити акаунт",
     "deleteCompanion": "Видалити супутника",
     "inviteFailed": "Не вдалося запросити {user}. Спроб: ({retries}).",
+    "invitationStatusFailed": "Код входу надіслано користувачу {user}, але запис аудиту не вдалося зберегти. Лист не буде надіслано повторно автоматично.",
     "fillPassword": "Введіть пароль!",
     "companionInfo": "Супутник є окремим учасником без власного пристрою. Максимум: {max_companions}.",
     "noGroup": "Без групи",
@@ -405,6 +406,10 @@
   },
   "FeatureMap": {
     "changeLocation": "Змінити місцезнаходження",
+    "navigate": "Навігація",
+    "chooseNavigationApp": "Виберіть навігаційний застосунок",
+    "loadingMap": "Завантаження карти…",
+    "counselingHours": "Години консультацій",
     "drawPath": "Намалювати маршрут",
     "importRouteHint": "Експортуйте маршрут із Mapy.com (або Strava, Garmin, komoot…) як GPX і перетягніть його сюди.",
     "forceOfflineMap": "Примусово використовувати офлайн-карти",

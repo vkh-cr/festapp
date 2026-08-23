@@ -854,7 +854,14 @@
     "androidInstallHint": "Open this website on your Android phone in a browser like Chrome or Edge and hit the Install Now button.",
     "appAlreadyInstalled": "The app is already installed.",
     "pwaPromptNotSupported": "This platform or browser does not support the PWA install prompt or the app is already installed.",
-    "installOptionsLoadFailed": "Failed to load installation options."
+    "installOptionsLoadFailed": "Failed to load installation options.",
+    "storageTitle": "App storage",
+    "inspectStorage": "Inspect storage",
+    "pruneShells": "Free unused versions",
+    "pruneShellsConfirm": "Only unused app versions will be removed. Sign-in, offline data, and fonts remain preserved.",
+    "storageUsage": "Browser usage: {usage} MiB of {quota} MiB",
+    "storageBlocked": "The app will not remove anything right now. Your data remains safe.",
+    "storageReady": "Retained versions: {retained}; deletable: {deletable}"
   },
   "GroupStrings": {
     "newGroup": "New Group",
@@ -1174,6 +1181,7 @@
     "forgotPasswordQuestion": "Forgot Password?",
     "forgotYourPassword": "Forgot your password?",
     "sendResetEmail": "Send Reset Email",
+    "existingAccountRecoveryHelp": "Already have an account? Enter the same e-mail address. We will send you a secure link to set a new password.",
     "changePasswordTitle": "Change Password",
     "createPasswordToContinue": "Create a new password to continue.",
     "iAm": "I am",
@@ -1239,7 +1247,8 @@
     "passwordResetFailed": "The password reset email could not be sent. Please try again later.",
     "passwordResetEmailMissing": "This account has no email address for password reset. Please contact support.",
     "passwordChangedSignInRequired": "Your password was changed. Please sign in with the new password.",
-    "passwordChangeFailedGeneric": "The password could not be changed. Please request a new link."
+    "passwordChangeFailedGeneric": "The password could not be changed. Please request a new link.",
+    "invitationStatusFailed": "The sign-in code was sent to {user}, but its audit record could not be saved. The e-mail will not be sent again automatically."
   },
   "Common": {
     "fieldCannotBeEmpty": "Field cannot be empty",
@@ -1672,7 +1681,11 @@
     "mapBaseModeDescription": "Selects only the map base. Places, paths and status data may still refresh from the internet.",
     "mapBaseModeOnline": "Online map",
     "mapBaseModeLegacy": "Legacy vector offline map",
-    "mapBaseModeMapLibre": "MapLibre offline map"
+    "mapBaseModeMapLibre": "MapLibre offline map",
+    "counselingHours": "Counseling hours",
+    "navigate": "Navigate",
+    "loadingMap": "Loading map…",
+    "chooseNavigationApp": "Choose a navigation app"
   },
   "FeatureInformation": {
     "gameCheckPoint": "Check point {title}",
@@ -1911,16 +1924,22 @@
     "no": "No",
     "issueQr": "Generate QR",
     "signingIn": "Signing in…",
-    "verifyingQr": "Verifying the login QR.",
+    "verifyingQr": "Verifying the login credential.",
     "signedIn": "User signed in",
     "openingApp": "Done. Opening the app.",
-    "emailAlreadyExists": "An existing account already uses this e-mail. For your recent registration, use Generate QR below; otherwise enter a different e-mail.",
+    "emailAlreadyExists": "This e-mail already belongs to an account in this organization. The user can sign in with their password or choose Forgot password? on the sign-in page.",
     "commandConflict": "The details changed since the previous attempt. Check them and submit the form again.",
     "rateLimited": "There were too many attempts. Wait a moment and try again.",
     "receptionUnavailable": "Reception is unavailable or you no longer have permission.",
     "registrationUnavailable": "This registration can no longer be managed.",
     "invalidInput": "Check the entered details and try again.",
-    "unexpectedCommandError": "The registration could not be completed. Please try again."
+    "unexpectedCommandError": "The registration could not be completed. Please try again.",
+    "enterManualCode": "Enter code manually",
+    "manualCode": "Login code",
+    "manualCodeValidity": "Valid for 30 minutes.",
+    "findParticipant": "Select an existing participant",
+    "searchParticipant": "Search by name or e-mail",
+    "noParticipantsFound": "No matching participants found."
   },
   "Offline": {
     "youAreOffline": "You are offline — showing the last downloaded data.",
@@ -1932,12 +1951,12 @@
     "feedbackStateUnknown": "Cannot check the feedback status without a connection."
   },
   "ClientChanges": {
-    "title": "Changes",
-    "onlineOnly": "Change history is available online only.",
-    "empty": "No changes have been recorded yet.",
-    "notActive": "The history will start recording new changes after the new sync mode is activated. Existing database state is not reconstructed as change history.",
+    "title": "App changes",
+    "onlineOnly": "The changes overview is available online only.",
+    "empty": "No changes were recorded in the last {days} days.",
+    "notActive": "Changes will start being recorded after the new sync mode is activated. Earlier history is not reconstructed.",
     "retry": "Try again",
-    "loadError": "Change history could not be loaded.",
+    "loadError": "The changes overview could not be loaded.",
     "publicationPending": "Awaiting publication",
     "published": "Published",
     "deletedActor": "Deleted or unknown user",
@@ -1954,6 +1973,10 @@
     "itemCount": {
       "one": "1 change",
       "other": "{count} changes"
-    }
+    },
+    "subtitle": "Changes saved on each day during the last {days} days.",
+    "rangeDays": "{days} days",
+    "totalChanges": "{count} changes total",
+    "dayChanges": "{day}: {count} changes"
   }
 }

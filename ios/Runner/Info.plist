@@ -34,8 +34,11 @@
 	<false/>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
+		<string>comgooglemaps</string>
+		<string>geo-navigation</string>
 		<string>sms</string>
 		<string>tel</string>
+		<string>waze</string>
 	</array>
 	<key>LSMinimumSystemVersion</key>
 	<string>11.0</string>

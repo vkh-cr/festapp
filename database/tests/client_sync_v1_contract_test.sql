@@ -11,6 +11,7 @@ BEGIN
   SELECT array_agg(expected.name) INTO v_missing
   FROM unnest(ARRAY[
     'get_private_client_sync_v1','get_client_commits_v1','get_client_commit_v1',
+    'get_client_activity_v1',
     'claim_client_projection_dirty_v1','get_public_client_sync_component_v1',
     'complete_client_sync_publication_classes_v1','mark_news_read_client_sync_v1',
     'save_event_client_sync_v1','delete_event_client_sync_v1',
@@ -47,7 +48,8 @@ BEGIN
     'game_update_settings_client_sync_v1',
     'sync_source_via_http_client_sync_v1',
     'create_counseling_slots_client_sync_v1',
-    'delete_empty_counseling_slots_client_sync_v1','game_guess_client_sync_v1',
+    'delete_empty_counseling_slots_client_sync_v1',
+    'delete_counseling_slot_client_sync_v1','game_guess_client_sync_v1',
     'get_exclusive_groups_for_edit_v1','save_exclusive_group_client_sync_v1',
     'delete_exclusive_group_client_sync_v1',
     'create_companion_client_sync_v1','delete_owned_companion_client_sync_v1',
@@ -104,6 +106,35 @@ BEGIN
       'public.get_client_commit_v1(uuid)'::regprocedure)
       LIKE '%get_is_manager_on_unit(c.unit)%',
     'audit detail accepts the same unit-manager scope as the list');
+  PERFORM assert_true(pg_get_functiondef(
+      'public.get_client_activity_v1(bigint,timestamptz,timestamptz)'::regprocedure)
+      NOT LIKE '%''actorDisplay''%'
+      AND pg_get_functiondef(
+        'public.get_client_activity_v1(bigint,timestamptz,timestamptz)'::regprocedure)
+        NOT LIKE '%''actorId''%',
+    'activity overview exposes no actor identity');
+  PERFORM assert_true(pg_get_functiondef(
+      'public.get_client_activity_v1(bigint,timestamptz,timestamptz)'::regprocedure)
+      LIKE '%c.occasion = p_occasion%'
+      AND pg_get_functiondef(
+        'public.get_client_activity_v1(bigint,timestamptz,timestamptz)'::regprocedure)
+        NOT LIKE '%c.unit = s.unit%'
+      AND pg_get_functiondef(
+        'public.get_client_activity_v1(bigint,timestamptz,timestamptz)'::regprocedure)
+        NOT LIKE '%c.organization = s.organization%',
+    'activity permission never broadens the requested occasion dataset');
+  PERFORM assert_true(pg_get_functiondef(
+      'public.get_client_activity_v1(bigint,timestamptz,timestamptz)'::regprocedure)
+      LIKE '%activeActorCount%'
+      AND pg_get_functiondef(
+        'public.get_client_activity_v1(bigint,timestamptz,timestamptz)'::regprocedure)
+        LIKE '%generate_series%',
+    'activity overview returns daily metrics including zero days');
+  PERFORM assert_true(has_function_privilege(
+      'authenticated',
+      'public.get_client_activity_v1(bigint,timestamptz,timestamptz)',
+      'EXECUTE'),
+    'authenticated managers can load aggregate activity');
   PERFORM assert_true(pg_get_functiondef(
       'public.save_speaker_client_sync_v1(bigint,uuid,bigint,jsonb)'::regprocedure)
       LIKE '%requested_topic.topic_id%',
@@ -183,6 +214,24 @@ BEGIN
     SELECT 1 FROM public.client_sync_component_sources s
     WHERE s.cutover_ready),
     'additive migration cannot make a source writer cutover-ready by itself');
+  PERFORM assert_true(NOT EXISTS (
+      SELECT 1 FROM public.occasions o
+      WHERE COALESCE((o.data->>'client_sync_v1')::boolean,false))
+    OR NOT EXISTS (
+      SELECT 1 FROM public.client_sync_component_sources s
+      WHERE s.registry_version=(
+        SELECT max(v.registry_version) FROM public.client_sync_component_sources v)
+        AND NOT s.cutover_ready),
+    'enabled client sync cannot coexist with an unready registry source');
+  PERFORM assert_true(NOT EXISTS (
+      SELECT 1 FROM public.occasions o
+      WHERE COALESCE((o.data->>'client_sync_v1')::boolean,false))
+    OR NOT EXISTS (
+      SELECT 1 FROM information_schema.role_table_grants g
+      WHERE g.grantee IN ('anon','authenticated')
+        AND g.table_schema='public' AND g.table_name='images'
+        AND g.privilege_type IN ('INSERT','UPDATE','DELETE')),
+    'enabled client sync closes ordinary occasion image DML');
   PERFORM assert_true(NOT EXISTS (
     SELECT 1 FROM public.client_sync_component_sources s
     CROSS JOIN LATERAL unnest(s.canonical_writers) writer(name)
@@ -292,6 +341,22 @@ BEGIN
     'public.save_occasion_client_sync_v1(bigint,uuid,bigint,jsonb)'::regprocedure)
       LIKE '%client_sync_v1 before hiding%',
     'ordinary occasion save cannot hide an enabled sync scope');
+  PERFORM assert_true(pg_get_functiondef(
+    'public.save_occasion_client_sync_v1(bigint,uuid,bigint,jsonb)'::regprocedure)
+      LIKE '%get_is_editor_on_unit%',
+    'occasion save accepts the unit editor role used by occasion settings');
+  PERFORM assert_true(pg_get_functiondef(
+    'public.save_occasion_domain_command_internal_v1(bigint,uuid,bigint,jsonb)'::regprocedure)
+      LIKE '%get_is_editor_on_unit%',
+    'occasion domain save preserves unit editor authorization');
+  PERFORM assert_true(pg_get_functiondef(
+    'public.complete_client_mutation_applied_v1(uuid,bigint,text,text,jsonb,text[],jsonb,jsonb,jsonb,text[],jsonb,text,text,jsonb,bigint[])'::regprocedure)
+      LIKE '%get_public_client_sync_component_core_v1%',
+    'authenticated mutation finalization uses the internal public materializer');
+  PERFORM assert_true(pg_get_functiondef(
+    'public.get_public_client_sync_component_core_v1(text,text,bigint)'::regprocedure)
+      LIKE '%get_is_editor_on_unit%',
+    'internal public materialization accepts the unit editor save role');
   PERFORM assert_true(pg_get_functiondef(
     'public.delete_occasion_client_sync_v1(bigint,uuid)'::regprocedure)
       LIKE '%client_sync_v1 before deleting%',

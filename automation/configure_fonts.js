@@ -112,7 +112,7 @@ if (fs.existsSync(pubspecPath)) {
     
     fonts.forEach(font => {
         newFontSection += `        - asset: fonts/${font.appFilename}\n`;
-        // No explicit weight in Pubspec per request
+        newFontSection += `          weight: ${font.weight}\n`;
         if (font.style !== 'normal') newFontSection += `          style: ${font.style}\n`;
     });
     

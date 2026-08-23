@@ -147,6 +147,7 @@ class AppRouter extends RootStackRouter {
         AutoRoute(
             page: UserStayRoute.page,
             path: "/:$linkFormatted/${UserStayPage.ROUTE}"),
+        AutoRoute(page: MapEditorRoute.page, path: '/map-editor'),
         AutoRoute(
             page: EventEditRoute.page,
             path: "/:$linkFormatted/${EventEditPage.ROUTE}",
@@ -176,12 +177,15 @@ class AppRouter extends RootStackRouter {
                   path: UnitPage.ROUTE,
                   maintainState: false),
 
-              AutoRoute(page: MapRoute.page, path: MapPage.ROUTE, children: [
-                AutoRoute(
-                  path: ':id',
-                  page: MapRoute.page,
-                ),
-              ]),
+              RedirectRoute(
+                path: MapPage.ROUTE,
+                redirectTo:
+                    '${MapPage.ROUTE}/${PublicMapPage.overviewDestination}',
+              ),
+              AutoRoute(
+                page: PublicMapRoute.page,
+                path: '${MapPage.ROUTE}/:destination',
+              ),
               AutoRoute(page: InfoRoute.page, path: InfoPage.ROUTE, children: [
                 AutoRoute(
                   path: ':id',

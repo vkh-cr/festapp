@@ -13,7 +13,34 @@ on:
   workflow_dispatch:
 
 jobs:
+  tenant-drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Verify production branch is a canonical main overlay
+        shell: bash
+        run: |
+          set -euo pipefail
+          BRANCH="${GITHUB_REF#refs/heads/}"
+          case "$BRANCH" in
+            prod/csmostrava2026) TENANT_ID=csmostrava2026 ;;
+            prod/hvezdamorska) TENANT_ID=hvezdamorska ;;
+            *) echo "No unified-overlay policy for $BRANCH"; exit 0 ;;
+          esac
+          BASE_MAIN_SHA=$(node -e 'const v=require("./automation/tenant-overlay.json");process.stdout.write(v.baseMainSha||"")')
+          test -n "$BASE_MAIN_SHA"
+          git fetch --no-tags origin main
+          git show "$BASE_MAIN_SHA:automation/check_tenant_branch_drift.sh" > /tmp/check-tenant-drift.sh
+          chmod +x /tmp/check-tenant-drift.sh
+          CANONICAL_MAIN_REF=origin/main /tmp/check-tenant-drift.sh "$BASE_MAIN_SHA" "$TENANT_ID" "$GITHUB_SHA"
+          MAIN_TREE=$(mktemp -d /tmp/festapp-main-policy.XXXXXX)
+          git archive "$BASE_MAIN_SHA" | tar -x -C "$MAIN_TREE"
+          bash "$MAIN_TREE/automation/tests/tenant_config_matrix.test.sh"
+
   detect:
+    needs: tenant-drift
     runs-on: ubuntu-latest
     outputs:
       target: ${{ steps.read.outputs.target }}
@@ -34,7 +61,7 @@ jobs:
             exit 0
           fi
 
-          # Source the conf so values with spaces (APP_NAME="CSM Ostrava 2026") survive.
+          # Source the conf so quoted values with spaces survive.
           set -a
           # shellcheck disable=SC1091
           source automation/project.conf

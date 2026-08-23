@@ -7,9 +7,7 @@
 #          all routing (web client, Flutter SPA, /sitemap.xml, /form/<slug>
 #          OG inject, auth_bridge, static fallback).
 #
-# Used by:
-#   - .github/workflows/deploy.yml (CI deploy via wrangler-action)
-#   - Cloudflare Pages dashboard "Build command" for direct-git projects
+# Used by automation/deploy_direct.sh before every production upload.
 #
 # Required env vars on the CF Pages project (Production + Preview) for the
 # dynamic sitemap and OG inject to work at runtime:
@@ -62,7 +60,7 @@ echo "Applying project configuration..."
 # 2. Build Flutter Web
 echo "Building Flutter App..."
 $FLUTTER_CMD precache --web
-$FLUTTER_CMD build web --release --base-href / --no-web-resources-cdn
+$FLUTTER_CMD build web --release --base-href / --no-web-resources-cdn --no-wasm-dry-run
 
 # 2b. Emit the automatic-update manifest (festapp-version.json + stamped
 #     main.dart copy) that powers web/festapp_update_prompt.js. Split into its
@@ -102,6 +100,7 @@ node automation/generate_pwa_service_worker.mjs \
   build/web \
   "$(grep -m1 '^VERSION=' automation/project.conf | cut -d= -f2 | tr -d '[:space:]')" \
   "$(grep -m1 '^FORCE_OCCASION_LINK=' automation/project.conf | cut -d= -f2- | tr -d '\"' | tr -d "'" | tr -d '[:space:]')"
+node automation/check_pwa_shell_budget.mjs build/web automation/project.conf
 
 # 6. Cloudflare-specific routing via Pages Function (_worker.js).
 #    Cloudflare Pages applies _redirects BEFORE static assets, so a catch-all

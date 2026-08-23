@@ -29,13 +29,19 @@ fvm flutter build ipa --release \
   --build-number="$target_build" \
   --export-options-plist="$SCRIPT_DIR/ExportOptions.plist"
 
+archive_app="$PROJECT_ROOT/build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app"
+if [ -d "$archive_app/Frameworks/OneSignalLocation.framework" ]; then
+  echo "Release archive unexpectedly contains OneSignalLocation.framework."
+  exit 1
+fi
+
 ipa_files=("$PROJECT_ROOT"/build/ios/ipa/*.ipa)
 if [ "${#ipa_files[@]}" -ne 1 ] || [ ! -f "${ipa_files[0]}" ]; then
   echo "Expected exactly one IPA in build/ios/ipa."
   exit 1
 fi
 export IPA_PATH="${ipa_files[0]}"
-export FASTLANE_APP_IDENTIFIER="festapp.jm2025"
+export FASTLANE_APP_IDENTIFIER="$(node -p "require('./automation/release/app_store_config.json').bundleId")"
 echo "Uploading build only; submission and release are separate gates."
 cd "$SCRIPT_DIR/fastlane"
 FASTLANE_SKIP_UPDATE_CHECK=1 FASTLANE_SKIP_INIT=true fastlane upload_build

@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CSM Ostrava 2026 — offline map preview</title>
+    <link rel="stylesheet" href="/assets/lib/maplibre-gl/maplibre-gl.css" />
+    <script src="/assets/lib/maplibre-gl/maplibre-gl.js"></script>
+    <style>
+      html, body, #map { height: 100%; margin: 0; }
+      .preview-label {
+        position: absolute;
+        z-index: 2;
+        top: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 8px 12px;
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.92);
+        box-shadow: 0 1px 5px rgba(0, 0, 0, 0.25);
+        font: 14px/1.25 system-ui, sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="preview-label">CSM Ostrava 2026 · lokální MBTiles preview</div>
+    <div id="map"></div>
+    <script>
+      const map = new maplibregl.Map({
+        container: 'map',
+        style: '/preview-style.json?contract=local-name-fallback-v1',
+        center: [18.282, 49.8346],
+        zoom: 12,
+        maxZoom: 18,
+      });
+      map.addControl(new maplibregl.NavigationControl(), 'top-right');
+      map.addControl(new maplibregl.ScaleControl({ unit: 'metric' }), 'bottom-left');
+    </script>
+  </body>
+</html>

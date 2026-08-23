@@ -13,6 +13,7 @@ import 'package:fstapp/components/map/icon_model.dart';
 import 'package:fstapp/components/map/map_direction_marker.dart';
 import 'package:fstapp/components/map/map_location_pin_helper.dart';
 import 'package:fstapp/components/map/map_scene.dart';
+import 'package:fstapp/components/map/map_strings.dart';
 import 'package:fstapp/components/map/map_surface_model.dart';
 import 'package:fstapp/components/map/map_viewport_controller.dart';
 import 'package:fstapp/components/map/offline_map_bundle_manager.dart';
@@ -48,6 +49,8 @@ class LegacyMapSurface extends StatefulWidget {
 
 class _LegacyMapSurfaceState extends State<LegacyMapSurface>
     with TickerProviderStateMixin {
+  static const _openStreetMapTiles =
+      'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
   late final AnimatedMapController _animatedController =
       AnimatedMapController(vsync: this);
   late final LegacyMapViewportController _viewportAdapter =
@@ -77,14 +80,9 @@ class _LegacyMapSurfaceState extends State<LegacyMapSurface>
 
   @override
   Widget build(BuildContext context) {
-    final baseLayer = widget.offline
-        ? _buildOfflineBaseLayer()
-        : fm.TileLayer(
-            tileProvider: CancellableNetworkTileProvider(),
-            maxZoom: 18,
-            urlTemplate: widget.layer.layerLink,
-            fallbackUrl: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-          );
+    final baseLayers = widget.offline
+        ? <Widget>[_buildOfflineBaseLayer()]
+        : _buildOnlineBaseLayers();
     return fm.FlutterMap(
       mapController: _animatedController.mapController,
       options: fm.MapOptions(
@@ -98,7 +96,7 @@ class _LegacyMapSurfaceState extends State<LegacyMapSurface>
               fm.InteractiveFlag.scrollWheelZoom,
         ),
         initialZoom: widget.model.initialZoom,
-        maxZoom: 18,
+        maxZoom: MapZoomLimits.interactionMaximum,
         initialCenter: widget.model.initialCenter,
         onTap: (_, location) => widget.model.onMapTap(location),
         onMapReady: () {
@@ -112,7 +110,7 @@ class _LegacyMapSurfaceState extends State<LegacyMapSurface>
         },
       ),
       children: [
-        baseLayer,
+        ...baseLayers,
         _buildAttribution(),
         _buildPathLayer(widget.model.scene.paths),
         _buildDirectionLayer(widget.model.scene.directions),
@@ -120,6 +118,31 @@ class _LegacyMapSurfaceState extends State<LegacyMapSurface>
         fm.MarkerLayer(markers: _buildMarkers()),
       ],
     );
+  }
+
+  List<Widget> _buildOnlineBaseLayers() {
+    final configured = widget.layer.layerLink?.trim();
+    final primary = configured == null || configured.isEmpty
+        ? _openStreetMapTiles
+        : configured;
+
+    fm.TileLayer tiles(String url, {String? fallbackUrl}) => fm.TileLayer(
+          tileProvider: CancellableNetworkTileProvider(),
+          maxZoom: MapZoomLimits.interactionMaximum,
+          maxNativeZoom: MapZoomLimits.onlineRasterNativeMaximum,
+          urlTemplate: url,
+          fallbackUrl: fallbackUrl,
+        );
+
+    if (primary == _openStreetMapTiles) return [tiles(_openStreetMapTiles)];
+
+    // Keep a complete, independently rendered OSM layer under a configured
+    // provider. Tile-level fallback is not enough when a provider answers with
+    // an error image or becomes unavailable for an entire session.
+    return [
+      tiles(_openStreetMapTiles),
+      tiles(primary, fallbackUrl: _openStreetMapTiles),
+    ];
   }
 
   Widget _buildOfflineBaseLayer() {
@@ -135,7 +158,7 @@ class _LegacyMapSurfaceState extends State<LegacyMapSurface>
       tileProviders: vmt.TileProviders({
         sourceName: vmtm.MbTilesVectorTileProvider(mbtiles: mbtiles),
       }),
-      maximumZoom: 18,
+      maximumZoom: MapZoomLimits.interactionMaximum,
     );
   }
 
@@ -151,6 +174,8 @@ class _LegacyMapSurfaceState extends State<LegacyMapSurface>
     }
     if ((widget.layer.logo?.isNotEmpty ?? false) ||
         (widget.layer.text?.isNotEmpty ?? false)) {
+      final usesOpenStreetMap =
+          widget.layer.layerLink?.trim() == _openStreetMapTiles;
       return fm.RichAttributionWidget(
         showFlutterMapAttribution: false,
         animationConfig: const fm.ScaleRAWA(),
@@ -173,6 +198,8 @@ class _LegacyMapSurfaceState extends State<LegacyMapSurface>
                       )
                   : null,
             ),
+          if (!usesOpenStreetMap)
+            fm.TextSourceAttribution(MapStrings.openStreetMapAttribution),
         ],
       );
     }
@@ -189,6 +216,9 @@ class _LegacyMapSurfaceState extends State<LegacyMapSurface>
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () => widget.model.onPlaceTap(presentation.placeId),
+              onLongPress: widget.model.onPlaceLongPress == null
+                  ? null
+                  : () => widget.model.onPlaceLongPress!(presentation.placeId),
               child: _LegacyPlaceMarker(
                 presentation: presentation,
                 icons: widget.model.icons,
@@ -365,12 +395,50 @@ class LegacyMapViewportController implements MapViewportController {
   double get directionLayoutZoom => controller.mapController.camera.zoom - 1;
 
   @override
+  Future<CameraApplyResult> applyCamera(CameraCommand command) async {
+    // A retained map can be put under TickerMode while an earlier camera
+    // animation is still pending. If that animation resumes after navigation,
+    // it would overwrite this required destination. Navigation state wins over
+    // cosmetic motion, so cancel every pending animation before the raw move.
+    controller.stopAnimations();
+    controller.mapController.move(
+      command.destination,
+      command.zoom + 1,
+    );
+    final raw = controller.mapController.camera;
+    final actual = MapCameraState(center: raw.center, zoom: raw.zoom - 1);
+    final centerMatches = const Distance().as(
+          LengthUnit.Meter,
+          actual.center,
+          command.destination,
+        ) <=
+        command.centerToleranceMeters;
+    final zoomMatches =
+        (actual.zoom - command.zoom).abs() <= command.zoomTolerance;
+    return CameraApplyResult(
+      status: centerMatches && zoomMatches
+          ? CameraApplyStatus.applied
+          : CameraApplyStatus.retryable,
+      surfaceId: command.surfaceId,
+      command: command,
+      actual: actual,
+      reason: centerMatches && zoomMatches ? null : 'actualCameraMismatch',
+    );
+  }
+
+  @override
   Future<void> animateTo(
     LatLng destination, {
     double? zoom,
     Curve curve = Curves.easeInOut,
+    Duration? duration,
   }) =>
-      controller.animateTo(dest: destination, zoom: zoom, curve: curve);
+      controller.animateTo(
+        dest: destination,
+        zoom: zoom,
+        curve: curve,
+        duration: duration,
+      );
 
   @override
   Future<void> fitCoordinates(

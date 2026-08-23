@@ -13,6 +13,35 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 
 # Available Actions
 
+## Android
+
+### android play_check
+
+```sh
+[bundle exec] fastlane android play_check
+```
+
+Read-only package and relevant-track version-code inspection
+
+### android play_internal_draft
+
+```sh
+[bundle exec] fastlane android play_internal_draft
+```
+
+Exactly gated binary-only upload to internal testing as draft
+
+### android play_production
+
+```sh
+[bundle exec] fastlane android play_production
+```
+
+Exactly gated full production release for the canonical package and version
+
+----
+
+
 ## iOS
 
 ### ios asc_check
@@ -134,6 +163,30 @@ Delete retry-created screenshot duplicates only
 ```
 
 Upload canonical screenshots only; never submit or release
+
+### ios select_build
+
+```sh
+[bundle exec] fastlane ios select_build
+```
+
+Select exactly one processed target build; never submit or release
+
+### ios build_check
+
+```sh
+[bundle exec] fastlane ios build_check
+```
+
+Read-only status of the exact target build
+
+### ios cancel_review_submission
+
+```sh
+[bundle exec] fastlane ios cancel_review_submission
+```
+
+Cancel only the in-progress review submission for the exact target version
 
 ### ios submission_check
 

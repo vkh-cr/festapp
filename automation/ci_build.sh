@@ -24,7 +24,7 @@ if ! command -v flutter &> /dev/null; then
 fi
 
 flutter precache
-flutter build web --release --base-href / --no-web-resources-cdn
+flutter build web --release --base-href / --no-web-resources-cdn --no-wasm-dry-run
 
 # 2. Prepare Flutter Build for Merge
 echo "Preparing Flutter build..."

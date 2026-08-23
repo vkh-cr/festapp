@@ -87,6 +87,7 @@
     "deleteAccount": "Konto löschen",
     "deleteCompanion": "Begleiter löschen",
     "inviteFailed": "Es konnte nicht eingeladen werden: {user}. Anzahl der Versuche: ({retries}).",
+    "invitationStatusFailed": "Der Anmeldecode wurde an {user} gesendet, aber der Audit-Eintrag konnte nicht gespeichert werden. Die E-Mail wird nicht automatisch erneut gesendet.",
     "fillPassword": "Gib das Passwort ein!",
     "companionInfo": "Ein Begleiter ist ein eigenständiger Teilnehmer ohne eigenes Gerät. Maximale Anzahl: {max_companions}.",
     "noGroup": "Keine Gruppe",
@@ -305,6 +306,10 @@
   },
   "FeatureMap": {
     "changeLocation": "Standort ändern",
+    "navigate": "Navigieren",
+    "chooseNavigationApp": "Navigations-App auswählen",
+    "loadingMap": "Karte wird geladen…",
+    "counselingHours": "Beratungszeiten",
     "drawPath": "Weg zeichnen",
     "importRouteHint": "Exportieren Sie Ihre Route aus Mapy.com (oder Strava, Garmin, komoot…) als GPX und legen Sie sie hier ab.",
     "importRoute": "Route importieren",

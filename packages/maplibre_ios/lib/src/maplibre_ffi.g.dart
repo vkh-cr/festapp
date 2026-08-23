@@ -906,6 +906,13 @@ extension type Helpers._(objc.ObjCObject object$) implements objc.ObjCObject,obj
   }
 
 
+  /// cancelTransitionsWithMapView:
+  static void cancelTransitionsWithMapView(MLNMapView mapView) {
+_objc_msgSend_xtuoz7(_class_Helpers, _sel_cancelTransitionsWithMapView_, mapView.ref.pointer);
+
+  }
+
+
   /// createOfflinePackProgressListenerWithCallbacks:
   static void createOfflinePackProgressListenerWithCallbacks(OfflinePackProgressCallbacks callbacks) {
 _objc_msgSend_xtuoz7(_class_Helpers, _sel_createOfflinePackProgressListenerWithCallbacks_, callbacks.ref.pointer);
@@ -31376,6 +31383,7 @@ late final _sel_brightness = objc.registerName("brightness");
 late final _sel_buildMenuWithBuilder_ = objc.registerName("buildMenuWithBuilder:");
 late final _sel_calibratedLatency = objc.registerName("calibratedLatency");
 late final _sel_camera = objc.registerName("camera");
+late final _sel_cancelTransitionsWithMapView_ = objc.registerName("cancelTransitionsWithMapView:");
 late final _sel_cameraEdgeInsets = objc.registerName("cameraEdgeInsets");
 late final _sel_cameraLookingAtCenterCoordinate_acrossDistance_pitch_heading_ = objc.registerName("cameraLookingAtCenterCoordinate:acrossDistance:pitch:heading:");
 late final _sel_cameraLookingAtCenterCoordinate_altitude_pitch_heading_ = objc.registerName("cameraLookingAtCenterCoordinate:altitude:pitch:heading:");

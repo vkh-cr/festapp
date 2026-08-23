@@ -14,6 +14,17 @@ class StyleControllerIos extends StyleController {
   }
 
   @override
+  Future<void> addImageWithPixelRatio(
+    String id,
+    Uint8List bytes, {
+    required double pixelRatio,
+  }) async {
+    final image = UIImage.imageWithData$1(bytes.toNSData(), scale: pixelRatio);
+    if (image == null) return;
+    _ffiStyle.setImage(image, forName: id.toNSString());
+  }
+
+  @override
   Future<void> addLayer(
     StyleLayer layer, {
     String? belowLayerId,

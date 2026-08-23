@@ -1,18 +1,23 @@
-import { deliverEmail, EmailTemplateNotFoundError } from "../_shared/emailDelivery.ts";
+import {
+  deliverEmail,
+  EmailTemplateNotFoundError,
+} from "../_shared/emailDelivery.ts";
 import { translatePlatformLinks } from "../_shared/translatePlatformLinks.ts";
 import { supabaseAdmin } from "../_shared/supabaseUtil.ts";
+import { finishRegistration } from "./registrationFlow.ts";
 
 const _DEFAULT_EMAIL = Deno.env.get("DEFAULT_EMAIL")!;
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
 };
 
 Deno.serve(async (req) => {
   try {
-    if (req.method === 'OPTIONS') {
-      return new Response('ok', { headers: corsHeaders });
+    if (req.method === "OPTIONS") {
+      return new Response("ok", { headers: corsHeaders });
     }
 
     const reqData = await req.json();
@@ -29,7 +34,10 @@ Deno.serve(async (req) => {
       console.error("Organization data not found.");
       return new Response(
         JSON.stringify({ error: "Organization data not found" }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 404 }
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 404,
+        },
       );
     }
 
@@ -41,7 +49,10 @@ Deno.serve(async (req) => {
       console.error("Required configuration is missing.");
       return new Response(
         JSON.stringify({ error: "Missing required configuration" }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 400,
+        },
       );
     }
 
@@ -55,64 +66,71 @@ Deno.serve(async (req) => {
     if (userData.data != null) {
       return new Response(
         JSON.stringify({ email: userEmail, code: 409 }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        },
       );
     }
 
-
     const defaultLang = orgConfig.DEFAULT_LANGUAGE || "en";
-    const userLang = reqData.lang || defaultLang || 'cs';
-    const unitTitle = userLang === 'cs' ? 'Moje akce' : 'My events';
+    const userLang = reqData.lang || defaultLang || "cs";
+    const unitTitle = userLang === "cs" ? "Moje akce" : "My events";
 
     const code = Math.floor(100000 + Math.random() * 900000).toString();
 
     // Create the user via RPC
-    const createResult: any = await supabaseAdmin.rpc("create_user_from_registration", {
-      org: organizationId,
-      email: userEmail,
-      password: code,
-      data: reqData,
-      unit_title: unitTitle,
-    });
+    const createResult = await supabaseAdmin.rpc(
+      "create_user_from_registration",
+      {
+        org: organizationId,
+        email: userEmail,
+        password: code,
+        data: reqData,
+        unit_title: unitTitle,
+      },
+    );
 
     const platforms = orgConfig.PLATFORMS || [];
     const platformLinksHtml = translatePlatformLinks(platforms, defaultLang);
 
-    // Prepare substitutions for the email template
-    const subs = {
-      code: code,
-      email: userEmail,
-      platformLinks: platformLinksHtml,
-      appName: appName,
-    };
-
     try {
-      await deliverEmail({
-        to: userEmail,
-        templateCode: "SIGN_IN_CODE",
-        context: { organization: organizationId },
-        substitutions: subs,
-        from: `${appName} | Festapp <${_DEFAULT_EMAIL}>`,
-      });
+      const result = await finishRegistration({
+        creationResult: createResult,
+        userEmail,
+        organizationId,
+        appName,
+        code,
+        platformLinksHtml,
+        defaultEmail: _DEFAULT_EMAIL,
+      }, deliverEmail);
+      return new Response(
+        JSON.stringify(result.body),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: result.status,
+        },
+      );
     } catch (error) {
       if (error instanceof EmailTemplateNotFoundError) {
         return new Response(
           JSON.stringify({ error: "Template not found" }),
-          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 404 }
+          {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+            status: 404,
+          },
         );
       }
       throw error;
     }
-
-    return new Response(
-      JSON.stringify({ email: userEmail, code: 200 }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
-    );
   } catch (error) {
     console.error("Unexpected error:", error);
     return new Response(
       JSON.stringify({ error: "Unexpected error occurred" }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 500,
+      },
     );
   }
 });

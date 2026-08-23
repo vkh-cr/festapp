@@ -1,13 +1,7 @@
 import { deliverEmail } from "../_shared/emailDelivery.ts";
 import { accountDeletionCors, createOpaqueToken, jsonResponse, maskEmail, sha256 } from "../_shared/accountDeletion.ts";
 import { createUserClient, supabaseAdmin } from "../_shared/supabaseUtil.ts";
-
-const organizationId = Number(Deno.env.get("ACCOUNT_DELETION_ORGANIZATION_ID"));
-const confirmationBase = Deno.env.get("ACCOUNT_DELETION_CONFIRMATION_URL") || "";
-const appName = Deno.env.get("ACCOUNT_DELETION_APP_NAME") || "Festapp";
-if (!Number.isSafeInteger(organizationId) || organizationId <= 0 || !confirmationBase) {
-  throw new Error("account_deletion_public_config_missing");
-}
+import { parseOrganizationBranding } from "../_shared/organizationBranding.ts";
 
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS") return new Response("ok", { headers: accountDeletionCors });
@@ -32,8 +26,20 @@ Deno.serve(async (request) => {
   if (authError || !user?.id || !user.email) return jsonResponse({ error: "unauthenticated" }, 401);
 
   const { data: profile } = await supabaseAdmin.from("user_info")
-    .select("organization").eq("id", user.id).eq("organization", organizationId).maybeSingle();
-  if (!profile) return jsonResponse({ error: "account_unavailable" }, 403);
+    .select("organization").eq("id", user.id).maybeSingle();
+  const organizationId = Number(profile?.organization);
+  if (!profile || !Number.isSafeInteger(organizationId) || organizationId <= 0) {
+    return jsonResponse({ error: "account_unavailable" }, 403);
+  }
+  const { data: organizationRow, error: organizationError } = await supabaseAdmin
+    .from("organizations").select("data").eq("id", organizationId).single();
+  let branding;
+  try {
+    if (organizationError) throw organizationError;
+    branding = parseOrganizationBranding(organizationRow?.data);
+  } catch {
+    return jsonResponse({ error: "configuration_unavailable" }, 503);
+  }
   const { data: deliveryEmail, error: deliveryEmailError } =
     await supabaseAdmin.rpc("get_user_delivery_email", { p_user: user.id });
   if (deliveryEmailError || !deliveryEmail) {
@@ -58,14 +64,15 @@ Deno.serve(async (request) => {
   try {
     await deliverEmail({
       to: deliveryEmail,
+      recipientUser: user.id,
       templateCode: "ACCOUNT_DELETION_CONFIRM",
       context: { organization: organizationId },
       substitutions: {
-        confirmationUrl: `${confirmationBase}?token=${encodeURIComponent(token)}`,
+        confirmationUrl: `${branding.defaultUrl}/delete-account?token=${encodeURIComponent(token)}`,
         expiresAt,
-        appName,
+        appName: branding.appName,
       },
-      from: `${appName} | Festapp <${Deno.env.get("DEFAULT_EMAIL") || ""}>`,
+      from: `${branding.appName} | Festapp <${Deno.env.get("DEFAULT_EMAIL") || ""}>`,
     });
     await supabaseAdmin.rpc("set_account_deletion_email_state", {
       p_request_id: requestId, p_delivered: true,

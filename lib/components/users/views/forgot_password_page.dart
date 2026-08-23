@@ -26,6 +26,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   bool _isSent = false;
   @override
   void dispose() {
+    _emailController.dispose();
     super.dispose();
   }
 
@@ -54,6 +55,14 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
               child: Column(
                 children: <Widget>[
                   Padding(
+                    padding: const EdgeInsets.fromLTRB(15, 0, 15, 16),
+                    child: Text(
+                      UserStrings.existingAccountRecoveryHelp,
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ),
+                  Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 15),
                     child: InternalFormFields.email(_emailController),
                   ),
@@ -70,17 +79,19 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                               setState(() {
                                 _isSent = true;
                               });
-                              AuthService.resetPasswordForEmail(
-                                      _emailController.text)
-                                  .then((value) {
+                              try {
+                                await AuthService.resetPasswordForEmail(
+                                    _emailController.text);
+                                if (!context.mounted) return;
                                 ToastHelper.Show(
                                     context, UserStrings.passwordResetSent);
-                              }).onError((error, stackTrace) {
+                              } catch (error) {
+                                if (!context.mounted) return;
                                 setState(() {
                                   _isSent = false;
                                 });
                                 ToastHelper.Show(context, error.toString());
-                              });
+                              }
                             }
                           },
                     label: UserStrings.sendResetEmail,

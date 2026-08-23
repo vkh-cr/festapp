@@ -9,13 +9,40 @@ import 'package:fstapp/theme_config.dart';
 import 'package:fwfh_cached_network_image/fwfh_cached_network_image.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:fstapp/services/launch_url_service.dart';
+import 'package:fstapp/services/connectivity_service.dart';
 
 import '../images/zoomable_image/zoomable_image.dart';
 
 /// Factory to enable cached network images in HtmlWidget
 class MyWidgetFactory extends WidgetFactory with CachedNetworkImageFactory {}
+
+@visibleForTesting
+String? youtubeVideoIdFromUrl(String url) {
+  final uri = Uri.tryParse(url.trim());
+  if (uri != null) {
+    final host = uri.host.toLowerCase().replaceFirst(RegExp(r'^www\.'), '');
+    if (host == 'youtu.be' && uri.pathSegments.isNotEmpty) {
+      final id = uri.pathSegments.first;
+      if (id.length == 11) return id;
+    }
+    if (host == 'youtube.com' ||
+        host == 'm.youtube.com' ||
+        host == 'music.youtube.com' ||
+        host == 'youtube-nocookie.com') {
+      final queryId = uri.queryParameters['v'];
+      if (queryId?.length == 11) return queryId;
+      if (uri.pathSegments.length >= 2 &&
+          const {'shorts', 'embed'}.contains(uri.pathSegments.first)) {
+        final id = uri.pathSegments[1];
+        if (id.length == 11) return id;
+      }
+    }
+  }
+  return YoutubePlayerController.convertUrlToId(url);
+}
 
 class HtmlWithAppLinksWidget extends HtmlWidget {
   HtmlWithAppLinksWidget(
@@ -57,6 +84,9 @@ class HtmlView extends StatefulWidget {
   final VoidCallback? twoFingersOn;
   final VoidCallback? twoFingersOff;
 
+  @visibleForTesting
+  final bool? offlineOverride;
+
   const HtmlView({
     super.key,
     required this.html,
@@ -65,6 +95,7 @@ class HtmlView extends StatefulWidget {
     this.color,
     this.twoFingersOn,
     this.twoFingersOff,
+    this.offlineOverride,
   });
 
   @override
@@ -74,6 +105,17 @@ class HtmlView extends StatefulWidget {
 class _HtmlViewState extends State<HtmlView> {
   @override
   Widget build(BuildContext context) {
+    final offlineOverride = widget.offlineOverride;
+    if (offlineOverride != null) {
+      return _buildContent(context, offlineOverride);
+    }
+    return ValueListenableBuilder<bool>(
+      valueListenable: ConnectivityService.isOfflineNotifier,
+      builder: (context, isOffline, _) => _buildContent(context, isOffline),
+    );
+  }
+
+  Widget _buildContent(BuildContext context, bool isOffline) {
     final textColor = widget.color ?? ThemeConfig.defaultHtmlViewColor(context);
     final linkColor = colorToRgbString(ThemeConfig.htmlLinkColor(context));
 
@@ -137,49 +179,13 @@ class _HtmlViewState extends State<HtmlView> {
 
         if (!kIsWeb && el.localName == 'a') {
           final url = el.attributes['href']!;
-          final vid = YoutubePlayer.convertUrlToId(url);
+          final vid = youtubeVideoIdFromUrl(url);
           if (vid != null) {
-            final ctrl = YoutubePlayerController(
-              initialVideoId: vid,
-              flags: const YoutubePlayerFlags(
-                useHybridComposition: true,
-                showLiveFullscreenButton: false,
-                autoPlay: false,
-                mute: false,
-              ),
-            );
-            final title = AnimatedBuilder(
-              animation: ctrl,
-              builder: (_, __) {
-                final t = ctrl.metadata.title;
-                return Expanded(
-                  child: GestureDetector(
-                    onTap: () async {
-                      await LaunchUrlService.openExternalUrl(url);
-                    },
-                    child: Text(
-                      t.isNotEmpty ? t : 'Loading title…',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        decoration: TextDecoration.underline,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
-                    ),
-                  ),
-                );
-              },
-            );
-            return YoutubePlayer(
-              controller: ctrl,
-              showVideoProgressIndicator: true,
-              topActions: [title],
-              bottomActions: const [
-                CurrentPosition(),
-                ProgressBar(isExpanded: true),
-                RemainingDuration(),
-              ],
+            return _YoutubeEmbed(
+              key: ValueKey('youtube:$url'),
+              url: url,
+              videoId: vid,
+              isOffline: isOffline,
             );
           }
         }
@@ -200,5 +206,102 @@ class _HtmlViewState extends State<HtmlView> {
   String colorToRgbString(Color? c) {
     if (c == null) return '';
     return 'rgb(${(c.r * 255).round()}, ${(c.g * 255).round()}, ${(c.b * 255).round()})';
+  }
+}
+
+class _YoutubeEmbed extends StatefulWidget {
+  const _YoutubeEmbed({
+    super.key,
+    required this.url,
+    required this.videoId,
+    required this.isOffline,
+  });
+
+  final String url;
+  final String videoId;
+  final bool isOffline;
+
+  @override
+  State<_YoutubeEmbed> createState() => _YoutubeEmbedState();
+}
+
+class _YoutubeEmbedState extends State<_YoutubeEmbed> {
+  static final Future<String> _appOrigin = PackageInfo.fromPlatform().then(
+    (info) => Uri(scheme: 'https', host: info.packageName).toString(),
+  );
+
+  YoutubePlayerController? _controller;
+  int _controllerGeneration = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_updateController());
+  }
+
+  @override
+  void didUpdateWidget(covariant _YoutubeEmbed oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.videoId != widget.videoId ||
+        oldWidget.isOffline != widget.isOffline) {
+      _disposeController();
+      unawaited(_updateController());
+    }
+  }
+
+  Future<void> _updateController() async {
+    if (widget.isOffline) return;
+    final generation = ++_controllerGeneration;
+    final origin = await _appOrigin;
+    if (!mounted ||
+        generation != _controllerGeneration ||
+        widget.isOffline) {
+      return;
+    }
+
+    _controller = YoutubePlayerController.fromVideoId(
+      videoId: widget.videoId,
+      autoPlay: false,
+      params: const YoutubePlayerParams(
+        showControls: true,
+        showFullscreenButton: true,
+        playsInline: true,
+        privacyEnhancedMode: false,
+      ).copyWith(origin: origin),
+    );
+    setState(() {});
+  }
+
+  void _disposeController() {
+    _controllerGeneration++;
+    unawaited(_controller?.close());
+    _controller = null;
+  }
+
+  @override
+  void dispose() {
+    _disposeController();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = _controller;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (controller != null)
+          YoutubePlayer(
+            controller: controller,
+          ),
+        OutlinedButton.icon(
+          onPressed: widget.isOffline
+              ? null
+              : () => LaunchUrlService.openExternalUrl(widget.url),
+          icon: Icon(widget.isOffline ? Icons.cloud_off : Icons.open_in_new),
+          label: Text(widget.url),
+        ),
+      ],
+    );
   }
 }

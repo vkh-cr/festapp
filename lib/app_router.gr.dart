@@ -29,8 +29,6 @@ import 'package:fstapp/components/inventory/views/inventory_pools_tab.dart'
     as _i15;
 import 'package:fstapp/components/inventory/views/user_stay_page.dart' as _i42;
 import 'package:fstapp/components/map/map_page.dart' as _i18;
-import 'package:fstapp/components/map/path_group_model.dart' as _i48;
-import 'package:fstapp/components/map/place_model.dart' as _i47;
 import 'package:fstapp/components/news/news_form_page.dart' as _i20;
 import 'package:fstapp/components/news/news_page.dart' as _i21;
 import 'package:fstapp/components/occasion/admin_page.dart' as _i1;
@@ -586,95 +584,50 @@ class LoginQrScannerRoute extends _i43.PageRouteInfo<void> {
 }
 
 /// generated route for
-/// [_i18.MapPage]
-class MapRoute extends _i43.PageRouteInfo<MapRouteArgs> {
-  MapRoute({
-    int? id,
-    _i47.PlaceModel? place,
-    _i48.PathGroupsModel? editPathGroup,
-    String? placeType,
+/// [_i18.MapEditorPage]
+class MapEditorRoute extends _i43.PageRouteInfo<MapEditorRouteArgs> {
+  MapEditorRoute({
+    required _i18.MapEditorMode mode,
     _i45.Key? key,
     List<_i43.PageRouteInfo>? children,
   }) : super(
-          MapRoute.name,
-          args: MapRouteArgs(
-            id: id,
-            place: place,
-            editPathGroup: editPathGroup,
-            placeType: placeType,
-            key: key,
-          ),
-          rawPathParams: {'id': id},
-          rawQueryParams: {'placeType': placeType},
+          MapEditorRoute.name,
+          args: MapEditorRouteArgs(mode: mode, key: key),
           initialChildren: children,
         );
 
-  static const String name = 'MapRoute';
+  static const String name = 'MapEditorRoute';
 
   static _i43.PageInfo page = _i43.PageInfo(
     name,
     builder: (data) {
-      final pathParams = data.inheritedPathParams;
-      final queryParams = data.queryParams;
-      final args = data.argsAs<MapRouteArgs>(
-        orElse: () => MapRouteArgs(
-          id: pathParams.optInt('id'),
-          placeType: queryParams.optString('placeType'),
-        ),
-      );
-      return _i18.MapPage(
-        id: args.id,
-        place: args.place,
-        editPathGroup: args.editPathGroup,
-        placeType: args.placeType,
-        key: args.key,
-      );
+      final args = data.argsAs<MapEditorRouteArgs>();
+      return _i18.MapEditorPage(mode: args.mode, key: args.key);
     },
   );
 }
 
-class MapRouteArgs {
-  const MapRouteArgs({
-    this.id,
-    this.place,
-    this.editPathGroup,
-    this.placeType,
-    this.key,
-  });
+class MapEditorRouteArgs {
+  const MapEditorRouteArgs({required this.mode, this.key});
 
-  final int? id;
-
-  final _i47.PlaceModel? place;
-
-  final _i48.PathGroupsModel? editPathGroup;
-
-  final String? placeType;
+  final _i18.MapEditorMode mode;
 
   final _i45.Key? key;
 
   @override
   String toString() {
-    return 'MapRouteArgs{id: $id, place: $place, editPathGroup: $editPathGroup, placeType: $placeType, key: $key}';
+    return 'MapEditorRouteArgs{mode: $mode, key: $key}';
   }
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    if (other is! MapRouteArgs) return false;
-    return id == other.id &&
-        place == other.place &&
-        editPathGroup == other.editPathGroup &&
-        placeType == other.placeType &&
-        key == other.key;
+    if (other is! MapEditorRouteArgs) return false;
+    return mode == other.mode && key == other.key;
   }
 
   @override
-  int get hashCode =>
-      id.hashCode ^
-      place.hashCode ^
-      editPathGroup.hashCode ^
-      placeType.hashCode ^
-      key.hashCode;
+  int get hashCode => mode.hashCode ^ key.hashCode;
 }
 
 /// generated route for
@@ -942,6 +895,79 @@ class OrganizationRouteArgs {
 
   @override
   int get hashCode => id.hashCode ^ key.hashCode;
+}
+
+/// generated route for
+/// [_i18.PublicMapPage]
+class PublicMapRoute extends _i43.PageRouteInfo<PublicMapRouteArgs> {
+  PublicMapRoute({
+    String destination = 'overview',
+    String? placeType,
+    _i45.Key? key,
+    List<_i43.PageRouteInfo>? children,
+  }) : super(
+          PublicMapRoute.name,
+          args: PublicMapRouteArgs(
+            destination: destination,
+            placeType: placeType,
+            key: key,
+          ),
+          rawPathParams: {'destination': destination},
+          rawQueryParams: {'placeType': placeType},
+          initialChildren: children,
+        );
+
+  static const String name = 'PublicMapRoute';
+
+  static _i43.PageInfo page = _i43.PageInfo(
+    name,
+    builder: (data) {
+      final pathParams = data.inheritedPathParams;
+      final queryParams = data.queryParams;
+      final args = data.argsAs<PublicMapRouteArgs>(
+        orElse: () => PublicMapRouteArgs(
+          destination: pathParams.getString('destination', 'overview'),
+          placeType: queryParams.optString('placeType'),
+        ),
+      );
+      return _i18.PublicMapPage(
+        destination: args.destination,
+        placeType: args.placeType,
+        key: args.key,
+      );
+    },
+  );
+}
+
+class PublicMapRouteArgs {
+  const PublicMapRouteArgs({
+    this.destination = 'overview',
+    this.placeType,
+    this.key,
+  });
+
+  final String destination;
+
+  final String? placeType;
+
+  final _i45.Key? key;
+
+  @override
+  String toString() {
+    return 'PublicMapRouteArgs{destination: $destination, placeType: $placeType, key: $key}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! PublicMapRouteArgs) return false;
+    return destination == other.destination &&
+        placeType == other.placeType &&
+        key == other.key;
+  }
+
+  @override
+  int get hashCode => destination.hashCode ^ placeType.hashCode ^ key.hashCode;
 }
 
 /// generated route for

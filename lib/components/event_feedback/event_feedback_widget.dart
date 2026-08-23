@@ -37,6 +37,18 @@ class EventFeedbackWidget extends StatefulWidget {
   @visibleForTesting
   final Future<EventFeedbackModel?> Function(int eventId)? loadFeedbackOverride;
 
+  /// Test seam for the synchronous offline fast path.
+  @visibleForTesting
+  final Future<bool> Function()? isOfflineOverride;
+
+  @visibleForTesting
+  final Future<Map<String, dynamic>?> Function(int eventId)?
+      loadCachedFeedbackOverride;
+
+  /// Keeps a stale connectivity signal or a wedged request from leaving the
+  /// feedback section in an endless loading state.
+  final Duration loadTimeout;
+
   const EventFeedbackWidget({
     super.key,
     required this.eventId,
@@ -45,6 +57,9 @@ class EventFeedbackWidget extends StatefulWidget {
     this.requiresSignIn = false,
     this.isParticipant = false,
     this.loadFeedbackOverride,
+    this.isOfflineOverride,
+    this.loadCachedFeedbackOverride,
+    this.loadTimeout = const Duration(seconds: 12),
   });
 
   @override
@@ -85,16 +100,22 @@ class _EventFeedbackWidgetState extends State<EventFeedbackWidget> {
   }
 
   Future<void> _load() async {
+    final knownOffline = widget.isOfflineOverride != null
+        ? await widget.isOfflineOverride!()
+        : ConnectivityService.isOfflineNotifier.value;
+    if (knownOffline) {
+      await _loadCachedOrUnknownOffline();
+      return;
+    }
     try {
-      final load =
-          widget.loadFeedbackOverride ?? DbEventFeedback.getMyFeedback;
-      final fb = await load(widget.eventId);
+      final load = widget.loadFeedbackOverride ?? DbEventFeedback.getMyFeedback;
+      final fb = await load(widget.eventId).timeout(widget.loadTimeout);
       // Keep the offline "already sent" cache in sync with the live answer
       // (null clears a stale entry after a deletion elsewhere). Fire-and-
       // forget: a cache write must never block or break the UI.
-      unawaited(OfflineDataService.saveMyEventFeedback(
-              widget.eventId, fb?.toJson())
-          .catchError((_) {}));
+      unawaited(
+          OfflineDataService.saveMyEventFeedback(widget.eventId, fb?.toJson())
+              .catchError((_) {}));
       if (!mounted) return;
       setState(() {
         _existing = fb;
@@ -108,8 +129,8 @@ class _EventFeedbackWidgetState extends State<EventFeedbackWidget> {
       // Live fetch failed: a cached record still shows the honest "sent"
       // state; with no cache while offline the state is unknown — never lie
       // with an empty form.
-      final cached =
-          await OfflineDataService.getMyEventFeedback(widget.eventId);
+      final cached = await (widget.loadCachedFeedbackOverride ??
+          OfflineDataService.getMyEventFeedback)(widget.eventId);
       if (!mounted) return;
       if (cached != null) {
         final fb = EventFeedbackModel.fromJson(cached);
@@ -125,7 +146,8 @@ class _EventFeedbackWidgetState extends State<EventFeedbackWidget> {
       // Weak signal / timeout / server outage counts as offline too, not just a
       // missing interface — so a failed load with no cache shows the "unknown"
       // notice rather than a misleading empty form.
-      final offline = ExceptionHandler.isNetworkError(e) ||
+      final offline = e is TimeoutException ||
+          ExceptionHandler.isNetworkError(e) ||
           await ConnectivityService.isOffline();
       if (!mounted) return;
       setState(() {
@@ -133,6 +155,21 @@ class _EventFeedbackWidgetState extends State<EventFeedbackWidget> {
         _loading = false;
       });
     }
+  }
+
+  Future<void> _loadCachedOrUnknownOffline() async {
+    final cached = await (widget.loadCachedFeedbackOverride ??
+        OfflineDataService.getMyEventFeedback)(widget.eventId);
+    if (!mounted) return;
+    final fb = cached == null ? null : EventFeedbackModel.fromJson(cached);
+    setState(() {
+      _existing = fb;
+      _rating = fb?.rating;
+      _note.text = fb?.note ?? '';
+      _commentDirty = false;
+      _stateUnknownOffline = fb == null;
+      _loading = false;
+    });
   }
 
   Future<void> _submit() async {
@@ -148,9 +185,9 @@ class _EventFeedbackWidgetState extends State<EventFeedbackWidget> {
         note: _note.text.trim().isEmpty ? null : _note.text.trim(),
       );
       // Fire-and-forget cache write — never fail a successful submit.
-      unawaited(OfflineDataService.saveMyEventFeedback(
-              widget.eventId, fb.toJson())
-          .catchError((_) {}));
+      unawaited(
+          OfflineDataService.saveMyEventFeedback(widget.eventId, fb.toJson())
+              .catchError((_) {}));
       if (!mounted) return;
       setState(() {
         _existing = fb;
@@ -247,8 +284,7 @@ class _EventFeedbackWidgetState extends State<EventFeedbackWidget> {
     final dark = theme.brightness == Brightness.dark;
     final selected = _rating == rating;
     final accent = _ratingColor(rating, dark);
-    final fg =
-        selected ? accent : (dark ? Colors.white54 : Colors.black54);
+    final fg = selected ? accent : (dark ? Colors.white54 : Colors.black54);
 
     return SizedBox(
       width: width,
@@ -294,9 +330,8 @@ class _EventFeedbackWidgetState extends State<EventFeedbackWidget> {
         : (_existing == null
             ? EventFeedbackStrings.sendFeedback
             : EventFeedbackStrings.updateFeedback);
-    final showRemove = _existing != null ||
-        _rating != null ||
-        _note.text.trim().isNotEmpty;
+    final showRemove =
+        _existing != null || _rating != null || _note.text.trim().isNotEmpty;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -308,9 +343,8 @@ class _EventFeedbackWidgetState extends State<EventFeedbackWidget> {
             return Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: _ratings
-                  .map((r) => _smileyTile(ctx, r, width))
-                  .toList(),
+              children:
+                  _ratings.map((r) => _smileyTile(ctx, r, width)).toList(),
             );
           },
         ),
@@ -421,8 +455,8 @@ class _EventFeedbackWidgetState extends State<EventFeedbackWidget> {
               _messageRow(context, Icons.lock_outline,
                   EventFeedbackStrings.onlySignedInParticipants)
             else if (_stateUnknownOffline)
-              _messageRow(context, Icons.cloud_off,
-                  OfflineStrings.feedbackStateUnknown)
+              _messageRow(
+                  context, Icons.cloud_off, OfflineStrings.feedbackStateUnknown)
             else
               _form(context),
             // Editors see the aggregated results inline (matches production).

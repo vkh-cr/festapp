@@ -73,7 +73,6 @@ Deno.serve(async (req) => {
     defaultUrl,
     occasionLink: currentLink.data.link,
     targetPath,
-    installationGeneration: orgConfig.PUSH_APP_GENERATION || "",
     recipient: record.to,
     heading: record.heading,
     content: record.content,

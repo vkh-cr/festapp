@@ -87,6 +87,7 @@
     "deleteAccount": "Zmazať účet",
     "deleteCompanion": "Odstrániť spoločníka",
     "inviteFailed": "Nepodarilo sa pozvať {user}. Počet pokusov: ({retries}).",
+    "invitationStatusFailed": "Prihlasovací kód bol používateľovi {user} odoslaný, ale auditný záznam sa nepodarilo uložiť. E-mail sa automaticky neposiela znova.",
     "fillPassword": "Vyplňte heslo!",
     "companionInfo": "Spoločník je samostatný účastník bez vlastného zariadenia. Maximálny počet: {max_companions}.",
     "noGroup": "Bez skupinky",
@@ -305,6 +306,10 @@
   },
   "FeatureMap": {
     "changeLocation": "Zmeniť polohu",
+    "navigate": "Navigovať",
+    "chooseNavigationApp": "Vyberte navigáciu",
+    "loadingMap": "Načítava sa mapa…",
+    "counselingHours": "Poradenské hodiny",
     "drawPath": "Kresliť cestu",
     "importRouteHint": "Vyexportuj trasu z Mapy.com (alebo Strava, Garmin, komoot…) ako GPX a presuň ju sem.",
     "importRoute": "Importovať trasu",

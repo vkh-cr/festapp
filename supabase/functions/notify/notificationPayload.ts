@@ -1,15 +1,25 @@
+export const CSM_INSTALLATION_GENERATION = "csm_ostrava_2026_v1";
+
 export interface NotificationPayloadInput {
   appId: string;
   defaultUrl: string;
   occasionLink: string;
   targetPath: string;
-  installationGeneration?: string | null;
   recipient?: string | null;
   heading: string;
   content: string;
 }
 
 export function buildNotificationPayload(input: NotificationPayloadInput) {
+  const notificationIcon = new URL(
+    "/notification-icon-256x256.png",
+    input.defaultUrl,
+  ).toString();
+  const webIcons = {
+    chrome_web_icon: notificationIcon,
+    firefox_icon: notificationIcon,
+  };
+
   if (input.recipient) {
     return {
       app_id: input.appId,
@@ -19,32 +29,29 @@ export function buildNotificationPayload(input: NotificationPayloadInput) {
       target_channel: "push",
       headings: { en: input.heading },
       contents: { en: input.content },
+      ...webIcons,
     };
   }
 
-  const filters: Array<Record<string, string>> = [];
-  if (input.installationGeneration) {
-    filters.push(
+  return {
+    app_id: input.appId,
+    filters: [
       {
         field: "tag",
         key: "app_generation",
         relation: "=",
-        value: input.installationGeneration,
+        value: CSM_INSTALLATION_GENERATION,
       },
       { operator: "AND" },
-    );
-  }
-  filters.push({
-    field: "tag",
-    key: "occasion",
-    relation: "=",
-    value: input.occasionLink,
-  });
-
-  return {
-    app_id: input.appId,
-    filters,
+      {
+        field: "tag",
+        key: "occasion",
+        relation: "=",
+        value: input.occasionLink,
+      },
+    ],
     headings: { en: input.heading },
     contents: { en: input.content },
+    ...webIcons,
   };
 }

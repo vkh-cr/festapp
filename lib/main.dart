@@ -20,6 +20,7 @@ import 'package:fstapp/services/connectivity_service.dart';
 import 'package:fstapp/services/health_tracking_http_client.dart';
 import 'package:fstapp/services/notification_helper.dart';
 import 'package:fstapp/services/installation_cutover_service.dart';
+import 'package:fstapp/startup/startup_failure_policy.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -30,6 +31,7 @@ import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/search/global_search_dialog.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/services/web_styles_helper.dart';
+import 'package:fstapp/services/web_bootstrap_bridge.dart';
 import 'package:fstapp/services/app_logger.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/time_travel_widget.dart';
@@ -61,12 +63,9 @@ Future<void> main() async {
 
 NotificationReconnectCoordinator? _notificationReconnectCoordinator;
 
-String initialRouteForUri(
-  Uri uri, {
-  String? forcedOccasionLink = AppConfig.forceOccasionLink,
-}) {
-  final path = uri.path == '/' && forcedOccasionLink != null
-      ? '/$forcedOccasionLink'
+String initialRouteForUri(Uri uri) {
+  final path = uri.path == '/' && AppConfig.forceOccasionLink != null
+      ? '/${AppConfig.forceOccasionLink}'
       : uri.path;
   return '$path${uri.hasQuery ? '?${uri.query}' : ''}';
 }
@@ -112,6 +111,9 @@ class _FestappBootstrapState extends State<FestappBootstrap> {
     }
     if (!mounted) return;
     setState(() => _isReady = true);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) WebBootstrapBridge.markAppReady();
+    });
   }
 
   MaterialPageRoute<void> _loadingRoute(RouteSettings settings) =>
@@ -176,6 +178,7 @@ Future<void> initializeEverything() async {
   }
   final startOffline = ConnectivityService.isOfflineNotifier.value;
   var effectiveOffline = startOffline;
+  var hasCachedOccasionSettings = false;
 
   try {
     await initializeDateFormatting();
@@ -240,7 +243,10 @@ Future<void> initializeEverything() async {
       AppLogger.debug('Offline start: skipped remote session validation');
     }
   } catch (e) {
-    effectiveOffline = true;
+    effectiveOffline = shouldEnterOfflineAfterSessionInitializationFailure(
+      wasAlreadyOffline: effectiveOffline,
+      supabaseInitialized: supabaseInitialized,
+    );
     AppLogger.error('Client sync initialization failed: $e');
   }
 
@@ -262,6 +268,7 @@ Future<void> initializeEverything() async {
         ? await OfflineDataService.getGlobalSettings()
         : null;
     if (settings != null) {
+      hasCachedOccasionSettings = true;
       SynchroService.globalSettingsModel = settings;
       final cachedUser = AuthService.isLoggedIn()
           ? await OfflineDataService.getUserInfo()
@@ -304,7 +311,9 @@ Future<void> initializeEverything() async {
       AppLogger.debug('Offline start: using cached occasion data');
     } else {
       await RightsService.updateAppData(force: true, refreshOffline: false)
-          .timeout(const Duration(seconds: 5));
+          .timeout(occasionLoadTimeout(
+        hasCachedSettings: hasCachedOccasionSettings,
+      ));
       AppLogger.debug('Occasion loaded');
       if (AuthService.isLoggedIn() && !ClientSyncRuntime.isV1Selected) {
         unawaited(SynchroService.refreshUserOfflineData().then((_) {
