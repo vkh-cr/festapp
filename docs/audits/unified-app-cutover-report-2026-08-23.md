@@ -2,24 +2,28 @@
 
 ## Current state
 
-The canonical main candidate is assembled in
-`cutover/unified-main-prod-branches-20260823` from main
-`d071cdd16be4e500b8c1fa16ac2ad070cbf60fe7`. It contains the retained shared
-CSM and HM capabilities, tenant-neutral runtime contracts, main-owned overlay
-policy, and the complete divergent-commit ledger.
+The canonical runtime cutover base and primary tenant cutover commits are:
 
-No Festapp commit, push, production migration, deployment, store release,
-backup-ref push, force push, or production write has been performed. The final
-main, CSM, and HM SHAs do not exist yet because repository policy requires
-explicit approval before the first commit. Production-branch cutover therefore
-remains blocked on that approved main commit.
+- `main`: `3e7a31ab39a3f913367985bcb2bb6fe137ac2418`
+- `prod/csmostrava2026`: `c36d704976ba1b4fbe0b000c4d39253646eb1cea`
+- `prod/hvezdamorska`: `b4afe7f8ff3030ed3f2a8f749b977b949402877e`
+
+Both primary production commits have the canonical runtime main SHA as their
+second parent and contain only their main-owned tenant overlay plus regenerated
+leaf files. A later report-only main commit may be synchronized into the tenant
+branches with the same drift proof; its SHA is deliberately not recorded inside
+its own self-referential report. No push, production migration, deployment,
+store release, backup-ref push, force push, or production write has been
+performed.
 
 ## Source results
 
 - All 450 divergent commits are classified exactly once: 260 CSM and 190 HM.
-- The original dirty CSM worktree remains untouched. Its external recovery
-  snapshot is `/tmp/festapp-unified-cutover.p9Dm64`, including a tracked patch
-  checksum and checksums for all 15 untracked paths.
+- The original dirty CSM worktree is detached at its original
+  `84c1d5de5277d4388c25d07235700a93668345c4` commit. Its tracked patch checksum
+  (`968dfa3210db147f817e6927162876f8d2102a812d3a05eddcbb16b8ef343f90`) and
+  untracked-inventory checksum were identical before and after detaching. Its
+  external recovery snapshot remains `/tmp/festapp-unified-cutover.p9Dm64`.
 - `main` is the sole owner of shared Flutter, web, SQL/RPC, Edge Function,
   worker, PWA, map, release-tooling, account-deletion, product-description, and
   order-agreement implementations.
@@ -46,6 +50,10 @@ remains blocked on that approved main commit.
 | Web client production build | pass |
 | Flutter tests | pass, 571 passed / 0 failed |
 | Flutter web production build | pass; existing wasm dry-run warnings remain |
+| CSM tenant Flutter/Vite production builds | pass |
+| HM tenant Flutter/Vite production builds | pass |
+| Final CSM/HM canonical drift checks | pass |
+| Final tree and complete unpushed-history credential scan | pass for main, CSM, and HM |
 | Edge/Deno tests | pass, 80 passed / 0 failed, including DB integrations |
 | Automation suite | pass, including private-input schema and PWA contracts |
 | Disposable local database baseline and migrations | pass via temporary Colima runtime; 32 forward migrations applied |
@@ -62,13 +70,22 @@ was rebuilt, the focused regression passed, and the complete 76-test DB gate
 then passed. Colima was started only for this local gate and stopped afterward;
 no remote database was used.
 
+A clean post-cutover Flutter resolution exposed that the permissive
+`adaptive_theme: ^3.7.2` constraint now selects incompatible 3.8.0. Main pins
+the previously verified 3.7.2 release, after which clean main, CSM, and HM web
+builds passed. Release credential hardening now ignores key artifacts globally,
+rejects App Store and Google Play credential paths inside the repository, and
+documents external provisioning.
+
 ## External boundaries and blockers
 
-- The FestappSeed locator and its approved secret-manager instructions were not
-  available. No locator was guessed, no private value was copied into Festapp,
-  and no cross-repository write was attempted. The public input and external
-  service schemas are present in Festapp, but tenant provisioning/readback
-  remains an explicit blocker.
+- FestappSeed was located as the private repository
+  `https://github.com/rawen-dev/festappseed` and cloned read-only for inspection
+  at `/Users/miakh/source/festappseed`. It currently contains no Play/App Store
+  credential provisioning contract or release credentials. No private value
+  was copied into Festapp and no FestappSeed write was attempted. The public
+  input and external-service schemas are present in Festapp, but concrete
+  tenant provisioning/readback remains an explicit external blocker.
 - Required-check branch protection and other GitHub policy are external state.
   The workflow contains the main-owned drift job, but it must not be described
   as unbypassable until separately authorized external readback confirms branch
@@ -76,14 +93,14 @@ no remote database was used.
 - Production migrations in
   `unified-production-database-deployment-manifest-2026-08-23.json` are ordered
   and marked `apply: false`. They remain unapplied.
-- The CSM and HM forward-only tree cutovers require the approved main commit as
-  their base. Their final drift proofs and final branch SHAs are therefore
-  pending.
+- Local pre-cutover refs preserve CSM at
+  `backup/prod-csmostrava2026-pre-cutover-20260823` and HM at
+  `backup/prod-hvezdamorska-pre-cutover-20260823`. They have not been pushed.
 
 ## Next authorized transition
 
-After the staged candidate is reviewed, obtain explicit approval for the main
-commit. Only then create the main commit and construct each production branch
-as the verified main tree plus its allowed overlay. Backup-ref pushes, branch
-pushes, production deployment, database writes, and store releases each remain
-separately authorized operations.
+After this report update is reviewed, committed, and synchronized into both
+tenant branches, obtain explicit approval before pushing `main`, either
+production branch, or backup refs. Production deployment, database writes,
+external-service provisioning, and store releases remain separately authorized
+operations.
