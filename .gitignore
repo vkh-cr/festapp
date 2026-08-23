@@ -69,6 +69,13 @@ unlinked_spec.ds
 **/android/**/GeneratedPluginRegistrant.java
 **/android/key.properties
 *.jks
+*.keystore
+
+# Release credentials are provisioned from FestappSeed and must stay outside
+# this repository. Runtime release tooling rejects in-repository key paths too.
+*.p8
+**/play-service-account*.json
+**/google-play-service-account*.json
 
 # iOS/XCode related
 **/ios/**/*.mode1v3

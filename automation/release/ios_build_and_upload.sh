@@ -13,6 +13,12 @@ if [ ! -f "$APP_STORE_CONNECT_KEY_PATH" ]; then
   echo "App Store Connect key not found: $APP_STORE_CONNECT_KEY_PATH"
   exit 1
 fi
+case "$(cd "$(dirname "$APP_STORE_CONNECT_KEY_PATH")" && pwd)/$(basename "$APP_STORE_CONNECT_KEY_PATH")" in
+  "$PROJECT_ROOT"/*)
+    echo "App Store Connect key must be provisioned from FestappSeed and remain outside the repository."
+    exit 1
+    ;;
+esac
 key_mode="$(stat -f '%Lp' "$APP_STORE_CONNECT_KEY_PATH")"
 if [ $((8#$key_mode & 077)) -ne 0 ]; then
   echo "App Store Connect key must not be accessible by group/others."

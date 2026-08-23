@@ -71,6 +71,7 @@ end
 def app_store_connect_key_path!
   path = File.expand_path(ENV.fetch('APP_STORE_CONNECT_KEY_PATH'))
   UI.user_error!("App Store Connect key not found: #{path}") unless File.file?(path)
+  UI.user_error!('App Store Connect key must be provisioned from FestappSeed and remain outside the repository') if path.start_with?(File.expand_path('../../..', __dir__) + File::SEPARATOR)
   mode = File.stat(path).mode & 0o777
   UI.user_error!("App Store Connect key must not be accessible by group/others: #{path}") unless (mode & 0o077).zero?
   path
