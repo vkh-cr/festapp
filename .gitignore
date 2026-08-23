@@ -1,6 +1,7 @@
 # Miscellaneous
 *.class
 *.lock
+!/pubspec.lock
 *.log
 *.pyc
 *.swp
@@ -70,10 +71,15 @@ unlinked_spec.ds
 **/android/key.properties
 *.jks
 *.keystore
+*.p12
+*.pem
+*.key
+*.mobileprovision
 
 # Release credentials are provisioned from FestappSeed and must stay outside
 # this repository. Runtime release tooling rejects in-repository key paths too.
 *.p8
+**/service-account*.json
 **/play-service-account*.json
 **/google-play-service-account*.json
 

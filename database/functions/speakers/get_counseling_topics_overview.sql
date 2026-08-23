@@ -5,7 +5,7 @@
 -- the counts to the parent event's day (same bounds the client passes to
 -- get_counseling_availability). The client uses free_future_slots to grey out
 -- empty areas and to show the free count. Gated on the counseling feature.
-CREATE OR REPLACE FUNCTION get_counseling_topics_overview(
+CREATE OR REPLACE FUNCTION public.get_counseling_topics_overview(
     p_occasion BIGINT,
     p_from     TIMESTAMPTZ DEFAULT NULL,
     p_to       TIMESTAMPTZ DEFAULT NULL

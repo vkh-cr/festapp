@@ -126,7 +126,7 @@ Deno.serve(async (req) => {
         await processDirectory(`${dir}/${item.name}`);
       } else if (item.type === "file" && item.name.endsWith(".sql") && item.download_url) {
         const filePath = `${dir}/${item.name}`;
-        console.log(`Executing ${filePath} ...`);
+        console.info(`Executing ${filePath} ...`);
         try {
           const fileResponse = await fetch(item.download_url);
           if (!fileResponse.ok) {
@@ -145,7 +145,7 @@ Deno.serve(async (req) => {
 
   try {
     await client.connect();
-    console.log("Connected to the database.");
+    console.info("Connected to the database.");
 
     // If the seed scripts are being run, call the extra SQL functions.
     if (directory === "scripts/seed") {
@@ -157,7 +157,7 @@ Deno.serve(async (req) => {
         admin_password.trim() !== ""
       ) {
         try {
-          console.log("Executing seed_org_with_admin...");
+          console.info("Executing seed_org_with_admin...");
           await client.queryObject(
             "SELECT seed_org_with_admin($1, $2)",
             [admin_email, admin_password],
@@ -176,12 +176,12 @@ Deno.serve(async (req) => {
           );
         }
       } else {
-        console.log("Skipping seed_org_with_admin due to missing admin_email or admin_password.");
+        console.info("Skipping seed_org_with_admin due to missing admin configuration.");
       }
 
       // Execute setup_triggers.
       try {
-        console.log("Executing setup_triggers...");
+        console.info("Executing setup_triggers...");
         await client.queryObject(
           "SELECT setup_triggers($1)",
           [project_url],
@@ -202,7 +202,7 @@ Deno.serve(async (req) => {
 
       // Execute setup_crons.
       try {
-        console.log("Executing setup_crons...");
+        console.info("Executing setup_crons...");
         await client.queryObject(
           "SELECT setup_crons($1)",
           [project_url],

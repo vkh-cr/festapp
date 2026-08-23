@@ -41,8 +41,6 @@ async function processEmailTask(taskData: any, authorization: string | null) {
     throw new Error("Template code is required for each task.");
   }
 
-  console.log(`Processing task for template: ${code}`);
-
   // --- Template Data Gathering using Strategy Pattern ---
   const handler = templateHandlers[code];
   if (!handler) {
@@ -52,9 +50,6 @@ async function processEmailTask(taskData: any, authorization: string | null) {
   const { subs, sender, receiver, context, attachments = [], reply_to } =
     await handler(taskData, authorization!);
 
-  console.log(
-    `Sending email to ${receiver} with ${attachments.length} attachments.`,
-  );
   await deliverEmail({
     to: receiver,
     templateCode: code,
@@ -67,24 +62,16 @@ async function processEmailTask(taskData: any, authorization: string | null) {
       ? `<ticket-order-${taskData.data.command_id}@festapp.net>`
       : undefined,
   });
-  console.log(`Email for template ${code} sent successfully to ${receiver}.`);
-
   // --- Post-Action ---
   if (
     (code === "TICKET_ORDER_UPDATE" || code === "TICKET_ORDER_REMINDER") &&
     context?.orderHistoryId
   ) {
-    console.log(
-      `Flagging order history record as sent: ${context.orderHistoryId}`,
-    );
     await supabaseAdmin.rpc("add_sent_to_customer_flag", {
       history_id: context.orderHistoryId,
     });
 
     if (code === "TICKET_ORDER_REMINDER") {
-      console.log(
-        `Marking reminder as sent on payment_info: ${context.paymentInfoId}`,
-      );
       await supabaseAdmin.rpc("mark_payment_reminder_sent", {
         p_payment_info_id: context.paymentInfoId,
       });
@@ -112,8 +99,6 @@ async function handleBatchProcessing(
 
   const results = [];
   let tasksAttempted = 0;
-
-  console.log(`Starting batch processing for ${tasks.length} tasks.`);
 
   for (const task of tasks) {
     tasksAttempted++;
@@ -146,7 +131,6 @@ async function handleBatchProcessing(
       const result = await processEmailTask(task, authorization);
       results.push({ ...result, taskId: task.id });
       if (task.id) {
-        console.log(`Removing task ${task.id} from the queue.`);
         const { error: rpcError } = await supabaseAdmin.rpc(
           "remove_from_queue_emails",
           {
@@ -159,8 +143,6 @@ async function handleBatchProcessing(
             `CRITICAL: Failed to remove task ${task.id} from queue:`,
             rpcError.message,
           );
-        } else {
-          console.log(`Successfully removed task ${task.id} from the queue.`);
         }
       }
     } catch (error) {
@@ -186,10 +168,6 @@ async function handleBatchProcessing(
       });
     }
   }
-
-  console.log(
-    `Batch processing finished. Attempted ${tasksAttempted} of ${tasks.length} tasks.`,
-  );
 
   return new Response(
     JSON.stringify({
@@ -218,9 +196,6 @@ Deno.serve(async (req) => {
     // --- QUEUE PROCESSING LOGIC ---
     if (requestBody.processQueue === true) {
       await authorizeRequest({ requestSecret });
-      console.log(
-        "Processing queue flag detected. Fetching due tasks from database.",
-      );
       const { data: tasks, error } = await supabaseAdmin.rpc(
         "claim_due_queue_emails_v1",
         { p_limit: 25 },

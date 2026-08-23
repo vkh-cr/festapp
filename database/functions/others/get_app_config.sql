@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION get_app_config_v218(data_in jsonb)
+CREATE OR REPLACE FUNCTION public.get_app_config_v218(data_in jsonb)
 RETURNS jsonb
 LANGUAGE plpgsql VOLATILE
 SECURITY DEFINER

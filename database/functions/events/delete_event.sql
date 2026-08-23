@@ -5,7 +5,7 @@
 -- event_users / event_users_saved rows that an editor cannot remove from the
 -- client under RLS (a user may only delete their own rows). event_speakers and
 -- activity_assignment_events cascade on their own.
-CREATE OR REPLACE FUNCTION delete_event(p_event BIGINT)
+CREATE OR REPLACE FUNCTION public.delete_event(p_event BIGINT)
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER

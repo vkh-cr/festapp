@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION update_service_item(
+CREATE OR REPLACE FUNCTION public.update_service_item(
   oc BIGINT,
   type TEXT,
   code TEXT,

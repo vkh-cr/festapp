@@ -4,7 +4,7 @@ CREATE OR REPLACE FUNCTION public.get_app_config_v219(data_in jsonb)
 RETURNS jsonb
 LANGUAGE plpgsql VOLATILE
 SECURITY DEFINER
-SET search_path = ''
+SET search_path = public, extensions
 AS $$
 DECLARE
   v_result jsonb;

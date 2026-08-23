@@ -6,6 +6,7 @@ import 'package:fstapp/components/search/search_result_model.dart';
 import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
 import 'package:fstapp/data_services/rights_service.dart';
+import 'package:fstapp/services/app_logger.dart';
 
 /// Data access for the GlobalSearch feature.
 ///
@@ -37,11 +38,10 @@ class DbSearch {
   static Future<void> rebuildOfflineIndex() async {
     try {
       await _offlineIndex.rebuild();
-    } catch (e) {
+    } catch (_) {
       // Keep the previous index. A later query retries because its epoch was
       // not accepted by the failed rebuild.
-      // ignore: avoid_print
-      print('DbSearch.rebuildOfflineIndex failed: $e');
+      AppLogger.warning('Offline search index rebuild failed');
     }
   }
 

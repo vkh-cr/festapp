@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION create_ticket_order_internal_v1(input_data JSONB)
+CREATE OR REPLACE FUNCTION public.create_ticket_order_internal_v1(input_data JSONB)
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER

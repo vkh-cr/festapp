@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION delete_service_item(
+CREATE OR REPLACE FUNCTION public.delete_service_item(
   oc BIGINT,
   type TEXT,
   code TEXT,

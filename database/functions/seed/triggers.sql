@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION setup_triggers(p_project_url TEXT)
+CREATE OR REPLACE FUNCTION public.setup_triggers(p_project_url TEXT)
 RETURNS VOID
 LANGUAGE plpgsql
 AS $func$

@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION sign_user_out_of_event(ev BIGINT, usr UUID)
+CREATE OR REPLACE FUNCTION public.sign_user_out_of_event(ev BIGINT, usr UUID)
 RETURNS jsonb
 LANGUAGE plpgsql
 SECURITY DEFINER

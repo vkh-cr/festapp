@@ -7,7 +7,7 @@ RETURNS BIGINT[]
 LANGUAGE plpgsql
 VOLATILE
 SECURITY DEFINER
-SET search_path = ''
+SET search_path = public, extensions
 AS $$
 DECLARE
     v_actor UUID := auth.uid();

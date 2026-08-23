@@ -6,6 +6,7 @@
 #          - lib/app_config.dart (Flutter App)
 #          - web_client/index.html (Meta tags)
 #          - web/index.html (Flutter web template title + iOS app title)
+#          - web/delete-account/index.html (Tenant account deletion page)
 #          - web_client/public/CNAME (Domain)
 # Usage: ./automation/apply_config.sh
 # ==============================================================================
@@ -145,6 +146,41 @@ PY
 else
     echo "Warning: $FLUTTER_INDEX not found."
 fi
+
+# 2c. Generate the public account-deletion page from tenant configuration.
+# The anon key is intentionally a public client credential; privileged access
+# remains enforced by the Edge Function and database authorization boundaries.
+DELETE_ACCOUNT_TEMPLATE="$PROJECT_ROOT/automation/templates/web/delete-account/index.html"
+DELETE_ACCOUNT_FILE="$PROJECT_ROOT/web/delete-account/index.html"
+if [ ! -f "$DELETE_ACCOUNT_TEMPLATE" ]; then
+    echo "Error: account deletion template not found at $DELETE_ACCOUNT_TEMPLATE"
+    exit 1
+fi
+mkdir -p "$(dirname "$DELETE_ACCOUNT_FILE")"
+python3 - "$DELETE_ACCOUNT_TEMPLATE" "$DELETE_ACCOUNT_FILE" "$APP_NAME" \
+    "$SUPABASE_URL" "$SUPABASE_ANON_KEY" <<'PY'
+import html
+import json
+import sys
+
+template_path, output_path, app_name, supabase_url, anon_key = sys.argv[1:]
+source = open(template_path, encoding="utf-8").read()
+replacements = {
+    "__FESTAPP_APP_NAME_HTML__": html.escape(app_name),
+    "__FESTAPP_DELETE_ENDPOINT__": json.dumps(
+        supabase_url.rstrip("/") + "/functions/v1/confirm-account-deletion"
+    ),
+    "__FESTAPP_ANON_KEY__": json.dumps(anon_key),
+}
+for token, value in replacements.items():
+    if token not in source:
+        raise SystemExit(f"Error: missing account deletion template token: {token}")
+    source = source.replace(token, value)
+if "__FESTAPP_" in source:
+    raise SystemExit("Error: unresolved account deletion template token")
+open(output_path, "w", encoding="utf-8").write(source.rstrip() + "\n")
+PY
+echo "✔ Generated account deletion page"
 
 # 3. Update CNAME file (Domain)
 # Generate the installable PWA identity from the same brand source.

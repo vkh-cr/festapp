@@ -37,7 +37,6 @@ serve(async (req) => {
 
     // 2. Handle SNS Subscription Confirmation (Auto-confirm)
     if (payload.Type === SNS_TYPE_CONFIRMATION) {
-      console.log("Confirming subscription:", payload.SubscribeURL);
       const confirmRes = await fetch(payload.SubscribeURL);
       if (confirmRes.ok) {
         return new Response("Confirmed", { status: 200 });
@@ -65,7 +64,7 @@ serve(async (req) => {
       const emailBody = sesMessage.content;
 
       if (!tokenMatch) {
-        console.error("No token found in recipient:", recipient);
+        console.error("No bank pairing token found in recipient");
         await supabase.rpc("log_transactions_parser_log", {
           p_bank_account_id: null,
           p_external_id: messageId,
@@ -86,7 +85,7 @@ serve(async (req) => {
       bankAccount = accountData;
 
       if (dbError || !bankAccount) {
-        console.error("Bank account not found for code:", pairingCode);
+        console.error("Bank account not found for pairing code");
         // We log ID if we have messageId, but account is null
         await supabase.rpc("log_transactions_parser_log", {
           p_bank_account_id: null,
@@ -101,10 +100,6 @@ serve(async (req) => {
       const provider = detectProvider(
         bankAccount.account_number,
         bankAccount.type,
-      );
-
-      console.log(
-        `Detected provider: ${provider} for account: ${bankAccount.account_number}`,
       );
 
       // 7. Parse Email

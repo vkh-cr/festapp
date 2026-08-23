@@ -7,7 +7,7 @@
 -- BLOCK a repeat offender straight from a report, but UN-blocking is editor/admin
 -- only. So p_blocked = true requires crew rights, p_blocked = false requires
 -- editor rights. Envelope {code, message, data} like resolve_cleaning_place.
-CREATE OR REPLACE FUNCTION set_cleaning_reporter_blocked_internal_v1(
+CREATE OR REPLACE FUNCTION public.set_cleaning_reporter_blocked_internal_v1(
   p_occasion bigint,
   p_user uuid,
   p_blocked boolean
@@ -66,7 +66,7 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION set_cleaning_reporter_blocked(
+CREATE OR REPLACE FUNCTION public.set_cleaning_reporter_blocked(
   p_occasion bigint,
   p_user uuid,
   p_blocked boolean

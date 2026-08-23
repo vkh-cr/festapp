@@ -2,7 +2,7 @@
 -- p_to) window scopes the slots to the parent rozcestník event's day (the
 -- client passes that event's day bounds in UTC); when both are NULL all future
 -- slots are returned. Counselors with no slot in the window are omitted.
-CREATE OR REPLACE FUNCTION get_counseling_availability(
+CREATE OR REPLACE FUNCTION public.get_counseling_availability(
     p_occasion BIGINT,
     p_topic    BIGINT,
     p_from     TIMESTAMPTZ DEFAULT NULL,

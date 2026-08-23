@@ -136,12 +136,12 @@ export default {
       const result = await createWorkerRetention(env).runOnce({
         apply: env.SYNC_RETENTION_APPLY === 'true',
       });
-      console.log(JSON.stringify({ event: 'client_sync_retention', ...result }));
+      console.info(JSON.stringify({ event: 'client_sync_retention', ...result }));
       return;
     }
     try {
       const publishedScopes = await createWorkerPublisher(env).runOnce();
-      console.log(JSON.stringify({ event: 'client_sync_publish', publishedScopes }));
+      console.info(JSON.stringify({ event: 'client_sync_publish', publishedScopes }));
     } catch (error) {
       const errors = error instanceof AggregateError ? error.errors : [error];
       console.error(JSON.stringify({

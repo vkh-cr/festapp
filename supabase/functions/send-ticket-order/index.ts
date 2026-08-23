@@ -68,7 +68,7 @@ Deno.serve(async (req) => {
     let ticketOrderResponse: any;
 
     if (authorizationHeader) {
-      console.log("Creating ticket order via User Scoped Client");
+      console.info("Creating ticket order via user-scoped authorization");
       const userClient = createUserClient(authorizationHeader);
 
       const { data, error } = await userClient.rpc(
@@ -82,7 +82,7 @@ Deno.serve(async (req) => {
         ticketOrderResponse = data?.data ?? data;
       }
     } else {
-      console.log("Creating ticket order via Admin Client");
+      console.info("Creating ticket order via system authorization");
       const { data, error } = await supabaseAdmin.rpc(
         rpcName,
         rpcParameters,

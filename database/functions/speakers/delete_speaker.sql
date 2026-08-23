@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION delete_speaker(p_speaker_id BIGINT)
+CREATE OR REPLACE FUNCTION public.delete_speaker(p_speaker_id BIGINT)
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER

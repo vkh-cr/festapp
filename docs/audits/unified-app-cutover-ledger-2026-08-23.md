@@ -17,8 +17,8 @@ This ledger freezes the fetched source ranges and classifies every divergent com
 - Dirty CSM snapshot: `/tmp/festapp-unified-cutover.p9Dm64`; tracked patch SHA is recorded in `tracked.patch.sha256`, and all 15 untracked files are recorded in `untracked.sha256` without exposing file contents.
 - Integration worktree: `/Users/miakh/source/festapp-unified-cutover`, branch `cutover/unified-main-prod-branches-20260823`, based on `d071cdd16be4e500b8c1fa16ac2ad070cbf60fe7`.
 - Initial copied plan SHA-256: `b12aad8d0ef3e264b1806802f50f9853b052a8df9a46cfd52f2f02495c847eeb`; current candidate plan SHA-256 after recording migration-collision evidence and Markdown hygiene: `4d773ce4ec6b94c378d91239cd8063d7d5bacc285e3cbef71856c1bbd603f0db`; execution prompt SHA-256: `88df0e05964e0cc3caf11e3a0851bca468315008177c8438c36dd4e97580739c`.
-- Existing backup refs do not cover the current CSM/HM tips. Creating/pushing dedicated pre-cutover refs remains separately authorized.
-- FestappSeed locator/instructions remain unresolved by explicit task constraint. No path was guessed and no cross-repo write was attempted.
+- Local pre-cutover refs preserve both frozen tenant tips: `backup/prod-csmostrava2026-pre-cutover-20260823` at `84c1d5de5277d4388c25d07235700a93668345c4` and `backup/prod-hvezdamorska-pre-cutover-20260823` at `942c45401b73eaf289bd6f299c606eda4b16cc26`. Pushing those refs remains separately authorized.
+- FestappSeed is the private `rawen-dev/festappseed` repository, cloned at `/Users/miakh/source/festappseed`. It currently contains no documented Play/App Store credential-provisioning contract; no cross-repo write was attempted.
 
 ## Dirty topic transfer
 

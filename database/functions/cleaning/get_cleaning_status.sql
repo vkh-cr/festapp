@@ -12,7 +12,7 @@
 -- statuses must keep working even after the feature is turned off (so the crew
 -- can still resolve what is open). Only new reports are gated — in
 -- report_cleaning_issue.
-CREATE OR REPLACE FUNCTION get_cleaning_status(oc bigint) RETURNS jsonb
+CREATE OR REPLACE FUNCTION public.get_cleaning_status(oc bigint) RETURNS jsonb
   LANGUAGE plpgsql
   STABLE
   SECURITY DEFINER
