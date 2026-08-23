@@ -2,12 +2,13 @@ export type CompletionNotification = {
   to: string;
   templateCode: "ACCOUNT_DELETION_COMPLETE";
   context: { organization: number };
-  substitutions: { appName: "CSM Ostrava" };
+  substitutions: { appName: string };
 };
 
 type CompletionJob = {
   completionEmail?: unknown;
   organization: number;
+  appName: string;
 };
 
 export async function sendCompletionNotification(
@@ -21,7 +22,7 @@ export async function sendCompletionNotification(
     to: job.completionEmail,
     templateCode: "ACCOUNT_DELETION_COMPLETE",
     context: { organization: job.organization },
-    substitutions: { appName: "CSM Ostrava" },
+    substitutions: { appName: job.appName },
   });
   return true;
 }

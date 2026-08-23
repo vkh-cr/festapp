@@ -1,7 +1,7 @@
 # Recepce, role recepčního a přihlášení přes QR
 
-Date: 2026-08-05  
-Status: Ready for execution  
+Date: 2026-08-05
+Status: Ready for execution
 Verification: standard
 
 ## Outcome

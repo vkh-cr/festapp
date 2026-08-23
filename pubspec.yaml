@@ -89,7 +89,7 @@ dependencies:
   mobile_scanner: ^7.1.4
   flutter_map_animations: ^0.8.0
   auto_route: ^11.1.0
-  adaptive_theme: ^3.7.2
+  adaptive_theme: 3.7.2
   connectivity_plus: ^7.0.0
   vector_map_tiles_mbtiles: ^1.2.0
   vector_map_tiles: ^8.0.0
@@ -159,10 +159,12 @@ flutter:
   fonts:
     - family: Gill Sans
       fonts:
+        - asset: fonts/Futura PT Book.ttf
+          weight: 400
+        - asset: fonts/Futura PT Medium.ttf
+          weight: 500
         - asset: fonts/Gill Sans Bold.otf
           weight: 700
-        - asset: fonts/Gill Sans Regular.ttf
-          weight: 400
   assets:
     - assets/icons/
     - assets/translations/

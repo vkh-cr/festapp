@@ -125,7 +125,7 @@ CREATE OR REPLACE FUNCTION public.import_occasion_users_from_csv(
 RETURNS jsonb
 LANGUAGE sql
 SECURITY DEFINER
-SET search_path = ''
+SET search_path = public, extensions
 AS $$
   SELECT public.import_occasion_users_from_csv_internal_v1(
     p_occasion_id, p_rows, p_delete_user_ids);

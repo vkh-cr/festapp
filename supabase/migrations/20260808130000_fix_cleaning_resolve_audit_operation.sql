@@ -10,7 +10,7 @@ CREATE OR REPLACE FUNCTION public.resolve_cleaning_place_client_sync_v1(
 LANGUAGE plpgsql
 VOLATILE
 SECURITY DEFINER
-SET search_path = ''
+SET search_path = public, extensions
 AS $$
 DECLARE
   v_actor uuid := auth.uid();

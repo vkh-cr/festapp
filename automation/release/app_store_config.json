@@ -2,8 +2,19 @@
   "schemaVersion": 2,
   "appleId": "6745415882",
   "bundleId": "festapp.jm2025",
+  "androidPackage": "fstapp.jm2025",
+  "releaseBranch": "prod/csmostrava2026",
   "signingTeamId": "8WKBB6L8LT",
   "notificationExtensionBundleId": "festapp.jm2025.OneSignalNotificationServiceExtension",
+  "signingProfiles": {
+    "app": "CSM Ostrava AppStore",
+    "notificationExtension": "CSM Ostrava OneSignal AppStore"
+  },
+  "googlePlay": {
+    "screenshotSource": "repo-data/store-screenshots/csm-2026/final",
+    "listingDirectory": "automation/release/fastlane/metadata/googleplay/cs-CZ",
+    "locale": "cs-CZ"
+  },
   "source": { "name": "JM 2025", "version": "0.14.25" },
   "target": { "name": "CSM Ostrava", "version": "0.19.89", "locale": "cs" },
   "organizationId": 9,

@@ -13,6 +13,12 @@ if [ ! -f "$APP_STORE_CONNECT_KEY_PATH" ]; then
   echo "App Store Connect key not found: $APP_STORE_CONNECT_KEY_PATH"
   exit 1
 fi
+case "$(cd "$(dirname "$APP_STORE_CONNECT_KEY_PATH")" && pwd)/$(basename "$APP_STORE_CONNECT_KEY_PATH")" in
+  "$PROJECT_ROOT"/*)
+    echo "App Store Connect key must be provisioned from FestappSeed and remain outside the repository."
+    exit 1
+    ;;
+esac
 key_mode="$(stat -f '%Lp' "$APP_STORE_CONNECT_KEY_PATH")"
 if [ $((8#$key_mode & 077)) -ne 0 ]; then
   echo "App Store Connect key must not be accessible by group/others."
@@ -41,7 +47,7 @@ if [ "${#ipa_files[@]}" -ne 1 ] || [ ! -f "${ipa_files[0]}" ]; then
   exit 1
 fi
 export IPA_PATH="${ipa_files[0]}"
-export FASTLANE_APP_IDENTIFIER="festapp.jm2025"
+export FASTLANE_APP_IDENTIFIER="$(node -p "require('./automation/release/app_store_config.json').bundleId")"
 echo "Uploading build only; submission and release are separate gates."
 cd "$SCRIPT_DIR/fastlane"
 FASTLANE_SKIP_UPDATE_CHECK=1 FASTLANE_SKIP_INIT=true fastlane upload_build

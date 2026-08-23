@@ -15,8 +15,8 @@ if (!process.argv.includes('--local') || !process.argv.includes('--read-only')) 
   fail('preflight must be invoked with --local --read-only');
 }
 if (manifest.schemaVersion !== 2) fail('unsupported app-store manifest schema');
-if (manifest.appleId !== '6745415882' || manifest.bundleId !== 'festapp.jm2025') fail('immutable Apple identity mismatch');
-if (manifest.signingTeamId !== '8WKBB6L8LT') fail('signing team mismatch');
+if (!/^\d+$/.test(manifest.appleId ?? '') || !manifest.bundleId) fail('immutable Apple identity is missing');
+if (!manifest.signingTeamId) fail('signing team is missing');
 if (manifest.releaseMode !== 'automatic_after_approval') fail('release mode must be automatic after Apple approval');
 
 const review = manifest.review;
@@ -25,9 +25,6 @@ if (!review?.contact?.firstName || !review?.contact?.lastName || !review?.contac
 }
 if (!review?.demoAccount?.email || !review?.demoAccount?.authEmail || !review?.demoAccount?.passwordKeychainService) {
   fail('canonical reviewer demo account is incomplete');
-}
-if (review?.demoAccount?.email !== 'test@test.com' || review?.demoAccount?.authEmail !== '9+test@test.com') {
-  fail('reviewer-visible and effective auth emails are not pinned correctly');
 }
 if (!review?.notesPath) fail('canonical reviewer notes path is missing');
 else requireFile(path.join('automation/release', review.notesPath));
@@ -96,8 +93,8 @@ if (!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(manifest.target.version ?? '')) 
 if ('build' in manifest.target) fail('app-store manifest must not duplicate the canonical build number');
 
 const project = fs.readFileSync(path.join(root, 'ios/Runner.xcodeproj/project.pbxproj'), 'utf8');
-if (!project.includes('PRODUCT_BUNDLE_IDENTIFIER = festapp.jm2025;')) fail('main bundle identifier is not pinned');
-if (!project.includes('DEVELOPMENT_TEAM = 8WKBB6L8LT;')) fail('expected signing team is absent');
+if (!project.includes(`PRODUCT_BUNDLE_IDENTIFIER = ${manifest.bundleId};`)) fail('main bundle identifier disagrees with manifest');
+if (!project.includes(`DEVELOPMENT_TEAM = ${manifest.signingTeamId};`)) fail('signing team disagrees with manifest');
 const runnerInfo = fs.readFileSync(path.join(root, 'ios/Runner/Info.plist'), 'utf8');
 const whenInUse = runnerInfo.match(/<key>NSLocationWhenInUseUsageDescription<\/key>\s*<string>([^<]+)<\/string>/);
 if (!whenInUse?.[1]?.trim()) fail('Runner Info.plist is missing a non-empty NSLocationWhenInUseUsageDescription');
@@ -157,7 +154,9 @@ if (!/automatic_release:\s*true/.test(submitLane) || /automatic_release:\s*false
   fail('Fastlane submission must use automatic release after Apple approval');
 }
 if (/release_approved_version|manual ASC action/.test(fastfile)) fail('obsolete manual release path found');
-if (/9\+test@test\.com|bujnmi@gmail\.com|festapp-csm-reviewer/.test(fastfile)) {
+if (review?.demoAccount?.authEmail && fastfile.includes(review.demoAccount.authEmail) ||
+    review?.contact?.email && fastfile.includes(review.contact.email) ||
+    review?.demoAccount?.passwordKeychainService && fastfile.includes(review.demoAccount.passwordKeychainService)) {
   fail('Fastfile duplicates app-specific reviewer configuration');
 }
 

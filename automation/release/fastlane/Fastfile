@@ -15,7 +15,7 @@ raise "Cannot read canonical project version: #{version_error}" unless version_s
 PROJECT_VERSION = JSON.parse(version_json)
 TARGET_VERSION = MANIFEST.fetch('target').fetch('version')
 TARGET_BUILD = PROJECT_VERSION.fetch('build')
-PLAY_PACKAGE = 'fstapp.jm2025'
+PLAY_PACKAGE = MANIFEST.fetch('androidPackage')
 
 def play_key_path!
   path = File.expand_path(ENV.fetch('GOOGLE_PLAY_JSON_KEY'))
@@ -71,6 +71,7 @@ end
 def app_store_connect_key_path!
   path = File.expand_path(ENV.fetch('APP_STORE_CONNECT_KEY_PATH'))
   UI.user_error!("App Store Connect key not found: #{path}") unless File.file?(path)
+  UI.user_error!('App Store Connect key must be provisioned from FestappSeed and remain outside the repository') if path.start_with?(File.expand_path('../../..', __dir__) + File::SEPARATOR)
   mode = File.stat(path).mode & 0o777
   UI.user_error!("App Store Connect key must not be accessible by group/others: #{path}") unless (mode & 0o077).zero?
   path
@@ -245,7 +246,7 @@ platform :ios do
     profile_path = File.join(signing_dir, "#{extension_id}.mobileprovision")
     get_provisioning_profile(
       api_key: api_key, app_identifier: extension_id, cert_id: certs.first.id,
-      provisioning_name: 'CSM Ostrava OneSignal AppStore',
+      provisioning_name: MANIFEST.fetch('signingProfiles').fetch('notificationExtension'),
       filename: File.basename(profile_path), output_path: signing_dir, force: true
     )
     FileUtils.chmod(0o600, profile_path)
@@ -272,8 +273,8 @@ platform :ios do
     UI.user_error!('Distribution certificate creation did not return an ID') if cert_id.to_s.empty?
 
     {
-      BUNDLE_ID => 'CSM Ostrava AppStore',
-      MANIFEST.fetch('notificationExtensionBundleId') => 'CSM Ostrava OneSignal AppStore'
+      BUNDLE_ID => MANIFEST.fetch('signingProfiles').fetch('app'),
+      MANIFEST.fetch('notificationExtensionBundleId') => MANIFEST.fetch('signingProfiles').fetch('notificationExtension')
     }.each do |identifier, profile_name|
       get_provisioning_profile(
         api_key: api_key, app_identifier: identifier, cert_id: cert_id,

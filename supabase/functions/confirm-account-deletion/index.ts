@@ -7,6 +7,7 @@ import {
   sha256,
 } from "../_shared/accountDeletion.ts";
 import { supabaseAdmin } from "../_shared/supabaseUtil.ts";
+import { parseOrganizationBranding } from "../_shared/organizationBranding.ts";
 import { sendCompletionNotification } from "./completionNotification.ts";
 
 async function inspect(token: string) {
@@ -138,11 +139,12 @@ Deno.serve(async (request) => {
         /^(http:\/\/(127\.0\.0\.1|localhost|kong)(:|\/))/.test(
           Deno.env.get("SUPABASE_URL") || "",
         );
-      if (localVendorMock) {
-        console.log("Local disposable test: OneSignal adapter mocked");
-      } else if (!config?.ONESIGNAL_APP_ID || !config?.ONESIGNAL_REST_API_KEY) {
+      if (
+        !localVendorMock &&
+        (!config?.ONESIGNAL_APP_ID || !config?.ONESIGNAL_REST_API_KEY)
+      ) {
         throw new Error("onesignal_configuration");
-      } else {
+      } else if (!localVendorMock) {
         await deleteOneSignalUser(
           config.ONESIGNAL_APP_ID,
           config.ONESIGNAL_REST_API_KEY,
@@ -173,13 +175,21 @@ Deno.serve(async (request) => {
   }
 
   try {
+    const { data: organizationRow, error: organizationError } =
+      await supabaseAdmin
+        .from("organizations").select("data").eq("id", organization).single();
+    if (organizationError) throw organizationError;
+    const branding = parseOrganizationBranding(organizationRow?.data);
     await sendCompletionNotification({
       completionEmail: job.completionEmail,
       organization,
+      appName: branding.appName,
     }, (message) =>
       deliverEmail({
         ...message,
-        from: `CSM Ostrava | Festapp <${Deno.env.get("DEFAULT_EMAIL") || ""}>`,
+        from: `${branding.appName} | Festapp <${
+          Deno.env.get("DEFAULT_EMAIL") || ""
+        }>`,
       }));
   } catch {
     console.error("Deletion completed; completion notification failed");

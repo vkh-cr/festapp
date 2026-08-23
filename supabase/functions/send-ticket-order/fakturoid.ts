@@ -1,4 +1,5 @@
 import { supabaseAdmin } from "../_shared/supabaseUtil.ts";
+import { buildFakturoidInvoicePayload } from "./fakturoidPayload.ts";
 
 export interface FakturoidConfig {
   client_id: string;
@@ -45,43 +46,16 @@ export async function useFakturoid(
 
   // 2) Create Proforma with minimal payload
   const d = order.data;
-  const today = new Date().toISOString().slice(0, 10);
-  const total = Number(order.payment_info.amount).toFixed(2);
   const isEur =
     String(order.payment_info.currency_code).toUpperCase() === "EUR";
   const originalVariableSymbol = String(order.payment_info.variable_symbol);
-
-  const createBody: any = {
-    custom_id: idempotencyKey,
-    document_type: "proforma",
+  const createBody = buildFakturoidInvoicePayload(
+    order,
+    unitName,
+    idempotencyKey,
     subject_id,
-    issued_on: today,
-    taxable_fulfillment_due: today,
-    currency: order.payment_info.currency_code,
-    iban: order.payment_info.account_number,
-    bank_account: order.payment_info.account_number_human_readable,
-    lines: [
-      {
-        name: unitName,
-        quantity: 1,
-        // Enforce a maximum of 10 characters for unit_name
-        unit_name: unitName.slice(0, 10),
-        unit_price: total,
-        vat_rate: 0,
-      },
-    ],
-  };
-
-  // EUR RF is derived from this exact VS. Keep Fakturoid on the same numeric
-  // base instead of accepting its document-number default.
-  if (isEur) {
-    createBody.variable_symbol = originalVariableSymbol;
-  }
-
-  // Add the note from the config to the payload if it exists
-  if (note) {
-    createBody.note = note;
-  }
+    note,
+  );
 
   const lookupUrl = new URL(
     `https://app.fakturoid.cz/api/v3/accounts/${slug}/invoices.json`,

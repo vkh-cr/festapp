@@ -30,6 +30,7 @@ import 'package:timezone/timezone.dart' as tz;
 import '../_shared/common_strings.dart';
 import 'occasion_advanced_settings.dart';
 import 'occasion_features_section.dart';
+import 'occasion_save_state.dart';
 import 'occasion_settings_strings.dart';
 
 class OccasionSettingsTab extends StatefulWidget {
@@ -159,67 +160,73 @@ class _OccasionSettingsTabState extends State<OccasionSettingsTab> {
     // 1. Validate the form. If it's not valid, do nothing.
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
-    // 2. Set the state to "saving" to show a loading indicator on the button.
-    setState(() {
-      _isSaving = true;
-    });
+    try {
+      await runOccasionSaveAction(
+        setSaving: (isSaving) {
+          if (mounted) {
+            setState(() {
+              _isSaving = isSaving;
+            });
+          }
+        },
+        action: () async {
+          // 3. Save the form fields to update the local state variables.
+          _formKey.currentState!.save();
 
-    // 3. Save the form fields to update the local state variables.
-    _formKey.currentState!.save();
+          // 4. Update the occasion model with the new values from the form.
+          occasion!.title = _title;
+          occasion!.link = _linkValue;
+          occasion!.startTime = _from;
+          occasion!.endTime = _to;
+          occasion!.description = _description;
+          occasion!.isOpen = _isOpen;
+          occasion!.isHidden = _isHidden;
+          occasion!.isPromoted = _isPromoted;
 
-    // 4. Update the occasion model with the new values from the form.
-    occasion!.title = _title;
-    occasion!.link = _linkValue;
-    occasion!.startTime = _from;
-    occasion!.endTime = _to;
-    occasion!.description = _description;
-    occasion!.isOpen = _isOpen;
-    occasion!.isHidden = _isHidden;
-    occasion!.isPromoted = _isPromoted;
+          final imageUrl = occasion!.data?[Tb.occasions.data_image];
+          final bool hasImage = (imageUrl as String?)?.isNotEmpty ?? false;
+          if (_isPromoted && !hasImage) {
+            occasion!.isPromoted = false;
+          }
 
-    final imageUrl = occasion!.data?[Tb.occasions.data_image];
-    final bool hasImage = (imageUrl as String?)?.isNotEmpty ?? false;
-    if (_isPromoted && !hasImage) {
-      occasion!.isPromoted = false;
-    }
+          occasion!.data ??= {};
 
-    occasion!.data ??= {};
+          // Save Reply-To Email
+          final trimmedEmail = _replyToEmailController.text.trim();
+          if (trimmedEmail.isEmpty) {
+            occasion!.data!.remove(Tb.occasions.data_reply_to);
+          } else {
+            occasion!.data![Tb.occasions.data_reply_to] = trimmedEmail;
+          }
 
-    // Save Reply-To Email
-    final trimmedEmail = _replyToEmailController.text.trim();
-    if (trimmedEmail.isEmpty) {
-      occasion!.data!.remove(Tb.occasions.data_reply_to);
-    } else {
-      occasion!.data![Tb.occasions.data_reply_to] = trimmedEmail;
-    }
+          // Save Timezone
+          occasion!.data![Tb.occasions.data_timezone] = _selectedTimezone;
 
-    // Save Timezone
-    occasion!.data![Tb.occasions.data_timezone] = _selectedTimezone;
+          // 5. Persist the changes to the database.
+          await DbOccasions.updateOccasion(occasion!);
 
-    // 5. Persist the changes to the database.
-    await DbOccasions.updateOccasion(occasion!);
+          // 6. Check if the component is still mounted and the new link is valid.
+          if (mounted && occasion!.link != null) {
+            // Show a success message.
+            ToastHelper.Show(
+                context, "${CommonStrings.saved}: ${occasion!.title!}");
 
-    // 6. Check if the component is still mounted and the new link is valid.
-    if (mounted && occasion!.link != null) {
-      // Show a success message.
-      ToastHelper.Show(context, "${CommonStrings.saved}: ${occasion!.title!}");
-
-      // 7. Trigger the full page refresh.
-      // This router method handles updating RightsService with the new link
-      // and then navigates to the correct administration page (AdminPage or
-      // ReservationsPage). This is crucial, especially if the event link
-      // itself has been changed.
-      await RouterService.navigateToOccasionAdministration(
-        context,
-        occasion: occasion!,
+            // 7. Trigger the full page refresh.
+            // This router method handles updating RightsService with the new link
+            // and then navigates to the correct administration page (AdminPage or
+            // ReservationsPage). This is crucial, especially if the event link
+            // itself has been changed.
+            await RouterService.navigateToOccasionAdministration(
+              context,
+              occasion: occasion!,
+            );
+          }
+        },
       );
-    }
-
-    // 8. Reset the saving state.
-    if (mounted) {
-      setState(() {
-        _isSaving = false;
-      });
+    } catch (error) {
+      if (mounted) {
+        ToastHelper.Show(context, error.toString());
+      }
     }
   }
 

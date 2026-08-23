@@ -1,0 +1,52 @@
+name: Gh-Pages
+
+on:
+  push:
+    branches: [ prod/festapp ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.38.7'
+          channel: 'stable'
+
+      - name: Build Flutter
+        run: |
+          flutter precache
+          flutter build web --release --base-href / --no-web-resources-cdn
+          mv build/web/index.html build/web/flutter.html
+
+      - name: Build Web Client and Merge
+        run: |
+          cd web_client
+          npm install
+          npm run build
+          cp -r dist/* ../build/web/
+
+      - name: Setup SPA Fallback
+        # Copy the new index.html (Web Client) to 404.html for GitHub Pages routing
+        run: |
+          cp build/web/index.html build/web/404.html
+          rm -f build/web/flutter_service_worker.js
+          node automation/generate_pwa_service_worker.mjs build/web "$(grep -m1 '^VERSION=' automation/project.conf | cut -d= -f2 | tr -d '[:space:]')"
+
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build/web
+          publish_branch: gh-pages
+          cname: live.festapp.net

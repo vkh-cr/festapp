@@ -351,7 +351,7 @@ CREATE OR REPLACE FUNCTION public.import_occasion_users_from_csv(
     p_occasion_id bigint,
     p_rows jsonb,
     p_delete_user_ids jsonb DEFAULT '[]'::jsonb
-) RETURNS jsonb LANGUAGE sql SECURITY DEFINER SET search_path = '' AS $$
+) RETURNS jsonb LANGUAGE sql SECURITY DEFINER SET search_path = public, extensions AS $$
   SELECT public.import_occasion_users_from_csv_internal_v1(
     p_occasion_id,p_rows,p_delete_user_ids);
 $$;

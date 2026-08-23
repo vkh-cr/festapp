@@ -1,5 +1,6 @@
 import { createUserClient, supabaseAdmin } from "../_shared/supabaseUtil.ts";
 import { presentPayment } from "../_shared/paymentPresentation.ts";
+import { resolveTicketOrderCommandIdentity } from "./commandIdentity.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -16,10 +17,15 @@ Deno.serve(async (req) => {
     const {
       orderDetails: directOrderDetails,
       replacement,
-      commandId,
-      clientId,
+      commandId: requestedCommandId,
+      clientId: requestedClientId,
     } = await req.json();
-    if (!commandId || !clientId) {
+    const identity = resolveTicketOrderCommandIdentity(
+      requestedCommandId,
+      requestedClientId,
+      replacement,
+    );
+    if (!identity) {
       return new Response(
         JSON.stringify({ error: "Missing command identity" }),
         {
@@ -28,6 +34,7 @@ Deno.serve(async (req) => {
         },
       );
     }
+    const { commandId, clientId } = identity;
     if (!directOrderDetails && !replacement) {
       return new Response(JSON.stringify({ error: "Missing order payload" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },

@@ -6,16 +6,15 @@ import 'package:fstapp/main.dart';
 import 'package:fstapp/startup/startup_failure_policy.dart';
 
 void main() {
-  test('opens the forced occasion when the web URL has no path', () {
-    expect(initialRouteForUri(Uri.parse('https://preview.example/')),
-        '/csmostrava2026');
+  test('keeps the root route when no forced occasion is configured', () {
+    expect(initialRouteForUri(Uri.parse('https://preview.example/')), '/');
   });
 
   test('preserves explicit web deep links', () {
     expect(
       initialRouteForUri(Uri.parse(
-          'https://preview.example/csmostrava2026/news?filter=latest')),
-      '/csmostrava2026/news?filter=latest',
+          'https://preview.example/sample-event/news?filter=latest')),
+      '/sample-event/news?filter=latest',
     );
   });
 

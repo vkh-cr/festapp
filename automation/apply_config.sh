@@ -32,16 +32,65 @@ fi
 # Source the config (DOMAIN)
 source "$CONFIG_FILE"
 
-for required_key in DOMAIN APP_NAME APP_TITLE_SHORT APP_DESCRIPTION \
+for required_key in DOMAIN APP_NAME APP_TITLE_SHORT APP_DESCRIPTION VERSION \
     ANDROID_APPLICATION_ID IOS_BUNDLE_ID IOS_DEVELOPMENT_TEAM \
     IOS_ONESIGNAL_APP_GROUP IOS_ASSOCIATED_DOMAIN LOGO_ASSET DARK_LOGO_ASSET \
     PROGRAM_LOGO_ASSET WEB_LOADING_LOGO_ASSET WEB_IS_ALL_UNIT \
-    WEB_SUPPORTED_LANGUAGES; do
+    WEB_SUPPORTED_LANGUAGES SUPABASE_URL SUPABASE_ANON_KEY ORGANIZATION_ID \
+    IS_APP_SUPPORTED WEB_LINK THEME_SEED_1 THEME_SEED_2 THEME_SEED_3 \
+    THEME_SEED_4 FONT_FAMILY_BASE FORM_FONT_SCALE; do
     if [ -z "${!required_key}" ]; then
         echo "Error: $required_key must be defined in $CONFIG_FILE"
         exit 1
     fi
 done
+
+case "${DEPLOY_TARGET:-skip}" in cloudflare|netlify|gh-pages|skip|'') ;; *)
+    echo "Error: DEPLOY_TARGET must be cloudflare, netlify, gh-pages, or skip"; exit 1 ;;
+esac
+case "$WEB_IS_ALL_UNIT:$IS_APP_SUPPORTED" in
+    true:true|true:false|false:true|false:false) ;;
+    *) echo "Error: WEB_IS_ALL_UNIT and IS_APP_SUPPORTED must be true or false"; exit 1 ;;
+esac
+[[ "$ORGANIZATION_ID" =~ ^[1-9][0-9]*$ ]] || {
+    echo "Error: ORGANIZATION_ID must be a positive integer"; exit 1;
+}
+[[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+\+[0-9]+$ ]] || {
+    echo "Error: VERSION must use semantic-version+build format"; exit 1;
+}
+[[ "$ANDROID_APPLICATION_ID" =~ ^[A-Za-z][A-Za-z0-9_]*(\.[A-Za-z][A-Za-z0-9_]*)+$ ]] || {
+    echo "Error: invalid ANDROID_APPLICATION_ID"; exit 1;
+}
+[[ "$IOS_BUNDLE_ID" =~ ^[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)+$ ]] || {
+    echo "Error: invalid IOS_BUNDLE_ID"; exit 1;
+}
+[[ "$SUPABASE_URL" =~ ^https://[a-z0-9]+\.supabase\.co/?$ ]] || {
+    echo "Error: SUPABASE_URL must use https://<project-ref>.supabase.co"; exit 1;
+}
+[[ "$WEB_LINK" =~ ^https?://[^[:space:]]+$ ]] || {
+    echo "Error: WEB_LINK must be an absolute HTTP(S) URL"; exit 1;
+}
+for color_key in THEME_SEED_1 THEME_SEED_2 THEME_SEED_3 THEME_SEED_4; do
+    [[ "${!color_key}" =~ ^#[0-9A-Fa-f]{6}$ ]] || {
+        echo "Error: $color_key must use #RRGGBB format"; exit 1;
+    }
+done
+[[ "$FORM_FONT_SCALE" =~ ^[0-9]+([.][0-9]+)?$ ]] || {
+    echo "Error: FORM_FONT_SCALE must be numeric"; exit 1;
+}
+for budget_key in PWA_CORE_CACHE_BUDGET_BYTES PWA_KNOWN_CACHE_BUDGET_BYTES; do
+    if [ -n "${!budget_key:-}" ] && ! [[ "${!budget_key}" =~ ^[1-9][0-9]*$ ]]; then
+        echo "Error: $budget_key must be a positive integer"; exit 1
+    fi
+done
+for asset_path in "$LOGO_ASSET" "$DARK_LOGO_ASSET" "$PROGRAM_LOGO_ASSET"; do
+    [ -f "$PROJECT_ROOT/$asset_path" ] || {
+        echo "Error: configured asset does not exist: $asset_path"; exit 1;
+    }
+done
+[ -f "$PROJECT_ROOT/web/$WEB_LOADING_LOGO_ASSET" ] || {
+    echo "Error: configured web loading asset does not exist: $WEB_LOADING_LOGO_ASSET"; exit 1;
+}
 
 echo "Detailed Configuration:"
 echo "  - Domain: $DOMAIN"

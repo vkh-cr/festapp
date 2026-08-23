@@ -49,6 +49,7 @@ export class FormFieldModel {
         this.order = data.order;
         this.productTypeId = data.product_type;
         this.data = data.data || {};
+        this.productTypeData = data.product_type_data || this.data.product_type_data || null;
         
         if (this.data && this.data[FormFieldModel.metaFields]) {
              // Recursively create models for subfields (important for product logic)
@@ -66,20 +67,13 @@ export class FormFieldModel {
         }
 
         // Product Type Options logic
-        if (this.type === 'product_type' && this.data && this.data.product_type_data && this.data.product_type_data.products) {
-             const products = this.data.product_type_data.products;
-             this.options = products.map(p => new FormOptionModel({
-                 [FormOptionModel.metaValue]: p.title,
-                 [FormOptionModel.metaDescription]: p.description,
-                 [FormOptionModel.metaOptionsId]: p.id,
-                 [FormOptionModel.metaOptionsPrice]: p.price,
-                 [FormOptionModel.metaCurrency]: p.currency_code,
-                 [FormOptionModel.metaData]: p.data
-             }));
-        } else if (this.type === 'product_type' && data.product_type_data && data.product_type_data.products) {
-            // Fallback for raw data structure if 'this.data' wasn't fully set?
-            // (Constructor sets this.data = data.data, but sometimes data IS the data object?)
-             const products = data.product_type_data.products;
+        if (this.type === 'product_type' && this.productTypeData) {
+            // Product type metadata is returned next to the form field by
+            // get_form_by_link. Match the Flutter renderer and use its
+            // description for the whole product choice section.
+            this.description = this.productTypeData.description;
+
+            const products = this.productTypeData.products || [];
              this.options = products.map(p => new FormOptionModel({
                  [FormOptionModel.metaValue]: p.title,
                  [FormOptionModel.metaDescription]: p.description,

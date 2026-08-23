@@ -129,4 +129,35 @@ void main() {
     expect(created.eventIds, [21, 22]);
     expect(deleted.count, 2);
   });
+
+  test('single counseling slot deletion uses the guarded slot RPC', () async {
+    late String functionName;
+    late Map<String, dynamic> parameters;
+    final commands =
+        SupabaseSpeakerCommands.withTransport(ClientCommandTransport(
+      (name, params) async {
+        functionName = name;
+        parameters = params;
+        return {
+          'status': 'applied',
+          'code': 200,
+          'data': {'eventId': 21, 'deleted': true},
+          'sync': {'replacements': <Object>[]},
+        };
+      },
+      maxAttempts: 1,
+    ));
+
+    final result = await commands.deleteCounselingSlot(
+      speakerId: 8,
+      eventId: 21,
+      expectedVersion: 3,
+    );
+
+    expect(functionName, 'delete_counseling_slot_client_sync_v1');
+    expect(parameters['p_speaker'], 8);
+    expect(parameters['p_event_id'], 21);
+    expect(parameters['p_expected_version'], 3);
+    expect(result.count, 1);
+  });
 }

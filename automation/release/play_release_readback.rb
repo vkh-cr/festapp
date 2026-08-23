@@ -4,7 +4,8 @@ require 'google/apis/androidpublisher_v3'
 require 'googleauth'
 require 'json'
 
-package_name = 'fstapp.jm2025'
+manifest = JSON.parse(File.read(File.expand_path('app_store_config.json', __dir__)))
+package_name = manifest.fetch('androidPackage')
 credentials = File.expand_path(ENV.fetch('GOOGLE_PLAY_JSON_KEY'))
 abort 'Credential must remain outside the repository' if credentials.start_with?(File.expand_path('../..', __dir__) + File::SEPARATOR)
 

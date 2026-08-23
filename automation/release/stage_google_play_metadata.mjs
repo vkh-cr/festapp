@@ -6,10 +6,16 @@ import { fileURLToPath } from 'node:url';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '../..');
-const source = path.join(root, 'repo-data/store-screenshots/csm-2026/final');
-const listing = path.join(here, 'fastlane/metadata/googleplay/cs-CZ');
+const releaseConfig = JSON.parse(fs.readFileSync(path.join(here, 'app_store_config.json'), 'utf8'));
+const googlePlay = releaseConfig.googlePlay;
+if (!googlePlay?.screenshotSource || !googlePlay?.listingDirectory || !releaseConfig.androidPackage) {
+  throw new Error('Release manifest lacks googlePlay paths or androidPackage');
+}
+const source = path.resolve(root, googlePlay.screenshotSource);
+const listing = path.resolve(root, googlePlay.listingDirectory);
 const playAssets = path.join(source, 'google-play-assets');
-const target = path.join(root, 'build/release/google-play-metadata/cs-CZ');
+const locale = googlePlay.locale || 'cs-CZ';
+const target = path.join(root, 'build/release/google-play-metadata', locale);
 const manifest = JSON.parse(fs.readFileSync(path.join(source, 'manifest.json'), 'utf8'));
 
 function pngSize(file) {
@@ -82,5 +88,5 @@ for (const file of fs.readdirSync(target, { recursive: true }).sort()) {
   const absolute = path.join(target, file);
   if (fs.statSync(absolute).isFile()) evidence.push({ path: file.replaceAll('\\', '/'), sha256: sha256(absolute) });
 }
-fs.writeFileSync(path.join(target, 'staging-manifest.json'), `${JSON.stringify({ packageName: 'fstapp.jm2025', files: evidence }, null, 2)}\n`);
-console.log(`Staged fstapp.jm2025 metadata, canonical Play graphics, 7 phone, 6 seven-inch and 6 ten-inch screenshots.`);
+fs.writeFileSync(path.join(target, 'staging-manifest.json'), `${JSON.stringify({ packageName: releaseConfig.androidPackage, files: evidence }, null, 2)}\n`);
+console.log(`Staged ${releaseConfig.androidPackage} metadata for ${locale}.`);

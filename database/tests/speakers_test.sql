@@ -761,6 +761,50 @@ BEGIN
     RAISE NOTICE 'test 10 (delete_event unbinds sign-ups) passed';
 END $$ LANGUAGE plpgsql;
 
+-- ---------------------------------------------------------------------------
+-- 11. The single-slot editor command cannot delete a counseling entry point
+--     or any other event, even when that event is linked to the speaker.
+-- ---------------------------------------------------------------------------
+DO $$
+DECLARE
+    v_oc    bigint := (SELECT v FROM _spk WHERE k = 'occasion');
+    v_sp    bigint := (SELECT v FROM _spk WHERE k = 'speaker');
+    v_entry bigint;
+    v_slot  bigint;
+    v_res   jsonb;
+BEGIN
+    PERFORM set_config('request.jwt.claim.sub', get_user_id('spk_editor')::text, true);
+
+    INSERT INTO public.events (occasion, title, start_time, end_time, type, data)
+    VALUES (v_oc, 'Counseling entry', now() + interval '12 days',
+            now() + interval '12 days 1 hour', '',
+            '{"counseling_entry":true}'::jsonb)
+    RETURNING id INTO v_entry;
+    INSERT INTO public.event_speakers (event, speaker) VALUES (v_entry, v_sp);
+
+    v_res := public.delete_counseling_slot(v_sp, v_entry);
+    PERFORM assert_eq(v_res->>'code', '400',
+        'single-slot delete rejects the counseling entry point');
+    PERFORM assert_true(EXISTS(SELECT 1 FROM public.events WHERE id = v_entry),
+        'counseling entry survives single-slot delete');
+
+    INSERT INTO public.events (occasion, title, start_time, end_time,
+                               max_participants, type, data)
+    VALUES (v_oc, 'Real counseling slot', now() + interval '12 days',
+            now() + interval '12 days 20 minutes', 1, 'counseling',
+            '{"is_counseling_slot":true}'::jsonb)
+    RETURNING id INTO v_slot;
+    INSERT INTO public.event_speakers (event, speaker) VALUES (v_slot, v_sp);
+
+    v_res := public.delete_counseling_slot(v_sp, v_slot);
+    PERFORM assert_eq(v_res->>'code', '200',
+        'single-slot delete accepts the linked counseling slot');
+    PERFORM assert_true(NOT EXISTS(SELECT 1 FROM public.events WHERE id = v_slot),
+        'linked counseling slot is deleted');
+
+    RAISE NOTICE 'test 11 (guarded single counseling slot delete) passed';
+END $$ LANGUAGE plpgsql;
+
 DO $$ BEGIN RAISE NOTICE 'speakers + counseling regression tests passed'; END $$ LANGUAGE plpgsql;
 
 ROLLBACK; -- Always rollback: tests must not mutate data

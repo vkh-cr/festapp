@@ -119,6 +119,12 @@ with `SECURITY DEFINER`, you MUST verify:
 
 ## 4. Commit Workflow
 
+Shared application, SQL, Edge, worker, test and generic automation changes are
+made on a branch from `main`. A `prod/*` change may contain only an approved
+tenant overlay path and must record the main SHA it overlays. Before proposing a
+production-branch commit, run the checker extracted from that recorded main SHA
+as documented in `docs/architecture/tenant_overlays.md`.
+
 Follow this checklist **before** every commit:
 
 ### Step 1: Configuration Check

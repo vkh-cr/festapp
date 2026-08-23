@@ -27,28 +27,34 @@ Connect.
 
 ---
 
-## 🗝 Step 2: Set Up Local Authentication Script
+## 🗝 Step 2: Provision Credentials from FestappSeed
 
-1. Open `.set_appstore_env.sh` in the `automation/release/` folder
-2. Fill in your credentials:
+Provision the App Store Connect key and identifiers from the private
+FestappSeed repository into a local directory outside this repository. Do not
+copy the `.p8` key into the Festapp checkout.
+
+Create the ignored local file `automation/release/.set_appstore_env.sh` with
+references to the externally provisioned values:
 
 ```bash
 export APP_STORE_CONNECT_KEY_ID="ABCD123456"
 export APP_STORE_CONNECT_ISSUER_ID="01234567-89ab-cdef-0123-456789abcdef"
+export APP_STORE_CONNECT_KEY_PATH="/absolute/path/provisioned-from-FestappSeed/AuthKey_ABCD123456.p8"
 ```
 
-✅ Do **NOT** commit this file with real credentials.
+The key file must be readable only by its owner (`chmod 600`). Both the shell
+script and release tooling reject missing or unsafe key material, and the
+release tooling rejects any key path inside the Festapp repository.
 
 ---
 
-## 📁 Step 3: Place the Private Key
+## 📁 Step 3: Verify the External Private Key
 
-Place your downloaded `.p8` file (e.g. `AuthKey_ABCD123456.p8`) **inside the
-`automation/release/` folder**.\
-The script will automatically copy it to the required location:
+Confirm that the configured path resolves outside the Festapp checkout:
 
-```
-~/.appstoreconnect/private_keys/
+```bash
+source automation/release/.set_appstore_env.sh
+test -f "$APP_STORE_CONNECT_KEY_PATH"
 ```
 
 ---
@@ -67,7 +73,7 @@ Run the setup script to install Fastlane (if needed) and create `Fastfile`:
 
 ```bash
 source automation/release/.set_appstore_env.sh
-./automation/release/build_and_upload.sh
+./automation/release/ios_build_and_upload.sh
 ```
 
 You’ll be prompted to enter **release notes**. The script will:
@@ -98,9 +104,10 @@ Whatever you type will be used as the "What's New" description for that version.
 
 Make sure:
 
-- The `.p8` file is placed correctly in `automation/release/`
-- The filename follows `AuthKey_<KEY_ID>.p8`
-- The key ID in your env file matches the actual file name
+- FestappSeed has provisioned the original `.p8` file outside this repository
+- `APP_STORE_CONNECT_KEY_PATH` is an absolute path to that external file
+- the key file mode is `600`
+- the key ID in your env file matches the provisioned key
 
 ---
 
@@ -113,14 +120,15 @@ my_project/
 │       └── Info.plist
 ├── automation/
 │   └── release/
-│       ├── build_and_upload.sh
+│       ├── ios_build_and_upload.sh
 │       ├── fastlane_setup.sh
 │       ├── .set_appstore_env.sh
 │       ├── ios_howto.md
-│       ├── AuthKey_ABCD123456.p8
 │       └── fastlane/
 │           └── Fastfile
 └── pubspec.yaml
 ```
+
+The provisioned `AuthKey_ABCD123456.p8` is deliberately outside this tree.
 
 ---

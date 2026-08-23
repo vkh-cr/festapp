@@ -1,16 +1,5 @@
 # Database Documentation
 
-## Recovery readiness
-
-`automation/release/recovery_readiness.mjs` composes the canonical configured
-Supabase target, fixed read-only recovery aggregates, backup inventory and the
-shared client-sync health collector. It accepts no arbitrary SQL and performs
-no restore or write operation. See
-[`docs/runbooks/csm-data-recovery.md`](../runbooks/csm-data-recovery.md) for the
-authorization boundaries. Database backups do not contain Supabase Storage or
-R2 object payloads, and the redacted commit audit is evidence rather than an
-event-sourced backup.
-
 ## Client sync v1 maintenance contracts
 
 The sole publisher releases failed dirty work by exact claim token.

@@ -166,10 +166,7 @@ baseline, nesouvisí.
   v popupu záchodu na mapě (fáze 5).
 - **Deep link**: `CleaningPage` přijímá volitelný `:id` path param
   (`cleaning/:id` → rovnou otevře dialog hlášení daného záchodu, vzor
-  `map/:id`). Tento navigační detail je superseded kanonickou
-  `PublicMapSession` architekturou z
-  `2026-08-07_public_map_session_architecture_plan.md`; interní callers dnes
-  používají `MapNavigation`. Připravuje půdu pro QR kódy na samolepkách — **samotné QR se
+  `map/:id`). Připravuje půdu pro QR kódy na samolepkách — **samotné QR se
   teď dál nerozvíjí** (žádný generátor/tisk), jen routa.
 
 ### 4.4 Pohled čety (stejná stránka, rozšířené UI)
@@ -200,8 +197,7 @@ baseline, nesouvisí.
   problém“ (otevře stejný dialog jako CleaningPage).
 - Z dlaždice záchodu na CleaningPage odkaz „na mapě“ →
   `RouterService.navigateOccasion(context, "${MapPage.ROUTE}/${placeId}")`
-  (historický symbol `setMapToOnePlaceAndShowPopup` je superseded; centrování
-  a presentation dnes vlastní `PublicMapSession`).
+  (centrování + popup už existuje: `setMapToOnePlaceAndShowPopup`).
 
 ### 4.6 i18n
 

@@ -12,11 +12,14 @@ $root = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 Set-Location $root
 $fvmBin = Join-Path $env:LOCALAPPDATA 'Pub\Cache\bin'
 if (Test-Path -LiteralPath $fvmBin) { $env:Path = "$fvmBin;$env:Path" }
-$package = 'fstapp.jm2025'
+$releaseManifest = Get-Content -Raw -LiteralPath (Join-Path $root 'automation/release/app_store_config.json') | ConvertFrom-Json
+$package = $releaseManifest.androidPackage
+$expectedBranch = $releaseManifest.releaseBranch
 $branch = (git branch --show-current).Trim()
-if ($branch -ne 'prod/csmostrava2026') { throw "Refusing branch $branch" }
+if (-not $package -or -not $expectedBranch) { throw 'Release manifest lacks androidPackage or releaseBranch' }
+if ($branch -ne $expectedBranch) { throw "Refusing branch $branch; expected $expectedBranch" }
 if ((git remote get-url origin).Trim() -ne 'https://github.com/vkh-cr/festapp.git') { throw 'Unexpected origin remote' }
-if ((Select-String -Path android/app/build.gradle -SimpleMatch 'applicationId = "fstapp.jm2025"').Count -ne 1) { throw 'Package identity mismatch' }
+if ((Select-String -Path android/app/build.gradle -SimpleMatch "applicationId = `"$package`"").Count -ne 1) { throw 'Package identity mismatch' }
 $versionLine = (Select-String -Path pubspec.yaml -Pattern '^version:\s*(.+)$').Matches.Groups[1].Value.Trim()
 $parts = $versionLine.Split('+')
 if ($parts.Count -ne 2) { throw 'Canonical version has no build number' }

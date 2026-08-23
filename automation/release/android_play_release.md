@@ -1,9 +1,10 @@
 # Android / Google Play release
 
-Canonical package: `fstapp.jm2025`. Default operation remains local preflight;
+The canonical package and expected release branch come from the tenant-owned
+`automation/release/app_store_config.json`. Default operation remains local preflight;
 the explicitly gated write operation publishes the verified build directly to
 production. The Google identity may hold account-level release permission for
-all apps, but this repository wrapper remains locked to this canonical package.
+all apps, but this repository wrapper remains locked to the manifest package.
 
 ```powershell
 .\automation\release\android_release.ps1 -Preflight
@@ -16,7 +17,7 @@ The original upload keystore is configured only through ignored `android/key.pro
 Production upload requires the exact confirmation printed by the guarded lane:
 
 ```powershell
-.\automation\release\android_release.ps1 -UploadProduction -Confirmation 'fstapp.jm2025|<versionCode>|<sourceSHA>|production'
+.\automation\release\android_release.ps1 -UploadProduction -Confirmation '<androidPackage>|<versionCode>|<sourceSHA>|production'
 ```
 
 The read-only check creates a temporary Google Play edit because track reads are
