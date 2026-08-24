@@ -31,6 +31,9 @@ authoritative for architecture, security, migration and validation.
 - Canonical branch: `prod/csmostrava2026`.
 - Release source SHA: `cbb3fa7425b7c33b2cab1bba4e2ffe8765f5b6cc`.
 - Current branch/registry SHA: `4429055d1f11ae3f1abac05b7c71b631fd5946e1`.
+- Post-build canonical CSM candidate: `cutover/csm-after-1027` at
+  `d90d42a3d5551cf3871734d6f36cc3967d9025ed`; it preserves `4429055d1` as an
+  ancestor and must not become the production tip before command `1027` completes.
 - Target client version: `0.19.90+440`.
 - Google Play production version: `438` at full distribution.
 - Submitted iOS build: `439`; it predates the image cutover.
@@ -54,6 +57,9 @@ authoritative for architecture, security, migration and validation.
 - Production Windows command `1027` enqueued against the exact current branch
   SHA for read-only Play inspection and a new signed AAB build; it supersedes
   commands `1025` and `1026`, and Play mutation is explicitly forbidden.
+- The post-build CSM overlay was regenerated from canonical `main`, passed its
+  drift/config/legacy-absence gates and was published only as
+  `cutover/csm-after-1027`; the production ref remains unchanged.
 
 ## Next action
 
@@ -132,3 +138,4 @@ monitor to resume polling.
 | 2026-08-24 | Canonical source push | `cbb3fa7425b7c33b2cab1bba4e2ffe8765f5b6cc` | `0.19.90+440` available on `origin/prod/csmostrava2026` |
 | 2026-08-24 | Windows build request | control-channel command `1026` | queued; no result yet |
 | 2026-08-24 | Canonical replacement build request | control-channel command `1027` | queued for branch tip `4429055d1`; supersedes `1026` |
+| 2026-08-24 | Post-build tenant candidate | `d90d42a3d5551cf3871734d6f36cc3967d9025ed` | verified and published on `cutover/csm-after-1027`; production ref unchanged |
