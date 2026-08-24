@@ -41,6 +41,7 @@ done
 grep -qE 'fixturecsm' "$TMP_ROOT/csmostrava2026/lib/app_config.dart"
 grep -qE 'fixturehm' "$TMP_ROOT/hvezdamorska/lib/app_config.dart"
 grep -qE 'organization = 4' "$TMP_ROOT/hvezdamorska/web_client/src/app_config.js"
+grep -qE 'static const bool isAllUnit = true;' "$TMP_ROOT/hvezdamorska/lib/app_config.dart"
 grep -qE "supportedLanguages = \['cs', 'en'\]" "$TMP_ROOT/hvezdamorska/web_client/src/app_config.js"
 grep -qE 'CSM Fixture' "$TMP_ROOT/csmostrava2026/web/delete-account/index.html"
 grep -qE 'fixturecsm.supabase.co/functions/v1/confirm-account-deletion' "$TMP_ROOT/csmostrava2026/web/delete-account/index.html"

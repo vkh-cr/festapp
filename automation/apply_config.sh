@@ -343,6 +343,11 @@ PY
         sed_inplace "s|static const bool isAppSupported = .*;|static const bool isAppSupported = $IS_APP_SUPPORTED;|g" "$FLUTTER_CONFIG"
     fi
 
+    # Keep Flutter's unit-level startup mode on the same canonical tenant flag
+    # as the web client. Missing this propagation makes an all-unit deployment
+    # query an occasion from the bare host and render a blank application.
+    sed_inplace "s|static const bool isAllUnit = .*;|static const bool isAllUnit = $WEB_IS_ALL_UNIT;|g" "$FLUTTER_CONFIG"
+
     # Update Web Link
     if [ ! -z "$WEB_LINK" ]; then
         sed_inplace "s|static const String webLink = \".*\";|static const String webLink = \"$WEB_LINK\";|g" "$FLUTTER_CONFIG"

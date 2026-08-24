@@ -183,6 +183,7 @@ echo "--- lib/app_config.dart ---"
 assert_contains "$TMP_ROOT/lib/app_config.dart" "static const String supabaseUrl = 'https://test.supabase.co';"
 assert_contains "$TMP_ROOT/lib/app_config.dart" "'test-anon-key-fixture';"
 assert_contains "$TMP_ROOT/lib/app_config.dart" "static const int organization = 42;"
+assert_contains "$TMP_ROOT/lib/app_config.dart" "static const bool isAllUnit = true;"
 assert_contains "$TMP_ROOT/lib/app_config.dart" 'static const String webLink = "https://test.example.com";'
 assert_contains "$TMP_ROOT/lib/app_config.dart" "static const String imageApiUrl = 'https://image-api.test.example.com';"
 assert_contains "$TMP_ROOT/lib/app_config.dart" "static const String imageProjectId = 'a';"
