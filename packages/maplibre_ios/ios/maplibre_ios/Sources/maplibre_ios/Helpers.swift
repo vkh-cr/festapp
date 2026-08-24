@@ -8,6 +8,15 @@ import UIKit
 
 @objc(Helpers)
 public class Helpers: NSObject {
+    @objc public static func useBestForNavigationLocationAccuracy(
+        mapView: MLNMapView
+    ) {
+        mapView.locationManager.setDesiredAccuracy?(
+            kCLLocationAccuracyBestForNavigation
+        )
+        mapView.locationManager.setDistanceFilter?(kCLDistanceFilterNone)
+    }
+
     @objc public static func cancelTransitions(mapView: MLNMapView) {
         let selector = NSSelectorFromString("cancelTransitions")
         if mapView.responds(to: selector) {

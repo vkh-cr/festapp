@@ -175,6 +175,7 @@ final class MapLibreMapStateIos extends MapLibreMapState {
     if (mapView == null) return;
 
     _locationEnabled = true;
+    Helpers.useBestForNavigationLocationAccuracyWithMapView(mapView);
     mapView.showsUserLocation = widget.active;
     // TODO: apply bearingRenderMode
     mapView.showsUserHeadingIndicator =

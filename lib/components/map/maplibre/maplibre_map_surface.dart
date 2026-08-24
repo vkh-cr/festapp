@@ -1,8 +1,8 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:fstapp/components/map/map_direction_marker.dart';
+import 'package:fstapp/components/map/map_location_accuracy.dart';
 import 'package:fstapp/components/map/map_location_pin_helper.dart';
 import 'package:fstapp/components/map/map_strings.dart';
 import 'package:fstapp/components/map/map_surface_model.dart';
@@ -96,12 +96,7 @@ class _MapLibreMapSurfaceState extends State<MapLibreMapSurface> {
         !ml.MapController.userLocationIsSupported) {
       return;
     }
-    var permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-    }
-    if (permission == LocationPermission.whileInUse ||
-        permission == LocationPermission.always) {
+    if (await MapLocationAccuracy.ensurePermission()) {
       // A continuously pulsing/animating puck requests frames even while the
       // map itself is idle. A static location + accuracy indicator preserves
       // the useful information without turning an idle map into a 60 FPS view.

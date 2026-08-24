@@ -330,6 +330,7 @@ SWIFT_PROTOCOL_NAMED("FlutterApi")
 @class MLNTilePyramidOfflineRegion;
 SWIFT_CLASS_NAMED("Helpers")
 @interface Helpers : NSObject
++ (void)useBestForNavigationLocationAccuracyWithMapView:(MLNMapView * _Nonnull)mapView;
 + (void)cancelTransitionsWithMapView:(MLNMapView * _Nonnull)mapView;
 + (void)setValueWithTarget:(NSObject * _Nonnull)target field:(NSString * _Nonnull)field value:(NSObject * _Nonnull)value;
 + (NSPredicate * _Nullable)parsePredicateWithRaw:(NSString * _Nonnull)raw SWIFT_WARN_UNUSED_RESULT;

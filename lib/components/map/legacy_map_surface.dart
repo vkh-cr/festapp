@@ -12,6 +12,7 @@ import 'package:fstapp/components/features/map_feature.dart';
 import 'package:fstapp/components/map/icon_model.dart';
 import 'package:fstapp/components/map/map_direction_marker.dart';
 import 'package:fstapp/components/map/map_location_pin_helper.dart';
+import 'package:fstapp/components/map/map_location_accuracy.dart';
 import 'package:fstapp/components/map/map_scene.dart';
 import 'package:fstapp/components/map/map_strings.dart';
 import 'package:fstapp/components/map/map_surface_model.dart';
@@ -114,7 +115,13 @@ class _LegacyMapSurfaceState extends State<LegacyMapSurface>
         _buildAttribution(),
         _buildPathLayer(widget.model.scene.paths),
         _buildDirectionLayer(widget.model.scene.directions),
-        if (widget.model.scene.showCurrentLocation) CurrentLocationLayer(),
+        if (widget.model.scene.showCurrentLocation)
+          CurrentLocationLayer(
+            positionStream: const LocationMarkerDataStreamFactory()
+                .fromGeolocatorPositionStream(
+              stream: MapLocationAccuracy.positionStream(),
+            ),
+          ),
         fm.MarkerLayer(markers: _buildMarkers()),
       ],
     );
