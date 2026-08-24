@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { IMAGE_TRANSFORM_CONTRACT, isCanonicalTransformRequest, renderCloudflareWafBlockExpression, renderImagesSourceAllowlist } from '../../src/transform-contract';
+import {
+  IMAGE_TRANSFORM_CONTRACT,
+  PUBLIC_IMAGE_CORS_HEADER,
+  isCanonicalTransformRequest,
+  renderCloudflareVariantCorsExpression,
+  renderCloudflareWafBlockExpression,
+  renderImagesSourceAllowlist,
+} from '../../src/transform-contract';
 
 const valid = 'https://img.festapp.net/cdn-cgi/image/width=300,fit=scale-down,format=auto,quality=75,onerror=redirect/https://img.festapp.net/images/42/a.jpg';
 
@@ -28,5 +35,14 @@ describe('bounded transform contract', () => {
       { hostname: 'img.festapp.net', path: '/images/' },
       { hostname: 'a.img.festapp.net', path: '/images/' },
     ]);
+  });
+  it('renders public variant CORS from the same host contract', () => {
+    expect(PUBLIC_IMAGE_CORS_HEADER).toEqual({
+      name: 'Access-Control-Allow-Origin',
+      value: '*',
+    });
+    expect(renderCloudflareVariantCorsExpression()).toBe(
+      '(http.host in {"img.festapp.net" "a.img.festapp.net"} and starts_with(raw.http.request.uri.path, "/cdn-cgi/image/"))',
+    );
   });
 });

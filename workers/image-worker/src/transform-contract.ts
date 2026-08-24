@@ -6,6 +6,16 @@ export function renderImagesSourceAllowlist() {
   return contract.publicHosts.map((hostname) => ({ hostname, path: contract.sourcePathPrefix }));
 }
 
+export const PUBLIC_IMAGE_CORS_HEADER = {
+  name: 'Access-Control-Allow-Origin',
+  value: '*',
+} as const;
+
+export function renderCloudflareVariantCorsExpression(): string {
+  const hosts = contract.publicHosts.map((host) => `"${host}"`).join(' ');
+  return `(http.host in {${hosts}} and starts_with(raw.http.request.uri.path, "/cdn-cgi/image/"))`;
+}
+
 export function isCanonicalTransformRequest(value: string): boolean {
   try {
     const outer = new URL(value);
