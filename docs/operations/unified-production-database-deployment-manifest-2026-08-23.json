@@ -41,6 +41,6 @@
     "CSM and HM share this project, so the shared migration deployment is performed once after target preflight.",
     "20260823120000 reconciles the independently-created 20260806142000 reception migration without rewriting either applied history.",
     "20260823130000 aligns active SECURITY DEFINER search paths and requires approved occasion membership for cleaning reports without rewriting applied history.",
-    "Tenant AGREEMENT_PDF values and other operational seed payloads must be supplied through the located FestappSeed repository after its provisioning contract and any write are separately authorized."
+    "Tenant AGREEMENT_PDF values and other operational seed payloads must use the located FestappSeed contract; concrete payload population and every external write remain separately authorized."
   ]
 }

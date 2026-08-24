@@ -90,12 +90,20 @@ test, enforced lockfile resolution, and disposable migration replay passed.
 ## External boundaries and blockers
 
 - FestappSeed was located as the private repository
-  `https://github.com/rawen-dev/festappseed` and cloned read-only for inspection
-  at `/Users/miakh/source/festappseed`. It currently contains no Play/App Store
-  credential provisioning contract or release credentials. No private value
-  was copied into Festapp and no FestappSeed write was attempted. The public
-  input and external-service schemas are present in Festapp, but concrete
-  tenant provisioning/readback remains an explicit external blocker.
+  `https://github.com/rawen-dev/festappseed` and cloned for inspection at
+  `/Users/miakh/source/festappseed`. FestappSeed commit
+  `4e7adbdbd30aa38bcaebdc4b6d308b9b3f8c4f9f` now provides a tested, fail-closed
+  CSM Play/App Store provisioning contract with platform-specific local
+  adapters, authority checks, artifact hashes, and Android certificate
+  fingerprint verification. Its committed tree contains no release credential.
+  No private value was copied into Festapp. Concrete credential population and
+  store readback remain explicit external gates.
+- The FestappSeed audit found three legacy tracked runtime env files containing
+  OneSignal REST, SMTP/AWS, and internal auth credentials. They were removed
+  from the current FestappSeed tree without deleting the ignored local operator
+  copies. Their historical values must be rotated before the incident is
+  considered contained; no history rewrite or external credential mutation was
+  performed.
 - Required-check branch protection and other GitHub policy are external state.
   The workflow contains the main-owned drift job, but it must not be described
   as unbypassable until separately authorized external readback confirms branch
