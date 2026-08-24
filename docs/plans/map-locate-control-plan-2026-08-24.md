@@ -1,7 +1,7 @@
 # Standardní locate/recenter ovladač mapy
 
-Date: 2026-08-24  
-Status: Ready for execution  
+Date: 2026-08-24
+Status: Ready for execution
 Verification: standard
 
 ## Outcome
@@ -386,4 +386,3 @@ Prokázat jednotnost, nekolidující UI a žádnou skrytou druhou implementaci.
   kontrakt.
 - Web browser může přesnou polohu omezit podle svého permission modelu; control
   musí v takovém případě skončit ve standardním unavailable/error stavu.
-
