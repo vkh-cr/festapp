@@ -40,7 +40,8 @@ for required_key in DOMAIN APP_NAME APP_TITLE_SHORT APP_DESCRIPTION VERSION \
     WEB_SUPPORTED_LANGUAGES SUPABASE_URL SUPABASE_ANON_KEY ORGANIZATION_ID \
     IS_APP_SUPPORTED WEB_LINK THEME_SEED_1 THEME_SEED_2 THEME_SEED_3 \
     THEME_SEED_4 FONT_FAMILY_BASE FORM_FONT_SCALE IMAGE_API_URL \
-    IMAGE_PROJECT_ID; do
+    IMAGE_PROJECT_ID PWA_CORE_CACHE_BUDGET_BYTES \
+    PWA_KNOWN_CACHE_BUDGET_BYTES; do
     if [ -z "${!required_key}" ]; then
         echo "Error: $required_key must be defined in $CONFIG_FILE"
         exit 1
@@ -81,7 +82,7 @@ done
     echo "Error: FORM_FONT_SCALE must be numeric"; exit 1;
 }
 for budget_key in PWA_CORE_CACHE_BUDGET_BYTES PWA_KNOWN_CACHE_BUDGET_BYTES; do
-    if [ -n "${!budget_key:-}" ] && ! [[ "${!budget_key}" =~ ^[1-9][0-9]*$ ]]; then
+    if ! [[ "${!budget_key}" =~ ^[1-9][0-9]*$ ]]; then
         echo "Error: $budget_key must be a positive integer"; exit 1
     fi
 done
