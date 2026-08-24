@@ -4,6 +4,7 @@ import 'package:geolocator/geolocator.dart';
 /// Location configuration used while a map is visible on a mobile device.
 abstract final class MapLocationAccuracy {
   static const iosTemporaryFullAccuracyPurposeKey = 'MapLocation';
+  static Future<bool>? _permissionCheck;
 
   static const settings = LocationSettings(
     accuracy: LocationAccuracy.bestForNavigation,
@@ -21,6 +22,18 @@ abstract final class MapLocationAccuracy {
   }
 
   static Future<bool> ensurePermission() async {
+    final pending = _permissionCheck;
+    if (pending != null) return pending;
+    final check = _ensurePermission();
+    _permissionCheck = check;
+    try {
+      return await check;
+    } finally {
+      if (identical(_permissionCheck, check)) _permissionCheck = null;
+    }
+  }
+
+  static Future<bool> _ensurePermission() async {
     var permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();

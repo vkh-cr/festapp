@@ -1,8 +1,10 @@
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fstapp/app_router.dart';
 import 'package:fstapp/app_router.gr.dart';
+import 'package:fstapp/components/map/public_map_session.dart';
 import 'package:fstapp/components/occasion/occasion_home_page.dart';
 
 void main() {
@@ -38,6 +40,37 @@ void main() {
       isBottomNavigationReselection(activeIndex: 0, selectedIndex: 0),
       isTrue,
     );
+  });
+
+  testWidgets('initial map tab visibility sync runs after the build phase',
+      (tester) async {
+    final session = PublicMapSession();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PublicMapSessionScope(
+          session: session,
+          child: Column(
+            children: [
+              Builder(builder: (context) {
+                PublicMapSessionScope.watch(context);
+                return const SizedBox();
+              }),
+              Builder(builder: (context) {
+                scheduleInitialMapTabVisibilitySync(
+                  () => session.setVisible(true),
+                );
+                return const SizedBox();
+              }),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+    expect(session.isMapVisible, isTrue);
+    session.dispose();
   });
 
   test('program event details stay inside the retained occasion shell', () {

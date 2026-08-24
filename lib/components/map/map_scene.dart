@@ -135,6 +135,7 @@ class MapScene {
   final List<MapDirectionPresentation> directions;
   final List<MapDrawPointPresentation> drawPoints;
   final bool showCurrentLocation;
+  final LatLng? currentLocation;
 
   const MapScene({
     this.places = const [],
@@ -142,5 +143,6 @@ class MapScene {
     this.directions = const [],
     this.drawPoints = const [],
     this.showCurrentLocation = false,
+    this.currentLocation,
   });
 }

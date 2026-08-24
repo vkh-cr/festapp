@@ -134,7 +134,11 @@ class _OccasionHomePageState extends State<OccasionHomePage>
     _tabsRouter?.removeListener(_onTabsChanged);
     _tabsRouter = tabsRouter;
     tabsRouter.addListener(_onTabsChanged);
-    _onTabsChanged();
+    scheduleInitialMapTabVisibilitySync(() {
+      if (mounted && identical(_tabsRouter, tabsRouter)) {
+        _onTabsChanged();
+      }
+    });
   }
 
   void _onTabsChanged() {
@@ -293,6 +297,11 @@ bool isBottomNavigationReselection({
   required int selectedIndex,
 }) =>
     activeIndex == selectedIndex;
+
+@visibleForTesting
+void scheduleInitialMapTabVisibilitySync(VoidCallback synchronize) {
+  WidgetsBinding.instance.addPostFrameCallback((_) => synchronize());
+}
 
 Future<void> _resetTabToCanonicalRoot({
   required TabsRouter tabsRouter,

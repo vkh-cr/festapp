@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart' as fm;
+import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fstapp/components/features/map_feature.dart';
 import 'package:fstapp/components/map/legacy_map_surface.dart';
@@ -10,9 +11,13 @@ import 'package:fstapp/components/map/map_viewport_controller.dart';
 import 'package:latlong2/latlong.dart';
 
 void main() {
-  MapSurfaceModel model({bool active = true}) => MapSurfaceModel(
+  MapSurfaceModel model({
+    bool active = true,
+    MapScene scene = const MapScene(),
+  }) =>
+      MapSurfaceModel(
         active: active,
-        scene: const MapScene(),
+        scene: scene,
         icons: const [],
         initialCenter: const LatLng(49.8, 18.2),
         initialZoom: 14,
@@ -81,6 +86,43 @@ void main() {
     expect(find.byType(LegacyMapSurface), findsOneWidget);
     final map = tester.widget<fm.FlutterMap>(find.byType(fm.FlutterMap));
     expect(map.options.maxZoom, MapZoomLimits.interactionMaximum);
+  });
+
+  testWidgets('Legacy renders the location supplied by the shared map scene',
+      (tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: MapRendererHost(
+        renderer: OfflineMapRenderer.legacy,
+        isOffline: true,
+        model: model(
+          scene: const MapScene(
+            showCurrentLocation: true,
+            currentLocation: LatLng(49.8, 18.2),
+          ),
+        ),
+        legacy: LegacyMapConfiguration.offlineUnavailable(MapLayer()),
+      ),
+    ));
+
+    expect(find.byType(DefaultLocationMarker), findsOneWidget);
+  });
+
+  testWidgets('Legacy hides a retained location while its scene is inactive',
+      (tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: MapRendererHost(
+        renderer: OfflineMapRenderer.legacy,
+        isOffline: true,
+        model: model(
+          scene: const MapScene(
+            currentLocation: LatLng(49.8, 18.2),
+          ),
+        ),
+        legacy: LegacyMapConfiguration.offlineUnavailable(MapLayer()),
+      ),
+    ));
+
+    expect(find.byType(DefaultLocationMarker), findsNothing);
   });
 
   testWidgets('does not silently fall back when MapLibre is unavailable',

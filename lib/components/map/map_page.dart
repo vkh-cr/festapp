@@ -14,8 +14,9 @@ import 'package:fstapp/services/exception_handler.dart';
 import 'package:fstapp/components/map/map_page_helper.dart';
 import 'package:fstapp/components/map/counseling_hours_panel.dart';
 import 'package:fstapp/components/map/map_path_direction_layout.dart';
-import 'package:fstapp/components/map/map_locate_control.dart';
+import 'package:fstapp/components/map/map_location_accuracy.dart';
 import 'package:fstapp/components/map/map_locate_coordinator.dart';
+import 'package:fstapp/components/map/map_offscreen_location_indicator.dart';
 import 'package:fstapp/components/map/map_scene.dart';
 import 'package:fstapp/components/map/public_map_host.dart';
 import 'package:fstapp/components/map/public_map_session.dart';
@@ -58,6 +59,7 @@ import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
 import 'package:fstapp/components/html/html_helper.dart';
 import 'place_model.dart';
 import 'package:fstapp/services/platform_helper.dart';
+import 'package:fstapp/services/responsive_service.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
@@ -71,6 +73,7 @@ import 'package:fstapp/components/map/external_map_navigation.dart';
 import 'package:fstapp/components/map/ios_navigation_app_picker.dart';
 import 'package:fstapp/services/launch_url_service.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:geolocator/geolocator.dart';
 
 import '../schedule/event_page.dart';
 import '../speakers/counseling_page.dart';
@@ -245,6 +248,9 @@ class _MapPageState extends State<MapPage>
   late final ScrollController _iconScrollController;
 
   bool _isMapTabActive = false;
+  StreamSubscription<Position>? _userLocationSubscription;
+  Future<void>? _userLocationCancellation;
+  final ValueNotifier<LatLng?> _currentUserLocation = ValueNotifier(null);
   PublicMapSession? _mapSession;
   int _catalogEpoch = 0;
   bool _catalogFinal = false;
@@ -311,6 +317,8 @@ class _MapPageState extends State<MapPage>
     }
     _iconScrollController.dispose();
     _placeTypeSelectionFeedbackTimer?.cancel();
+    unawaited(_userLocationSubscription?.cancel());
+    _currentUserLocation.dispose();
     _legacyOfflineConfiguration?.dispose();
     super.dispose();
   }
@@ -354,6 +362,7 @@ class _MapPageState extends State<MapPage>
         }
       });
     }
+    _syncUserLocationTracking();
     // Inherited-widget changes may invoke this lifecycle more than once (for
     // example when Android finishes localization/startup). Map initialization
     // owns controllers, downloads, listeners and a late-final feature snapshot,
@@ -458,6 +467,48 @@ class _MapPageState extends State<MapPage>
         allowDownload: hasConnection,
       );
     }
+  }
+
+  void _syncUserLocationTracking() {
+    if (!_isMapTabActive) {
+      final subscription = _userLocationSubscription;
+      _userLocationSubscription = null;
+      if (subscription != null) {
+        final cancellation = subscription.cancel();
+        _userLocationCancellation = cancellation;
+        unawaited(cancellation.whenComplete(() {
+          if (identical(_userLocationCancellation, cancellation)) {
+            _userLocationCancellation = null;
+          }
+          if (mounted && _isMapTabActive) _syncUserLocationTracking();
+        }));
+      }
+      return;
+    }
+    if (_userLocationSubscription != null ||
+        _userLocationCancellation != null) {
+      return;
+    }
+    late final StreamSubscription<Position> subscription;
+    subscription = MapLocationAccuracy.positionStream().listen(
+      (position) {
+        if (!mounted || !_isMapTabActive) return;
+        _currentUserLocation.value = LatLng(
+          position.latitude,
+          position.longitude,
+        );
+      },
+      onError: (Object error, StackTrace stackTrace) {
+        AppLogger.error('Map location tracking failed: $error\n$stackTrace');
+        if (mounted) _currentUserLocation.value = null;
+      },
+      onDone: () {
+        if (!identical(_userLocationSubscription, subscription)) return;
+        _userLocationSubscription = null;
+        if (mounted) _currentUserLocation.value = null;
+      },
+    );
+    _userLocationSubscription = subscription;
   }
 
   Future<bool> _hasNetworkConnection() async {
@@ -867,42 +918,51 @@ class _MapPageState extends State<MapPage>
       OfflineMapRenderer.legacy => !_useOffline || _offlineMapError == null,
       OfflineMapRenderer.maplibre => _mapLibreStyle != null,
     };
-    final scene = _buildMapScene();
-    final mapWidget = MapRendererHost(
-      renderer: offlineConfiguration.renderer,
-      isOffline: _useOffline,
-      model: MapSurfaceModel(
-        active: _isMapTabActive,
-        scene: scene,
-        icons: _icons,
-        initialCenter: _mapCenter!,
-        initialZoom: _mapFeature.defaultMapZoom,
-        viewport: _viewportController,
-        onMapTap: onMapTap,
-        onPlaceTap: _onPlaceTap,
-        onPlaceLongPress: _onPlaceLongPress,
-        onCameraReady: () {
-          final wasReady = _viewportController.isReady;
-          _viewportController.markReady();
-          if (mounted && !wasReady) setState(() {});
-          _mapSession?.hostChanged();
-        },
-        onCameraChanged: () {
-          if (mounted && _popupPlaceId != null) setState(() {});
-        },
-        onZoomChanged: _onZoomChanged,
-      ),
-      legacy: _useOffline
-          ? (_legacyOfflineConfiguration ??
-              LegacyMapConfiguration.offlineUnavailable(
-                _mapFeature.offlineMapLayer,
-              ))
-          : LegacyMapConfiguration.online(_mapFeature.onlineMapLayer),
-      mapLibre: MapLibreMapConfiguration(
-        style: _mapLibreStyle,
-        unavailable: _buildMapLibreUnavailable(),
-      ),
-    );
+    Widget buildMapWidget(LatLng? currentLocation) => MapRendererHost(
+          renderer: offlineConfiguration.renderer,
+          isOffline: _useOffline,
+          model: MapSurfaceModel(
+            active: _isMapTabActive,
+            scene: _buildMapScene(currentLocation: currentLocation),
+            icons: _icons,
+            initialCenter: _mapCenter!,
+            initialZoom: _mapFeature.defaultMapZoom,
+            viewport: _viewportController,
+            onMapTap: onMapTap,
+            onPlaceTap: _onPlaceTap,
+            onPlaceLongPress: _onPlaceLongPress,
+            onCameraReady: () {
+              final wasReady = _viewportController.isReady;
+              _viewportController.markReady();
+              if (mounted && !wasReady) setState(() {});
+              _mapSession?.hostChanged();
+            },
+            onCameraChanged: () {
+              if (mounted &&
+                  (_popupPlaceId != null ||
+                      _currentUserLocation.value != null)) {
+                setState(() {});
+              }
+            },
+            onZoomChanged: _onZoomChanged,
+          ),
+          legacy: _useOffline
+              ? (_legacyOfflineConfiguration ??
+                  LegacyMapConfiguration.offlineUnavailable(
+                    _mapFeature.offlineMapLayer,
+                  ))
+              : LegacyMapConfiguration.online(_mapFeature.onlineMapLayer),
+          mapLibre: MapLibreMapConfiguration(
+            style: _mapLibreStyle,
+            unavailable: _buildMapLibreUnavailable(),
+          ),
+        );
+    final mapWidget = renderer == OfflineMapRenderer.legacy
+        ? ValueListenableBuilder<LatLng?>(
+            valueListenable: _currentUserLocation,
+            builder: (context, location, child) => buildMapWidget(location),
+          )
+        : buildMapWidget(null);
     return Scaffold(
       appBar: AppBar(
         title: Text(pageTitle,
@@ -967,15 +1027,6 @@ class _MapPageState extends State<MapPage>
             state: _downloadState,
             useOffline: _useOffline,
           ),
-          if (_mapCenter != null &&
-              _isMapTabActive &&
-              _viewportController.isReady &&
-              rendererAvailableForLocate)
-            MapLocateControl(
-              enabled: true,
-              loading: _locateCoordinator.isLocating,
-              onPressed: () => unawaited(_recenterOnCurrentUser()),
-            ),
           if (_isDrawingPath) _buildDrawControls(),
           if (!_isDrawingPath && selectedPlace != null) _buildEditControls(),
           if (!_isDrawingPath && selectedPlace == null)
@@ -1010,9 +1061,126 @@ class _MapPageState extends State<MapPage>
               context,
               _placeTypeSelectionFeedback,
             ),
+          if (_isMapTabActive && rendererAvailableForLocate)
+            ValueListenableBuilder<LatLng?>(
+              valueListenable: _currentUserLocation,
+              builder: (context, location, child) {
+                final projectedLocation = _projectUserLocation(location);
+                if (projectedLocation == null) {
+                  return const SizedBox.shrink();
+                }
+                return MapOffscreenLocationIndicator(
+                  projectedLocation: projectedLocation,
+                  occupiedRectsBuilder: (viewport) =>
+                      _locateOverlayOccupiedRects(context, renderer, viewport),
+                  onPressed: () => unawaited(_recenterOnCurrentUser()),
+                );
+              },
+            ),
         ],
       ),
     );
+  }
+
+  Offset? _projectUserLocation(LatLng? location) {
+    if (location == null || !_viewportController.isReady) return null;
+    try {
+      return _viewportController.coordinateToScreenPoint(location);
+    } catch (error) {
+      // A renderer can be between surface detach and attach during a switch.
+      AppLogger.warning('Map location projection unavailable: $error');
+      return null;
+    }
+  }
+
+  List<Rect> _locateOverlayOccupiedRects(
+    BuildContext context,
+    OfflineMapRenderer renderer,
+    Size viewport,
+  ) {
+    final obstacles = <Rect>[];
+
+    if (_isDrawingPath) {
+      obstacles.add(
+        Rect.fromLTRB(
+            0, viewport.height - 176, viewport.width, viewport.height),
+      );
+    } else if (selectedPlace != null) {
+      obstacles.add(Rect.fromLTWH(0, 0, viewport.width, 120));
+    } else {
+      if (_pathGroups.isNotEmpty) {
+        if (ResponsiveService.isMobile(context)) {
+          obstacles.add(Rect.fromLTWH(8, 8, viewport.width - 16, 104));
+        } else {
+          final height = math.min(
+            viewport.height - 16,
+            _pathGroups.length * 92.0 + 12,
+          );
+          obstacles.add(
+            Rect.fromLTWH(viewport.width - 96, 8, 88, height),
+          );
+          obstacles.add(
+            Rect.fromCenter(
+              center: Offset(viewport.width / 2, 49),
+              width: 200,
+              height: 50,
+            ),
+          );
+        }
+      }
+      if (_placeTypes.isNotEmpty) {
+        final showOther = MapPageHelper.hasOtherVisiblePlaces(
+          _places,
+          _placeTypes,
+        );
+        final chipCount = _placeTypes.length + (showOther ? 1 : 0);
+        final width = math.min(viewport.width - 24, chipCount * 38.0 + 12);
+        obstacles.add(
+          Rect.fromLTWH(
+            (viewport.width - width) / 2,
+            viewport.height - 62,
+            width,
+            46,
+          ),
+        );
+      }
+      if (_placeTypeSelectionFeedback?.isNotEmpty == true) {
+        obstacles.add(
+          Rect.fromLTWH(24, viewport.height - 108, viewport.width - 48, 36),
+        );
+      }
+    }
+
+    if (renderer == OfflineMapRenderer.maplibre) {
+      obstacles.add(
+        Rect.fromLTWH(viewport.width - 208, 8, 200, 28),
+      );
+    }
+    if (!_useOffline &&
+        (_downloadState is MapDownloading ||
+            _downloadState is MapDownloadCompleted)) {
+      obstacles.add(
+        Rect.fromLTWH(viewport.width - 56, 16, 40, 40),
+      );
+    }
+
+    if (_popupPlaceId != null && _viewportController.isAttached) {
+      final marker = _places.firstWhereOrNull(
+        (item) => item.place.id == _popupPlaceId,
+      );
+      if (marker != null) {
+        final point = _viewportController.coordinateToScreenPoint(marker.point);
+        final left = math.max(
+          8.0,
+          math.min(point.dx - 150, viewport.width - 308),
+        );
+        obstacles.add(
+          Rect.fromLTWH(left, math.max(8.0, point.dy - 190), 300, 190),
+        );
+      }
+    }
+
+    return obstacles;
   }
 
   Future<void> _recenterOnCurrentUser() async {
@@ -1145,7 +1313,7 @@ class _MapPageState extends State<MapPage>
     );
   }
 
-  MapScene _buildMapScene() {
+  MapScene _buildMapScene({required LatLng? currentLocation}) {
     return MapScene(
       places: _getDisplayedPlaces(),
       paths: _paths,
@@ -1162,6 +1330,7 @@ class _MapPageState extends State<MapPage>
               ))
           .toList(growable: false),
       showCurrentLocation: _isMapTabActive,
+      currentLocation: currentLocation,
     );
   }
 
