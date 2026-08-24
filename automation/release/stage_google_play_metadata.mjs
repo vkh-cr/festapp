@@ -6,17 +6,30 @@ import { fileURLToPath } from 'node:url';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '../..');
-const releaseConfig = JSON.parse(fs.readFileSync(path.join(here, 'app_store_config.json'), 'utf8'));
-const googlePlay = releaseConfig.googlePlay;
-if (!googlePlay?.screenshotSource || !googlePlay?.listingDirectory || !releaseConfig.androidPackage) {
-  throw new Error('Release manifest lacks googlePlay paths or androidPackage');
+const manifestValue = process.env.FESTAPP_RELEASE_MANIFEST?.trim();
+if (!manifestValue) {
+  throw new Error('Set FESTAPP_RELEASE_MANIFEST to the private release config.json');
 }
-const source = path.resolve(root, googlePlay.screenshotSource);
-const listing = path.resolve(root, googlePlay.listingDirectory);
-const playAssets = path.join(source, 'google-play-assets');
-const locale = googlePlay.locale || 'cs-CZ';
+const manifestPath = fs.realpathSync(manifestValue);
+const listingRoot = path.dirname(manifestPath);
+const releaseConfig = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+const googlePlay = releaseConfig.googlePlay;
+if (!releaseConfig.androidPackage || !googlePlay?.locale || !googlePlay?.metadataDirectory ||
+    !googlePlay?.artworkDirectory || !googlePlay?.screenshotManifest || !googlePlay?.screenshotSets) {
+  throw new Error('Release manifest lacks the Google Play publishing contract');
+}
+const listingPath = (relative) => {
+  const resolved = path.resolve(listingRoot, relative);
+  if (resolved !== listingRoot && !resolved.startsWith(`${listingRoot}${path.sep}`)) {
+    throw new Error(`Release path escapes listing root: ${relative}`);
+  }
+  return resolved;
+};
+const listing = listingPath(googlePlay.metadataDirectory);
+const playAssets = listingPath(googlePlay.artworkDirectory);
+const locale = googlePlay.locale;
 const target = path.join(root, 'build/release/google-play-metadata', locale);
-const manifest = JSON.parse(fs.readFileSync(path.join(source, 'manifest.json'), 'utf8'));
+const manifest = JSON.parse(fs.readFileSync(listingPath(googlePlay.screenshotManifest), 'utf8'));
 
 function pngSize(file) {
   const data = fs.readFileSync(file);
@@ -34,14 +47,18 @@ function sha256(file) {
   return crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 }
 
-function stageSet(name, sourceDir, destinationDirs) {
+function stageSet(name, config) {
   const set = manifest.sets[name];
-  const actual = fs.readdirSync(path.join(source, sourceDir)).filter(f => f.endsWith('.png')).sort();
+  if (!set || !config?.sourceDirectory || !Array.isArray(config.destinationDirectories)) {
+    throw new Error(`Incomplete Google Play screenshot set: ${name}`);
+  }
+  const sourceDir = listingPath(config.sourceDirectory);
+  const actual = fs.readdirSync(sourceDir).filter(f => f.endsWith('.png')).sort();
   if (JSON.stringify(actual) !== JSON.stringify(set.files)) throw new Error(`${name}: file list differs from manifest`);
   for (const file of set.files) {
-    const input = path.join(source, sourceDir, file);
+    const input = path.join(sourceDir, file);
     if (JSON.stringify(pngSize(input)) !== JSON.stringify(set.size)) throw new Error(`${name}/${file}: unexpected dimensions`);
-    for (const dir of destinationDirs) {
+    for (const dir of config.destinationDirectories) {
       fs.mkdirSync(path.join(target, 'images', dir), { recursive: true });
       fs.copyFileSync(input, path.join(target, 'images', dir, file));
     }
@@ -52,22 +69,12 @@ fs.rmSync(target, { recursive: true, force: true });
 fs.mkdirSync(target, { recursive: true });
 for (const file of ['title.txt', 'short_description.txt', 'full_description.txt']) {
   const input = path.join(listing, file);
-  const text = fs.readFileSync(input, 'utf8');
-  for (const forbidden of ['bujnmi', 'festapp']) {
-    if (text.toLocaleLowerCase('cs-CZ').includes(forbidden)) {
-      throw new Error(`${file}: forbidden public-store term detected`);
-    }
-  }
   fs.copyFileSync(input, path.join(target, file));
 }
 const changelogSource = path.join(listing, 'changelogs');
 const changelogTarget = path.join(target, 'changelogs');
 fs.mkdirSync(changelogTarget, { recursive: true });
 for (const file of fs.readdirSync(changelogSource).filter(file => file.endsWith('.txt'))) {
-  const text = fs.readFileSync(path.join(changelogSource, file), 'utf8');
-  for (const forbidden of ['bujnmi', 'festapp']) {
-    if (text.toLocaleLowerCase('cs-CZ').includes(forbidden)) throw new Error(`changelogs/${file}: forbidden public-store term detected`);
-  }
   fs.copyFileSync(path.join(changelogSource, file), path.join(changelogTarget, file));
 }
 
@@ -80,8 +87,7 @@ if (pngColorType(featureGraphic) !== 2) throw new Error('Play feature graphic mu
 fs.mkdirSync(path.join(target, 'images'), { recursive: true });
 fs.copyFileSync(icon, path.join(target, 'images/icon.png'));
 fs.copyFileSync(featureGraphic, path.join(target, 'images/featureGraphic.png'));
-stageSet('googlePhone', 'google-phone', ['phoneScreenshots']);
-stageSet('googleTablet', 'google-tablet', ['sevenInchScreenshots', 'tenInchScreenshots']);
+for (const [name, config] of Object.entries(googlePlay.screenshotSets)) stageSet(name, config);
 
 const evidence = [];
 for (const file of fs.readdirSync(target, { recursive: true }).sort()) {

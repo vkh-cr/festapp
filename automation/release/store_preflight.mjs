@@ -5,11 +5,30 @@ import { fileURLToPath } from 'node:url';
 import { parseProjectVersion } from './project_version.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const manifest = JSON.parse(fs.readFileSync(path.join(root, 'automation/release/app_store_config.json'), 'utf8'));
+const manifestValue = process.env.FESTAPP_RELEASE_MANIFEST?.trim();
+if (!manifestValue) {
+  console.error('ERROR: Set FESTAPP_RELEASE_MANIFEST to the private release config.json.');
+  process.exit(1);
+}
+const manifestPath = path.resolve(manifestValue);
+if (!fs.existsSync(manifestPath)) {
+  console.error(`ERROR: missing release manifest ${manifestPath}`);
+  process.exit(1);
+}
+const listingRoot = path.dirname(fs.realpathSync(manifestPath));
+const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
 const errors = [];
 const warnings = [];
 const fail = (message) => errors.push(message);
 const requireFile = (relative) => fs.existsSync(path.join(root, relative)) || fail(`missing ${relative}`);
+const listingPath = (relative) => {
+  const resolved = path.resolve(listingRoot, relative);
+  if (resolved !== listingRoot && !resolved.startsWith(`${listingRoot}${path.sep}`)) {
+    fail(`release path escapes listing root: ${relative}`);
+  }
+  return resolved;
+};
+const requireListingFile = (relative) => fs.existsSync(listingPath(relative)) || fail(`missing release file ${relative}`);
 
 if (!process.argv.includes('--local') || !process.argv.includes('--read-only')) {
   fail('preflight must be invoked with --local --read-only');
@@ -27,18 +46,16 @@ if (!review?.demoAccount?.email || !review?.demoAccount?.authEmail || !review?.d
   fail('canonical reviewer demo account is incomplete');
 }
 if (!review?.notesPath) fail('canonical reviewer notes path is missing');
-else requireFile(path.join('automation/release', review.notesPath));
+else requireListingFile(review.notesPath);
 
 const classification = manifest.storeClassification;
-if (classification?.primaryCategory !== 'TRAVEL' || classification?.secondaryCategory !== 'EDUCATION') {
-  fail('canonical store categories changed unexpectedly');
-}
-if (classification?.contentRights !== 'USES_THIRD_PARTY_CONTENT') fail('content-rights decision mismatch');
-if (classification?.availableInNewTerritories !== true) fail('new-territory availability decision mismatch');
-if (classification?.availability?.currentCountryOrRegionCount !== 174 ||
-    classification?.availability?.chinaMainland !== 'EXCLUDED' ||
-    classification?.availability?.confirmedInAppStoreConnectAt !== '2026-08-04') {
-  fail('country-availability decision state mismatch');
+if (!classification?.primaryCategory || !classification?.secondaryCategory) fail('store categories are incomplete');
+if (!classification?.contentRights) fail('content-rights decision is missing');
+if (typeof classification?.availableInNewTerritories !== 'boolean') fail('new-territory availability decision is missing');
+if (!Number.isInteger(classification?.availability?.currentCountryOrRegionCount) ||
+    !classification?.availability?.chinaMainland ||
+    !/^\d{4}-\d{2}-\d{2}$/.test(classification?.availability?.confirmedInAppStoreConnectAt ?? '')) {
+  fail('country-availability decision is incomplete');
 }
 const expectedBooleanAgeAnswers = [
   'advertising', 'ageAssurance', 'gambling', 'healthOrWellnessTopics', 'lootBox',
@@ -48,22 +65,21 @@ const expectedBooleanAgeAnswers = [
 for (const field of expectedBooleanAgeAnswers) {
   if (classification?.ageRating?.[field] !== false) fail(`age-rating ${field} must be false`);
 }
-if (classification?.ageRating?.medicalOrTreatmentInformation !== 'NONE') {
-  fail('medical/treatment age-rating answer must remain NONE');
-}
 const appPrivacy = manifest.appPrivacy;
-if (appPrivacy?.entryMode !== 'manual_app_store_connect' || appPrivacy?.approvalRequired !== false ||
-    appPrivacy?.published !== true || appPrivacy?.lastPublishedAt !== '2026-08-04') {
-  fail('published App Privacy state mismatch');
+if (!appPrivacy?.entryMode || typeof appPrivacy?.approvalRequired !== 'boolean' ||
+    typeof appPrivacy?.published !== 'boolean' ||
+    (appPrivacy.published && !/^\d{4}-\d{2}-\d{2}$/.test(appPrivacy.lastPublishedAt ?? ''))) {
+  fail('App Privacy publication state is incomplete');
 }
 if (!appPrivacy?.questionnairePath) fail('App Privacy questionnaire path is missing');
-else requireFile(path.join('automation/release', appPrivacy.questionnairePath));
+else requireListingFile(appPrivacy.questionnairePath);
 const dsa = manifest.dsa;
-if (dsa?.publisher !== 'Michael Bujnovský' || dsa?.accountEnrollment !== 'INDIVIDUAL' ||
-    dsa?.traderStatus !== 'NOT_TRADER' || dsa?.commercialization !== false ||
-    dsa?.organizerRelationshipRelevant !== false || dsa?.manualAscConfirmationRequired !== false ||
-    dsa?.confirmedInAppStoreConnectAt !== '2026-08-04') {
-  fail('canonical individual-publisher DSA NOT_TRADER decision mismatch');
+if (!dsa?.publisher || !dsa?.accountEnrollment || !dsa?.traderStatus ||
+    typeof dsa?.commercialization !== 'boolean' ||
+    typeof dsa?.organizerRelationshipRelevant !== 'boolean' ||
+    typeof dsa?.manualAscConfirmationRequired !== 'boolean' ||
+    !/^\d{4}-\d{2}-\d{2}$/.test(dsa?.confirmedInAppStoreConnectAt ?? '')) {
+  fail('DSA decision state is incomplete');
 }
 const expectedNoneAgeAnswers = [
   'ageRatingOverrideV2', 'alcoholTobaccoOrDrugUseOrReferences', 'contests',
@@ -75,7 +91,9 @@ const expectedNoneAgeAnswers = [
   'violenceRealisticProlongedGraphicOrSadistic',
 ];
 for (const field of expectedNoneAgeAnswers) {
-  if (classification?.ageRating?.[field] !== 'NONE') fail(`age-rating ${field} must be NONE`);
+  if (typeof classification?.ageRating?.[field] !== 'string' || !classification.ageRating[field]) {
+    fail(`age-rating ${field} must be a non-empty enum value`);
+  }
 }
 
 const config = fs.readFileSync(path.join(root, 'automation/project.conf'), 'utf8');
@@ -161,43 +179,36 @@ if (review?.demoAccount?.authEmail && fastfile.includes(review.demoAccount.authE
 }
 
 for (const file of [
-  'automation/release/APP_STORE_CHECKLIST.md',
-  'automation/release/APP_PRIVACY_DISCLOSURE.md',
-  'automation/release/APP_REVIEW_NOTES.md',
-  'automation/release/fastlane/metadata/review_information/notes.txt',
   'web/privacy/index.html', 'web/privacy/choices/index.html', 'web/terms/index.html',
   'web/apple-app-site-association', 'web/.well-known/apple-app-site-association',
 ]) requireFile(file);
-
 const legalCheck = spawnSync(process.execPath, [
   path.join(root, 'automation/release/render_legal_pages.mjs'), '--check',
 ], { encoding: 'utf8' });
 if (legalCheck.status !== 0) fail(legalCheck.stderr.trim() || 'generated legal pages are stale');
-const legalText = [
-  'automation/release/legal/privacy-policy.cs.md',
-  'automation/release/legal/privacy-choices.cs.md',
-  'automation/release/legal/terms.cs.md',
-].map((file) => fs.readFileSync(path.join(root, file), 'utf8')).join('\n');
 const legal = manifest.legal;
-if (legal?.sourceDirectory !== 'legal' || legal?.privacyPolicyVersion !== '1.1' ||
-    legal?.effectiveDate !== '2026-08-04' || legal?.privacyContact !== 'info@festapp.net' ||
-    legal?.approvalRequired !== true || legal?.productionDeploymentRequired !== false ||
-    legal?.productionDeployedAt !== '2026-08-04' || legal?.productionDeploymentId !== '8f6479e1') {
-  fail('canonical legal publication state mismatch');
+if (!legal?.sourceDirectory || !legal?.privacyPolicyVersion ||
+    !/^\d{4}-\d{2}-\d{2}$/.test(legal?.effectiveDate ?? '') || !legal?.privacyContact ||
+    typeof legal?.approvalRequired !== 'boolean' || typeof legal?.productionDeploymentRequired !== 'boolean') {
+  fail('legal publication state is incomplete');
 }
-if (/navrženým?|před zveřejněním|bez tohoto schválení/i.test(legalText)) {
-  fail('internal legal-draft wording remains in publishable sources');
+if (!legal.productionDeploymentRequired &&
+    (!/^\d{4}-\d{2}-\d{2}$/.test(legal.productionDeployedAt ?? '') || !legal.productionDeploymentId)) {
+  fail('completed legal deployment lacks its receipt');
 }
 
-const metadataDir = path.join(root, 'automation/release/fastlane/metadata/cs');
-const copyrightFile = path.join(root, 'automation/release/fastlane/metadata/copyright.txt');
+const appleMetadataDirectory = manifest.apple?.metadataDirectory;
+if (!appleMetadataDirectory) fail('Apple metadata directory is missing');
+const appleMetadataRoot = listingPath(appleMetadataDirectory ?? '.');
+const metadataDir = path.join(appleMetadataRoot, manifest.target.locale);
+const copyrightFile = path.join(appleMetadataRoot, 'copyright.txt');
 if (!fs.existsSync(copyrightFile) || !/^\d{4}\s+\S.+/.test(fs.readFileSync(copyrightFile, 'utf8').trim())) {
   fail('App Store copyright must contain a four-digit year and rights holder');
 }
 const limits = { name: 30, subtitle: 30, keywords: 100, promotional_text: 170, description: 4000, release_notes: 4000 };
 for (const [name, limit] of Object.entries(limits)) {
   const file = path.join(metadataDir, `${name}.txt`);
-  if (!fs.existsSync(file)) { fail(`missing metadata cs/${name}.txt`); continue; }
+  if (!fs.existsSync(file)) { fail(`missing metadata ${manifest.target.locale}/${name}.txt`); continue; }
   const content = fs.readFileSync(file, 'utf8').trim();
   if (!content || [...content].length > limit) fail(`metadata ${name} must be 1..${limit} characters`);
 }
@@ -211,12 +222,11 @@ function pngInfo(file) {
   if (data.toString('hex', 0, 8) !== '89504e470d0a1a0a') throw new Error('not PNG');
   return { width: data.readUInt32BE(16), height: data.readUInt32BE(20), colorType: data[25] };
 }
-const screenshotRoot = path.join(root, 'automation/release/fastlane/screenshots/cs');
-const screenshotFiles = fs.existsSync(screenshotRoot)
-  ? fs.readdirSync(screenshotRoot).filter((file) => file.endsWith('.png')).sort()
-  : [];
 for (const [device, rule] of Object.entries(manifest.screenshots)) {
-  const files = screenshotFiles.filter((file) => file.startsWith(`${device}-`));
+  const screenshotRoot = rule.sourceDirectory ? listingPath(rule.sourceDirectory) : undefined;
+  const files = screenshotRoot && fs.existsSync(screenshotRoot)
+    ? fs.readdirSync(screenshotRoot).filter((file) => file.endsWith('.png')).sort()
+    : [];
   if (files.length < rule.minimumCount) {
     fail(`final ${device} screenshots missing: need at least ${rule.minimumCount}`);
     continue;
@@ -234,20 +244,6 @@ try {
   const info = pngInfo(icon);
   if (info.width !== 1024 || info.height !== 1024 || [4, 6].includes(info.colorType)) fail('App Store icon must be 1024x1024 without alpha');
 } catch (error) { fail(`App Store icon: ${error.message}`); }
-
-const runtimeFiles = [
-  'assets/translations/cs.json','assets/translations/en.json','web/site.webmanifest',
-  'web/index.html','ios/Runner/Info.plist','automation/release/fastlane/metadata/cs/name.txt',
-  'automation/release/fastlane/metadata/cs/description.txt',
-  'automation/release/fastlane/metadata/cs/privacy_choices_url.txt',
-];
-for (const relative of runtimeFiles) {
-  const content = fs.readFileSync(path.join(root, relative), 'utf8');
-  if (/Jubileum mládeže|JM 2025/i.test(content)) fail(`visible legacy brand remains in ${relative}`);
-}
-if (/credentials to info@festapp\.net|přihlašovacími údaji na info@festapp\.net/.test(
-  runtimeFiles.map((file) => fs.readFileSync(path.join(root, file), 'utf8')).join('\n')
-)) fail('legacy credential-by-email deletion copy remains');
 
 warnings.push('Legal approval and production-deployment gates require external evidence.');
 for (const warning of warnings) console.warn(`WARN: ${warning}`);

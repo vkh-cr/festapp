@@ -6,7 +6,11 @@ require 'tmpdir'
 
 default_platform(:ios)
 
-MANIFEST = JSON.parse(File.read(File.expand_path('../app_store_config.json', __dir__)))
+manifest_value = ENV['FESTAPP_RELEASE_MANIFEST'].to_s.strip
+raise 'Set FESTAPP_RELEASE_MANIFEST to the private release config.json' if manifest_value.empty?
+manifest_path = File.realpath(File.expand_path(manifest_value))
+RELEASE_ROOT = File.dirname(manifest_path)
+MANIFEST = JSON.parse(File.read(manifest_path))
 APPLE_ID = MANIFEST.fetch('appleId')
 BUNDLE_ID = MANIFEST.fetch('bundleId')
 version_helper = File.expand_path('../project_version.mjs', __dir__)
@@ -46,6 +50,14 @@ def play_source_sha!
   sha, error, status = Open3.capture3('git', '-C', File.expand_path('../../..', __dir__), 'rev-parse', 'HEAD')
   UI.user_error!("Cannot read source SHA: #{error}") unless status.success?
   sha.strip
+end
+
+def expected_apple_screenshot_counts
+  MANIFEST.fetch('screenshots').to_h do |_name, rule|
+    source = File.expand_path(rule.fetch('sourceDirectory'), RELEASE_ROOT)
+    UI.user_error!("Screenshot path escapes the release listing: #{source}") unless source.start_with?("#{RELEASE_ROOT}#{File::SEPARATOR}")
+    [rule.fetch('appStoreDisplayType'), Dir.glob(File.join(source, '*.png')).size]
+  end
 end
 
 def relevant_play_version_codes
@@ -198,7 +210,7 @@ platform :ios do
     app = target_app!('READ_ONLY_ASC_CHECK')
     editable = app.get_edit_app_store_version
     if editable
-      expected_copyright = File.read(File.expand_path('metadata/copyright.txt', __dir__)).strip
+      expected_copyright = File.read(File.join(RELEASE_ROOT, MANIFEST.fetch('apple').fetch('metadataDirectory'), 'copyright.txt')).strip
       UI.user_error!("Copyright readback mismatch: #{editable.copyright.inspect}") unless editable.copyright == expected_copyright
       UI.success("EDITABLE VERSION: #{editable.version_string} (#{editable.app_store_state})")
       UI.message("COPYRIGHT: #{editable.copyright}")
@@ -323,9 +335,9 @@ platform :ios do
     app = target_app!('UPLOAD_METADATA_ONLY')
     editable = app.get_edit_app_store_version
     UI.user_error!("No editable target version") unless editable&.version_string == TARGET_VERSION
-    metadata_root = File.expand_path('metadata', __dir__)
-    Dir.mktmpdir('festapp-apple-metadata') do |staging|
-      FileUtils.cp_r(File.join(metadata_root, 'cs'), staging)
+    metadata_root = File.join(RELEASE_ROOT, MANIFEST.fetch('apple').fetch('metadataDirectory'))
+    Dir.mktmpdir('apple-metadata') do |staging|
+      FileUtils.cp_r(File.join(metadata_root, MANIFEST.fetch('target').fetch('locale')), staging)
       %w[trade_representative_contact_information copyright.txt primary_category.txt secondary_category.txt primary_first_sub_category.txt primary_second_sub_category.txt secondary_first_sub_category.txt secondary_second_sub_category.txt].each do |name|
         source = File.join(metadata_root, name)
         FileUtils.cp_r(source, staging) if File.exist?(source)
@@ -367,7 +379,8 @@ platform :ios do
         demo_account.fetch('authEmail'), demo_account.fetch('passwordKeychainService')
       )
     end
-    notes_path = File.expand_path(review.fetch('notesPath'), File.expand_path('..', __dir__))
+    notes_path = File.expand_path(review.fetch('notesPath'), RELEASE_ROOT)
+    UI.user_error!('Reviewer notes path escapes the release listing') unless notes_path.start_with?("#{RELEASE_ROOT}#{File::SEPARATOR}")
     attributes[:notes] = File.read(notes_path).strip
     attributes[:demo_account_required] = true
     detail = begin
@@ -390,7 +403,8 @@ platform :ios do
     review = MANIFEST.fetch('review')
     contact = review.fetch('contact')
     demo_account = review.fetch('demoAccount')
-    notes_path = File.expand_path(review.fetch('notesPath'), File.expand_path('..', __dir__))
+    notes_path = File.expand_path(review.fetch('notesPath'), RELEASE_ROOT)
+    UI.user_error!('Reviewer notes path escapes the release listing') unless notes_path.start_with?("#{RELEASE_ROOT}#{File::SEPARATOR}")
     expected = {
       contact_first_name: contact.fetch('firstName'),
       contact_last_name: contact.fetch('lastName'),
@@ -414,7 +428,7 @@ platform :ios do
     app_info = app.fetch_edit_app_info
     UI.user_error!('No editable App Info for the existing app') unless app_info
     localization = app_info.get_app_info_localizations.find { |item| item.locale == MANIFEST.fetch('target').fetch('locale') }
-    UI.user_error!('Missing Czech App Info localization') unless localization
+    UI.user_error!("Missing #{MANIFEST.fetch('target').fetch('locale')} App Info localization") unless localization
     localization.update(attributes: {
       privacy_policy_url: MANIFEST.fetch('urls').fetch('privacy'),
       privacy_choices_url: MANIFEST.fetch('urls').fetch('privacyChoices')
@@ -431,10 +445,10 @@ platform :ios do
     version = app.get_edit_app_store_version
     UI.user_error!('No editable target version') unless version&.version_string == TARGET_VERSION
     version_localization = version.get_app_store_version_localizations.find { |item| item.locale == MANIFEST.fetch('target').fetch('locale') }
-    UI.user_error!('Missing Czech version localization') unless version_localization
+    UI.user_error!("Missing #{MANIFEST.fetch('target').fetch('locale')} version localization") unless version_localization
     app_info = app.fetch_edit_app_info
     info_localization = app_info&.get_app_info_localizations&.find { |item| item.locale == MANIFEST.fetch('target').fetch('locale') }
-    UI.user_error!('Missing Czech App Info localization') unless info_localization
+    UI.user_error!("Missing #{MANIFEST.fetch('target').fetch('locale')} App Info localization") unless info_localization
 
     expected_urls = MANIFEST.fetch('urls')
     checks = {
@@ -453,9 +467,10 @@ platform :ios do
     sets = version_localization.get_app_screenshot_sets
     counts = sets.to_h { |set| [set.screenshot_display_type, set.app_screenshots&.size || 0] }
     UI.message("SCREENSHOTS: #{counts.sort.to_h}")
-    UI.user_error!("Expected 7 iPhone screenshots, got #{counts['APP_IPHONE_67'] || 0}") unless counts['APP_IPHONE_67'] == 7
-    UI.user_error!("Expected 6 iPad screenshots, got #{counts['APP_IPAD_PRO_3GEN_129'] || 0}") unless counts['APP_IPAD_PRO_3GEN_129'] == 6
-    UI.success("LISTING READY: name=#{info_localization.name.inspect}, locale=cs, iPhone=7, iPad=6")
+    expected_apple_screenshot_counts.each do |display_type, expected|
+      UI.user_error!("Expected #{expected} screenshots for #{display_type}, got #{counts[display_type] || 0}") unless counts[display_type] == expected
+    end
+    UI.success("LISTING READY: name=#{info_localization.name.inspect}, locale=#{MANIFEST.fetch('target').fetch('locale')}, screenshots=#{counts.sort.to_h}")
   end
 
   desc 'Read-only category, age-rating, content-rights and availability audit'
@@ -507,8 +522,8 @@ platform :ios do
     version = app.get_edit_app_store_version
     UI.user_error!('No editable target version') unless version&.version_string == TARGET_VERSION
     localization = version.get_app_store_version_localizations.find { |item| item.locale == MANIFEST.fetch('target').fetch('locale') }
-    UI.user_error!('Missing Czech version localization') unless localization
-    expected_counts = { 'APP_IPHONE_67' => 7, 'APP_IPAD_PRO_3GEN_129' => 6 }
+    UI.user_error!("Missing #{MANIFEST.fetch('target').fetch('locale')} version localization") unless localization
+    expected_counts = expected_apple_screenshot_counts
 
     localization.get_app_screenshot_sets.each do |set|
       expected = expected_counts[set.screenshot_display_type]
@@ -527,7 +542,7 @@ platform :ios do
     expected_counts.each do |display_type, expected|
       UI.user_error!("Screenshot cleanup readback failed for #{display_type}") unless counts[display_type] == expected
     end
-    UI.success('Removed only exact retry duplicates; App Store now has 7 iPhone and 6 iPad screenshots')
+    UI.success("Removed only exact retry duplicates; App Store counts now match #{expected_counts}")
   end
 
   desc 'Upload canonical screenshots only; never submit or release'
@@ -536,14 +551,24 @@ platform :ios do
     editable = app.get_edit_app_store_version
     UI.user_error!("No editable target version") unless editable&.version_string == TARGET_VERSION
     ENV['FASTLANE_ENABLE_BETA_DELIVER_SYNC_SCREENSHOTS'] = '1'
-    deliver(
-      api_key: api_key, app_identifier: BUNDLE_ID,
-      screenshots_path: File.expand_path('screenshots', __dir__),
-      metadata_path: File.expand_path('screenshots', __dir__),
-      skip_binary_upload: true, skip_metadata: true, skip_screenshots: false,
-      overwrite_screenshots: false, sync_screenshots: true, submit_for_review: false,
-      automatic_release: false, run_precheck_before_submit: false, force: true
-    )
+    Dir.mktmpdir('apple-screenshots') do |staging|
+      MANIFEST.fetch('screenshots').transform_values do |rule|
+        File.expand_path(rule.fetch('sourceDirectory'), RELEASE_ROOT)
+      end.each do |prefix, source_dir|
+        UI.user_error!("Screenshot path escapes the release listing: #{source_dir}") unless source_dir.start_with?("#{RELEASE_ROOT}#{File::SEPARATOR}")
+        UI.user_error!("Missing internal screenshot set: #{source_dir}") unless Dir.exist?(source_dir)
+        Dir.glob(File.join(source_dir, '*.png')).sort.each do |source|
+          FileUtils.cp(source, File.join(staging, "#{prefix}-#{File.basename(source)}"))
+        end
+      end
+      deliver(
+        api_key: api_key, app_identifier: BUNDLE_ID,
+        screenshots_path: staging, metadata_path: staging,
+        skip_binary_upload: true, skip_metadata: true, skip_screenshots: false,
+        overwrite_screenshots: false, sync_screenshots: true, submit_for_review: false,
+        automatic_release: false, run_precheck_before_submit: false, force: true
+      )
+    end
   end
 
   desc 'Select exactly one processed target build; never submit or release'

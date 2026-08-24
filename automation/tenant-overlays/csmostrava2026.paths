@@ -23,11 +23,6 @@ web/support/**
 web/terms/**
 automation/offline-map/manifests/csmostrava2026/**
 automation/offline-map/style/**
-automation/release/fastlane/metadata/**
-automation/release/fastlane/screenshots/**
 automation/release/legal/**
-automation/release/app_store_config.json
-automation/release/APP_*.md
 automation/release/ExportOptions.plist
-repo-data/store-screenshots/csm-2026/**
 database/recovery/2026-*csmostrava*.sql

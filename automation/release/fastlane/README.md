@@ -3,6 +3,15 @@ fastlane documentation
 
 # Installation
 
+App-specific publishing data is stored outside this repository. Before running
+any lane, set `FESTAPP_RELEASE_MANIFEST` to the exact private `config.json` for
+the release listing. Fastlane fails closed when that canonical manifest is
+unavailable.
+
+Store copy and screenshots are staged from that repository into temporary
+directories. Keystores, API keys, passwords, and service-account credentials do
+not belong in either repository.
+
 Make sure you have the latest version of the Xcode command line tools installed:
 
 ```sh

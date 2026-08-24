@@ -12,7 +12,10 @@ $root = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 Set-Location $root
 $fvmBin = Join-Path $env:LOCALAPPDATA 'Pub\Cache\bin'
 if (Test-Path -LiteralPath $fvmBin) { $env:Path = "$fvmBin;$env:Path" }
-$releaseManifest = Get-Content -Raw -LiteralPath (Join-Path $root 'automation/release/app_store_config.json') | ConvertFrom-Json
+if (-not $env:FESTAPP_RELEASE_MANIFEST) { throw 'Set FESTAPP_RELEASE_MANIFEST to the private release config.json' }
+$manifestPath = (Resolve-Path -LiteralPath $env:FESTAPP_RELEASE_MANIFEST).Path
+if (-not (Test-Path -LiteralPath $manifestPath)) { throw "Internal release manifest not found: $manifestPath" }
+$releaseManifest = Get-Content -Raw -LiteralPath $manifestPath | ConvertFrom-Json
 $package = $releaseManifest.androidPackage
 $expectedBranch = $releaseManifest.releaseBranch
 $branch = (git branch --show-current).Trim()

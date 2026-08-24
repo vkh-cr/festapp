@@ -6,6 +6,7 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 ENV_SCRIPT="$SCRIPT_DIR/.set_appstore_env.sh"
 if [ ! -f "$ENV_SCRIPT" ]; then echo "Missing $ENV_SCRIPT"; exit 1; fi
 source "$ENV_SCRIPT"
+: "${FESTAPP_RELEASE_MANIFEST:?missing FESTAPP_RELEASE_MANIFEST}"
 : "${APP_STORE_CONNECT_KEY_ID:?missing APP_STORE_CONNECT_KEY_ID}"
 : "${APP_STORE_CONNECT_ISSUER_ID:?missing APP_STORE_CONNECT_ISSUER_ID}"
 : "${APP_STORE_CONNECT_KEY_PATH:?missing APP_STORE_CONNECT_KEY_PATH}"
@@ -27,7 +28,12 @@ fi
 
 cd "$PROJECT_ROOT"
 node automation/release/store_preflight.mjs --local --read-only
-target_version="$(node -p "require('./automation/release/app_store_config.json').target.version")"
+release_manifest="$FESTAPP_RELEASE_MANIFEST"
+if [ ! -f "$release_manifest" ]; then
+  echo "Release manifest not found: $release_manifest"
+  exit 1
+fi
+target_version="$(node -e 'const manifest = require(process.argv[1]); process.stdout.write(manifest.target.version)' "$release_manifest")"
 target_build="$(node automation/release/project_version.mjs --build)"
 "$SCRIPT_DIR/prepare_signing_keychain.sh"
 fvm flutter build ipa --release \
@@ -47,7 +53,7 @@ if [ "${#ipa_files[@]}" -ne 1 ] || [ ! -f "${ipa_files[0]}" ]; then
   exit 1
 fi
 export IPA_PATH="${ipa_files[0]}"
-export FASTLANE_APP_IDENTIFIER="$(node -p "require('./automation/release/app_store_config.json').bundleId")"
+export FASTLANE_APP_IDENTIFIER="$(node -p "require(process.argv[1]).bundleId" "$release_manifest")"
 echo "Uploading build only; submission and release are separate gates."
 cd "$SCRIPT_DIR/fastlane"
 FASTLANE_SKIP_UPDATE_CHECK=1 FASTLANE_SKIP_INIT=true fastlane upload_build
