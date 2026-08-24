@@ -7,9 +7,11 @@ import path from 'node:path';
 const buildDir = path.resolve(process.argv[2] || 'build/web');
 const expectedVersion = process.argv[3];
 const configPath = path.resolve(process.argv[4] || 'automation/project.conf');
+const target = process.argv[5] || 'cloudflare';
 if (!expectedVersion) {
-  throw new Error('Usage: verify_web_build.mjs <build-dir> <expected-version> [project-conf]');
+  throw new Error('Usage: verify_web_build.mjs <build-dir> <expected-version> [project-conf] [cloudflare|static]');
 }
+assert.ok(['cloudflare', 'static'].includes(target), `unsupported deploy target: ${target}`);
 const escapedVersion = expectedVersion.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 const manifest = JSON.parse(await readFile(
@@ -23,14 +25,15 @@ assert.equal(
   'manifest points to an unexpected main bundle',
 );
 
-const [flutterHtml, main, versionedMain, worker, siteManifestText, edgeWorker, authBridge] = await Promise.all([
-  readFile(path.join(buildDir, 'flutter'), 'utf8'),
+const flutterEntry = target === 'cloudflare' ? 'flutter' : 'flutter.html';
+const authBridgeEntry = target === 'cloudflare' ? 'auth_bridge' : 'auth_bridge.html';
+const [flutterHtml, main, versionedMain, worker, siteManifestText, authBridge] = await Promise.all([
+  readFile(path.join(buildDir, flutterEntry), 'utf8'),
   readFile(path.join(buildDir, 'main.dart.js')),
   readFile(path.join(buildDir, manifest.main)),
   readFile(path.join(buildDir, 'festapp_service_worker.js'), 'utf8'),
   readFile(path.join(buildDir, 'site.webmanifest'), 'utf8'),
-  readFile(path.join(buildDir, '_worker.js'), 'utf8'),
-  readFile(path.join(buildDir, 'auth_bridge'), 'utf8'),
+  readFile(path.join(buildDir, authBridgeEntry), 'utf8'),
 ]);
 assert.match(
   flutterHtml,
@@ -40,7 +43,9 @@ assert.match(
 assert.deepEqual(versionedMain, main, 'versioned and canonical main bundles differ');
 
 const projectConfig = await readFile(configPath, 'utf8');
-const configValue = (key) => projectConfig.match(new RegExp(`^${key}=(.*)$`, 'm'))?.[1].trim();
+const configValue = (key) => projectConfig.match(new RegExp(`^${key}=(.*)$`, 'm'))?.[1]
+  .trim()
+  .replace(/^(['"])(.*)\1$/, '$2');
 const supabaseUrl = configValue('SUPABASE_URL');
 const expectedAnonKey = configValue('SUPABASE_ANON_KEY');
 const expectedProjectRef = supabaseUrl?.match(/^https:\/\/([a-z0-9]+)\.supabase\.co\/?$/)?.[1];
@@ -57,6 +62,23 @@ assert.equal(
 assert.ok(
   main.includes(Buffer.from(expectedAnonKey)),
   'compiled Flutter bundle does not contain the configured Supabase anon key',
+);
+const loadingLogo = configValue('WEB_LOADING_LOGO_ASSET');
+assert.ok(loadingLogo, 'project.conf is missing WEB_LOADING_LOGO_ASSET');
+assert.match(
+  flutterHtml,
+  new RegExp(`<img class="initial-logo" src="${loadingLogo.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}"`),
+  'Flutter loader does not use the configured tenant asset',
+);
+assert.doesNotMatch(flutterHtml, /CSM Ostrava 2026/, 'Flutter loader contains foreign tenant branding');
+
+const flutterConfigPath = path.resolve(path.dirname(configPath), '..', 'lib/app_config.dart');
+const flutterConfig = await readFile(flutterConfigPath, 'utf8');
+const expectedIsAllUnit = configValue('WEB_IS_ALL_UNIT');
+assert.match(
+  flutterConfig,
+  new RegExp(`static const bool isAllUnit = ${expectedIsAllUnit};`),
+  'generated Flutter isAllUnit differs from project.conf',
 );
 assert.match(
   worker,
@@ -79,11 +101,14 @@ assert.equal(
   expectedForcedPath,
   'service worker routing differs from site.webmanifest start_url',
 );
-assert.equal(
-  parseForcedPath(edgeWorker, 'edge worker'),
-  expectedForcedPath,
-  'edge worker routing differs from site.webmanifest start_url',
-);
+if (target === 'cloudflare') {
+  const edgeWorker = await readFile(path.join(buildDir, '_worker.js'), 'utf8');
+  assert.equal(
+    parseForcedPath(edgeWorker, 'edge worker'),
+    expectedForcedPath,
+    'edge worker routing differs from site.webmanifest start_url',
+  );
+}
 
 const authStorageKey = authBridge.match(
   /const SUPABASE_KEY = '(sb-[a-z0-9]+-auth-token)'/,

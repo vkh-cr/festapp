@@ -124,12 +124,9 @@ assert_contains "$TMP_ROOT/web/index.html" 'appId: "aaaaaaaa-bbbb-cccc-dddd-eeee
 assert_contains "$TMP_ROOT/web/index.html" 'safari_web_id: "web.onesignal.auto.test"'
 assert_contains "$TMP_ROOT/web/index.html" "app_generation: 'test_generation_v1'"
 assert_contains "$TMP_ROOT/web/index.html" "occasion: 'test-occasion'"
-if grep -F -q '<svg class="initial-logo"' "$PROJECT_ROOT/web/index.html"; then
-    assert_contains "$TMP_ROOT/web/index.html" '<svg class="initial-logo"'
-    assert_missing "$TMP_ROOT/web/index.html" '<img class="initial-logo"'
-else
-    assert_contains "$TMP_ROOT/web/index.html" '<img class="initial-logo" src="android-chrome-192x192.png"'
-fi
+assert_contains "$TMP_ROOT/web/index.html" '<img class="initial-logo" src="android-chrome-192x192.png"'
+assert_missing "$TMP_ROOT/web/index.html" '<svg class="initial-logo"'
+assert_missing "$TMP_ROOT/web/index.html" 'CSM Ostrava 2026'
 
 echo
 echo "--- web/delete-account/index.html ---"

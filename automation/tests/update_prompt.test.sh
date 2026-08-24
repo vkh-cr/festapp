@@ -108,7 +108,9 @@ fi
 
 # The release gate must accept only a self-consistent HTML/manifest/main/worker
 # set carrying the same version.
-printf '<script>window.__FESTAPP_BUILD_VERSION__ = "1.2.3+456";</script>\n' > "$BUILD_DIR/flutter"
+CONFIG_LOADING_LOGO="$(sed -n 's/^WEB_LOADING_LOGO_ASSET=//p' "$PROJECT_ROOT/automation/project.conf")"
+printf '<script>window.__FESTAPP_BUILD_VERSION__ = "1.2.3+456";</script><img class="initial-logo" src="%s">\n' \
+  "$CONFIG_LOADING_LOGO" > "$BUILD_DIR/flutter"
 printf 'const BUILD_VERSION = "1.2.3+456"; const FORCED_OCCASION_PATH = "/test-occasion"; // FESTAPP_QUERY_BUILD_VERSION\n' > "$BUILD_DIR/festapp_service_worker.js"
 printf '{"start_url":"/test-occasion/"}\n' > "$BUILD_DIR/site.webmanifest"
 printf 'const FORCED_OCCASION_PATH = "/test-occasion";\n' > "$BUILD_DIR/_worker.js"

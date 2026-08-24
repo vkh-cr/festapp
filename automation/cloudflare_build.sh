@@ -15,92 +15,13 @@
 #   - SUPABASE_ANON_KEY
 #   - ORGANIZATION_ID
 # ==============================================================================
-set -e
+set -euo pipefail
 
 echo "Cloudflare Pages build starting..."
 
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-BUILD_WEB_DIR="$PROJECT_ROOT/build/web"
-WEB_CLIENT_DIST_DIR="$PROJECT_ROOT/web_client/dist"
-
-# Both Flutter and Vite leave content-hashed assets from older builds in place.
-# A merged PWA must start from empty generated output or its service worker will
-# precache obsolete tenant bundles and retain them in browser storage.
-rm -rf -- "$BUILD_WEB_DIR" "$WEB_CLIENT_DIST_DIR"
-
-FLUTTER_VERSION=$(node "$PROJECT_ROOT/automation/flutter_version.mjs")
-FLUTTER_INSTALL_DIR="${HOME}/flutter"
-
-# 1. Resolve Flutter command. Preference order:
-#      1. `flutter` already on PATH (CF Pages CI runs subosito or our prior install).
-#      2. `fvm flutter` (macOS dev box; works on any host with fvm).
-#      3. Download Linux Flutter into ${HOME} (CF Pages Linux build container).
-FLUTTER_CMD=""
-if command -v flutter &> /dev/null; then
-    FLUTTER_CMD="flutter"
-elif command -v fvm &> /dev/null; then
-    FLUTTER_CMD="fvm flutter"
-else
-    if [ ! -d "${FLUTTER_INSTALL_DIR}" ]; then
-        echo "Installing Flutter ${FLUTTER_VERSION} (linux)..."
-        curl -L "https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_${FLUTTER_VERSION}-stable.tar.xz" \
-            | tar -xJf - -C "${HOME}"
-    fi
-    export PATH="${FLUTTER_INSTALL_DIR}/bin:${PATH}"
-    FLUTTER_CMD="flutter"
-fi
-
-$FLUTTER_CMD --version
-
-# 1b. Apply project.conf to source files (title, app_config.js, app_config.dart,
-#     theme, fonts, version). Portable sed in apply_config.sh handles Linux/macOS.
-echo "Applying project configuration..."
-./automation/apply_config.sh
-
-# 2. Build Flutter Web
-echo "Building Flutter App..."
-$FLUTTER_CMD precache --web
-$FLUTTER_CMD build web --release --base-href / --no-web-resources-cdn --no-wasm-dry-run
-
-# 2b. Emit the automatic-update manifest (festapp-version.json + stamped
-#     main.dart copy) that powers web/festapp_update_prompt.js. Split into its
-#     own script so it can be unit tested without a Flutter build.
-./automation/emit_version_manifest.sh build/web
-
-# 3. Rename Flutter index.html so the Web Client index.html sits at root.
-#    Cloudflare strips ".html" from URLs (/foo.html -> 308 /foo). We keep the
-#    Flutter entry extension-less so worker fetches don't bounce through a
-#    redirect (which would lose body + corrupt query). Same trick for
-#    auth_bridge and the web client index below.
-mv build/web/index.html build/web/flutter
-
-# 4. Build Web Client
-echo "Building Web Client..."
-cd web_client
-npm install
-npm run build
-
-# 5. Merge Web Client dist into Flutter build/web
-cp -r dist/* ../build/web/
-
-cd ..
-
-# 5b. Rename Web Client index.html to extension-less /webclient.
-mv build/web/index.html build/web/webclient
-
-# 5c. Rename auth_bridge.html to extension-less /auth_bridge.
-if [ -f build/web/auth_bridge.html ]; then
-    mv build/web/auth_bridge.html build/web/auth_bridge
-fi
-
-# 5d. Replace Flutter's deprecated self-unregistering worker with a versioned,
-#     complete app-shell cache after both frontends have been merged.
-rm -f build/web/flutter_service_worker.js
-node automation/generate_pwa_service_worker.mjs \
-  build/web \
-  "$(grep -m1 '^VERSION=' automation/project.conf | cut -d= -f2 | tr -d '[:space:]')" \
-  "$(grep -m1 '^FORCE_OCCASION_LINK=' automation/project.conf | cut -d= -f2- | tr -d '\"' | tr -d "'" | tr -d '[:space:]')"
-node automation/check_pwa_shell_budget.mjs build/web automation/project.conf
+cd "$PROJECT_ROOT"
+bash "$PROJECT_ROOT/automation/build_web_bundle.sh" cloudflare
 
 # 6. Cloudflare-specific routing via Pages Function (_worker.js).
 #    Cloudflare Pages applies _redirects BEFORE static assets, so a catch-all
@@ -395,7 +316,7 @@ PY
 
 node automation/verify_web_build.mjs build/web \
   "$(grep -m1 '^VERSION=' automation/project.conf | cut -d= -f2 | tr -d '[:space:]')" \
-  automation/project.conf
+  automation/project.conf cloudflare
 
 echo "Build complete. Output in build/web"
 ls -la build/web | head -25

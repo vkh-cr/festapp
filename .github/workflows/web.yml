@@ -10,12 +10,12 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
 
       - name: Read canonical Flutter version
         id: flutter-version
@@ -27,25 +27,12 @@ jobs:
           flutter-version: ${{ steps.flutter-version.outputs.version }}
           channel: 'stable'
 
-      - name: Build Flutter
-        run: |
-          flutter precache
-          flutter build web --release --base-href / --no-web-resources-cdn
-          mv build/web/index.html build/web/flutter.html
-
-      - name: Build Web Client and Merge
-        run: |
-          cd web_client
-          npm install
-          npm run build
-          cp -r dist/* ../build/web/
+      - name: Build canonical web bundle
+        run: bash automation/build_web_bundle.sh static
 
       - name: Setup SPA Fallback
         # Copy the new index.html (Web Client) to 404.html for GitHub Pages routing
-        run: |
-          cp build/web/index.html build/web/404.html
-          rm -f build/web/flutter_service_worker.js
-          node automation/generate_pwa_service_worker.mjs build/web "$(grep -m1 '^VERSION=' automation/project.conf | cut -d= -f2 | tr -d '[:space:]')"
+        run: cp build/web/index.html build/web/404.html
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3

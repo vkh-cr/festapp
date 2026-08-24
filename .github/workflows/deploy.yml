@@ -154,8 +154,8 @@ jobs:
     steps:
       - name: Not implemented in deploy.yml
         run: |
-          echo "::warning::gh-pages still uses .github/workflows/web.yml on the prod/festapp branch."
-          echo "To consolidate, port the Flutter+web_client build + peaceiris/actions-gh-pages step into this job."
+          echo "::notice::prod/festapp deployment is owned by .github/workflows/web.yml."
+          echo "That workflow uses the canonical build_web_bundle.sh builder."
           exit 0
 
   skipped:

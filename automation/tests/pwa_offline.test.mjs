@@ -391,6 +391,14 @@ try {
     path.join(projectRoot, 'automation/cloudflare_build.sh'),
     'utf8',
   );
+  const sharedBuild = await readFile(
+    path.join(projectRoot, 'automation/build_web_bundle.sh'),
+    'utf8',
+  );
+  const githubPagesWorkflow = await readFile(
+    path.join(projectRoot, '.github/workflows/web.yml'),
+    'utf8',
+  );
   const appConfig = await readFile(path.join(projectRoot, 'lib/app_config.dart'), 'utf8');
   const oneSignalWorker = await readFile(
     path.join(projectRoot, 'web/push/OneSignalSDKWorker.js'),
@@ -414,6 +422,13 @@ try {
     cloudflareBuild,
     /FLUTTER_WEB_CANVASKIT_FORCE_MULTI_SURFACE_RASTERIZER/,
   );
+  assert.match(ciBuild, /build_web_bundle\.sh" static/);
+  assert.match(cloudflareBuild, /build_web_bundle\.sh" cloudflare/);
+  assert.match(sharedBuild, /apply_config\.sh/);
+  assert.match(sharedBuild, /emit_version_manifest\.sh/);
+  assert.match(sharedBuild, /verify_web_build\.mjs/);
+  assert.match(githubPagesWorkflow, /build_web_bundle\.sh static/);
+  assert.doesNotMatch(githubPagesWorkflow, /flutter build web/);
   assert.match(flutterIndex, /serviceWorkerParam: \{ scope: "\/push\/" \}/);
   assert.match(
     flutterIndex,
@@ -444,13 +459,14 @@ try {
   assert.match(flutterIndex, /festappLocalDevelopmentReady/);
   assert.match(flutterIndex, /serviceWorker\.getRegistrations\(\)/);
   assert.match(flutterIndex, /festapp-app-shell-/);
-  assert.match(flutterIndex, /<svg class="initial-logo"/);
+  assert.match(flutterIndex, /<img class="initial-logo"/);
   assert.match(
     flutterIndex,
-    /svg\.initial-logo\s*\{[\s\S]*?max-width:\s*320px/,
-    'the tenant-specific inline startup logo must keep its CSM sizing',
+    /img\.initial-logo\s*\{[\s\S]*?max-width:\s*320px/,
+    'the configured tenant startup logo must keep its loading-screen sizing',
   );
-  assert.doesNotMatch(flutterIndex, /<img class="initial-logo"/);
+  assert.doesNotMatch(flutterIndex, /<svg class="initial-logo"/);
+  assert.doesNotMatch(flutterIndex, /CSM Ostrava 2026/);
   const updatePrompt = await readFile(
     path.join(projectRoot, 'web/festapp_update_prompt.js'),
     'utf8',
