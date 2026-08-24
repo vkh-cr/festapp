@@ -12,15 +12,24 @@ set -e
 
 echo "Starting Unified Build Process..."
 
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+FLUTTER_VERSION=$(node "$PROJECT_ROOT/automation/flutter_version.mjs")
+
 # 1. Build Flutter App
 echo "Building Flutter App..."
 # Ensure flutter is in path (Netlify specific)
 export PATH="$PATH:/opt/buildhome/flutter/bin"
 
 if ! command -v flutter &> /dev/null; then
-    echo "Flutter not found. Installing..."
-    curl -L https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.38.7-stable.tar.xz | tar -xJf - -C /opt/buildhome
+    echo "Flutter not found. Installing ${FLUTTER_VERSION}..."
+    curl -L "https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_${FLUTTER_VERSION}-stable.tar.xz" | tar -xJf - -C /opt/buildhome
     export PATH="/opt/buildhome/flutter/bin:$PATH"
+fi
+
+ACTUAL_FLUTTER_VERSION=$(flutter --version --machine | node -e 'let input=""; process.stdin.on("data", chunk => input += chunk); process.stdin.on("end", () => process.stdout.write(JSON.parse(input).frameworkVersion));')
+if [ "$ACTUAL_FLUTTER_VERSION" != "$FLUTTER_VERSION" ]; then
+    echo "Flutter ${FLUTTER_VERSION} required by .fvmrc, found ${ACTUAL_FLUTTER_VERSION}." >&2
+    exit 1
 fi
 
 flutter precache

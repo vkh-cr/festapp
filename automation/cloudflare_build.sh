@@ -28,7 +28,7 @@ WEB_CLIENT_DIST_DIR="$PROJECT_ROOT/web_client/dist"
 # precache obsolete tenant bundles and retain them in browser storage.
 rm -rf -- "$BUILD_WEB_DIR" "$WEB_CLIENT_DIST_DIR"
 
-FLUTTER_VERSION="3.38.7"
+FLUTTER_VERSION=$(node "$PROJECT_ROOT/automation/flutter_version.mjs")
 FLUTTER_INSTALL_DIR="${HOME}/flutter"
 
 # 1. Resolve Flutter command. Preference order:

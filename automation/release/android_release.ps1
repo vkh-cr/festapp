@@ -73,7 +73,10 @@ if (-not (Get-Command fvm -ErrorAction SilentlyContinue) -and (Test-Path (Join-P
   $env:PATH = "$fvmFallback;$env:PATH"
 }
 Require-Command git; Require-Command fvm; Require-Command java; Require-Command node; Require-Command keytool
-if ((fvm flutter --version --machine | ConvertFrom-Json).frameworkVersion -ne '3.44.8') { throw 'Flutter must be exactly 3.44.8 through FVM' }
+$requiredFlutterVersion = (Get-Content -LiteralPath (Join-Path $root '.fvmrc') -Raw | ConvertFrom-Json).flutter
+if ((fvm flutter --version --machine | ConvertFrom-Json).frameworkVersion -ne $requiredFlutterVersion) {
+  throw "Flutter must be exactly $requiredFlutterVersion through FVM"
+}
 $savedErrorPreference = $ErrorActionPreference
 $ErrorActionPreference = 'Continue'
 $javaVersion = (& java -version 2>&1 | Out-String)

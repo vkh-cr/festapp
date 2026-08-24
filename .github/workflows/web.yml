@@ -17,10 +17,14 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Setup Flutter
+      - name: Read canonical Flutter version
+        id: flutter-version
+        run: echo "version=$(node automation/flutter_version.mjs)" >> "$GITHUB_OUTPUT"
+
+      - name: Install Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.38.7'
+          flutter-version: ${{ steps.flutter-version.outputs.version }}
           channel: 'stable'
 
       - name: Build Flutter
