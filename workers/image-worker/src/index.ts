@@ -1,5 +1,10 @@
 import type { Env } from './types';
-import { handleCors, addCorsHeaders } from './cors';
+import {
+  handleCors,
+  handlePublicReadCors,
+  addCorsHeaders,
+  addPublicReadCorsHeaders,
+} from './cors';
 import { handleUpload } from './upload';
 import { handlePublicServe } from './serve-public';
 import { handlePrivate } from './serve-private';
@@ -9,18 +14,23 @@ import { errorResponse } from './responses';
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
+    const url = new URL(request.url);
+    const isControlHost = url.hostname === 'image-api.festapp.net';
+    const isControlPath = url.pathname === '/upload'
+      || url.pathname.startsWith('/private/')
+      || url.pathname === '/delete'
+      || url.pathname.startsWith('/presign/');
+    const isPublicRead = !isControlHost && !isControlPath;
+
     try {
       // CORS preflight
       if (request.method === 'OPTIONS') {
-        return handleCors(request, env);
+        return isPublicRead ? handlePublicReadCors() : handleCors(request, env);
       }
-
-      const url = new URL(request.url);
 
       // Route by path prefix
       let response: Response;
 
-      const isControlHost = url.hostname === 'image-api.festapp.net';
       if (url.pathname === '/upload') {
         response = await handleUpload(request, env);
       } else if (url.pathname.startsWith('/private/')) {
@@ -37,15 +47,18 @@ export default {
         });
       }
 
-      return addCorsHeaders(request, env, response);
+      return isPublicRead
+        ? addPublicReadCorsHeaders(response)
+        : addCorsHeaders(request, env, response);
     } catch (error) {
       console.error('image_control_error', {
         status: 'internal_error',
         name: error instanceof Error ? error.name : 'UnknownError',
       });
-      return addCorsHeaders(request, env,
-        errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', true)
-      );
+      const response = errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', true);
+      return isPublicRead
+        ? addPublicReadCorsHeaders(response)
+        : addCorsHeaders(request, env, response);
     }
   },
 };

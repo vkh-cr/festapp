@@ -3,6 +3,7 @@ import { handleCors } from '../../src/cors';
 import { handleDelete } from '../../src/delete';
 import { handleUpload } from '../../src/upload';
 import type { Env } from '../../src/types';
+import worker from '../../src/index';
 
 function bucket() {
   return { put: vi.fn(), delete: vi.fn(), get: vi.fn(), head: vi.fn() } as unknown as R2Bucket;
@@ -34,6 +35,32 @@ describe('control plane', () => {
     expect(handleCors(new Request('https://image-api.festapp.net/upload', {
       method: 'OPTIONS', headers: { Origin: 'https://evil.example' },
     }), configured).status).toBe(403);
+  });
+
+  it('allows credential-free public image reads from any web origin', async () => {
+    const configured = env();
+    const origin = 'https://hvezdamorska.netlify.app';
+
+    const preflight = await worker.fetch(new Request('https://a.img.festapp.net/images/236/x.webp', {
+      method: 'OPTIONS', headers: { Origin: origin },
+    }), configured);
+    expect(preflight.status).toBe(204);
+    expect(preflight.headers.get('Access-Control-Allow-Origin')).toBe('*');
+    expect(preflight.headers.get('Access-Control-Allow-Methods')).toBe('GET, HEAD, OPTIONS');
+
+    const response = await worker.fetch(new Request('https://a.img.festapp.net/images/236/x.webp', {
+      headers: { Origin: origin },
+    }), configured);
+    expect(response.status).toBe(404);
+    expect(response.headers.get('Access-Control-Allow-Origin')).toBe('*');
+  });
+
+  it('does not make private routes public on a public compatibility host', async () => {
+    const response = await worker.fetch(new Request('https://a.img.festapp.net/private/236/x.webp', {
+      method: 'OPTIONS', headers: { Origin: 'https://untrusted.example' },
+    }), env());
+    expect(response.status).toBe(403);
+    expect(response.headers.get('Access-Control-Allow-Origin')).toBeNull();
   });
 
   it('compensates the public R2 write when DB persistence fails', async () => {

@@ -27,6 +27,21 @@ export function handleCors(request: Request, env: Env): Response {
 }
 
 /**
+ * Public image reads are intentionally credential-free and may be embedded by
+ * any web client. They therefore do not depend on the control-plane allowlist.
+ */
+export function handlePublicReadCors(): Response {
+  return new Response(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, HEAD, OPTIONS',
+      'Access-Control-Max-Age': '86400',
+    },
+  });
+}
+
+/**
  * Add CORS headers to an existing response.
  */
 export function addCorsHeaders(request: Request, env: Env, response: Response): Response {
@@ -35,5 +50,11 @@ export function addCorsHeaders(request: Request, env: Env, response: Response): 
   const newResponse = new Response(response.body, response);
   newResponse.headers.set('Access-Control-Allow-Origin', origin);
   newResponse.headers.append('Vary', 'Origin');
+  return newResponse;
+}
+
+export function addPublicReadCorsHeaders(response: Response): Response {
+  const newResponse = new Response(response.body, response);
+  newResponse.headers.set('Access-Control-Allow-Origin', '*');
   return newResponse;
 }
