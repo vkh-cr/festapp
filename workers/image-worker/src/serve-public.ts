@@ -1,5 +1,5 @@
 import type { Env } from './types';
-import { resolveBucket } from './bucket';
+import { resolveProjectByHostname } from './project-registry';
 
 /**
  * Serve public files from R2 with cache headers, conditional requests,
@@ -26,7 +26,7 @@ export async function handlePublicServe(
     return new Response('Not found', { status: 404 });
   }
 
-  const bucket = resolveBucket(env, { hostname: url.hostname });
+  const bucket = resolveProjectByHostname(env, url.hostname).publicBucket;
 
   // HEAD request — metadata only
   if (request.method === 'HEAD') {

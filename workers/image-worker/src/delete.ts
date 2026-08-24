@@ -1,98 +1,126 @@
 import type { Env } from './types';
-import { extractBearerToken, checkEditorPermission, checkUnitEditorPermission, checkIsEditorOnAnyOccasion, resolveSupabaseAuth } from './auth';
-import { resolveBucket } from './bucket';
+import {
+  authorizeImageDeletion,
+  checkIsEditorOnAnyOccasion,
+  extractBearerToken,
+  removeImageRecords,
+  type SupabaseAuth,
+} from './auth';
+import { assertControlHost, ProjectResolutionError, resolveControlProject } from './project-registry';
+import { purgeSourceUrl } from './purge';
+import { errorResponse, jsonResponse } from './responses';
 
-/**
- * Handle authenticated R2 image deletion.
- *
- * Accepts POST with JSON body { key: string }.
- * Validates the key starts with "images/", extracts the occasion or unit ID
- * from the key path, checks editor permission, and deletes the R2 object.
- */
-export async function handleDelete(
-  request: Request,
-  env: Env
-): Promise<Response> {
-  if (request.method !== 'POST') {
-    return new Response('Method not allowed', { status: 405 });
+const MAX_DELETE_LINKS = 50;
+
+interface DeleteBody {
+  projectId?: string;
+  links?: string[];
+  link?: string;
+  key?: string;
+  supabaseUrl?: string;
+}
+
+export async function handleDelete(request: Request, env: Env): Promise<Response> {
+  if (request.method !== 'POST') return errorResponse(405, 'METHOD_NOT_ALLOWED', 'Method not allowed');
+  if (Number(request.headers.get('Content-Length') || 0) > 64 * 1024) {
+    return errorResponse(413, 'REQUEST_TOO_LARGE', 'Delete request is too large');
   }
-
-  // Authenticate
   const authHeader = request.headers.get('Authorization');
-  if (!authHeader) {
-    return new Response('Missing authorization header', { status: 401 });
-  }
+  if (!authHeader) return errorResponse(401, 'AUTH_REQUIRED', 'Missing authorization header');
 
-  let userJwt: string;
+  let jwt: string;
+  try { jwt = extractBearerToken(authHeader); }
+  catch { return errorResponse(401, 'INVALID_TOKEN', 'Invalid token'); }
+
+  let body: DeleteBody;
+  try { body = await request.json() as DeleteBody; }
+  catch { return errorResponse(400, 'INVALID_JSON', 'Invalid JSON body'); }
+
+  let project;
   try {
-    userJwt = extractBearerToken(authHeader);
-  } catch {
-    return new Response('Invalid token', { status: 401 });
+    project = resolveControlProject(env, {
+      projectId: body.projectId,
+      legacySupabaseUrl: body.supabaseUrl,
+    });
+    assertControlHost(project, request.url);
+  } catch (error) {
+    if (error instanceof ProjectResolutionError) return errorResponse(400, error.code, error.message);
+    throw error;
+  }
+  const auth: SupabaseAuth = { supabaseUrl: project.supabaseUrl, anonKey: project.anonKey };
+
+  if (body.key !== undefined && body.key.startsWith('private/')) {
+    if (!/^private\/[A-Za-z0-9._/-]+$/.test(body.key) || body.key.includes('..')) {
+      return errorResponse(400, 'INVALID_PRIVATE_KEY', 'Only canonical private keys may be deleted by key');
+    }
+    if (!await checkIsEditorOnAnyOccasion(jwt, auth)) return errorResponse(403, 'FORBIDDEN', 'Forbidden');
+    await project.privateBucket.delete(body.key);
+    return jsonResponse({ deleted: true, key: body.key, projectId: project.id });
   }
 
-  // Parse JSON body
-  let body: { key?: string; supabaseUrl?: string; anonKey?: string };
-  try {
-    body = (await request.json()) as { key?: string; supabaseUrl?: string; anonKey?: string };
-  } catch {
-    return new Response('Invalid JSON body', { status: 400 });
+  // Temporary measured-adoption alias for released clients that still send a
+  // public object key. Reconstruct the exact stored link and use the same
+  // database authorization as the canonical URL contract.
+  const legacyLink = body.key !== undefined && /^images\/[A-Za-z0-9._/-]+$/.test(body.key) && !body.key.includes('..')
+    ? `https://${project.publicHostname}/${body.key}`
+    : null;
+  if (body.key !== undefined && legacyLink === null) {
+    return errorResponse(400, 'INVALID_IMAGE_KEY', 'Image key is not canonical');
+  }
+  const links = body.links ?? (body.link ? [body.link] : legacyLink ? [legacyLink] : []);
+  if (!Array.isArray(links) || links.length === 0 || links.length > MAX_DELETE_LINKS ||
+      links.some((link) => typeof link !== 'string')) {
+    return errorResponse(400, 'INVALID_LINK_BATCH', `links must contain 1-${MAX_DELETE_LINKS} URLs`);
+  }
+  const uniqueLinks = [...new Set(links)];
+  const parsed = uniqueLinks.map((link) => parsePublicLink(link, project.publicHostname));
+  if (parsed.some((item) => item === null)) {
+    return errorResponse(400, 'PROJECT_LINK_MISMATCH', 'Every URL must be a canonical stored link for the selected project');
   }
 
-  const { key } = body;
-  if (!key || typeof key !== 'string') {
-    return new Response('Missing key field', { status: 400 });
+  const authorized = await authorizeImageDeletion(jwt, uniqueLinks, auth);
+  if (authorized.length !== uniqueLinks.length || uniqueLinks.some((link) => !authorized.includes(link))) {
+    return errorResponse(403, 'DELETE_NOT_AUTHORIZED', 'The complete delete batch is not authorized');
   }
 
-  // Validate key prefix — only images/ and private/ are allowed
-  if (!key.startsWith('images/') && !key.startsWith('private/')) {
-    return new Response('Invalid key prefix', { status: 400 });
-  }
-
-  // Resolve Supabase connection — prefer request fields, fall back to env secrets
-  const auth = resolveSupabaseAuth(
-    body.supabaseUrl || null,
-    body.anonKey || null,
-    env
-  );
-
-  let isEditor = false;
-  if (key.startsWith('private/')) {
-    // Private files — editor on any occasion can manage
-    isEditor = await checkIsEditorOnAnyOccasion(userJwt, auth);
-  } else {
-    // Extract occasion or unit ID from key path
-    // Patterns: images/{occasionId}/... or images/unit-{unitId}/...
-    const pathAfterImages = key.slice('images/'.length);
-    const firstSegment = pathAfterImages.split('/')[0];
-
-    if (firstSegment.startsWith('unit-')) {
-      const unitId = parseInt(firstSegment.slice('unit-'.length), 10);
-      if (isNaN(unitId)) {
-        return new Response('Invalid unit ID in key path', { status: 400 });
-      }
-      isEditor = await checkUnitEditorPermission(userJwt, unitId, auth);
-    } else {
-      const occasionId = parseInt(firstSegment, 10);
-      if (isNaN(occasionId)) {
-        return new Response('Invalid occasion ID in key path', { status: 400 });
-      }
-      isEditor = await checkEditorPermission(userJwt, occasionId, auth);
+  const results: Array<{ link: string; deleted: boolean; code?: string; retryable?: boolean }> = [];
+  const readyForRecordRemoval: string[] = [];
+  for (let index = 0; index < uniqueLinks.length; index++) {
+    const link = uniqueLinks[index];
+    const key = parsed[index]!;
+    try {
+      await project.publicBucket.delete(key);
+      await purgeSourceUrl(env, link);
+      readyForRecordRemoval.push(link);
+      results.push({ link, deleted: true });
+    } catch (error) {
+      const retryable = typeof error === 'object' && error !== null && 'retryable' in error
+        ? Boolean((error as { retryable: boolean }).retryable) : true;
+      results.push({ link, deleted: false, code: 'R2_OR_PURGE_FAILED', retryable });
     }
   }
 
-  if (!isEditor) {
-    return new Response('Forbidden', { status: 403 });
+  if (readyForRecordRemoval.length > 0 && !await removeImageRecords(jwt, readyForRecordRemoval, auth)) {
+    for (const result of results) {
+      if (readyForRecordRemoval.includes(result.link)) {
+        result.deleted = false;
+        result.code = 'RECORD_REMOVAL_FAILED';
+        result.retryable = true;
+      }
+    }
   }
 
-  // Delete the R2 object — route by Supabase project URL
-  const bucket = resolveBucket(env, { supabaseUrl: auth.supabaseUrl });
-  await bucket.delete(key);
+  const complete = results.every((result) => result.deleted);
+  console.log('image_operation', { operation: 'delete', status: complete ? 'success' : 'partial', projectId: project.id });
+  return jsonResponse({ complete, results }, complete ? 200 : 207);
+}
 
-  return new Response(
-    JSON.stringify({ deleted: true, key }),
-    {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    }
-  );
+function parsePublicLink(link: string, hostname: string): string | null {
+  try {
+    const url = new URL(link);
+    if (url.protocol !== 'https:' || url.hostname !== hostname || url.port || url.username || url.password ||
+        url.search || url.hash || !url.pathname.startsWith('/images/') || url.pathname.includes('%') ||
+        url.pathname.split('/').includes('..')) return null;
+    return url.pathname.slice(1);
+  } catch { return null; }
 }

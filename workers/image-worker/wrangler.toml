@@ -2,14 +2,15 @@ name = "festapp-image-worker"
 main = "src/index.ts"
 compatibility_date = "2025-01-01"
 
-# Custom domains — one per project bucket
+# Transitional P1 routing. The two public hosts remain only until the measured
+# installed-client gate permits their R2 custom-domain cutover (P3).
 routes = [
   { pattern = "img.festapp.net", custom_domain = true },
-  { pattern = "a.img.festapp.net", custom_domain = true }
+  { pattern = "a.img.festapp.net", custom_domain = true },
+  { pattern = "image-api.festapp.net", custom_domain = true }
 ]
 
-# Keep workers.dev route active alongside custom domain
-workers_dev = true
+workers_dev = false
 
 # R2 bucket bindings
 [[r2_buckets]]
@@ -17,12 +18,16 @@ binding = "IMAGES_BUCKET"
 bucket_name = "festapp-images"
 
 [[r2_buckets]]
-binding = "IMAGES_TEMP"
-bucket_name = "festapp-images-temp"
-
-[[r2_buckets]]
 binding = "IMAGES_BUCKET_A"
 bucket_name = "festapp-images-a"
+
+[[r2_buckets]]
+binding = "IMAGES_PRIVATE_BUCKET"
+bucket_name = "festapp-images-private"
+
+[[r2_buckets]]
+binding = "IMAGES_PRIVATE_BUCKET_A"
+bucket_name = "festapp-images-a-private"
 
 # Images binding for compression (requires Images subscription)
 [images]
@@ -30,7 +35,16 @@ binding = "IMAGES"
 
 # Secrets (set via `wrangler secret put`):
 # SUPABASE_URL
-# SUPABASE_SERVICE_ROLE_KEY
+# SUPABASE_ANON_KEY
+# SUPABASE_URL_A
+# SUPABASE_ANON_KEY_A
 # R2_ACCESS_KEY_ID
 # R2_SECRET_ACCESS_KEY
 # CF_ACCOUNT_ID
+# CF_CACHE_PURGE_TOKEN
+
+[vars]
+CF_ZONE_ID = "02fd6ca8f4652d62e9b05f24a5e9d84f"
+CONTROL_ALLOWED_ORIGINS = "https://csmostrava.festapp.net,https://vstupenky.online"
+# P1-only: set to "enabled" during verified private-object copying, then remove.
+PRIVATE_MIGRATION_FALLBACK = "disabled"

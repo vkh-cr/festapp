@@ -170,6 +170,8 @@ assert_contains "$TMP_ROOT/web_client/src/app_config.js" "static organization = 
 assert_contains "$TMP_ROOT/web_client/src/app_config.js" "static isAllUnit = true;"
 assert_contains "$TMP_ROOT/web_client/src/app_config.js" "static supportedLanguages = ['cs', 'en'];"
 assert_contains "$TMP_ROOT/web_client/src/app_config.js" 'static webLink = "https://test.example.com";'
+assert_contains "$TMP_ROOT/web_client/src/app_config.js" "static imageApiUrl = 'https://image-api.test.example.com';"
+assert_contains "$TMP_ROOT/web_client/src/app_config.js" "static imageProjectId = 'a';"
 assert_contains "$TMP_ROOT/web_client/src/app_config.js" 'static forceOccasionLink = "test-occasion";'
 
 echo
@@ -182,6 +184,8 @@ assert_contains "$TMP_ROOT/lib/app_config.dart" "static const String supabaseUrl
 assert_contains "$TMP_ROOT/lib/app_config.dart" "'test-anon-key-fixture';"
 assert_contains "$TMP_ROOT/lib/app_config.dart" "static const int organization = 42;"
 assert_contains "$TMP_ROOT/lib/app_config.dart" 'static const String webLink = "https://test.example.com";'
+assert_contains "$TMP_ROOT/lib/app_config.dart" "static const String imageApiUrl = 'https://image-api.test.example.com';"
+assert_contains "$TMP_ROOT/lib/app_config.dart" "static const String imageProjectId = 'a';"
 assert_contains "$TMP_ROOT/lib/app_config.dart" 'static const String? forceOccasionLink = "test-occasion";'
 assert_contains "$TMP_ROOT/lib/app_config.dart" "static const String oneSignalAppId = '11111111-2222-3333-4444-555555555555';"
 assert_contains "$TMP_ROOT/lib/app_config.dart" "static const String pushAppGeneration = 'test_generation_v1';"

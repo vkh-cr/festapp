@@ -24,9 +24,11 @@ produkční branche, kterou právě kontroluješ. Expected tenant tree sestavuj 
 čistého main tree + povolených source/data overlays + fresh config generation.
 Neveřejné security/provisioning hodnoty, provozní kódy a seed payloads patří do
 uživatelova repa `FestappSeed`, ne do Festappu. Security/authorization logika a
-public input schema naopak patří do main. `FestappSeed` teď není lokálně ani pod
-ověřeným GitHub locator name dostupné: nevymýšlej jeho cestu a nezapisuj do něj,
-dokud nezískáš exact locator, nepřečteš jeho instrukce a nedostaneš scope.
+public input schema naopak patří do main. Ověřený private owner je
+`rawen-dev/festappseed`, lokálně `/Users/miakh/source/festappseed`; publishing
+manifest je `release/store-listings/csm-ostrava-2026/config.json`. Credential
+soubory ponech pouze v ignorovaném `release/private/` nebo schváleném secret
+manageru.
 
 Nevytvářej placeholders, paralelní business implementace, branch-name runtime
 podmínky, speculative fallbacky ani plošné `ours` conflict resolutions. Pokud

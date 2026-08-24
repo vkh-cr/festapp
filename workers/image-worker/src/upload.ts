@@ -1,6 +1,7 @@
 import type { Env } from './types';
-import { extractBearerToken, checkEditorPermission, checkUnitEditorPermission, resolveSupabaseAuth, type SupabaseAuth } from './auth';
-import { resolveBucket, resolvePublicOrigin } from './bucket';
+import { extractBearerToken, checkEditorPermission, checkUnitEditorPermission, type SupabaseAuth } from './auth';
+import { assertControlHost, resolveControlProject, ProjectResolutionError } from './project-registry';
+import { errorResponse, jsonResponse } from './responses';
 
 /** Absolute maximum upload size (before any transform). */
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
@@ -36,26 +37,26 @@ export async function handleUpload(
   env: Env
 ): Promise<Response> {
   if (request.method !== 'POST') {
-    return new Response('Method not allowed', { status: 405 });
+    return errorResponse(405, 'METHOD_NOT_ALLOWED', 'Method not allowed');
   }
 
   // Check file size before reading body
   const contentLength = request.headers.get('Content-Length');
   if (contentLength && parseInt(contentLength, 10) > MAX_FILE_SIZE) {
-    return new Response('File too large', { status: 413 });
+    return errorResponse(413, 'FILE_TOO_LARGE', 'File too large');
   }
 
   // Authenticate
   const authHeader = request.headers.get('Authorization');
   if (!authHeader) {
-    return new Response('Missing authorization header', { status: 401 });
+    return errorResponse(401, 'AUTH_REQUIRED', 'Missing authorization header');
   }
 
   let userJwt: string;
   try {
     userJwt = extractBearerToken(authHeader);
   } catch {
-    return new Response('Invalid token', { status: 401 });
+    return errorResponse(401, 'INVALID_TOKEN', 'Invalid token');
   }
 
   // Parse multipart form data
@@ -63,7 +64,7 @@ export async function handleUpload(
   try {
     formData = await request.formData();
   } catch {
-    return new Response('Invalid form data', { status: 400 });
+    return errorResponse(400, 'INVALID_FORM_DATA', 'Invalid form data');
   }
 
   const file = formData.get('file') as File | null;
@@ -71,30 +72,39 @@ export async function handleUpload(
   const unitIdRaw = formData.get('unitId');
 
   if (!file) {
-    return new Response('Missing file field', { status: 400 });
+    return errorResponse(400, 'MISSING_FILE', 'Missing file field');
   }
 
-  if (!occasionIdRaw && !unitIdRaw) {
-    return new Response('Missing occasionId or unitId', { status: 400 });
+  if ((!occasionIdRaw && !unitIdRaw) || (occasionIdRaw && unitIdRaw)) {
+    return errorResponse(400, 'INVALID_OWNER', 'Exactly one of occasionId or unitId is required');
   }
 
   const occasionId = occasionIdRaw ? parseInt(String(occasionIdRaw), 10) : null;
   const unitId = unitIdRaw ? parseInt(String(unitIdRaw), 10) : null;
 
   if (occasionIdRaw && (occasionId === null || isNaN(occasionId))) {
-    return new Response('Invalid occasionId', { status: 400 });
+    return errorResponse(400, 'INVALID_OCCASION', 'Invalid occasionId');
   }
 
   if (unitIdRaw && (unitId === null || isNaN(unitId))) {
-    return new Response('Invalid unitId', { status: 400 });
+    return errorResponse(400, 'INVALID_UNIT', 'Invalid unitId');
   }
 
-  // Resolve Supabase connection — prefer request fields, fall back to env secrets
-  const auth = resolveSupabaseAuth(
-    formData.get('supabaseUrl') as string | null,
-    formData.get('anonKey') as string | null,
-    env
-  );
+  let project;
+  try {
+    project = resolveControlProject(env, {
+      projectId: formData.get('projectId') as string | null,
+      // Temporary canonical URL alias for the measured installed-client window.
+      legacySupabaseUrl: formData.get('supabaseUrl') as string | null,
+    });
+    assertControlHost(project, request.url);
+  } catch (error) {
+    if (error instanceof ProjectResolutionError) {
+      return errorResponse(400, error.code, error.message);
+    }
+    throw error;
+  }
+  const auth: SupabaseAuth = { supabaseUrl: project.supabaseUrl, anonKey: project.anonKey };
 
   // Check editor permission via RPC using user's JWT
   let isEditor = false;
@@ -104,13 +114,13 @@ export async function handleUpload(
     isEditor = await checkUnitEditorPermission(userJwt, unitId, auth);
   }
   if (!isEditor) {
-    return new Response('Forbidden', { status: 403 });
+    return errorResponse(403, 'FORBIDDEN', 'Forbidden');
   }
 
   // Validate file size from actual body
   const buffer = await file.arrayBuffer();
   if (buffer.byteLength > MAX_FILE_SIZE) {
-    return new Response('File too large', { status: 413 });
+    return errorResponse(413, 'FILE_TOO_LARGE', 'File too large');
   }
 
   // Read optional per-request transform overrides from form fields
@@ -121,12 +131,20 @@ export async function handleUpload(
   const maxEdge = maxEdgeRaw ? parseInt(String(maxEdgeRaw), 10) : DEFAULT_MAX_EDGE;
   const maxBytes = maxBytesRaw ? parseInt(String(maxBytesRaw), 10) : DEFAULT_MAX_BYTES;
   const jpegQuality = qualityRaw ? parseInt(String(qualityRaw), 10) : DEFAULT_JPEG_QUALITY;
+  if (!Number.isInteger(maxEdge) || maxEdge < 1 || maxEdge > 4000 ||
+      !Number.isInteger(maxBytes) || maxBytes < 0 || maxBytes > MAX_FILE_SIZE ||
+      !Number.isInteger(jpegQuality) || jpegQuality < 1 || jpegQuality > 100) {
+    return errorResponse(400, 'INVALID_TRANSFORM_INPUT', 'Upload transform values are out of bounds');
+  }
 
   // Use explicit key for private uploads, otherwise generate one
   const explicitKey = formData.get('key') as string | null;
   let key: string;
-  if (explicitKey && explicitKey.startsWith('private/')) {
+  if (explicitKey && /^private\/[A-Za-z0-9._/-]+$/.test(explicitKey) &&
+      !explicitKey.includes('..') && explicitKey.length <= 1024) {
     key = explicitKey;
+  } else if (explicitKey) {
+    return errorResponse(400, 'INVALID_PRIVATE_KEY', 'Explicit keys must be canonical private keys');
   } else {
     // Generate storage key — timestamp + random suffix guarantees uniqueness
     const safeName = sanitizeFilename(file.name);
@@ -178,28 +196,31 @@ export async function handleUpload(
     contentType = file.type || 'application/octet-stream';
   }
 
-  // Store to R2 — route by Supabase project URL
-  const routingOpts = { supabaseUrl: auth.supabaseUrl };
-  const bucket = resolveBucket(env, routingOpts);
+  const isPrivate = key.startsWith('private/');
+  const bucket = isPrivate ? project.privateBucket : project.publicBucket;
   await bucket.put(key, body, {
-    httpMetadata: { contentType },
+    httpMetadata: {
+      contentType,
+      ...(isPrivate ? {} : { cacheControl: 'public, max-age=31536000, immutable' }),
+    },
   });
 
-  // Resolve public origin from bucket routing (not request origin)
-  // so the URL matches the domain that serves the correct bucket
-  const origin = resolvePublicOrigin(env, routingOpts, new URL(request.url).origin);
-  const publicUrl = `${origin}/${key}`;
+  const objectUrl = isPrivate
+    ? `https://image-api.festapp.net/${key}?projectId=${project.id}`
+    : `https://${project.publicHostname}/${key}`;
 
-  // Add image record to the caller's Supabase database
-  await addImageRecord(userJwt, auth, publicUrl, occasionId, unitId);
-
-  return new Response(
-    JSON.stringify({ url: publicUrl, key }),
-    {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
+  if (!isPrivate) {
+    try {
+      await addImageRecord(userJwt, auth, objectUrl, occasionId, unitId);
+    } catch (error) {
+      await bucket.delete(key);
+      console.error('image_upload_failed', { operation: 'upload', status: 'db_failed_compensated' });
+      return errorResponse(502, 'IMAGE_RECORD_FAILED', 'Image record could not be persisted', true);
     }
-  );
+  }
+
+  console.log('image_operation', { operation: 'upload', status: 'success', projectId: project.id });
+  return jsonResponse({ url: objectUrl, key, projectId: project.id });
 }
 
 /**
@@ -232,5 +253,6 @@ async function addImageRecord(
   if (!response.ok) {
     const text = await response.text();
     console.warn('add_image_record failed:', response.status, text);
+    throw new Error('add_image_record failed');
   }
 }

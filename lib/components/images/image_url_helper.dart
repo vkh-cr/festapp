@@ -1,44 +1,41 @@
-/// Helper for transforming image URLs to use on-the-fly Worker transforms.
-///
-/// Appends query parameters (?w=&f=&q=) that the image Worker uses
-/// to resize and re-encode images via the Cloudflare Images binding.
+/// Builds the bounded Cloudflare Images delivery contract.
 class ImageUrlHelper {
   /// Standard thumbnail widths to maximize CDN cache hits.
   static const int thumbnailWidth = 300;
   static const int mediumWidth = 600;
   static const int fullWidth = 1200;
 
-  /// Hosts that support Worker image transforms.
-  static const String _imageHost = 'img.festapp.net';
-  static const String _workerHost = 'festapp-image-worker.festapp.workers.dev';
+  static const Set<String> _imageHosts = {
+    'img.festapp.net',
+    'a.img.festapp.net',
+  };
+  static const Set<int> _widths = {thumbnailWidth, mediumWidth, fullWidth};
 
-  /// Transforms an img.festapp.net URL to include resize query parameters.
-  ///
-  /// Returns the original URL unchanged if it's not an img.festapp.net URL
-  /// or if parsing fails.
-  ///
-  /// [width] defaults to [thumbnailWidth] (300px).
-  /// [format] defaults to 'auto' for automatic WebP/AVIF negotiation.
-  /// [quality] is optional (1-100); omitted if null.
+  /// Returns historical/noncanonical inputs unchanged as originals.
   static String transformImageUrl(
     String originalUrl, {
     int width = thumbnailWidth,
-    String format = 'auto',
-    int? quality,
   }) {
     try {
       final uri = Uri.parse(originalUrl);
-      if (!uri.host.contains(_imageHost) && !uri.host.contains(_workerHost)) {
+      final rawPath = originalUrl.split(RegExp(r'[?#]')).first;
+      if (uri.scheme != 'https' ||
+          uri.userInfo.isNotEmpty ||
+          uri.hasPort ||
+          !_imageHosts.contains(uri.host) ||
+          !_widths.contains(width) ||
+          !uri.path.startsWith('/images/') ||
+          rawPath.contains('%') ||
+          uri.pathSegments.contains('..') ||
+          uri.path.startsWith('/cdn-cgi/image/') ||
+          !RegExp(r'\.(jpe?g|png|webp|gif|avif|svg)$', caseSensitive: false)
+              .hasMatch(uri.path)) {
         return originalUrl;
       }
-
-      final queryParams = <String, String>{
-        'w': width.toString(),
-        'f': format,
-        if (quality != null) 'q': quality.toString(),
-      };
-
-      return uri.replace(queryParameters: queryParams).toString();
+      final source = Uri(scheme: 'https', host: uri.host, path: uri.path);
+      final options =
+          'width=$width,fit=scale-down,format=auto,quality=75,onerror=redirect';
+      return 'https://${uri.host}/cdn-cgi/image/$options/$source';
     } catch (_) {
       return originalUrl;
     }

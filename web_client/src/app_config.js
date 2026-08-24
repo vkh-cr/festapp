@@ -10,6 +10,8 @@ export class AppConfig {
     static isAppSupported = true;
     static flutterAppUrl = '';
     static webLink = "https://vstupenky.online";
+    static imageApiUrl = 'https://image-api.festapp.net';
+    static imageProjectId = 'default';
     static compatibleUrls = [AppConfig.webLink];
 
     

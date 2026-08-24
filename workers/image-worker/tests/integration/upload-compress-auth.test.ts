@@ -59,7 +59,9 @@ const projectConf = loadKeyValueFile(
 const env = (key: string) =>
   process.env[key] || envLocal[key] || projectConf[key] || '';
 
-const WORKER_URL = process.env.TEST_WORKER_URL || 'https://img.festapp.net';
+const WORKER_URL = process.env.TEST_WORKER_URL || projectConf.IMAGE_API_URL || 'https://image-api.festapp.net';
+const PROJECT_ID = process.env.TEST_IMAGE_PROJECT_ID || projectConf.IMAGE_PROJECT_ID || 'default';
+const PUBLIC_ORIGIN = PROJECT_ID === 'a' ? 'https://a.img.festapp.net' : 'https://img.festapp.net';
 const SUPABASE_URL = env('SUPABASE_URL');
 const DATABASE_URL = env('DATABASE_URL');
 const ANON_KEY = env('SUPABASE_ANON_KEY');
@@ -254,8 +256,7 @@ async function uploadFile(
   if (!options.omitOccasion) {
     formData.append('occasionId', options.occasionId || OCCASION_ID);
   }
-  formData.append('supabaseUrl', SUPABASE_URL);
-  formData.append('anonKey', ANON_KEY);
+  formData.append('projectId', PROJECT_ID);
   if (options.extraFields) {
     for (const [k, v] of Object.entries(options.extraFields)) {
       formData.append(k, v);
@@ -282,11 +283,9 @@ async function deleteKey(key: string, jwt?: string): Promise<Response> {
       Authorization: `Bearer ${jwt || testJwt!}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      key,
-      supabaseUrl: SUPABASE_URL,
-      anonKey: ANON_KEY,
-    }),
+    body: JSON.stringify(key.startsWith('private/')
+      ? { key, projectId: PROJECT_ID }
+      : { links: [`${PUBLIC_ORIGIN}/${key}`], projectId: PROJECT_ID }),
   });
 }
 
@@ -354,8 +353,7 @@ describe.skipIf(skip)('Upload, Compress, Auth & Cleanup', () => {
       const formData = new FormData();
       formData.append('file', new Blob([MINIMAL_JPEG], { type: 'image/jpeg' }), 'x.jpg');
       formData.append('occasionId', OCCASION_ID);
-      formData.append('supabaseUrl', SUPABASE_URL);
-      formData.append('anonKey', ANON_KEY);
+      formData.append('projectId', PROJECT_ID);
       const resp = await fetch(`${WORKER_URL}/upload`, {
         method: 'POST',
         headers: { Authorization: 'Basic dXNlcjpwYXNz' },
@@ -546,52 +544,6 @@ describe.skipIf(skip)('Upload, Compress, Auth & Cleanup', () => {
     });
   });
 
-  // ── On-the-fly transforms via query params ─────────────────
-
-  describe('On-the-fly transforms (?w=&f=&q=)', () => {
-    let url: string;
-    let key: string;
-
-    it('uploads image for transform tests', async () => {
-      const resp = await uploadFile(MINIMAL_JPEG, 'test-transform.jpg');
-      expect(resp.status).toBe(200);
-      const json = (await resp.json()) as { url: string; key: string };
-      url = json.url;
-      key = json.key;
-      uploadedKeys.push(key);
-    });
-
-    it('serves image with ?w=300&f=auto', async () => {
-      const resp = await fetch(`${url}?w=300&f=auto`);
-      expect(resp.status).toBe(200);
-      expect(resp.headers.get('content-type')).toMatch(/^image\//);
-    });
-
-    it('serves image with ?w=600&f=auto (medium breakpoint)', async () => {
-      const resp = await fetch(`${url}?w=600&f=auto`);
-      expect(resp.status).toBe(200);
-      expect(resp.headers.get('content-type')).toMatch(/^image\//);
-    });
-
-    it('serves image with ?w=300&f=auto&q=80 (with quality)', async () => {
-      const resp = await fetch(`${url}?w=300&f=auto&q=80`);
-      expect(resp.status).toBe(200);
-      expect(resp.headers.get('content-type')).toMatch(/^image\//);
-    });
-
-    it('original URL without params still works', async () => {
-      const resp = await fetch(url);
-      expect(resp.status).toBe(200);
-      expect(resp.headers.get('content-type')).toMatch(/^image\//);
-    });
-
-    it('cleans up transform test image', async () => {
-      const resp = await deleteKey(key);
-      expect(resp.status).toBe(200);
-      uploadedKeys.splice(uploadedKeys.indexOf(key), 1);
-    });
-  });
-
   // ── Private file access ────────────────────────────────────
 
   describe('Private file access', () => {
@@ -611,8 +563,7 @@ describe.skipIf(skip)('Upload, Compress, Auth & Cleanup', () => {
       formData.append('file', new Blob([MINIMAL_JPEG], { type: 'image/jpeg' }), 'test-private.jpg');
       formData.append('key', privateKey);
       formData.append('occasionId', OCCASION_ID);
-      formData.append('supabaseUrl', SUPABASE_URL);
-      formData.append('anonKey', ANON_KEY);
+      formData.append('projectId', PROJECT_ID);
 
       const resp = await fetch(`${WORKER_URL}/upload`, {
         method: 'POST',
@@ -622,18 +573,18 @@ describe.skipIf(skip)('Upload, Compress, Auth & Cleanup', () => {
       expect(resp.status).toBe(200);
       const json = (await resp.json()) as { url: string };
       publicOrigin = new URL(json.url).origin;
-      crossInstance = new URL(publicOrigin).hostname !== new URL(WORKER_URL).hostname;
+      crossInstance = false;
       uploadedKeys.push(privateKey);
     });
 
     it('rejects unauthenticated request to private/ (401)', async () => {
-      const resp = await fetch(`${publicOrigin}/${privateKey}`);
+      const resp = await fetch(`${publicOrigin}/${privateKey}?projectId=${PROJECT_ID}`);
       expect(resp.status).toBe(401);
     });
 
     it('allows authenticated editor request to private/ (200)', async (ctx) => {
       if (crossInstance) ctx.skip();
-      const resp = await fetch(`${publicOrigin}/${privateKey}`, {
+      const resp = await fetch(`${publicOrigin}/${privateKey}?projectId=${PROJECT_ID}`, {
         headers: { Authorization: `Bearer ${testJwt}` },
       });
       expect(resp.status).toBe(200);
@@ -642,7 +593,7 @@ describe.skipIf(skip)('Upload, Compress, Auth & Cleanup', () => {
 
     it('returns 404 for non-existent private file', async (ctx) => {
       if (crossInstance) ctx.skip();
-      const resp = await fetch(`${publicOrigin}/private/nonexistent-${Date.now()}.jpg`, {
+      const resp = await fetch(`${publicOrigin}/private/nonexistent-${Date.now()}.jpg?projectId=${PROJECT_ID}`, {
         headers: { Authorization: `Bearer ${testJwt}` },
       });
       expect(resp.status).toBe(404);

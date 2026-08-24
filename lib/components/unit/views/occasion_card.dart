@@ -168,8 +168,7 @@ class _OccasionCardState extends State<OccasionCard> {
                         child: CachedNetworkImage(
                           imageUrl: ImageUrlHelper.transformImageUrl(
                               widget.occasion.data![Tb.occasions.data_image]!,
-                              width: ImageUrlHelper.mediumWidth,
-                              quality: 75),
+                              width: ImageUrlHelper.mediumWidth),
                           fit: BoxFit.cover,
                         ),
                       ),

@@ -37,7 +37,7 @@ export class OccasionCard {
         // Image
         if (occasion.data?.image) {
             const img = document.createElement('img');
-            img.src = transformImageUrl(occasion.data.image, { width: MEDIUM_WIDTH, quality: 75 });
+            img.src = transformImageUrl(occasion.data.image, { width: MEDIUM_WIDTH });
             img.alt = occasion.title || 'Event Image';
             img.className = 'oc-bg';
             card.appendChild(img);

@@ -872,7 +872,7 @@ class _EventPageState extends State<EventPage> {
           Positioned.fill(
             child: CachedNetworkImage(
               imageUrl: ImageUrlHelper.transformImageUrl(imageUrl,
-                  width: ImageUrlHelper.fullWidth, quality: 80),
+                  width: ImageUrlHelper.fullWidth),
               fit: BoxFit.cover,
               errorWidget: (_, __, ___) =>
                   Container(color: ThemeConfig.appBarColor()),

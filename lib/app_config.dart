@@ -34,7 +34,8 @@ class AppConfig {
   static const String webLink = "https://vstupenky.online";
   static const String syncHeadOrigin = "";
   static const String syncAssetOrigin = "";
-  static const String imageWorkerUrl = 'https://img.festapp.net';
+  static const String imageApiUrl = 'https://image-api.festapp.net';
+  static const String imageProjectId = 'default';
   static bool isProLicense = true;
   static const int imagesMaxWidth = 780;
   static const int imagesMaxBytes = 800000;

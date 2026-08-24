@@ -1,26 +1,6 @@
-import type { Env } from './types';
-
-/**
- * Supabase connection info — either from request form fields or env secrets.
- */
 export interface SupabaseAuth {
   supabaseUrl: string;
   anonKey: string;
-}
-
-/**
- * Resolve Supabase connection info.
- * Prefers explicit values (from the request), falls back to env secrets.
- */
-export function resolveSupabaseAuth(
-  supabaseUrl: string | null,
-  anonKey: string | null,
-  env: Env
-): SupabaseAuth {
-  return {
-    supabaseUrl: supabaseUrl || env.SUPABASE_URL,
-    anonKey: anonKey || env.SUPABASE_ANON_KEY,
-  };
 }
 
 /**
@@ -110,4 +90,40 @@ export async function checkIsEditorOnAnyOccasion(
   );
   if (!response.ok) return false;
   return (await response.json()) === true;
+}
+
+export async function authorizeImageDeletion(
+  userJwt: string,
+  links: string[],
+  auth: SupabaseAuth,
+): Promise<string[]> {
+  const response = await fetch(`${auth.supabaseUrl}/rest/v1/rpc/authorize_image_deletion`, {
+    method: 'POST',
+    headers: {
+      apikey: auth.anonKey,
+      Authorization: `Bearer ${userJwt}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ p_links: links }),
+  });
+  if (!response.ok) return [];
+  const body = await response.json() as Array<{ link: string }> | string[];
+  return body.map((item) => typeof item === 'string' ? item : item.link);
+}
+
+export async function removeImageRecords(
+  userJwt: string,
+  links: string[],
+  auth: SupabaseAuth,
+): Promise<boolean> {
+  const response = await fetch(`${auth.supabaseUrl}/rest/v1/rpc/remove_image_records`, {
+    method: 'POST',
+    headers: {
+      apikey: auth.anonKey,
+      Authorization: `Bearer ${userJwt}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ p_links: links }),
+  });
+  return response.ok;
 }
