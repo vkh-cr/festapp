@@ -1685,7 +1685,9 @@
     "counselingHours": "Poradenské hodiny",
     "navigate": "Navigovat",
     "loadingMap": "Načítám mapu…",
-    "chooseNavigationApp": "Vyberte navigaci"
+    "chooseNavigationApp": "Vyberte navigaci",
+    "currentLocation": "Moje poloha",
+    "currentLocationUnavailable": "Aktuální polohu se nepodařilo získat."
   },
   "FeatureInformation": {
     "gameCheckPoint": "Stanoviště {title}",

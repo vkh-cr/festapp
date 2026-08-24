@@ -308,6 +308,8 @@
     "changeLocation": "Zmeniť polohu",
     "navigate": "Navigovať",
     "chooseNavigationApp": "Vyberte navigáciu",
+    "currentLocation": "Moja poloha",
+    "currentLocationUnavailable": "Aktuálna poloha nie je k dispozícii.",
     "loadingMap": "Načítava sa mapa…",
     "counselingHours": "Poradenské hodiny",
     "drawPath": "Kresliť cestu",

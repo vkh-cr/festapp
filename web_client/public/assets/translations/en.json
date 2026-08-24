@@ -1685,7 +1685,9 @@
     "counselingHours": "Counseling hours",
     "navigate": "Navigate",
     "loadingMap": "Loading map…",
-    "chooseNavigationApp": "Choose a navigation app"
+    "chooseNavigationApp": "Choose a navigation app",
+    "currentLocation": "My location",
+    "currentLocationUnavailable": "Current location is unavailable."
   },
   "FeatureInformation": {
     "gameCheckPoint": "Check point {title}",

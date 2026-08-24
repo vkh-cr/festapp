@@ -158,6 +158,16 @@ Representative flow:
 - Native production build/release zůstává samostatný autorizovaný krok na
   produkčním stroji.
 
+### Execution evidence update (2026-08-24)
+
+- `LegacyMapSurface` subscribes to `MapLocationAccuracy.positionStream()` while
+  rendering the current-location marker, and `MapLibreMapSurface` calls
+  `MapLocationAccuracy.ensurePermission()` while enabling its puck. Therefore
+  the pre-existing marker/puck can already trigger a permission request during
+  surface initialization. The explicit-tap rule in Wave 3 applies to the new
+  one-shot recenter request; changing the existing marker/puck permission timing
+  would expand this plan beyond its additive locate-control scope.
+
 ## Deletion ledger
 
 | Artifact | Current role | Final action | Removal proof |
@@ -288,7 +298,10 @@ Napojit standardní ovladač jednou na společný viewport seam.
 - Double tap během requestu je no-op.
 - Výměna online/offline rendereru během permission dialogu nesmí animovat starou
   surface.
-- Permission prompt smí vzniknout jen jako důsledek explicitního tapu.
+- Nový one-shot permission request smí vzniknout jen jako důsledek explicitního
+  tapu na locate control. Stávající Legacy location marker a MapLibre puck už na
+  `main` volají sdílený permission owner při inicializaci surface; jejich
+  dosavadní prompt timing se v tomto additive recenter scope nemění.
 - Web zůstává na Legacy a používá stejný action path.
 
 **Validation**

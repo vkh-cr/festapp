@@ -308,6 +308,8 @@
     "changeLocation": "Standort ändern",
     "navigate": "Navigieren",
     "chooseNavigationApp": "Navigations-App auswählen",
+    "currentLocation": "Mein Standort",
+    "currentLocationUnavailable": "Der aktuelle Standort ist nicht verfügbar.",
     "loadingMap": "Karte wird geladen…",
     "counselingHours": "Beratungszeiten",
     "drawPath": "Weg zeichnen",

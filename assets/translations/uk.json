@@ -408,6 +408,8 @@
     "changeLocation": "Змінити місцезнаходження",
     "navigate": "Навігація",
     "chooseNavigationApp": "Виберіть навігаційний застосунок",
+    "currentLocation": "Моє місцезнаходження",
+    "currentLocationUnavailable": "Поточне місцезнаходження недоступне.",
     "loadingMap": "Завантаження карти…",
     "counselingHours": "Години консультацій",
     "drawPath": "Намалювати маршрут",

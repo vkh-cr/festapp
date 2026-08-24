@@ -15,6 +15,10 @@ class MapStrings {
       .tr(); // "You can change location by tapping on the map."
   static String get locationOnMap =>
       'FeatureMap.locationOnMap'.tr(); // "Location on map"
+  static String get currentLocation =>
+      'FeatureMap.currentLocation'.tr(); // "My location"
+  static String get currentLocationUnavailable =>
+      'FeatureMap.currentLocationUnavailable'.tr();
   static String get placeChanged =>
       'FeatureMap.placeChanged'.tr(); // "Place has been changed."
   static String get showGroups => 'FeatureMap.showGroups'.tr(); // "Show groups"

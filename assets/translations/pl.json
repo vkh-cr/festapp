@@ -308,6 +308,8 @@
     "changeLocation": "Zmień lokalizację",
     "navigate": "Nawiguj",
     "chooseNavigationApp": "Wybierz aplikację nawigacyjną",
+    "currentLocation": "Moja lokalizacja",
+    "currentLocationUnavailable": "Bieżąca lokalizacja jest niedostępna.",
     "loadingMap": "Ładowanie mapy…",
     "counselingHours": "Godziny konsultacji",
     "drawPath": "Rysuj trasę",

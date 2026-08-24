@@ -14,6 +14,8 @@ import 'package:fstapp/services/exception_handler.dart';
 import 'package:fstapp/components/map/map_page_helper.dart';
 import 'package:fstapp/components/map/counseling_hours_panel.dart';
 import 'package:fstapp/components/map/map_path_direction_layout.dart';
+import 'package:fstapp/components/map/map_locate_control.dart';
+import 'package:fstapp/components/map/map_locate_coordinator.dart';
 import 'package:fstapp/components/map/map_scene.dart';
 import 'package:fstapp/components/map/public_map_host.dart';
 import 'package:fstapp/components/map/public_map_session.dart';
@@ -206,6 +208,7 @@ class _MapPageState extends State<MapPage>
   // Paths stay hidden until the user selects a group; nothing is drawn by default.
   static const bool _showAllPathsWhenNoGroupSelected = false;
   final MapViewportCoordinator _viewportController = MapViewportCoordinator();
+  late final MapLocateCoordinator _locateCoordinator;
 
   List<IconModel> _icons = [];
   // Derived cleaning status + rating aggregate per toilet place id (empty unless
@@ -292,6 +295,7 @@ class _MapPageState extends State<MapPage>
     super.initState();
     _isMapTabActive = _isDrawingPath || widget.place != null;
     _useOffline = kIsWeb && ConnectivityService.isOfflineNotifier.value;
+    _locateCoordinator = MapLocateCoordinator(viewport: _viewportController);
     ConnectivityService.isOfflineNotifier.addListener(_onConnectivityChanged);
     _iconScrollController = ScrollController();
   }
@@ -859,6 +863,10 @@ class _MapPageState extends State<MapPage>
       isOffline: _useOffline,
       isWeb: kIsWeb,
     );
+    final rendererAvailableForLocate = switch (renderer) {
+      OfflineMapRenderer.legacy => !_useOffline || _offlineMapError == null,
+      OfflineMapRenderer.maplibre => _mapLibreStyle != null,
+    };
     final scene = _buildMapScene();
     final mapWidget = MapRendererHost(
       renderer: offlineConfiguration.renderer,
@@ -874,7 +882,9 @@ class _MapPageState extends State<MapPage>
         onPlaceTap: _onPlaceTap,
         onPlaceLongPress: _onPlaceLongPress,
         onCameraReady: () {
+          final wasReady = _viewportController.isReady;
           _viewportController.markReady();
+          if (mounted && !wasReady) setState(() {});
           _mapSession?.hostChanged();
         },
         onCameraChanged: () {
@@ -957,6 +967,15 @@ class _MapPageState extends State<MapPage>
             state: _downloadState,
             useOffline: _useOffline,
           ),
+          if (_mapCenter != null &&
+              _isMapTabActive &&
+              _viewportController.isReady &&
+              rendererAvailableForLocate)
+            MapLocateControl(
+              enabled: true,
+              loading: _locateCoordinator.isLocating,
+              onPressed: () => unawaited(_recenterOnCurrentUser()),
+            ),
           if (_isDrawingPath) _buildDrawControls(),
           if (!_isDrawingPath && selectedPlace != null) _buildEditControls(),
           if (!_isDrawingPath && selectedPlace == null)
@@ -994,6 +1013,28 @@ class _MapPageState extends State<MapPage>
         ],
       ),
     );
+  }
+
+  Future<void> _recenterOnCurrentUser() async {
+    if (_locateCoordinator.isLocating) return;
+    final operation = ExceptionHandler.guard<MapLocateResult>(
+      context,
+      defaultErrorMessage: MapStrings.currentLocationUnavailable,
+      futureFunction: () => _locateCoordinator.recenter(
+        isActive: () => mounted && _isMapTabActive,
+      ),
+    );
+    if (mounted) setState(() {});
+    final result = await operation;
+    if (!mounted) return;
+    setState(() {});
+    if (result == MapLocateResult.denied) {
+      await ToastHelper.Show(
+        context,
+        MapStrings.currentLocationUnavailable,
+        severity: ToastSeverity.NotOk,
+      );
+    }
   }
 
   OfflineMapRenderer get _offlineRenderer =>

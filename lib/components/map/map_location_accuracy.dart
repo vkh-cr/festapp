@@ -15,6 +15,11 @@ abstract final class MapLocationAccuracy {
     yield* Geolocator.getPositionStream(locationSettings: settings);
   }
 
+  static Future<Position?> currentPosition() async {
+    if (!await ensurePermission()) return null;
+    return Geolocator.getCurrentPosition(locationSettings: settings);
+  }
+
   static Future<bool> ensurePermission() async {
     var permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
