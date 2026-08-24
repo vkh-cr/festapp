@@ -164,6 +164,6 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION public.update_user(input_data jsonb)
-RETURNS jsonb LANGUAGE sql SECURITY DEFINER SET search_path = '' AS $$
+RETURNS jsonb LANGUAGE sql SECURITY DEFINER SET search_path = public, extensions AS $$
   SELECT public.update_user_internal_v1(input_data);
 $$;

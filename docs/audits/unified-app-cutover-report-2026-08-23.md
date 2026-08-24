@@ -56,7 +56,7 @@ performed.
 | Final tree and complete unpushed-history credential scan | pass for main, CSM, and HM |
 | Edge/Deno tests | pass, 80 passed / 0 failed, including DB integrations |
 | Automation suite | pass, including private-input schema and PWA contracts |
-| Disposable local database baseline and migrations | pass via temporary Colima runtime; 32 forward migrations applied |
+| Disposable local database baseline and migrations | pass via temporary Colima runtime; latest hardening migration applied |
 | Database tests | pass, 76 passed / 0 failed |
 | PowerShell parser/readback | skipped: `pwsh` unavailable; scripts were generalized and inspected |
 | Production readback/deploy/release | pending separate authorization |
@@ -76,6 +76,16 @@ the previously verified 3.7.2 release, after which clean main, CSM, and HM web
 builds passed. Release credential hardening now ignores key artifacts globally,
 rejects App Store and Google Play credential paths inside the repository, and
 documents external provisioning.
+
+The final standards/spec review then tightened the cutover without changing its
+tenant model: canonical SQL sources now use explicit `public` qualification,
+active SECURITY DEFINER entry points use the approved search path, cleaning
+reports require approved occasion membership, and the hardening is delivered by
+a forward-only migration. Production logs no longer emit recipients, order or
+payment identifiers, the account-deletion page is generated from each tenant's
+configuration, and the repository now tracks the verified root `pubspec.lock`.
+The focused cleaning regression, tenant configuration matrix, generated-page
+test, enforced lockfile resolution, and disposable migration replay passed.
 
 ## External boundaries and blockers
 

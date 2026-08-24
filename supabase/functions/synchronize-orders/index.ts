@@ -37,7 +37,6 @@ Deno.serve(async (req) => {
     }
 
     if (!bankAccounts || bankAccounts.length === 0) {
-      console.log("No bank accounts available for fetching");
       return new Response(
         JSON.stringify({ message: "No bank accounts available for fetching" }),
         {
@@ -50,7 +49,6 @@ Deno.serve(async (req) => {
     // Filter accounts to process only those with type "FIO".
     const fioAccounts = bankAccounts.filter((account: any) => account.account_type === "FIO");
     if (fioAccounts.length === 0) {
-      console.log("No FIO bank accounts available for fetching");
       return new Response(
         JSON.stringify({ message: "No FIO bank accounts available for fetching" }),
         {
@@ -76,28 +74,20 @@ Deno.serve(async (req) => {
           const formattedStartDate = startDate.toISOString().split("T")[0];
 
           const setDateUrl = `https://fioapi.fio.cz/v1/rest/set-last-date/${bankSecret}/${formattedStartDate}/`;
-          console.log(`Account ${bankAccountId} has 0 recent DB transactions. Setting Fio API pointer to ${formattedStartDate}.`);
-
           const setDateResponse = await fetch(setDateUrl);
           if (!setDateResponse.ok) {
               // Log the error but proceed anyway, as the subsequent 'last' fetch might still work or provide a useful error.
               console.error(`Failed to set last date for account ${bankAccountId}. Status: ${setDateResponse.status}`);
               fetchResults.push({ bankAccountId, error: `Failed to set Fio API pointer with status: ${setDateResponse.status}` });
-          } else {
-              console.log(`Successfully set Fio API pointer for account ${bankAccountId}.`);
           }
         }
 
         // Always fetch the latest transactions.
         // If the date was just set, this will get everything since that date.
         // If transactions already exist in our DB, this gets transactions since the last fetch.
-        const fetchDescription = `Fetching latest transactions for account ${bankAccountId}.`;
         const apiUrl = `https://fioapi.fio.cz/v1/rest/last/${bankSecret}/transactions.json`;
 
-        console.log(fetchDescription);
-
         const apiResponse = await fetch(apiUrl);
-        console.log(`Fio API fetch for bank account ${bankAccountId}: ${apiResponse.status}`);
 
         if (!apiResponse.ok) {
             console.error(`Fio API request failed for account ${bankAccountId} with status: ${apiResponse.status}`);
@@ -137,8 +127,6 @@ Deno.serve(async (req) => {
       }
     }
 
-    console.log("All fetch operations completed:", fetchResults);
-
     // --- PART 2: Retrieve Orders and Call Send-Tickets Endpoint ---
 
     // Retrieve all orders that are paid and eligible for ticket sending.
@@ -164,15 +152,15 @@ Deno.serve(async (req) => {
             body: JSON.stringify({ requestSecret, orderId, email }),
           });
           const responseData = await response.json();
-          console.log(`Send tickets for order ${orderId} response:`, responseData);
           sendTicketResults.push({ orderId, result: responseData });
         } catch (err) {
           console.error(`Error sending tickets for order ${orderId}:`, err);
-          sendTicketResults.push({ orderId, error: err.message });
+          sendTicketResults.push({
+            orderId,
+            error: err instanceof Error ? err.message : "Ticket delivery failed",
+          });
         }
       }
-    } else {
-      console.log("No orders eligible for ticket sending.");
     }
 
     // Combine results and return the final outcome.
@@ -181,7 +169,6 @@ Deno.serve(async (req) => {
       sendTicketResults,
     };
 
-    console.log("Final results:", finalResults);
     return new Response(JSON.stringify({ message: "Operations completed", results: finalResults }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
@@ -190,7 +177,9 @@ Deno.serve(async (req) => {
     // Handle both custom AuthError and any other unexpected errors.
     const isAuthError = error instanceof AuthError;
     const status = isAuthError ? error.status : 500;
-    const message = error.message || "Unexpected error occurred";
+    const message = error instanceof Error
+      ? error.message
+      : "Unexpected error occurred";
 
     console.error(`Error [${status}]: ${message}`, isAuthError ? '' : error);
 

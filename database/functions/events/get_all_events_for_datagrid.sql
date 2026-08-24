@@ -1,5 +1,5 @@
 -- Creates the updated function that correctly handles null places
-CREATE OR REPLACE FUNCTION get_all_events_for_datagrid(p_occasion_id bigint)
+CREATE OR REPLACE FUNCTION public.get_all_events_for_datagrid(p_occasion_id bigint)
 RETURNS jsonb
 LANGUAGE "plpgsql"
 STABLE

@@ -2,7 +2,7 @@
 -- occasions.features (decision R3). Speakers themselves are core and no longer
 -- gated; only the counseling flow (areas catalog, slot generator, matcher,
 -- booking window/limit) depends on this feature being enabled.
-CREATE OR REPLACE FUNCTION get_is_counseling_enabled_on_occasion(p_occasion BIGINT)
+CREATE OR REPLACE FUNCTION public.get_is_counseling_enabled_on_occasion(p_occasion BIGINT)
 RETURNS BOOLEAN
 LANGUAGE sql
 STABLE

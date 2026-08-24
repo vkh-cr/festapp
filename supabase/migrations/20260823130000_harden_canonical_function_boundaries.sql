@@ -1,3 +1,20 @@
+BEGIN;
+
+-- Align the active SECURITY DEFINER entry points with the canonical search-path
+-- contract without rewriting already-applied migration history.
+ALTER FUNCTION public.set_saved_program(bigint, bigint[], text)
+  SET search_path TO public, extensions;
+ALTER FUNCTION public.get_app_config_v219(jsonb)
+  SET search_path TO public, extensions;
+ALTER FUNCTION public.import_user_group_assignments(bigint, jsonb)
+  SET search_path TO public, extensions;
+ALTER FUNCTION public.save_occasion_user_for_edit(jsonb)
+  SET search_path TO public, extensions;
+ALTER FUNCTION public.update_user(jsonb)
+  SET search_path TO public, extensions;
+
+-- Replace the cleaning report RPC from its canonical source so privileged
+-- writes require approved membership in the target occasion.
 -- Cleaning service — participant reports a problem on a toilet.
 -- SECURITY DEFINER: participants have no direct write access to cleaning_reports
 -- or log_notifications, so all validation, insert and crew notification happen
@@ -174,3 +191,5 @@ BEGIN
   );
 END;
 $$;
+
+COMMIT;

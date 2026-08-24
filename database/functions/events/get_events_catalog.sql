@@ -1,6 +1,6 @@
 -- Lightweight event catalog (id/title/times) for admin pickers,
 -- e.g. the exclusivity editor. Includes hidden events; editor-only.
-CREATE OR REPLACE FUNCTION get_events_catalog(p_occasion BIGINT)
+CREATE OR REPLACE FUNCTION public.get_events_catalog(p_occasion BIGINT)
 RETURNS JSONB
 LANGUAGE plpgsql
 STABLE

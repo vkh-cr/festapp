@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION get_all_user_basics_for_scan(scan_code text)
+CREATE OR REPLACE FUNCTION public.get_all_user_basics_for_scan(scan_code text)
 RETURNS jsonb
 SECURITY DEFINER
 SET search_path = public, extensions

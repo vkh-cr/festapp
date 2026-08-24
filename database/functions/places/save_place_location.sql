@@ -8,7 +8,7 @@
 --
 -- Only saveLocation goes through this RPC; the other place writes (grid CRUD)
 -- keep their direct editor-only RLS path — see DbPlaces / database/policies.
-CREATE OR REPLACE FUNCTION save_place_location(
+CREATE OR REPLACE FUNCTION public.save_place_location(
   p_place_id bigint,
   p_lat double precision,
   p_lng double precision

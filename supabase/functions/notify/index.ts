@@ -98,7 +98,6 @@ Deno.serve(async (req) => {
       },
     );
   } else {
-    console.log("Notification accepted by OneSignal");
     return new Response(JSON.stringify({ status: "accepted" }), {
       status: 202,
       headers: { "Content-Type": "application/json" },

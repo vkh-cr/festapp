@@ -184,8 +184,6 @@ export function createEmailDelivery(
       throw new EmailDeliveryError(error);
     }
 
-    console.log("Email accepted by transport");
-
     let logged = true;
     try {
       await dependencies.logEmail({

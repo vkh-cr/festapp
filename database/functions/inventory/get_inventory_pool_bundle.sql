@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION get_inventory_pool_bundle(p_inventory_pool_id bigint)
+CREATE OR REPLACE FUNCTION public.get_inventory_pool_bundle(p_inventory_pool_id bigint)
 RETURNS jsonb
 SECURITY DEFINER
 SET search_path = public, extensions

@@ -94,21 +94,16 @@ Deno.serve(async (req) => {
           const formattedStartDate = startDate.toISOString().split("T")[0];
 
           const setDateUrl = `https://fioapi.fio.cz/v1/rest/set-last-date/${secret}/${formattedStartDate}/`;
-          console.log(`Account ${bankAccountId} has 0 recent DB transactions. Setting Fio API pointer to ${formattedStartDate}.`);
-
           const setDateResponse = await fetch(setDateUrl);
           if (!setDateResponse.ok) {
               // Log the error but proceed, as the 'last' fetch might still provide a useful response.
               console.error(`Failed to set last date for account ${bankAccountId}. Status: ${setDateResponse.status}`);
               syncResults.push({ bankAccountId, status: 'error', message: `Failed to set Fio API pointer with status: ${setDateResponse.status}` });
-          } else {
-              console.log(`Successfully set Fio API pointer for account ${bankAccountId}.`);
           }
         }
 
         // Always fetch the latest transactions.
         const apiUrl = `https://fioapi.fio.cz/v1/rest/last/${secret}/transactions.json`;
-        console.log(`Fetching latest transactions for account ${bankAccountId}.`);
         const apiResponse = await fetch(apiUrl);
 
         // Check if the API request was successful.
@@ -134,7 +129,6 @@ Deno.serve(async (req) => {
             console.error(`Error inserting transactions for account ${bankAccountId}:`, insertError);
             syncResults.push({ bankAccountId, status: 'error', message: 'Failed to insert transactions.' });
           } else {
-            console.log(`Insert result for account ${bankAccountId}:`, insertResult);
             syncResults.push({ bankAccountId, status: 'success', new_transactions: transactions.length });
           }
         } else {
@@ -161,7 +155,9 @@ Deno.serve(async (req) => {
     // Handle both custom AuthError and any other unexpected errors.
     const isAuthError = error instanceof AuthError;
     const status = isAuthError ? error.status : 500;
-    const message = error.message || "An unexpected error occurred";
+    const message = error instanceof Error
+      ? error.message
+      : "An unexpected error occurred";
 
     console.error(`Error [${status}]: ${message}`, isAuthError ? '' : error);
 

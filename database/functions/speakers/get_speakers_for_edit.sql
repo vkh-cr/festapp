@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION get_speakers_for_edit(p_occasion BIGINT)
+CREATE OR REPLACE FUNCTION public.get_speakers_for_edit(p_occasion BIGINT)
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER

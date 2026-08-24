@@ -6,8 +6,6 @@ import { getBaseOrderData } from "./shared.ts";
 export async function getTicketOrderStornoTemplate(reqData: any, authorizationHeader: string) {
   const { orderId, requestSecret } = reqData.data;
 
-  console.log("Order ID:", orderId);
-
   const { order, occasion, payment_info, bank_account, latest_history_id, reference_history, form_data, reply_to } = await getBaseOrderData(orderId, requestSecret, authorizationHeader);
 
  // Call the RPC function "get_latest_order_history" which returns the latest order history for non-zero price
@@ -23,10 +21,6 @@ export async function getTicketOrderStornoTemplate(reqData: any, authorizationHe
 
  // Assuming the function returns a row with price and currency_code directly
  const { price, currency_code } = orderHistory;
-
-  console.log(orderHistory);
-  console.log(price);
-
 
   // Prepare substitutions with price and currency code
   const subs: Record<string, string> = {

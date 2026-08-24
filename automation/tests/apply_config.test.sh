@@ -32,12 +32,14 @@ echo "Temp project root: $TMP_ROOT"
 # 1. Stage the files apply_config.sh writes to. Use the real ones in the repo
 #    as the starting state — that way we test against actual templates.
 mkdir -p "$TMP_ROOT/automation" \
+         "$TMP_ROOT/automation/templates/web/delete-account" \
          "$TMP_ROOT/android/app/src/main/kotlin/fstapp/example" \
          "$TMP_ROOT/android/app/src/main" \
          "$TMP_ROOT/ios/Runner.xcodeproj" \
          "$TMP_ROOT/ios/Runner" \
          "$TMP_ROOT/ios/OneSignalNotificationServiceExtension" \
          "$TMP_ROOT/web/.well-known" \
+         "$TMP_ROOT/web/delete-account" \
          "$TMP_ROOT/web" \
          "$TMP_ROOT/web_client/src" \
          "$TMP_ROOT/web_client/public" \
@@ -45,6 +47,7 @@ mkdir -p "$TMP_ROOT/automation" \
          "$TMP_ROOT/assets/icons"
 
 cp "$PROJECT_ROOT/automation/apply_config.sh" "$TMP_ROOT/automation/apply_config.sh"
+cp "$PROJECT_ROOT/automation/templates/web/delete-account/index.html" "$TMP_ROOT/automation/templates/web/delete-account/index.html"
 cp "$FIXTURE_CONF" "$TMP_ROOT/automation/project.conf"
 
 # Snapshot real templates the script edits.
@@ -124,6 +127,13 @@ if grep -F -q '<svg class="initial-logo"' "$PROJECT_ROOT/web/index.html"; then
 else
     assert_contains "$TMP_ROOT/web/index.html" '<img class="initial-logo" src="android-chrome-192x192.png"'
 fi
+
+echo
+echo "--- web/delete-account/index.html ---"
+assert_contains "$TMP_ROOT/web/delete-account/index.html" "<title>Smazání účtu | Test App Name</title>"
+assert_contains "$TMP_ROOT/web/delete-account/index.html" 'const endpoint = "https://test.supabase.co/functions/v1/confirm-account-deletion";'
+assert_contains "$TMP_ROOT/web/delete-account/index.html" 'const apiKey = "test-anon-key-fixture";'
+assert_missing "$TMP_ROOT/web/delete-account/index.html" "CSM Ostrava"
 
 echo
 echo "--- installable PWA manifests ---"

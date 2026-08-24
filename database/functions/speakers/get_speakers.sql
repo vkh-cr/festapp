@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION get_speakers(
+CREATE OR REPLACE FUNCTION public.get_speakers(
     p_occasion            BIGINT,
     p_include_description BOOLEAN DEFAULT FALSE
 )

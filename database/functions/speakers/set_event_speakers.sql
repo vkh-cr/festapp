@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION set_event_speakers(p_event BIGINT, p_speakers BIGINT[])
+CREATE OR REPLACE FUNCTION public.set_event_speakers(p_event BIGINT, p_speakers BIGINT[])
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER

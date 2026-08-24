@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION get_all_user_basics_from_occasion(oc bigint)
+CREATE OR REPLACE FUNCTION public.get_all_user_basics_from_occasion(oc bigint)
 RETURNS jsonb
 SECURITY DEFINER
 SET search_path = public, extensions

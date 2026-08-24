@@ -112,7 +112,6 @@ export async function useFakturoid(
     },
   );
   const patched = await patchRes.json();
-  console.log("Invoice patched with client data:", patched);
 
   // 5) Fetch PDF with up to one retry on 204
   if (patched.pdf_url) {
@@ -122,7 +121,7 @@ export async function useFakturoid(
     });
 
     if (pdfRes.status === 204) {
-      console.log("PDF not ready, retrying in 1s…");
+      console.info("Invoice PDF not ready; retrying once");
       await new Promise((r) => setTimeout(r, 1000));
       pdfRes = await fetch(patched.pdf_url, {
         headers: { Authorization: `Bearer ${access_token}` },
@@ -137,7 +136,6 @@ export async function useFakturoid(
         contentType: "application/pdf",
         encoding: "binary",
       });
-      console.log("Fetched PDF successfully.");
     } else {
       console.error("Could not fetch PDF, status:", pdfRes.status);
     }

@@ -1,6 +1,6 @@
 -- This function replaces the need to call `update_spot` in a loop.
 -- It processes a batch of spot assignment changes for a given UI row in a single transaction.
-CREATE OR REPLACE FUNCTION update_spot_assignments(p_changes jsonb)
+CREATE OR REPLACE FUNCTION public.update_spot_assignments(p_changes jsonb)
 RETURNS void
 SECURITY DEFINER
 LANGUAGE plpgsql

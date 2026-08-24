@@ -75,8 +75,6 @@ Deno.serve(async (req) => {
       from: `Festapp <${_DEFAULT_EMAIL}>`,
     });
 
-    console.log("Email sent to:", email);
-
     return new Response(JSON.stringify({ email }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,

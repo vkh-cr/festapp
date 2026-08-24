@@ -84,15 +84,17 @@ Deno.serve(async (req) => {
 
     if (isTicketEnabled) {
       const isNamedTicket = ticketFeature?.ticket_type === "named";
-      const resources = isNamedTicket
-        ? await fetchNamedTicketResources(tickets[0])
-        : await fetchTicketResources(tickets[0]);
+      const renderTicket = isNamedTicket
+        ? ((resources) => (ticket: any) =>
+          generateNamedTicketImage(ticket, resources, order.data, "cs"))(
+            await fetchNamedTicketResources(tickets[0]),
+          )
+        : ((resources) => (ticket: any) => generateTicketImage(ticket, resources))(
+            await fetchTicketResources(tickets[0]),
+          );
       for (const ticket of tickets) {
         try {
-          console.log("Generating PDF for ticket:", ticket.ticket_symbol);
-          const pdfBytes = isNamedTicket
-            ? await generateNamedTicketImage(ticket, resources, order.data, "cs")
-            : await generateTicketImage(ticket, resources);
+          const pdfBytes = await renderTicket(ticket);
           attachments.push({
             filename: `ticket_${ticket.ticket_symbol}.pdf`,
             content: pdfBytes,
@@ -111,7 +113,6 @@ Deno.serve(async (req) => {
       }
     }
 
-    console.log("Sending email...");
     try {
       await deliverEmail({
         to: email,
@@ -138,13 +139,11 @@ Deno.serve(async (req) => {
     // Update Status Logic
     // If we have an authenticated user (from authorizeRequest), use the User-scoped client and _ws RPC
     if (user && authorizationHeader) {
-        console.log("Updating via User Scoped Client (_ws)");
         const userClient = createUserClient(authorizationHeader);
         const { error } = await userClient.rpc("update_order_and_tickets_to_sent_ws", { order_id: orderId, ticket_ids: ticketIds });
         updateError = error;
     } else {
         // Fallback to Admin client for Secret/System requests
-        console.log("Updating via Admin Client");
         const { error } = await supabaseAdmin.rpc("update_order_and_tickets_to_sent", { order_id: orderId, ticket_ids: ticketIds });
         updateError = error;
     }
@@ -165,7 +164,9 @@ Deno.serve(async (req) => {
     // Handle both custom AuthError and any other unexpected errors.
     const isAuthError = error instanceof AuthError;
     const status = isAuthError ? error.status : 500;
-    const message = error.message || "Unexpected error occurred";
+    const message = error instanceof Error
+      ? error.message
+      : "Unexpected error occurred";
 
     console.error(`Error [${status}]: ${message}`, isAuthError ? '' : error);
 

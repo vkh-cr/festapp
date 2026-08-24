@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION get_user_info_for_users(user_ids uuid[], oc bigint)
+CREATE OR REPLACE FUNCTION public.get_user_info_for_users(user_ids uuid[], oc bigint)
 RETURNS jsonb
 SECURITY definer
 SET search_path = public, extensions

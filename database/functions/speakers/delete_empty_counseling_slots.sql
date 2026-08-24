@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION delete_empty_counseling_slots_internal_v1(p_speaker BIGINT, p_from TIMESTAMPTZ DEFAULT NULL)
+CREATE OR REPLACE FUNCTION public.delete_empty_counseling_slots_internal_v1(p_speaker BIGINT, p_from TIMESTAMPTZ DEFAULT NULL)
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -51,7 +51,7 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION delete_empty_counseling_slots(
+CREATE OR REPLACE FUNCTION public.delete_empty_counseling_slots(
   p_speaker bigint, p_from timestamptz DEFAULT NULL
 ) RETURNS jsonb LANGUAGE sql SECURITY DEFINER SET search_path = public, extensions AS $$
   SELECT public.delete_empty_counseling_slots_internal_v1(p_speaker,p_from);

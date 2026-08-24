@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION update_speaker_topic(p_occasion BIGINT, p_topic JSONB)
+CREATE OR REPLACE FUNCTION public.update_speaker_topic(p_occasion BIGINT, p_topic JSONB)
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER

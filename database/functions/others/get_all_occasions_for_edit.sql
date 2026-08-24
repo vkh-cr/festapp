@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION get_all_occasions_for_edit_v212(unit_id bigint)
+CREATE OR REPLACE FUNCTION public.get_all_occasions_for_edit_v212(unit_id bigint)
 RETURNS jsonb
 SECURITY DEFINER
 SET search_path = public, extensions

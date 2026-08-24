@@ -44,7 +44,7 @@ Deno-based edge functions for privileged operations, external API calls, and ema
 | `instance-install` | Runs SQL scripts from GitHub for setup/migrations (tables, functions, policies, seeds). |
 | `fetch-http-data` | Proxies HTTP requests, returns Base64. Used to bypass CORS. |
 | `bank-mail-parser` | Receives AWS SNS bank confirmation emails, parses transaction details, inserts into DB. |
-| `generate-hvezdamorska-agreement` | Domain-specific: generates PDF travel agreement using `pdf-lib`. |
+| `generate-order-agreement` | Generates the tenant-configured PDF order agreement using `pdf-lib`; tenant identity is supplied through the canonical configuration boundary. |
 
 ## Auth Patterns
 

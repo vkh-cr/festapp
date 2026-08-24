@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION scan_ticket(scanned_id TEXT, scanned_code TEXT)
+CREATE OR REPLACE FUNCTION public.scan_ticket(scanned_id TEXT, scanned_code TEXT)
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER

@@ -9,7 +9,8 @@
 -- Fixture: one occasion with the cleaning feature enabled, a toilet place_type,
 -- two toilets (WC 01 / WC 02) + a non-toilet place, and users:
 --   reporter (plain attendee), crew + crew2 (is_cleaning_crew), editor,
---   outsider (attendee, no crew). Plus a second occasion WITHOUT the feature.
+--   outsider (attendee, no crew), and nonparticipant (no occasion membership).
+--   Plus a second occasion WITHOUT the feature.
 -- ---------------------------------------------------------------------------
 DO $$
 DECLARE
@@ -26,6 +27,7 @@ BEGIN
     PERFORM create_user_for_test('cln_crew2',    'cln_crew2@test.local');
     PERFORM create_user_for_test('cln_editor',   'cln_editor@test.local');
     PERFORM create_user_for_test('cln_outsider', 'cln_outsider@test.local');
+    PERFORM create_user_for_test('cln_nonparticipant', 'cln_nonparticipant@test.local');
     PERFORM create_user_for_test('cln_rl',       'cln_rl@test.local');
 
     INSERT INTO public.occasions (title, link, start_time, end_time, is_open, features)
@@ -52,6 +54,8 @@ BEGIN
     VALUES (v_oc, get_user_id('cln_outsider'), true);
     INSERT INTO public.occasion_users (occasion, "user", is_approved)
     VALUES (v_oc, get_user_id('cln_rl'), true);
+    INSERT INTO public.occasion_users (occasion, "user", is_approved)
+    VALUES (v_oc2, get_user_id('cln_reporter'), true);
 
     -- Toilets are flagged purely via places.type = 'toilet' (the admin "WC"
     -- checkbox) — no place_types catalog row is required.
@@ -207,8 +211,8 @@ BEGIN
 END $$ LANGUAGE plpgsql;
 
 -- ---------------------------------------------------------------------------
--- 4. Report on a non-toilet place → 400; report on a place whose occasion has
---    the feature disabled (foreign occasion) → 404.
+-- 4. A nonparticipant cannot report; a participant report on a non-toilet
+--    place → 400; report on an occasion with the feature disabled → 404.
 -- ---------------------------------------------------------------------------
 DO $$
 DECLARE
@@ -216,6 +220,10 @@ DECLARE
     v_wc_other bigint := (SELECT v FROM _cln WHERE k = 'wc_other');
     v_res jsonb;
 BEGIN
+    PERFORM set_config('request.jwt.claim.sub', get_user_id('cln_nonparticipant')::text, true);
+    v_res := public.report_cleaning_issue(v_room, 'paper', NULL);
+    PERFORM assert_eq(v_res->>'code', '403', 'nonparticipant report → 403');
+
     PERFORM set_config('request.jwt.claim.sub', get_user_id('cln_reporter')::text, true);
 
     v_res := public.report_cleaning_issue(v_room, 'paper', NULL);
