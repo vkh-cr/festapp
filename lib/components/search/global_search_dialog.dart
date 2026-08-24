@@ -650,7 +650,7 @@ class _GlobalSearchDialogState extends State<GlobalSearchDialog> {
     return ClipOval(
       child: CachedNetworkImage(
         imageUrl: ImageUrlHelper.transformImageUrl(imageUrl,
-            width: ImageUrlHelper.thumbnailWidth, quality: 80),
+            width: ImageUrlHelper.thumbnailWidth),
         width: 40,
         height: 40,
         fit: BoxFit.cover,

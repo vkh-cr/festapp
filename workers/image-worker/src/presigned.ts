@@ -1,6 +1,8 @@
 import { AwsClient } from 'aws4fetch';
 import type { Env } from './types';
-import { extractBearerToken, checkIsEditorOnAnyOccasion, resolveSupabaseAuth } from './auth';
+import { extractBearerToken, checkIsEditorOnAnyOccasion } from './auth';
+import { assertControlHost, resolveControlProject, ProjectResolutionError } from './project-registry';
+import { errorResponse, jsonResponse } from './responses';
 
 const DEFAULT_EXPIRES_IN = 3600; // 1 hour
 const MAX_EXPIRES_IN = 604800; // 7 days
@@ -15,38 +17,48 @@ export async function handlePresign(
   request: Request,
   env: Env
 ): Promise<Response> {
+  if (request.method !== 'POST') return errorResponse(405, 'METHOD_NOT_ALLOWED', 'Method not allowed');
   // Authenticate
   const authHeader = request.headers.get('Authorization');
   if (!authHeader) {
-    return new Response('Missing authorization header', { status: 401 });
+    return errorResponse(401, 'AUTH_REQUIRED', 'Missing authorization header');
   }
 
   let userJwt: string;
   try {
     userJwt = extractBearerToken(authHeader);
   } catch {
-    return new Response('Invalid token', { status: 401 });
+    return errorResponse(401, 'INVALID_TOKEN', 'Invalid token');
   }
 
   // Extract key from path: /presign/{key}
   const url = new URL(request.url);
   const key = url.pathname.replace('/presign/', '');
 
-  // Resolve Supabase connection — prefer query params, fall back to env secrets
-  const auth = resolveSupabaseAuth(
-    url.searchParams.get('supabaseUrl'),
-    url.searchParams.get('anonKey'),
-    env
-  );
+  let project;
+  try {
+    project = resolveControlProject(env, {
+      projectId: url.searchParams.get('projectId'),
+      legacySupabaseUrl: url.searchParams.get('supabaseUrl'),
+    });
+    assertControlHost(project, request.url);
+  } catch (error) {
+    if (error instanceof ProjectResolutionError) return errorResponse(400, error.code, error.message);
+    throw error;
+  }
+  const auth = { supabaseUrl: project.supabaseUrl, anonKey: project.anonKey };
 
   // Check editor-on-any-occasion permission via RPC
   const isEditor = await checkIsEditorOnAnyOccasion(userJwt, auth);
   if (!isEditor) {
-    return new Response('Forbidden', { status: 403 });
+    return errorResponse(403, 'FORBIDDEN', 'Forbidden');
   }
 
   if (!key) {
-    return new Response('Missing key', { status: 400 });
+    return errorResponse(400, 'MISSING_KEY', 'Missing key');
+  }
+  if (key.length > 1024 || !key.startsWith('private/') || key.includes('..') || key.includes('%')) {
+    return errorResponse(400, 'INVALID_PRIVATE_KEY', 'Invalid private key');
   }
 
   // Parse optional expiresIn query param
@@ -54,9 +66,10 @@ export async function handlePresign(
   let expiresIn = DEFAULT_EXPIRES_IN;
   if (expiresInRaw) {
     const parsed = parseInt(expiresInRaw, 10);
-    if (!isNaN(parsed) && parsed > 0 && parsed <= MAX_EXPIRES_IN) {
-      expiresIn = parsed;
+    if (!/^\d+$/.test(expiresInRaw) || isNaN(parsed) || parsed <= 0 || parsed > MAX_EXPIRES_IN) {
+      return errorResponse(400, 'INVALID_EXPIRY', 'expiresIn must be 1-604800 seconds');
     }
+    expiresIn = parsed;
   }
 
   // Create AWS client for R2 S3-compatible API
@@ -67,7 +80,7 @@ export async function handlePresign(
 
   // Construct R2 S3-compatible URL
   const r2Url = new URL(
-    `https://${env.CF_ACCOUNT_ID}.r2.cloudflarestorage.com/festapp-images/${key}`
+    `https://${env.CF_ACCOUNT_ID}.r2.cloudflarestorage.com/${project.privateBucketName}/${key}`
   );
   r2Url.searchParams.set('X-Amz-Expires', String(expiresIn));
 
@@ -77,11 +90,5 @@ export async function handlePresign(
     aws: { signQuery: true },
   });
 
-  return new Response(
-    JSON.stringify({ url: signed.url, expiresIn }),
-    {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    }
-  );
+  return jsonResponse({ url: signed.url, expiresIn, projectId: project.id });
 }

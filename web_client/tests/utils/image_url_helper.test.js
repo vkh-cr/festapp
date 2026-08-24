@@ -2,60 +2,28 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { transformImageUrl, THUMBNAIL_WIDTH, MEDIUM_WIDTH, FULL_WIDTH } from '../../src/utils/image_url_helper.js';
 
-describe('transformImageUrl', () => {
-    it('transforms img.festapp.net URL with default width and format', () => {
-        const input = 'https://img.festapp.net/images/42/photo.jpg';
-        const result = transformImageUrl(input);
-        assert.strictEqual(
-            result,
-            'https://img.festapp.net/images/42/photo.jpg?w=300&f=auto'
-        );
-    });
+const source = 'https://img.festapp.net/images/42/photo.jpg';
+const options = 'width=300,fit=scale-down,format=auto,quality=75,onerror=redirect';
 
-    it('transforms with custom width (600)', () => {
-        const input = 'https://img.festapp.net/images/42/photo.jpg';
-        const result = transformImageUrl(input, { width: 600 });
-        assert.strictEqual(
-            result,
-            'https://img.festapp.net/images/42/photo.jpg?w=600&f=auto'
-        );
+describe('bounded image transform URL', () => {
+    it('builds the canonical transform and strips source query/fragment', () => {
+        assert.equal(transformImageUrl(`${source}?legacy=1#x`),
+            `https://img.festapp.net/cdn-cgi/image/${options}/${source}`);
     });
-
-    it('includes quality parameter when provided', () => {
-        const input = 'https://img.festapp.net/images/42/photo.jpg';
-        const result = transformImageUrl(input, { width: 300, quality: 80 });
-        assert.strictEqual(
-            result,
-            'https://img.festapp.net/images/42/photo.jpg?w=300&f=auto&q=80'
-        );
+    it('supports project A and exact presets', () => {
+        const projectA = 'https://a.img.festapp.net/images/1/a.png';
+        assert.equal(transformImageUrl(projectA, { width: MEDIUM_WIDTH }),
+            `https://a.img.festapp.net/cdn-cgi/image/width=600,fit=scale-down,format=auto,quality=75,onerror=redirect/${projectA}`);
+        assert.deepEqual([THUMBNAIL_WIDTH, MEDIUM_WIDTH, FULL_WIDTH], [300, 600, 1200]);
     });
-
-    it('passes through non-img.festapp.net URLs unchanged', () => {
-        const input = 'https://other-domain.com/image.jpg';
-        const result = transformImageUrl(input);
-        assert.strictEqual(result, input);
-    });
-
-    it('passes through Supabase Storage URLs unchanged', () => {
-        const input = 'https://xyz.supabase.co/storage/v1/object/public/public-files/images/photo.jpg';
-        const result = transformImageUrl(input);
-        assert.strictEqual(result, input);
-    });
-
-    it('handles malformed URLs gracefully (returns original)', () => {
-        const input = 'not-a-url';
-        const result = transformImageUrl(input);
-        assert.strictEqual(result, input);
-    });
-
-    it('handles empty string gracefully', () => {
-        const result = transformImageUrl('');
-        assert.strictEqual(result, '');
-    });
-
-    it('exports correct width constants', () => {
-        assert.strictEqual(THUMBNAIL_WIDTH, 300);
-        assert.strictEqual(MEDIUM_WIDTH, 600);
-        assert.strictEqual(FULL_WIDTH, 1200);
+    it('leaves noncanonical inputs unchanged', () => {
+        for (const value of [
+            'https://evil-img.festapp.net/images/1/a.jpg',
+            'https://img.festapp.net/private/a.jpg',
+            'https://img.festapp.net/images/1/file.pdf',
+            'https://img.festapp.net/images%2f1/a.jpg',
+            'not-a-url',
+        ]) assert.equal(transformImageUrl(value), value);
+        assert.equal(transformImageUrl(source, { width: 301 }), source);
     });
 });

@@ -35,7 +35,7 @@ class SpeakerAvatar extends StatelessWidget {
       radius: radius,
       backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
       backgroundImage: CachedNetworkImageProvider(
-        ImageUrlHelper.transformImageUrl(url, width: imageWidth, quality: 80),
+        ImageUrlHelper.transformImageUrl(url, width: imageWidth),
       ),
     );
   }

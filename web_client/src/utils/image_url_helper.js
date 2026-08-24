@@ -1,12 +1,9 @@
 /**
- * Helper for transforming image URLs to use on-the-fly Worker transforms.
- *
- * Appends query parameters (?w=&f=&q=) that the image Worker uses
- * to resize and re-encode images via the Cloudflare Images binding.
+ * Builds the bounded Cloudflare Images delivery contract.
  */
 
-const IMAGE_HOST = 'img.festapp.net';
-const WORKER_HOST = 'festapp-image-worker.festapp.workers.dev';
+const IMAGE_HOSTS = new Set(['img.festapp.net', 'a.img.festapp.net']);
+const IMAGE_PATH = /\.(jpe?g|png|webp|gif|avif|svg)$/i;
 
 /** Standard thumbnail widths to maximize CDN cache hits. */
 export const THUMBNAIL_WIDTH = 300;
@@ -20,20 +17,21 @@ export const FULL_WIDTH = 1200;
  * @param {string} originalUrl - The image URL to transform.
  * @param {Object} [options]
  * @param {number} [options.width=300] - Target width in pixels.
- * @param {string} [options.format='auto'] - Output format ('auto' for WebP/AVIF negotiation).
- * @param {number} [options.quality] - Quality 1-100 (omitted if undefined).
  * @returns {string} Transformed URL or original if not applicable.
  */
-export function transformImageUrl(originalUrl, { width = THUMBNAIL_WIDTH, format = 'auto', quality } = {}) {
+export function transformImageUrl(originalUrl, { width = THUMBNAIL_WIDTH } = {}) {
     try {
         const url = new URL(originalUrl);
-        if (!url.host.includes(IMAGE_HOST) && !url.host.includes(WORKER_HOST)) return originalUrl;
-
-        url.searchParams.set('w', String(width));
-        url.searchParams.set('f', format);
-        if (quality) url.searchParams.set('q', String(quality));
-
-        return url.toString();
+        const rawPath = originalUrl.split(/[?#]/, 1)[0];
+        if (url.protocol !== 'https:' || url.username || url.password || url.port ||
+            !IMAGE_HOSTS.has(url.hostname) || ![THUMBNAIL_WIDTH, MEDIUM_WIDTH, FULL_WIDTH].includes(width) ||
+            !url.pathname.startsWith('/images/') || url.pathname.startsWith('/cdn-cgi/image/') ||
+            rawPath.includes('%') || url.pathname.split('/').includes('..') || !IMAGE_PATH.test(url.pathname)) {
+            return originalUrl;
+        }
+        const source = `https://${url.hostname}${url.pathname}`;
+        const options = `width=${width},fit=scale-down,format=auto,quality=75,onerror=redirect`;
+        return `https://${url.hostname}/cdn-cgi/image/${options}/${source}`;
     } catch {
         return originalUrl;
     }

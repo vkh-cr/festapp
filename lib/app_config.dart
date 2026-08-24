@@ -34,7 +34,8 @@ class AppConfig {
   static const String webLink = "https://csmostrava.festapp.net";
   static const String syncHeadOrigin = "https://sync.festapp.net";
   static const String syncAssetOrigin = "https://assets.festapp.net";
-  static const String imageWorkerUrl = 'https://img.festapp.net';
+  static const String imageApiUrl = 'https://image-api.festapp.net';
+  static const String imageProjectId = 'a';
   static bool isProLicense = true;
   static const int imagesMaxWidth = 780;
   static const int imagesMaxBytes = 800000;

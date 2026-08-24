@@ -39,7 +39,8 @@ for required_key in DOMAIN APP_NAME APP_TITLE_SHORT APP_DESCRIPTION VERSION \
     PROGRAM_LOGO_ASSET WEB_LOADING_LOGO_ASSET WEB_IS_ALL_UNIT \
     WEB_SUPPORTED_LANGUAGES SUPABASE_URL SUPABASE_ANON_KEY ORGANIZATION_ID \
     IS_APP_SUPPORTED WEB_LINK THEME_SEED_1 THEME_SEED_2 THEME_SEED_3 \
-    THEME_SEED_4 FONT_FAMILY_BASE FORM_FONT_SCALE; do
+    THEME_SEED_4 FONT_FAMILY_BASE FORM_FONT_SCALE IMAGE_API_URL \
+    IMAGE_PROJECT_ID; do
     if [ -z "${!required_key}" ]; then
         echo "Error: $required_key must be defined in $CONFIG_FILE"
         exit 1
@@ -92,6 +93,14 @@ done
 [ -f "$PROJECT_ROOT/web/$WEB_LOADING_LOGO_ASSET" ] || {
     echo "Error: configured web loading asset does not exist: $WEB_LOADING_LOGO_ASSET"; exit 1;
 }
+if [[ "$IMAGE_PROJECT_ID" != "default" && "$IMAGE_PROJECT_ID" != "a" ]]; then
+    echo "Error: IMAGE_PROJECT_ID must be default or a"
+    exit 1
+fi
+if ! printf '%s' "$IMAGE_API_URL" | grep -Eq '^https://[^/]+$'; then
+    echo "Error: IMAGE_API_URL must be an https origin without a path"
+    exit 1
+fi
 
 echo "Detailed Configuration:"
 echo "  - Domain: $DOMAIN"
@@ -263,6 +272,8 @@ PY
     if [ ! -z "$WEB_LINK" ]; then
         sed_inplace "s|static webLink = \".*\";|static webLink = \"$WEB_LINK\";|g" "$APP_CONFIG"
     fi
+    sed_inplace "s|static imageApiUrl = '.*';|static imageApiUrl = '$IMAGE_API_URL';|g" "$APP_CONFIG"
+    sed_inplace "s|static imageProjectId = '.*';|static imageProjectId = '$IMAGE_PROJECT_ID';|g" "$APP_CONFIG"
 
     # Update Force Occasion Link (empty value -> null)
     if [ -z "$FORCE_OCCASION_LINK" ]; then
@@ -339,6 +350,8 @@ PY
 
     sed_inplace "s|static const String syncHeadOrigin = \".*\";|static const String syncHeadOrigin = \"${SYNC_HEAD_ORIGIN:-}\";|g" "$FLUTTER_CONFIG"
     sed_inplace "s|static const String syncAssetOrigin = \".*\";|static const String syncAssetOrigin = \"${SYNC_ASSET_ORIGIN:-}\";|g" "$FLUTTER_CONFIG"
+    sed_inplace "s|static const String imageApiUrl = '.*';|static const String imageApiUrl = '$IMAGE_API_URL';|g" "$FLUTTER_CONFIG"
+    sed_inplace "s|static const String imageProjectId = '.*';|static const String imageProjectId = '$IMAGE_PROJECT_ID';|g" "$FLUTTER_CONFIG"
 
     # Update Force Occasion Link (empty value -> null)
     if [ -z "$FORCE_OCCASION_LINK" ]; then

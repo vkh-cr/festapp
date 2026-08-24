@@ -1,6 +1,12 @@
 import type { Env } from './types';
-import { extractBearerToken, checkIsEditorOnAnyOccasion, resolveSupabaseAuth } from './auth';
-import { resolveBucket } from './bucket';
+import { extractBearerToken, checkIsEditorOnAnyOccasion } from './auth';
+import {
+  assertControlHost,
+  resolveControlProject,
+  resolveProjectByHostname,
+  ProjectResolutionError,
+} from './project-registry';
+import { errorResponse } from './responses';
 
 /**
  * Serve private files from R2 with JWT authentication and editor permission check.
@@ -14,37 +20,56 @@ export async function handlePrivate(
   request: Request,
   env: Env
 ): Promise<Response> {
+  if (request.method !== 'GET' && request.method !== 'HEAD') {
+    return errorResponse(405, 'METHOD_NOT_ALLOWED', 'Method not allowed');
+  }
   // Authenticate
   const authHeader = request.headers.get('Authorization');
   if (!authHeader) {
-    return new Response('Missing authorization header', { status: 401 });
+    return errorResponse(401, 'AUTH_REQUIRED', 'Missing authorization header');
   }
 
   let userJwt: string;
   try {
     userJwt = extractBearerToken(authHeader);
   } catch {
-    return new Response('Invalid token', { status: 401 });
+    return errorResponse(401, 'INVALID_TOKEN', 'Invalid token');
   }
 
-  // Check editor-on-any-occasion permission via RPC
-  const auth = resolveSupabaseAuth(null, null, env);
+  const url = new URL(request.url);
+  let project;
+  try {
+    const projectId = url.searchParams.get('projectId');
+    const legacySupabaseUrl = url.searchParams.get('supabaseUrl');
+    project = projectId || legacySupabaseUrl
+      ? resolveControlProject(env, { projectId, legacySupabaseUrl })
+      : resolveProjectByHostname(env, url.hostname);
+    assertControlHost(project, request.url);
+  } catch (error) {
+    if (error instanceof ProjectResolutionError) return errorResponse(400, error.code, error.message);
+    throw error;
+  }
+  const auth = { supabaseUrl: project.supabaseUrl, anonKey: project.anonKey };
   const isEditor = await checkIsEditorOnAnyOccasion(userJwt, auth);
   if (!isEditor) {
-    return new Response('Forbidden', { status: 403 });
+    return errorResponse(403, 'FORBIDDEN', 'Forbidden');
   }
 
   // Extract key from path — keep the private/ prefix (matches R2 key from upload)
-  const url = new URL(request.url);
   const key = url.pathname.slice(1); // Remove leading /
 
   if (!key) {
     return new Response('Not found', { status: 404 });
   }
 
-  // Get object from R2 — route to the correct bucket by hostname
-  const bucket = resolveBucket(env, { hostname: url.hostname });
-  const object = await bucket.get(key);
+  if (!key.startsWith('private/') || key.includes('..')) return errorResponse(400, 'INVALID_PRIVATE_KEY', 'Invalid private key');
+  let object = await project.privateBucket.get(key);
+  if (!object && env.PRIVATE_MIGRATION_FALLBACK === 'enabled') {
+    object = await project.publicBucket.get(key);
+    if (object) console.log('image_operation', {
+      operation: 'private_migration_fallback', status: 'hit', projectId: project.id,
+    });
+  }
   if (!object) {
     return new Response('Not found', { status: 404 });
   }
@@ -54,5 +79,5 @@ export async function handlePrivate(
   object.writeHttpMetadata(headers);
   headers.set('Cache-Control', 'private, no-cache');
 
-  return new Response(object.body, { headers });
+  return new Response(request.method === 'HEAD' ? null : object.body, { headers });
 }

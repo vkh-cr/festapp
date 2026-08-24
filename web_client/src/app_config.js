@@ -10,6 +10,8 @@ export class AppConfig {
     static isAppSupported = true;
     static flutterAppUrl = '';
     static webLink = "https://csmostrava.festapp.net";
+    static imageApiUrl = 'https://image-api.festapp.net';
+    static imageProjectId = 'a';
     static compatibleUrls = [AppConfig.webLink];
 
     

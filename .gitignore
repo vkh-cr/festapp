@@ -174,6 +174,7 @@ supabase/.env
 # Migration scripts
 automation/image-migration/.env
 automation/image-migration/node_modules/
+automation/image-migration/.private-cutover-ledger.jsonl
 
 # Generated offline map packages and preview artifacts
 automation/offline-map/out/

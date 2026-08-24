@@ -1,13 +1,13 @@
-import 'dart:convert';
 import 'dart:typed_data';
 import 'package:fstapp/app_config.dart';
+import 'package:fstapp/components/images/image_control_client.dart';
 import 'package:fstapp/database_tables/tb.dart';
-import 'package:fstapp/services/app_logger.dart';
 import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DbImages {
   static final _supabase = Supabase.instance.client;
+  static final _httpClient = http.Client();
   static const _bucketName = 'public-files';
 
   /// Detect image format from magic bytes and return extension.
@@ -35,9 +35,7 @@ class DbImages {
 
   /// Upload an image to the shared Worker with optional server-side transform.
   ///
-  /// The Worker validates the user's JWT against the Supabase project identified
-  /// by [supabaseUrl] + [anonKey]. This allows a single Worker (img.festapp.net)
-  /// to serve multiple Supabase projects.
+  /// The control API resolves the server-owned project registry from projectId.
   ///
   /// [imageData]   – raw image bytes.
   /// [occasion]    – occasion ID for permission check (mutually exclusive with [unit]).
@@ -45,9 +43,7 @@ class DbImages {
   /// [maxEdge]     – longer-edge limit in px (Worker default: 1200).
   /// [maxBytes]    – skip transform when file is smaller (Worker default: 800 KB).
   /// [quality]     – JPEG quality 1-100 (Worker default: 70, ignored for PNG).
-  /// [workerUrl]   – override Worker URL (defaults to [AppConfig.imageWorkerUrl]).
-  /// [supabaseUrl] – Supabase project URL for Worker auth (defaults to [AppConfig.supabaseUrl]).
-  /// [anonKey]     – Supabase anon key for Worker auth (defaults to [AppConfig.anonKey]).
+  /// [endpoint] – explicit endpoint injection for tests.
   static Future<String> uploadImage(
     Uint8List imageData,
     int? occasion,
@@ -55,78 +51,43 @@ class DbImages {
     int? maxEdge,
     int? maxBytes,
     int? quality,
-    String? workerUrl,
-    String? supabaseUrl,
-    String? anonKey,
+    String? endpoint,
   }) async {
     final session = _supabase.auth.currentSession;
     if (session == null) throw Exception('Not authenticated');
 
-    final baseUrl = workerUrl ?? AppConfig.imageWorkerUrl;
     final ext = _detectExtension(imageData);
-    final request = http.MultipartRequest(
-      'POST',
-      Uri.parse('$baseUrl/upload'),
-    );
-    request.headers['Authorization'] = 'Bearer ${session.accessToken}';
-    request.files.add(http.MultipartFile.fromBytes(
-      'file',
-      imageData,
+    return ImageControlClient(
+      endpoint: endpoint ?? AppConfig.imageApiUrl,
+      projectId: AppConfig.imageProjectId,
+      httpClient: _httpClient,
+    ).upload(
+      bytes: imageData,
       filename: '${DateTime.now().millisecondsSinceEpoch}.$ext',
-    ));
-    if (occasion != null) {
-      request.fields['occasionId'] = occasion.toString();
-    }
-    if (unit != null) {
-      request.fields['unitId'] = unit.toString();
-    }
-    if (maxEdge != null) {
-      request.fields['maxEdge'] = maxEdge.toString();
-    }
-    if (maxBytes != null) {
-      request.fields['maxBytes'] = maxBytes.toString();
-    }
-    if (quality != null) {
-      request.fields['quality'] = quality.toString();
-    }
-    // Tell the Worker which Supabase project to validate the JWT against
-    request.fields['supabaseUrl'] = supabaseUrl ?? AppConfig.supabaseUrl;
-    request.fields['anonKey'] = anonKey ?? AppConfig.anonKey;
-
-    final streamedResponse = await request.send();
-    final responseBody = await streamedResponse.stream.bytesToString();
-    if (streamedResponse.statusCode != 200) {
-      throw Exception('Upload failed: $responseBody');
-    }
-
-    final json = jsonDecode(responseBody) as Map<String, dynamic>;
-    return json['url'] as String;
+      accessToken: session.accessToken,
+      occasionId: occasion,
+      unitId: unit,
+      maxEdge: maxEdge,
+      maxBytes: maxBytes,
+      quality: quality,
+    );
   }
 
-  static bool _isR2Url(String url) =>
-      url.contains('img.festapp.net') ||
-      url.contains('festapp-image-worker.festapp.workers.dev');
+  static bool _isR2Url(String value) {
+    final uri = Uri.tryParse(value);
+    return uri?.scheme == 'https' &&
+        (uri?.host == 'img.festapp.net' || uri?.host == 'a.img.festapp.net') &&
+        uri!.path.startsWith('/images/');
+  }
 
   static Future<void> removeImage(String imageUrl) async {
     if (_isR2Url(imageUrl)) {
-      // R2: delete via Worker /delete endpoint
-      final key = Uri.parse(imageUrl).path.substring(1);
       final token = _supabase.auth.currentSession!.accessToken;
-      final response = await http.post(
-        Uri.parse('${AppConfig.imageWorkerUrl}/delete'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          'key': key,
-          'supabaseUrl': AppConfig.supabaseUrl,
-          'anonKey': AppConfig.anonKey,
-        }),
-      );
-      if (response.statusCode != 200) {
-        AppLogger.error('R2 delete returned ${response.statusCode}: ${response.body}');
-      }
+      await ImageControlClient(
+              endpoint: AppConfig.imageApiUrl,
+              projectId: AppConfig.imageProjectId,
+              httpClient: _httpClient)
+          .deleteLinks([imageUrl], token);
     } else {
       // Supabase Storage: existing path extraction
       final uri = Uri.parse(imageUrl);
@@ -137,21 +98,22 @@ class DbImages {
       }
       final filePath = segments.sublist(bucketIndex + 1).join('/');
       await _supabase.storage.from(_bucketName).remove([filePath]);
+      await _supabase.rpc('remove_image_records', params: {
+        'p_links': [imageUrl]
+      });
     }
-    await _supabase.rpc('remove_image_records', params: {
-      'p_links': [imageUrl],
-    });
   }
 
   static Future<String> createCopyOfImage(
       String imageUrl, int? occasion, int? unit) async {
     if (_isR2Url(imageUrl)) {
       // R2: download the image bytes and re-upload via Worker
-      final downloadResponse = await http.get(Uri.parse(imageUrl));
-      if (downloadResponse.statusCode != 200) {
-        throw Exception('Failed to download R2 image: ${downloadResponse.statusCode}');
-      }
-      return await uploadImage(downloadResponse.bodyBytes, occasion, unit);
+      final bytes = await ImageControlClient(
+              endpoint: AppConfig.imageApiUrl,
+              projectId: AppConfig.imageProjectId,
+              httpClient: _httpClient)
+          .download(imageUrl);
+      return uploadImage(bytes, occasion, unit);
     }
 
     // Supabase Storage: existing copy logic
@@ -198,12 +160,12 @@ class DbImages {
         .eq(Tb.images.occasion, occasion);
 
     // Partition URLs into R2 and Supabase Storage lists
-    List<String> r2Keys = [];
+    List<String> r2Links = [];
     List<String> supabasePaths = [];
     for (var image in response) {
       String imageUrl = image[Tb.images.link];
       if (_isR2Url(imageUrl)) {
-        r2Keys.add(Uri.parse(imageUrl).path.substring(1));
+        r2Links.add(imageUrl);
       } else {
         final uri = Uri.parse(imageUrl);
         final segments = uri.pathSegments;
@@ -214,26 +176,14 @@ class DbImages {
       }
     }
 
-    // Delete R2 images individually via Worker
-    if (r2Keys.isNotEmpty) {
+    // One bounded, ownership-aware control request for the whole R2 batch.
+    if (r2Links.isNotEmpty) {
       final token = _supabase.auth.currentSession!.accessToken;
-      for (final key in r2Keys) {
-        final deleteResponse = await http.post(
-          Uri.parse('${AppConfig.imageWorkerUrl}/delete'),
-          headers: {
-            'Authorization': 'Bearer $token',
-            'Content-Type': 'application/json',
-          },
-          body: jsonEncode({
-            'key': key,
-            'supabaseUrl': AppConfig.supabaseUrl,
-            'anonKey': AppConfig.anonKey,
-          }),
-        );
-        if (deleteResponse.statusCode != 200) {
-          AppLogger.error('R2 cleanup delete returned ${deleteResponse.statusCode} for key: $key');
-        }
-      }
+      await ImageControlClient(
+              endpoint: AppConfig.imageApiUrl,
+              projectId: AppConfig.imageProjectId,
+              httpClient: _httpClient)
+          .deleteLinks(r2Links, token);
     }
 
     // Delete Supabase Storage images in batch
@@ -241,8 +191,11 @@ class DbImages {
       await _supabase.storage.from(_bucketName).remove(supabasePaths);
     }
 
-    await _supabase.rpc('remove_image_records', params: {
-      'p_links': removedImages,
-    });
+    final supabaseLinks =
+        removedImages.where((link) => !_isR2Url(link)).toList();
+    if (supabaseLinks.isNotEmpty) {
+      await _supabase
+          .rpc('remove_image_records', params: {'p_links': supabaseLinks});
+    }
   }
 }

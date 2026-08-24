@@ -7,11 +7,10 @@ Scripts for migrating image files from Supabase Storage to Cloudflare R2 and rew
 ```
 Supabase Storage (public-files bucket)
   ↓ migrate-files.js (download via HTTP, upload via wrangler CLI)
-Cloudflare R2 (festapp-images bucket)
-  ↓ served by
-Cloudflare Worker (festapp-image-worker)
-  → https://festapp-image-worker.festapp.workers.dev/  (interim)
-  → https://img.festapp.net/                           (final, after DNS)
+Cloudflare R2 public-only bucket
+  → https://img.festapp.net/ (direct custom domain after P3)
+Cloudflare R2 private bucket
+  → https://image-api.festapp.net/private/... (authenticated Worker)
 ```
 
 ## Scripts
@@ -22,6 +21,7 @@ Cloudflare Worker (festapp-image-worker)
 | `rewrite-urls.js` | Rewrite all Supabase URLs in database to R2 URLs | **Yes** |
 | `verify.js` | Check zero Supabase URLs remain in database | No (read-only) |
 | `find-orphans.js` | List R2 objects not referenced in database | No (read-only) |
+| `private-bucket-cutover.js` | Inventory/copy/verify private objects | Delete mode only |
 
 ## Setup
 
@@ -58,12 +58,26 @@ node migrate-files.js --concurrency 5
 4. Uploads to R2 via `wrangler r2 object put --remote`
 5. Skips files already in R2 (idempotent)
 
-### Step 2: Verify Worker serves files
+### Private bucket isolation (P1 only)
+
+```bash
+npm run private:inventory
+npm run private:copy
+npm run private:verify
+# Separate authorized source-deletion checkpoint only:
+node private-bucket-cutover.js --delete --confirm-source-delete
+```
+
+The copy is resumable through `PRIVATE_CUTOVER_LEDGER`, verifies destination
+size before recording success and never deletes a source during copy. The ledger
+contains object keys and must remain restricted operational data.
+
+### Step 2: Verify the authorized public route serves files
 
 Before rewriting URLs, verify the Worker is serving files:
 
 ```bash
-curl -I https://festapp-image-worker.festapp.workers.dev/images/SOME_FILE.jpg
+curl -I https://img.festapp.net/images/SOME_FILE.jpg
 # Should return HTTP 200
 ```
 
@@ -130,35 +144,21 @@ Requires R2 API credentials in `.env`.
 
 ## Rollback
 
-If something goes wrong after URL rewrite, reverse it with SQL:
-
-```sql
--- Replace R2 prefix with original Supabase prefix
--- Adjust the R2 prefix to match what was used (workers.dev or img.festapp.net)
-UPDATE images SET link = REPLACE(link,
-  'https://festapp-image-worker.festapp.workers.dev/',
-  'https://kjdpmixlnhntmxjedpxh.supabase.co/storage/v1/object/public/public-files/')
-WHERE link LIKE '%festapp-image-worker.festapp.workers.dev%';
-
--- Repeat for HTML columns, JSONB fields etc.
--- Or simply rerun rewrite-urls.js after swapping R2_PREFIX back to Supabase prefix
-```
+The direct-delivery cutover preserves stored `img.festapp.net` URLs. P3 rollback
+restores only the recorded Worker route/version and purges the changed
+representation; it never moves private data back or restores client-selected
+credentials. See the evidence document for the required checkpoint record.
 
 ## Configuration
 
 The R2 target URL is configured in `lib/url-rewriter.js`:
 
 ```javascript
-export const R2_PREFIX = 'https://festapp-image-worker.festapp.workers.dev/';
-```
-
-When `img.festapp.net` DNS is configured, update this to:
-
-```javascript
 export const R2_PREFIX = 'https://img.festapp.net/';
 ```
 
-Then rerun `node rewrite-urls.js` to update all database URLs.
+Stored `img.festapp.net` URLs remain stable when the hostname moves from Worker
+to its exact public R2 bucket, so the direct-delivery cutover needs no DB rewrite.
 
 ## Migration Log
 
@@ -169,13 +169,7 @@ Then rerun `node rewrite-urls.js` to update all database URLs.
 - **Failed (editor-files):** 3 files in private bucket, need service role key
 - **URL rewrites:** 362 rows (336 first pass + 26 second pass after html-rewriter fix)
 - **Remaining:** 24 rows from hvezdamorska project (`lwfpdjxsdmkfyrzqbrlk`) — separate migration
-- **Target URL:** `festapp-image-worker.festapp.workers.dev` (interim, pending DNS)
+- **Historical target URL:** a workers.dev migration route that is no longer a supported client contract
 
-### Pending
-
-- [ ] Set CNAME: `img` → `festapp-image-worker.festapp.workers.dev` (proxied)
-- [ ] Rerun `rewrite-urls.js` with `R2_PREFIX = 'https://img.festapp.net/'`
-- [ ] Uncomment custom domain in `workers/image-worker/wrangler.toml`
-- [ ] Enable Cloudflare Image Transformations in dashboard
-- [ ] Migrate hvezdamorska (`lwfpdjxsdmkfyrzqbrlk`) URLs in separate run
-- [ ] Migrate 3 `editor-files` (need Supabase service role key or manual download)
+Current split-plane production checkpoints are tracked in
+`docs/plans/image-delivery-cost-cutover-evidence-2026-08-23.md`.

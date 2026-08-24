@@ -69,9 +69,9 @@ cp "$PROJECT_ROOT/ios/OneSignalNotificationServiceExtension/Info.plist" "$TMP_RO
 cp "$PROJECT_ROOT/ios/OneSignalNotificationServiceExtension/OneSignalNotificationServiceExtensionRelease.entitlements" "$TMP_ROOT/ios/OneSignalNotificationServiceExtension/OneSignalNotificationServiceExtensionRelease.entitlements"
 cp "$PROJECT_ROOT/web/apple-app-site-association" "$TMP_ROOT/web/apple-app-site-association"
 cp "$PROJECT_ROOT/web/.well-known/apple-app-site-association" "$TMP_ROOT/web/.well-known/apple-app-site-association"
-cp "$PROJECT_ROOT/assets/icons/fstapplogo.svg" "$TMP_ROOT/assets/icons/fstapplogo.svg"
-cp "$PROJECT_ROOT/assets/icons/fstapplogo.dark.svg" "$TMP_ROOT/assets/icons/fstapplogo.dark.svg"
-cp "$PROJECT_ROOT/web/android-chrome-192x192.png" "$TMP_ROOT/web/android-chrome-192x192.png"
+cp "$PROJECT_ROOT/assets/icons/fstapplogo.png" "$TMP_ROOT/assets/icons/fstapplogo.png"
+cp "$PROJECT_ROOT/assets/icons/fstapplogo_program.png" "$TMP_ROOT/assets/icons/fstapplogo_program.png"
+cp "$PROJECT_ROOT/web/csmostrava-logo.svg" "$TMP_ROOT/web/csmostrava-logo.svg"
 
 # theme_config.css is optional but typically present.
 if [ -f "$PROJECT_ROOT/web_client/src/theme_config.css" ]; then
@@ -170,6 +170,8 @@ assert_contains "$TMP_ROOT/web_client/src/app_config.js" "static organization = 
 assert_contains "$TMP_ROOT/web_client/src/app_config.js" "static isAllUnit = true;"
 assert_contains "$TMP_ROOT/web_client/src/app_config.js" "static supportedLanguages = ['cs', 'en'];"
 assert_contains "$TMP_ROOT/web_client/src/app_config.js" 'static webLink = "https://test.example.com";'
+assert_contains "$TMP_ROOT/web_client/src/app_config.js" "static imageApiUrl = 'https://image-api.test.example.com';"
+assert_contains "$TMP_ROOT/web_client/src/app_config.js" "static imageProjectId = 'a';"
 assert_contains "$TMP_ROOT/web_client/src/app_config.js" 'static forceOccasionLink = "test-occasion";'
 
 echo
@@ -182,10 +184,12 @@ assert_contains "$TMP_ROOT/lib/app_config.dart" "static const String supabaseUrl
 assert_contains "$TMP_ROOT/lib/app_config.dart" "'test-anon-key-fixture';"
 assert_contains "$TMP_ROOT/lib/app_config.dart" "static const int organization = 42;"
 assert_contains "$TMP_ROOT/lib/app_config.dart" 'static const String webLink = "https://test.example.com";'
+assert_contains "$TMP_ROOT/lib/app_config.dart" "static const String imageApiUrl = 'https://image-api.test.example.com';"
+assert_contains "$TMP_ROOT/lib/app_config.dart" "static const String imageProjectId = 'a';"
 assert_contains "$TMP_ROOT/lib/app_config.dart" 'static const String? forceOccasionLink = "test-occasion";'
 assert_contains "$TMP_ROOT/lib/app_config.dart" "static const String oneSignalAppId = '11111111-2222-3333-4444-555555555555';"
 assert_contains "$TMP_ROOT/lib/app_config.dart" "static const String pushAppGeneration = 'test_generation_v1';"
-assert_contains "$TMP_ROOT/lib/app_config.dart" "static const String programLogoAsset = 'assets/icons/fstapplogo.svg';"
+assert_contains "$TMP_ROOT/lib/app_config.dart" "static const String programLogoAsset = 'assets/icons/fstapplogo_program.png';"
 
 echo
 echo "--- native tenant identity ---"
