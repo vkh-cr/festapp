@@ -115,6 +115,17 @@ test('RouterService.normalizeUrl', async (t) => {
     AppConfig.compatibleUrls = originalCompatible;
 });
 
+test('admin is a canonical Flutter root route', async () => {
+    global.window = {
+        location: { pathname: '/', href: 'https://vstupenky.online/', hash: '' },
+        history: { replaceState: () => {}, pushState: () => {} },
+        addEventListener: () => {},
+        removeEventListener: () => {}
+    };
+    const { RouterService } = await import('../../src/services/router_service.js');
+    assert.ok(RouterService.flutterRoutes.includes('/admin'));
+});
+
 test('RouterService.Sanitization', async (t) => {
     // Mock window
     global.window = {

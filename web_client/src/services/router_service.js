@@ -103,6 +103,7 @@ export class RouterService {
         '/settings',
         '/install',
         '/unit',
+        '/admin',
         // '/form', // Handled by Web Client
         '/scan',
         '/transfer'

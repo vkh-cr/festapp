@@ -6,6 +6,7 @@ void main() {
     expect(
       AppRouter.getRootLinks(),
       containsAll(<String>[
+        'admin',
         'privacy',
         'terms',
         'support',

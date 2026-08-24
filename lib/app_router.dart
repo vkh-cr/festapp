@@ -249,6 +249,7 @@ class AppRouter extends RootStackRouter {
       SettingsPage.ROUTE,
       InstallPage.ROUTE,
       UnitPage.ROUTE,
+      AdminPage.ROUTE,
       FormPage.ROUTE,
       ScanPage.ROUTE,
       TransferPage.ROUTE,
