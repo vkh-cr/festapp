@@ -1,1 +1,0 @@
-Aktualizace zlepšuje stabilitu mapy, navigaci mezi programem a mapou a spolehlivost offline režimu.

@@ -61,4 +61,3 @@ State the unavailable external condition or `None`.
 | Date/time | Action | Receipt/evidence | Result |
 |---|---|---|---|
 | YYYY-MM-DD | `<action>` | `<non-secret ID/hash/link>` | `<result>` |
-

@@ -129,10 +129,10 @@ jinému fixed pointu.
 | Repository už říká, že public tenant identities a brand paths vlastní `project.conf`, nikoli generované soubory. | komentáře v `automation/project.conf` a `apply_config.sh` | Cutover tuto deklaraci musí technicky vynutit, ne jen dokumentovat. |
 | `automation/tests/pwa_offline.test.mjs` obsahuje CSM-specific očekávání. | text `tenant-specific ... CSM sizing` a forced-occasion fixtures | Testy společné logiky musí být tenant-neutral; CSM data patří do overlay fixture/matrix. |
 | CSM obsahuje generické vendored `packages/maplibre_android` a `packages/maplibre_platform_interface`, které main nemá. | `git diff --name-status main prod/csmostrava2026 -- packages` | Sdílené map packages musí být v main, pokud jsou aktivní dependencies; nesmějí zůstat CSM-only. |
-| CSM-specific data jsou identifikovatelná: offline-map manifests, CSM store screenshots, legal/release metadata a recovery SQL. | `automation/offline-map/manifests/csmostrava2026`, `repo-data/store-screenshots/csm-2026`, `database/recovery/2026-*csmostrava*`, CSM fastlane metadata | Tyto artefakty se zachovají jako explicitní tenant boundary, nepromíchají se se shared code. |
+| CSM-specific data jsou identifikovatelná: offline-map manifests, legal sources a recovery SQL; store metadata/screenshots vlastní private `rawen-dev/festappseed`. | `automation/offline-map/manifests/csmostrava2026`, `automation/release/legal`, `database/recovery/2026-*csmostrava*`, FestappSeed `release/store-listings/csm-ostrava-2026` | Runtime tenant artefakty zůstávají na explicitní overlay boundary; publishing data mají jediného private ownera a do Festapp HEAD nepatří. |
 | Předchozí EUR plán používal tenant-neutral implementaci v main a následné cherry-picky do produkčních branchí. | `docs/plans/2026-08-05_eur_payment_reference_plan.md` | Jednorázový cherry-pick nestačí jako dlouhodobá architektura; nový cutover zavede opakovatelný main-first merge a drift gate. |
 | HM popis produktu byl opraven v aktivním CSM worktree, nikoli v HM/main. | modifikace `web_client/src/components/forms/form_models.js` a nový `product_type_description.test.js` v CSM worktree | Oprava je tenant-neutral a musí být přenesena do main před cutoverem; z CSM nesmí zůstat jako branch-only logika. |
-| Repo pojmenované uživatelem `FestappSeed` není klonované pod `/Users/miakh/source` a `gh repo view vkh-cr/FestappSeed` jej pod aktuálním org/auth názvem nenalezlo. | read-only filesystem discovery a GitHub CLI lookup 2026-08-23 | Plán nesmí hádat jeho URL, strukturu ani souborové konvence. Wave 0 musí nejprve získat přesný locator/access a přečíst jeho vlastní instrukce; do té doby se do něj nezapisuje. |
+| FestappSeed bylo nalezeno jako private `rawen-dev/festappseed` a naklonováno v `/Users/miakh/source/festappseed`; obsahuje verzovaný provisioning contract a kanonická CSM publishing data. | read-only repo/remote audit a fail-closed provisioning testy 2026-08-24 | Cross-repo handoff používá jediný `FESTAPP_RELEASE_MANIFEST`; credential soubory zůstávají pouze v ignorovaném `release/private/` nebo schváleném secret manageru. |
 | Po Wave 0 fetchi bylo zjištěno, že main a CSM nesou dvě různé migrace se stejným prefixem `20260806142000`: main `manage_occasion_users_permission`, CSM `reception_manual_login_code`. | `git log --all -- ...20260806142000*` a obsah obou souborů | Obě nelze vložit do jedné kanonické Supabase historie. Main historický soubor zůstává beze změny; CSM reception contract se přenese novou idempotentní forward reconciliation migrací `20260823120000`, takže se žádná již aplikovaná historie nepřepisuje. |
 
 ## Canonical contract
@@ -163,7 +163,8 @@ overlay manifestu:
 
 1. `automation/project.conf` a branch release/version state;
 2. brand assets (loga, fonty, Android/iOS/PWA ikony) uvedené konfigurací;
-3. tenant legal texty, store listing metadata a screenshots;
+3. tenant legal texty nutné pro nasazený web/runtime; store listing metadata a
+   screenshots vlastní FestappSeed a v produkční větvi Festappu nejsou;
 4. tenant offline-map manifests/bundles;
 5. tenant recovery/runbook artefakty, které se nikdy nespouští jako shared
    migration;

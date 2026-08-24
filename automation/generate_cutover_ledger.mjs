@@ -203,7 +203,7 @@ ${Object.entries(fixed).map(([ref, sha]) => `| \`${ref}\` | \`${sha}\` |`).join(
 - Integration worktree: \`/Users/miakh/source/festapp-unified-cutover\`, branch \`cutover/unified-main-prod-branches-20260823\`, based on \`${fixed.main}\`.
 - Initial copied plan SHA-256: \`b12aad8d0ef3e264b1806802f50f9853b052a8df9a46cfd52f2f02495c847eeb\`; current candidate plan SHA-256 after recording migration-collision evidence and Markdown hygiene: \`4d773ce4ec6b94c378d91239cd8063d7d5bacc285e3cbef71856c1bbd603f0db\`; execution prompt SHA-256: \`88df0e05964e0cc3caf11e3a0851bca468315008177c8438c36dd4e97580739c\`.
 - Existing backup refs do not cover the current CSM/HM tips. Creating/pushing dedicated pre-cutover refs remains separately authorized.
-- FestappSeed locator/instructions remain unresolved by explicit task constraint. No path was guessed and no cross-repo write was attempted.
+- FestappSeed is the verified private \`rawen-dev/festappseed\` repository. Its versioned provisioning contract and publishing manifest own the cross-repo handoff; Festapp keeps only generic fail-closed consumers.
 
 ## Dirty topic transfer
 

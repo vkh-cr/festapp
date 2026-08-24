@@ -1,9 +1,0 @@
-This is an in-place update of Apple ID 6745415882 from JM 2025 to CSM Ostrava 2026; the bundle identifier intentionally remains festapp.jm2025 so existing users receive the update.
-
-The app is intended for CSM Ostrava participants. Attendee accounts are issued by the organizer; public account registration is not available. The schedule, map, news and practical information work without an account. The supplied demo account is a regular attendee and is required to test the personal profile, My Programme and capacity-limited activity registration. It has no administrative privileges.
-
-Demo flow: open Profile, sign in with the credentials below, then open My Programme. The account is pre-populated with 3 saved programme items and 6 registrations for capacity-limited activities. From the programme, open an activity detail to inspect its capacity and registration state; registration can also be toggled there.
-
-Account deletion: sign in, open Profile, choose Delete account and request the one-time email link. Opening the link only validates it; deletion happens only after the final destructive confirmation. No password or login code is requested by email.
-
-Permissions: Camera is used for QR scanning; Location is requested only while using the map; Photos is used only for the reachable profile-image upload. Notifications are optional.

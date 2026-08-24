@@ -35,7 +35,10 @@ proven when they are part of the outcome.
 
 | Work item | Status | Fixed point | Next action |
 |---|---|---|---|
-| [Image delivery cost cutover](open/image-delivery-cost-cutover-2026-08-24.md) | blocked | `prod/csmostrava2026` at `cbb3fa7425b7c33b2cab1bba4e2ffe8765f5b6cc`, version `0.19.90+440` | Wake the production Windows workstation and let command `1026` produce the signed Android AAB without a Play mutation. |
+| [Image delivery cost cutover](open/image-delivery-cost-cutover-2026-08-24.md) | blocked | release source `cbb3fa742`, branch registry tip `4429055d1`, version `0.19.90+440` | Wake the production Windows workstation and let command `1027` produce the signed Android AAB without a Play mutation. |
+| [Store publishing data cutover](open/store-publishing-data-cutover-2026-08-24.md) | blocked | FestappSeed `ae91a9c`, public main `056740617` | Wait for Android command `1027` before advancing the production branch. |
+| [EUR payment reference rollout](open/eur-payment-reference-rollout-2026-08-24.md) | blocked | `feature/eur-payment-cutover` at `a903ea681` | Authorize and run the production preflight against the configured CSM project before any migration. |
+| [Exposed runtime credential rotation](open/runtime-credential-rotation-2026-08-24.md) | blocked | FestappSeed `4e7adbdb`, Festapp `5028473a4` | Rotate every credential formerly stored in the three removed runtime env files and record non-secret revocation receipts. |
 
 ## Maintenance rules
 
@@ -49,4 +52,3 @@ proven when they are part of the outcome.
    required authority and the receipt after it is granted and executed.
 5. On closure, update authoritative evidence, move the item to `completed/`, and
    remove its row from the open table in one commit.
-

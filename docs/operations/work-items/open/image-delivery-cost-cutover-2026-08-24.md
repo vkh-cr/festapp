@@ -29,7 +29,8 @@ authoritative for architecture, security, migration and validation.
 ## Fixed point
 
 - Canonical branch: `prod/csmostrava2026`.
-- Canonical source SHA: `cbb3fa7425b7c33b2cab1bba4e2ffe8765f5b6cc`.
+- Release source SHA: `cbb3fa7425b7c33b2cab1bba4e2ffe8765f5b6cc`.
+- Current branch/registry SHA: `4429055d1f11ae3f1abac05b7c71b631fd5946e1`.
 - Target client version: `0.19.90+440`.
 - Google Play production version: `438` at full distribution.
 - Submitted iOS build: `439`; it predates the image cutover.
@@ -50,17 +51,19 @@ authoritative for architecture, security, migration and validation.
   applied and positively/negatively probed.
 - Clean source `0.19.90+440` validated, committed and pushed to the canonical
   production branch. No Android build ran on the Mac.
-- Production Windows command `1026` enqueued for read-only Play inspection and a
-  new signed AAB build; Play mutation is explicitly forbidden by that command.
+- Production Windows command `1027` enqueued against the exact current branch
+  SHA for read-only Play inspection and a new signed AAB build; it supersedes
+  commands `1025` and `1026`, and Play mutation is explicitly forbidden.
 
 ## Next action
 
 Power on or wake the production Windows workstation and let its existing
-user-scoped Festapp Control Channel monitor process command `1026`. Accept only a
+user-scoped Festapp Control Channel monitor process command `1027`. Accept only a
 matching `COMPLETE` or exact `BLOCKED` result. Do not enqueue a duplicate build.
 
 Expected result: a newly built signed `fstapp.jm2025` AAB with version code `440`,
-source SHA `cbb3fa7425b7c33b2cab1bba4e2ffe8765f5b6cc`, matching upload certificate,
+checkout SHA `4429055d1f11ae3f1abac05b7c71b631fd5946e1` containing release source
+`cbb3fa7425b7c33b2cab1bba4e2ffe8765f5b6cc`, matching upload certificate,
 AAB SHA-256, non-secret provenance manifest and explicit proof that no Play edit
 was created.
 
@@ -86,7 +89,7 @@ was created.
 
 The Mac control-channel master is healthy (`health=200`, unauthorized queue
 access returns `401`, pairing exists), but the Windows result cursor has not
-advanced beyond command `1024`. Commands `1025` and `1026` have no result. The
+advanced beyond command `1024`. Commands `1025`, `1026` and `1027` have no result. The
 required external action is only to wake the Windows workstation and allow its
 monitor to resume polling.
 
@@ -128,4 +131,4 @@ monitor to resume polling.
 | 2026-08-23 | P0-P2 infrastructure execution | authoritative evidence document | infrastructure live; client gate open |
 | 2026-08-24 | Canonical source push | `cbb3fa7425b7c33b2cab1bba4e2ffe8765f5b6cc` | `0.19.90+440` available on `origin/prod/csmostrava2026` |
 | 2026-08-24 | Windows build request | control-channel command `1026` | queued; no result yet |
-
+| 2026-08-24 | Canonical replacement build request | control-channel command `1027` | queued for branch tip `4429055d1`; supersedes `1026` |

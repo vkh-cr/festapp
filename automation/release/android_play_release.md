@@ -1,12 +1,13 @@
 # Android / Google Play release
 
-The canonical package and expected release branch come from the tenant-owned
-`automation/release/app_store_config.json`. Default operation remains local preflight;
+The canonical package and expected release branch come from the exact private
+manifest selected by `FESTAPP_RELEASE_MANIFEST`. Default operation remains local preflight;
 the explicitly gated write operation publishes the verified build directly to
 production. The Google identity may hold account-level release permission for
 all apps, but this repository wrapper remains locked to the manifest package.
 
 ```powershell
+$env:FESTAPP_RELEASE_MANIFEST = 'C:\path\to\private-release-listing\config.json'
 .\automation\release\android_release.ps1 -Preflight
 .\automation\release\android_release.ps1 -Build
 .\automation\release\android_release.ps1 -PlayCheck

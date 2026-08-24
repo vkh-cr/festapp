@@ -6,7 +6,11 @@ if ! command -v fastlane >/dev/null 2>&1; then
   echo "Fastlane is required. Install it with the repository-approved package manager."
   exit 1
 fi
-if [ ! -f "$SCRIPT_DIR/fastlane/Fastfile" ] || [ ! -f "$SCRIPT_DIR/app_store_config.json" ]; then
+if [ -z "${FESTAPP_RELEASE_MANIFEST:-}" ]; then
+  echo "Set FESTAPP_RELEASE_MANIFEST to the private release config.json."
+  exit 1
+fi
+if [ ! -f "$SCRIPT_DIR/fastlane/Fastfile" ] || [ ! -f "$FESTAPP_RELEASE_MANIFEST" ]; then
   echo "Canonical Fastfile or cutover manifest is missing."
   exit 1
 fi

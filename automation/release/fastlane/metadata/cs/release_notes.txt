@@ -1,1 +1,0 @@
-Program se při prvním otevření automaticky nastaví na aktuální den. Navigace z mapy nyní na iPhonu nabízí Apple Maps, Mapy.com a další nainstalované navigační aplikace. Aktualizace také opravuje správu míst v mapě a zlepšuje spolehlivost offline režimu.
