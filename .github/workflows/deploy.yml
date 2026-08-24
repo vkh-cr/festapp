@@ -36,8 +36,12 @@ jobs:
           chmod +x /tmp/check-tenant-drift.sh
           CANONICAL_MAIN_REF=origin/main /tmp/check-tenant-drift.sh "$BASE_MAIN_SHA" "$TENANT_ID" "$GITHUB_SHA"
           MAIN_TREE=$(mktemp -d /tmp/festapp-main-policy.XXXXXX)
-          git archive "$BASE_MAIN_SHA" | tar -x -C "$MAIN_TREE"
+          rmdir "$MAIN_TREE"
+          git worktree add --detach "$MAIN_TREE" "$BASE_MAIN_SHA"
+          trap 'git worktree remove --force "$MAIN_TREE"' EXIT
           bash "$MAIN_TREE/automation/tests/tenant_config_matrix.test.sh"
+          git worktree remove "$MAIN_TREE"
+          trap - EXIT
 
   detect:
     needs: tenant-drift
