@@ -92,10 +92,11 @@ test, enforced lockfile resolution, and disposable migration replay passed.
 - FestappSeed was located as the private repository
   `https://github.com/rawen-dev/festappseed` and cloned for inspection at
   `/Users/miakh/source/festappseed`. FestappSeed commit
-  `4e7adbdbd30aa38bcaebdc4b6d308b9b3f8c4f9f` now provides a tested, fail-closed
-  CSM Play/App Store provisioning contract with platform-specific local
-  adapters, authority checks, artifact hashes, and Android certificate
-  fingerprint verification. Its committed tree contains no release credential.
+  `ae91a9cba4b91e3bfbebbe77e750f36638cd76bc` now provides a tested, fail-closed
+  CSM Play/App Store provisioning contract, canonical store metadata and
+  approved screenshot/artwork inputs with platform-specific local adapters,
+  authority checks, artifact hashes, and Android certificate fingerprint
+  verification. Its committed tree contains no release credential.
   No private value was copied into Festapp. Concrete credential population and
   store readback remain explicit external gates.
 - The FestappSeed audit found three legacy tracked runtime env files containing

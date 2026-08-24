@@ -8,7 +8,7 @@ Verification: standard
 ## Authoritative sources
 
 - Architecture: [`../../../architecture/ai_context.md`](../../../architecture/ai_context.md)
-- Public implementation branch: `cleanup/store-assets-private-cutover`
+- Public implementation: `main` commit `056740617a338d16de62d0327b02346e62a7d952`
 - Private owner: `rawen-dev/festappseed`, path
   `release/store-listings/csm-ostrava-2026`
 
@@ -20,19 +20,21 @@ one owner: FestappSeed.
 
 ## Fixed point
 
-- Private repository: `rawen-dev/festappseed` `main`; the exact consolidation
-  SHA is recorded when its staged change is committed.
-- Public base: `prod/csmostrava2026` at `4429055d1`.
-- Public cleanup branch: `cleanup/store-assets-private-cutover`, at the commit containing this work item.
+- Private repository: `rawen-dev/festappseed` `main` at
+  `ae91a9cba4b91e3bfbebbe77e750f36638cd76bc`.
+- Public generic cleanup: `main` at `056740617a338d16de62d0327b02346e62a7d952`.
+- Tenant deletion source: `cleanup/store-assets-private-cutover` at `9e049fd58`.
 
 ## Completed actions
 
-- Canonical Apple and Google publishing assets are staged byte-identically in
-  FestappSeed after credential-pattern and filename scans.
+- Canonical Apple and Google publishing assets are committed byte-identically
+  in FestappSeed after credential-pattern and filename scans.
 - The private manifest owns both bundle IDs, Android package, release branch and target version.
 - Public release consumers now fail closed without the exact generic
   `FESTAPP_RELEASE_MANIFEST` pointer; no public script contains a tenant path.
-- Public duplicate metadata, screenshots, artwork and app-specific manifests are removed on the cleanup branch.
+- Public generic consumers and overlay policy are integrated in `main`; duplicate
+  CSM metadata, screenshots, artwork and app-specific manifests are removed on
+  the tenant deletion source and await deterministic tenant regeneration.
 
 ## Next action
 
@@ -41,10 +43,9 @@ receipt before changing the CSM production branch tip.
 
 ## Remaining order
 
-1. Commit the reviewed FestappSeed consolidation.
-2. Integrate the cleanup through `main`, then regenerate the CSM tenant branch deterministically.
-3. Run release preflight with the FestappSeed checkout and prove no public duplicate/reachability remains.
-4. Remove the superseded `festapp-release-internal` checkout only after its
+1. Integrate the cleanup through `main`, then regenerate the CSM tenant branch deterministically.
+2. Run release preflight with the FestappSeed checkout and prove no public duplicate/reachability remains.
+3. Remove the superseded `festapp-release-internal` checkout only after its
    unique content and Git reachability are proven unnecessary.
 
 ## Current blocker
@@ -62,8 +63,8 @@ branch first would invalidate the requested artifact provenance.
 ## Rollback and recovery
 
 - Public deletions remain recoverable from Git and the dated local preservation snapshot.
-- Private canonical data remains preserved in both the source repo and the
-  staged FestappSeed copy until the FestappSeed commit is verified.
+- Private canonical data remains preserved in FestappSeed commit `ae91a9c` and
+  the source repo until final duplicate/reachability proof is complete.
 
 ## Definition of complete
 
@@ -78,4 +79,4 @@ branch first would invalidate the requested artifact provenance.
 | Date | Action | Receipt/evidence | Result |
 |---|---|---|---|
 | 2026-08-24 | Source asset/config consolidation | source commits `0093ff0`, `fa666c0`, `dc93da5` | 95 files copied byte-identically into the designated FestappSeed owner |
-| 2026-08-24 | FestappSeed validation | 7 provisioning tests plus filename/content credential scan | passed; commit awaiting explicit confirmation |
+| 2026-08-24 | FestappSeed consolidation | `ae91a9cba4b91e3bfbebbe77e750f36638cd76bc`; 7 provisioning tests plus filename/content credential scan | committed; canonical private owner ready |
