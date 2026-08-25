@@ -105,6 +105,18 @@ void main() {
     ));
 
     expect(find.byType(DefaultLocationMarker), findsOneWidget);
+    final locationLayer = tester
+        .widgetList<fm.MarkerLayer>(find.byType(fm.MarkerLayer))
+        .singleWhere(
+          (layer) => layer.markers.any(
+            (marker) => marker.child is DefaultLocationMarker,
+          ),
+        );
+    final locationMarker = locationLayer.markers.singleWhere(
+      (marker) => marker.child is DefaultLocationMarker,
+    );
+    expect(locationMarker.width, 20);
+    expect(locationMarker.height, 20);
   });
 
   testWidgets('Legacy hides a retained location while its scene is inactive',

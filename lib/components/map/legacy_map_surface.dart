@@ -121,8 +121,8 @@ class _LegacyMapSurfaceState extends State<LegacyMapSurface>
             markers: [
               fm.Marker(
                 point: widget.model.scene.currentLocation!,
-                width: 40,
-                height: 40,
+                width: MapLocationStyle.onMapMarkerSize,
+                height: MapLocationStyle.onMapMarkerSize,
                 child: const DefaultLocationMarker(
                   color: MapLocationStyle.color,
                 ),
