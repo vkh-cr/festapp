@@ -242,6 +242,9 @@ class _OccasionHomePageState extends State<OccasionHomePage>
                           // an inactive Map tab discards its native surface and
                           // forces MapLibre to reload the style and tiles.
                           if (isReselected) {
+                            if (key == OccasionTab.map) {
+                              await _mapSession.resetToOverview();
+                            }
                             await _resetTabToCanonicalRoot(
                               tabsRouter: tabsRouter,
                               index: index,
@@ -322,6 +325,27 @@ Future<void> _resetTabToCanonicalRoot({
       orElse: () => throw StateError('Program tab has no canonical root.'),
     );
     await stackRouter.replaceAll([PageRouteInfo<void>(root.name)]);
+    return;
+  }
+
+  // Preserve the warm native map surface for ordinary overview reselection.
+  // A deep-linked place/category can itself be the nested router's first
+  // entry, so popUntilRoot would leave a non-canonical URL and could reapply
+  // its intent after a later remount. Replace only that non-overview route.
+  if (tabKey == OccasionTab.map) {
+    final current = stackRouter.current;
+    final isCanonicalOverview = current.name == PublicMapRoute.name &&
+        current.params.getString(
+              'destination',
+              PublicMapPage.overviewDestination,
+            ) ==
+            PublicMapPage.overviewDestination &&
+        current.queryParams.optString('placeType') == null;
+    if (!isCanonicalOverview) {
+      await stackRouter.replaceAll([
+        PublicMapRoute(destination: PublicMapPage.overviewDestination),
+      ]);
+    }
     return;
   }
 

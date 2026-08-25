@@ -93,4 +93,8 @@ abstract interface class PublicMapHost {
   PublicMapHostSnapshot get snapshot;
 
   Future<PublicMapHostResult> applyIntent(PublicMapEffect effect);
+
+  /// Restores the retained public map to its canonical overview without
+  /// replacing the native map surface.
+  Future<void> resetToOverview();
 }

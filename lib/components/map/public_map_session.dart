@@ -129,6 +129,32 @@ class PublicMapSession extends ChangeNotifier {
     }
   }
 
+  /// Handles reselecting the already-visible Map tab. Pending focus work is
+  /// invalidated before the retained host restores its canonical overview, so
+  /// a late deep-link completion cannot move the camera back afterwards.
+  Future<void> resetToOverview() async {
+    if (_disposed || !_visible) return;
+    _effectGeneration++;
+    _intent = null;
+    _latestOutcome = null;
+    _lastAttemptKey = null;
+    _phase = PublicMapPhase.idle;
+    final inPlace = _inPlaceCompleter;
+    if (inPlace != null && !inPlace.isCompleted) {
+      inPlace.complete(MapVisitResult.cancelled('mapResetToOverview'));
+    }
+    _inPlaceCompleter = null;
+    _publish();
+
+    final host = _host;
+    if (host == null) return;
+    try {
+      await host.resetToOverview();
+    } catch (error, stackTrace) {
+      AppLogger.error('Public map overview reset failed: $error\n$stackTrace');
+    }
+  }
+
   /// Thin cold-link adapter: routing already owns the active visit lifetime.
   void acceptExternalIntent(MapIntent intent) {
     if (_disposed) return;

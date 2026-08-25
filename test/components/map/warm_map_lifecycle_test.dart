@@ -95,4 +95,7 @@ final class _RetainedHost implements PublicMapHost {
       ),
     ));
   }
+
+  @override
+  Future<void> resetToOverview() async {}
 }

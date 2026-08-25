@@ -896,6 +896,56 @@ class _MapPageState extends State<MapPage>
     }
   }
 
+  @override
+  Future<void> resetToOverview() async {
+    if (!mounted ||
+        !_isMapTabActive ||
+        _isDrawingPath ||
+        widget.place != null) {
+      return;
+    }
+
+    final resetToken = ++_publicMapEffectToken;
+    _placeTypeSelectionFeedbackTimer?.cancel();
+    final savedPlaceType = await OfflineDataService.getSelectedPlaceType();
+    if (!mounted || !_isMapTabActive || resetToken != _publicMapEffectToken) {
+      return;
+    }
+
+    setState(() {
+      _deepLinkPlaceType = null;
+      _forcedVisiblePlaceId = null;
+      _popupPlaceId = null;
+      _selectedGroupId = null;
+      _paths = _showAllPathsWhenNoGroupSelected
+          ? _allGroupPaths.values.expand((paths) => paths).toList()
+          : [];
+      _placeTypeSelectionFeedback = null;
+      _selectedPlaceTypeCode = savedPlaceType;
+      _placeTypeInitialized = savedPlaceType != null;
+      _initPlaceTypeSelection();
+
+      final focused = focusedPlace;
+      if (focused != null) {
+        final index = _places.indexWhere(
+          (marker) => marker.place.id == focused.place.id,
+        );
+        if (index != -1) {
+          _places[index] = _places[index].withFocus(false);
+        }
+        focusedPlace = null;
+      }
+    });
+
+    final center = _mapCenter;
+    if (center != null && _viewportController.isReady) {
+      await _viewportController.animateTo(
+        center,
+        zoom: _mapFeature.defaultMapZoom,
+      );
+    }
+  }
+
   Future<void> _closePublicMap() async {
     if (await _mapSession?.closeVisit() ?? false) return;
     if (!mounted) return;

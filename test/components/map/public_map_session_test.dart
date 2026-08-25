@@ -70,6 +70,29 @@ void main() {
       session.dispose();
     });
 
+    test('active map reselection resets the retained host to overview',
+        () async {
+      final host = _FakeHost();
+      final session = PublicMapSession()
+        ..attachHost(host)
+        ..setVisible(true);
+
+      await session.resetToOverview();
+
+      expect(host.overviewResets, 1);
+      session.dispose();
+    });
+
+    test('hidden map ignores overview resets', () async {
+      final host = _FakeHost();
+      final session = PublicMapSession()..attachHost(host);
+
+      await session.resetToOverview();
+
+      expect(host.overviewResets, 0);
+      session.dispose();
+    });
+
     test('one readiness tuple is attempted at most once', () async {
       final host = _FakeHost(
         result: PublicMapHostResult.retryable('layoutChanged'),
@@ -256,7 +279,7 @@ final class _FailingNavigation implements MapTabNavigationAdapter {
 }
 
 class _FakeHost implements PublicMapHost {
-  _FakeHost({PublicMapHostResult? result}) : result = result;
+  _FakeHost({this.result});
 
   String surfaceId = 'surface-1';
   int styleEpoch = 1;
@@ -265,6 +288,7 @@ class _FakeHost implements PublicMapHost {
   bool ready = true;
   PublicMapHostResult? result;
   final List<PublicMapEffect> effects = [];
+  int overviewResets = 0;
 
   @override
   PublicMapHostSnapshot get snapshot => PublicMapHostSnapshot(
@@ -279,6 +303,11 @@ class _FakeHost implements PublicMapHost {
   Future<PublicMapHostResult> applyIntent(PublicMapEffect effect) async {
     effects.add(effect);
     return result ?? _applied(effect);
+  }
+
+  @override
+  Future<void> resetToOverview() async {
+    overviewResets++;
   }
 }
 

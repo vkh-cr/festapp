@@ -31,6 +31,23 @@ void main() {
     expect(source, contains('if (isReselected)'));
   });
 
+  test('reselecting the map requests its canonical overview', () {
+    final source = File(
+      'lib/components/occasion/occasion_home_page.dart',
+    ).readAsStringSync();
+
+    expect(source, contains('key == OccasionTab.map'));
+    expect(source, contains('_mapSession.resetToOverview()'));
+    expect(source, contains('if (tabKey == OccasionTab.map)'));
+    expect(source, contains('current.queryParams.optString(\'placeType\')'));
+    expect(
+      source,
+      contains(
+        'PublicMapRoute(destination: PublicMapPage.overviewDestination)',
+      ),
+    );
+  });
+
   test('only tapping the already active bottom tab requests a root reset', () {
     expect(
       isBottomNavigationReselection(activeIndex: 1, selectedIndex: 0),
