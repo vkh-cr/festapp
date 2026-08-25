@@ -45,14 +45,18 @@ class MapLocateCoordinator {
       if (!_remainsCurrent(surfaceId, isActive)) return MapLocateResult.ignored;
       if (position == null) return MapLocateResult.denied;
       final zoom = math.min(
-        math.max(_viewport.camera.zoom, minimumZoom),
+        math.max(_viewport.directionLayoutZoom, minimumZoom),
         MapZoomLimits.interactionMaximum,
       );
-      await _viewport.animateTo(
-        LatLng(position.latitude, position.longitude),
+      final result = await _viewport.applyCamera(CameraCommand(
+        surfaceId: surfaceId,
+        destination: LatLng(position.latitude, position.longitude),
         zoom: zoom,
-      );
-      return MapLocateResult.recentered;
+      ));
+      if (!_remainsCurrent(surfaceId, isActive)) return MapLocateResult.ignored;
+      return result.isApplied
+          ? MapLocateResult.recentered
+          : MapLocateResult.ignored;
     } finally {
       _isLocating = false;
     }

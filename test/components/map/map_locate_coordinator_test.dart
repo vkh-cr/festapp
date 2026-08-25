@@ -14,6 +14,7 @@ final class _FakeViewportController implements MapViewportController {
   MapCameraState camera;
 
   final List<({LatLng destination, double? zoom})> animations = [];
+  final List<CameraCommand> applications = [];
 
   @override
   double get directionLayoutZoom => camera.zoom;
@@ -29,8 +30,20 @@ final class _FakeViewportController implements MapViewportController {
   }
 
   @override
-  Future<CameraApplyResult> applyCamera(CameraCommand command) =>
-      throw UnimplementedError();
+  Future<CameraApplyResult> applyCamera(CameraCommand command) async {
+    applications.add(command);
+    camera = MapCameraState(
+      center: command.destination,
+      zoom: command.zoom,
+    );
+    animations.add((destination: command.destination, zoom: command.zoom));
+    return CameraApplyResult(
+      status: CameraApplyStatus.applied,
+      surfaceId: command.surfaceId,
+      command: command,
+      actual: camera,
+    );
+  }
 
   @override
   Offset coordinateToScreenPoint(LatLng coordinate) =>
@@ -62,6 +75,29 @@ Position _position(double latitude, double longitude) => Position(
     );
 
 void main() {
+  test('requires the active viewport to confirm the location camera change',
+      () async {
+    final viewport = MapViewportCoordinator();
+    final surface = _FakeViewportController(const MapCameraState(
+      center: LatLng(0, 0),
+      zoom: 10,
+    ));
+    viewport.attach(surface);
+    viewport.markReady();
+    final coordinator = MapLocateCoordinator(
+      viewport: viewport,
+      currentPosition: () async => _position(50.0755, 14.4378),
+    );
+
+    expect(
+      await coordinator.recenter(isActive: () => true),
+      MapLocateResult.recentered,
+    );
+    expect(surface.applications, hasLength(1));
+    expect(surface.camera.center, const LatLng(50.0755, 14.4378));
+    expect(surface.camera.zoom, MapLocateCoordinator.minimumZoom);
+  });
+
   test('recenters the active viewport on the current position at local zoom',
       () async {
     final viewport = MapViewportCoordinator();
