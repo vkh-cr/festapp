@@ -36,7 +36,13 @@ fi
 target_version="$(node automation/release/project_version.mjs --version)"
 target_build="$(node automation/release/project_version.mjs --build)"
 "$SCRIPT_DIR/prepare_signing_keychain.sh"
+fvm flutter pub get --enforce-lockfile
+if ! git diff --quiet || ! git diff --cached --quiet; then
+  echo "Release dependency resolution changed tracked files; commit the exact lockfile first."
+  exit 1
+fi
 fvm flutter build ipa --release \
+  --no-pub \
   --build-name="$target_version" \
   --build-number="$target_build" \
   --export-options-plist="$SCRIPT_DIR/ExportOptions.plist"
