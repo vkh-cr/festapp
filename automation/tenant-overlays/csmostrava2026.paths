@@ -18,9 +18,6 @@ web/favicon.svg
 web/fstapplogo.png
 web/notification-icon-256x256.png
 web/web-app-manifest-*.png
-web/privacy/**
-web/support/**
-web/terms/**
 automation/offline-map/manifests/csmostrava2026/**
 automation/offline-map/style/**
 automation/release/legal/**

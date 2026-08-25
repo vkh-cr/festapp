@@ -17,8 +17,5 @@ web/favicon.ico
 web/favicon.svg
 web/fstapplogo.png
 web/web-app-manifest-*.png
-web/privacy/**
-web/support/**
-web/terms/**
 automation/release/legal/**
 automation/release/ExportOptions.plist

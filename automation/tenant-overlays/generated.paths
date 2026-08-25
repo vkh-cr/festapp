@@ -14,6 +14,10 @@ web/.well-known/apple-app-site-association
 web/apple-app-site-association
 web/index.html
 web/delete-account/index.html
+web/privacy/index.html
+web/privacy/choices/index.html
+web/terms/index.html
+web/support/index.html
 web/site.webmanifest
 web_client/index.html
 web_client/package.json

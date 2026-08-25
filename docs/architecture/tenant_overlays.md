@@ -34,6 +34,21 @@ Never generate tenant B over tenant A's mutated tree. Start from a clean main
 tree for every profile. `automation/tests/tenant_config_matrix.test.sh` proves
 idempotence and cross-tenant isolation with synthetic public identities.
 
+## Required legal and support contract
+
+Every tenant `automation/project.conf` must define `PRIVACY_URL`,
+`PRIVACY_CHOICES_URL`, `TERMS_URL`, `SUPPORT_URL`, and `DELETE_ACCOUNT_URL` on
+the configured HTTPS deploy origin at their canonical paths. Tenant-owned
+Markdown in `automation/release/legal/` is the source for the four public legal
+and support documents; their `web/` HTML files are generated leaves and must
+never be edited independently.
+
+`automation/apply_config.sh` fails before generation when a required value or
+source is missing. `automation/verify_web_build.mjs` rejects missing, duplicate,
+foreign-branded, or SPA-fallback output, and
+`automation/verify_web_deployment.mjs` repeats those checks against the live
+deployment. An HTTP 200 alone is not proof that a legal route exists.
+
 ## Normal tenant upgrade
 
 1. Develop and validate shared behavior in main.

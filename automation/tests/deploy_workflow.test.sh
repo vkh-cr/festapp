@@ -37,11 +37,22 @@ else
 fi
 
 # 2. Required top-level keys.
-for needle in 'on:' 'jobs:' 'detect:' 'cloudflare:' 'netlify:' 'gh-pages:' 'skipped:'; do
+for needle in 'on:' 'jobs:' 'tenant-drift:' 'legal-contract:' 'detect:' 'cloudflare:' 'netlify:' 'gh-pages:' 'skipped:'; do
     if grep -F -q "$needle" "$WORKFLOW"; then
         echo "  ok: workflow has '$needle'"
     else
         echo "  FAIL: workflow missing '$needle'"
+        fail=1
+    fi
+done
+
+# The config-backed legal pages are a prerequisite of target detection, so a
+# production branch cannot silently deploy an SPA fallback at store URLs.
+for needle in 'needs: [tenant-drift, legal-contract]' 'render_legal_pages.mjs --validate' 'render_legal_pages.mjs --check'; do
+    if grep -F -q "$needle" "$WORKFLOW"; then
+        echo "  ok: legal contract contains '$needle'"
+    else
+        echo "  FAIL: legal contract missing '$needle'"
         fail=1
     fi
 done

@@ -41,12 +41,20 @@ for required_key in DOMAIN APP_NAME APP_TITLE_SHORT APP_DESCRIPTION VERSION \
     IS_APP_SUPPORTED WEB_LINK THEME_SEED_1 THEME_SEED_2 THEME_SEED_3 \
     THEME_SEED_4 FONT_FAMILY_BASE FORM_FONT_SCALE IMAGE_API_URL \
     IMAGE_PROJECT_ID PWA_CORE_CACHE_BUDGET_BYTES \
-    PWA_KNOWN_CACHE_BUDGET_BYTES; do
+    PWA_KNOWN_CACHE_BUDGET_BYTES PRIVACY_URL PRIVACY_CHOICES_URL TERMS_URL \
+    SUPPORT_URL DELETE_ACCOUNT_URL; do
     if [ -z "${!required_key}" ]; then
         echo "Error: $required_key must be defined in $CONFIG_FILE"
         exit 1
     fi
 done
+
+LEGAL_RENDERER="$PROJECT_ROOT/automation/release/render_legal_pages.mjs"
+if [ ! -f "$LEGAL_RENDERER" ]; then
+    echo "Error: required legal page renderer not found at $LEGAL_RENDERER"
+    exit 1
+fi
+node "$LEGAL_RENDERER" --config "$CONFIG_FILE" --validate
 
 case "${DEPLOY_TARGET:-skip}" in cloudflare|netlify|gh-pages|skip|'') ;; *)
     echo "Error: DEPLOY_TARGET must be cloudflare, netlify, gh-pages, or skip"; exit 1 ;;
@@ -273,6 +281,11 @@ PY
     if [ ! -z "$WEB_LINK" ]; then
         sed_inplace "s|static webLink = \".*\";|static webLink = \"$WEB_LINK\";|g" "$APP_CONFIG"
     fi
+    sed_inplace "s|static privacyUrl = \".*\";|static privacyUrl = \"$PRIVACY_URL\";|g" "$APP_CONFIG"
+    sed_inplace "s|static privacyChoicesUrl = \".*\";|static privacyChoicesUrl = \"$PRIVACY_CHOICES_URL\";|g" "$APP_CONFIG"
+    sed_inplace "s|static termsUrl = \".*\";|static termsUrl = \"$TERMS_URL\";|g" "$APP_CONFIG"
+    sed_inplace "s|static supportUrl = \".*\";|static supportUrl = \"$SUPPORT_URL\";|g" "$APP_CONFIG"
+    sed_inplace "s|static deleteAccountUrl = \".*\";|static deleteAccountUrl = \"$DELETE_ACCOUNT_URL\";|g" "$APP_CONFIG"
     sed_inplace "s|static imageApiUrl = '.*';|static imageApiUrl = '$IMAGE_API_URL';|g" "$APP_CONFIG"
     sed_inplace "s|static imageProjectId = '.*';|static imageProjectId = '$IMAGE_PROJECT_ID';|g" "$APP_CONFIG"
 
@@ -353,6 +366,29 @@ PY
     if [ ! -z "$WEB_LINK" ]; then
         sed_inplace "s|static const String webLink = \".*\";|static const String webLink = \"$WEB_LINK\";|g" "$FLUTTER_CONFIG"
     fi
+    python3 - "$FLUTTER_CONFIG" "$PRIVACY_URL" "$PRIVACY_CHOICES_URL" \
+        "$TERMS_URL" "$SUPPORT_URL" "$DELETE_ACCOUNT_URL" <<'PY'
+import pathlib
+import re
+import sys
+
+path = pathlib.Path(sys.argv[1])
+values = dict(zip(
+    ["privacyUrl", "privacyChoicesUrl", "termsUrl", "supportUrl", "deleteAccountUrl"],
+    sys.argv[2:],
+))
+source = path.read_text(encoding="utf-8")
+for name, value in values.items():
+    source, count = re.subn(
+        rf"static const String {name}\s*=\s*\"[^\"]*\";",
+        f'static const String {name} = "{value}";',
+        source,
+        count=1,
+    )
+    if count != 1:
+        raise SystemExit(f"Could not update Flutter {name}")
+path.write_text(source, encoding="utf-8")
+PY
 
     sed_inplace "s|static const String syncHeadOrigin = \".*\";|static const String syncHeadOrigin = \"${SYNC_HEAD_ORIGIN:-}\";|g" "$FLUTTER_CONFIG"
     sed_inplace "s|static const String syncAssetOrigin = \".*\";|static const String syncAssetOrigin = \"${SYNC_ASSET_ORIGIN:-}\";|g" "$FLUTTER_CONFIG"
@@ -560,6 +596,10 @@ if [ -f "$WEB_THEME" ]; then
 else
     echo "Warning: $WEB_THEME not found."
 fi
+
+# Legal and support pages are deterministic generated leaves. Their URLs and
+# tenant identity come from the same project.conf used for the application.
+node "$LEGAL_RENDERER" --config "$CONFIG_FILE"
 
 echo "Project configuration applied successfully."
 

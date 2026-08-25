@@ -10,6 +10,11 @@ export class AppConfig {
     static isAppSupported = true;
     static flutterAppUrl = '';
     static webLink = "https://vstupenky.online";
+    static privacyUrl = "https://vstupenky.online/privacy/";
+    static privacyChoicesUrl = "https://vstupenky.online/privacy/choices/";
+    static termsUrl = "https://vstupenky.online/terms/";
+    static supportUrl = "https://vstupenky.online/support/";
+    static deleteAccountUrl = "https://vstupenky.online/delete-account/";
     static imageApiUrl = 'https://image-api.festapp.net';
     static imageProjectId = 'default';
     static compatibleUrls = [AppConfig.webLink];

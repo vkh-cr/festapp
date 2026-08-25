@@ -39,7 +39,12 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: AppLegalLinks(
-            baseUri: Uri.parse('https://example.festapp.net'),
+            overrideUris: <Uri>[
+              Uri.parse('https://example.festapp.net/privacy/'),
+              Uri.parse('https://example.festapp.net/privacy/choices/'),
+              Uri.parse('https://example.festapp.net/terms/'),
+              Uri.parse('https://example.festapp.net/support/'),
+            ],
           ),
         ),
       ),

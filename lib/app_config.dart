@@ -32,6 +32,11 @@ class AppConfig {
   static const bool showBankSupportRole = false;
 
   static const String webLink = "https://vstupenky.online";
+  static const String privacyUrl = "https://vstupenky.online/privacy/";
+  static const String privacyChoicesUrl = "https://vstupenky.online/privacy/choices/";
+  static const String termsUrl = "https://vstupenky.online/terms/";
+  static const String supportUrl = "https://vstupenky.online/support/";
+  static const String deleteAccountUrl = "https://vstupenky.online/delete-account/";
   static const String syncHeadOrigin = "";
   static const String syncAssetOrigin = "";
   static const String imageApiUrl = 'https://image-api.festapp.net';

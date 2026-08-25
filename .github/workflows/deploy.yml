@@ -43,8 +43,23 @@ jobs:
           git worktree remove "$MAIN_TREE"
           trap - EXIT
 
-  detect:
+  legal-contract:
     needs: tenant-drift
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify required legal and support configuration
+        run: |
+          set -euo pipefail
+          test -f automation/project.conf || {
+            echo "::error::automation/project.conf is required on every production branch."
+            exit 1
+          }
+          node automation/release/render_legal_pages.mjs --validate
+          node automation/release/render_legal_pages.mjs --check
+
+  detect:
+    needs: [tenant-drift, legal-contract]
     runs-on: ubuntu-latest
     outputs:
       target: ${{ steps.read.outputs.target }}
@@ -60,9 +75,8 @@ jobs:
           echo "branch=${BRANCH}" >> "$GITHUB_OUTPUT"
 
           if [ ! -f automation/project.conf ]; then
-            echo "::warning::automation/project.conf missing on ${BRANCH}, skipping deploy."
-            echo "target=skip" >> "$GITHUB_OUTPUT"
-            exit 0
+            echo "::error::automation/project.conf missing on ${BRANCH}."
+            exit 1
           fi
 
           # Source the conf so quoted values with spaces survive.

@@ -32,6 +32,7 @@ echo "Temp project root: $TMP_ROOT"
 # 1. Stage the files apply_config.sh writes to. Use the real ones in the repo
 #    as the starting state — that way we test against actual templates.
 mkdir -p "$TMP_ROOT/automation" \
+         "$TMP_ROOT/automation/release/legal" \
          "$TMP_ROOT/automation/templates/web/delete-account" \
          "$TMP_ROOT/android/app/src/main/kotlin/fstapp/example" \
          "$TMP_ROOT/android/app/src/main" \
@@ -47,6 +48,8 @@ mkdir -p "$TMP_ROOT/automation" \
          "$TMP_ROOT/assets/icons"
 
 cp "$PROJECT_ROOT/automation/apply_config.sh" "$TMP_ROOT/automation/apply_config.sh"
+cp "$PROJECT_ROOT/automation/release/render_legal_pages.mjs" "$TMP_ROOT/automation/release/render_legal_pages.mjs"
+cp "$PROJECT_ROOT"/automation/release/legal/*.md "$TMP_ROOT/automation/release/legal/"
 cp "$PROJECT_ROOT/automation/templates/web/delete-account/index.html" "$TMP_ROOT/automation/templates/web/delete-account/index.html"
 cp "$FIXTURE_CONF" "$TMP_ROOT/automation/project.conf"
 
@@ -136,6 +139,21 @@ assert_contains "$TMP_ROOT/web/delete-account/index.html" 'const apiKey = "test-
 assert_missing "$TMP_ROOT/web/delete-account/index.html" "CSM Ostrava"
 
 echo
+echo "--- required legal pages ---"
+assert_contains "$TMP_ROOT/web/privacy/index.html" "<title>Ochrana osobních údajů | Test App Name</title>"
+assert_contains "$TMP_ROOT/web/privacy/choices/index.html" "<title>Vaše volby a práva | Test App Name</title>"
+assert_contains "$TMP_ROOT/web/terms/index.html" "<title>Podmínky | Test App Name</title>"
+assert_contains "$TMP_ROOT/web/support/index.html" "<title>Podpora | Test App Name</title>"
+for legal_page in "$TMP_ROOT/web/privacy/index.html" "$TMP_ROOT/web/privacy/choices/index.html" \
+    "$TMP_ROOT/web/terms/index.html" "$TMP_ROOT/web/support/index.html"; do
+    assert_contains "$legal_page" '<nav aria-label="Právní informace">'
+    assert_contains "$legal_page" 'href="/privacy/"'
+    assert_contains "$legal_page" 'href="/privacy/choices/"'
+    assert_contains "$legal_page" 'href="/terms/"'
+    assert_contains "$legal_page" 'href="/support/"'
+done
+
+echo
 echo "--- installable PWA manifests ---"
 for manifest in "$TMP_ROOT/web/site.webmanifest" "$TMP_ROOT/web_client/public/site.webmanifest"; do
     assert_contains "$manifest" '"name": "Test App Name"'
@@ -170,6 +188,11 @@ assert_contains "$TMP_ROOT/web_client/src/app_config.js" "static organization = 
 assert_contains "$TMP_ROOT/web_client/src/app_config.js" "static isAllUnit = true;"
 assert_contains "$TMP_ROOT/web_client/src/app_config.js" "static supportedLanguages = ['cs', 'en'];"
 assert_contains "$TMP_ROOT/web_client/src/app_config.js" 'static webLink = "https://test.example.com";'
+assert_contains "$TMP_ROOT/web_client/src/app_config.js" 'static privacyUrl = "https://test.example.com/privacy/";'
+assert_contains "$TMP_ROOT/web_client/src/app_config.js" 'static privacyChoicesUrl = "https://test.example.com/privacy/choices/";'
+assert_contains "$TMP_ROOT/web_client/src/app_config.js" 'static termsUrl = "https://test.example.com/terms/";'
+assert_contains "$TMP_ROOT/web_client/src/app_config.js" 'static supportUrl = "https://test.example.com/support/";'
+assert_contains "$TMP_ROOT/web_client/src/app_config.js" 'static deleteAccountUrl = "https://test.example.com/delete-account/";'
 assert_contains "$TMP_ROOT/web_client/src/app_config.js" "static imageApiUrl = 'https://image-api.test.example.com';"
 assert_contains "$TMP_ROOT/web_client/src/app_config.js" "static imageProjectId = 'a';"
 assert_contains "$TMP_ROOT/web_client/src/app_config.js" 'static forceOccasionLink = "test-occasion";'
@@ -185,6 +208,11 @@ assert_contains "$TMP_ROOT/lib/app_config.dart" "'test-anon-key-fixture';"
 assert_contains "$TMP_ROOT/lib/app_config.dart" "static const int organization = 42;"
 assert_contains "$TMP_ROOT/lib/app_config.dart" "static const bool isAllUnit = true;"
 assert_contains "$TMP_ROOT/lib/app_config.dart" 'static const String webLink = "https://test.example.com";'
+assert_contains "$TMP_ROOT/lib/app_config.dart" 'static const String privacyUrl = "https://test.example.com/privacy/";'
+assert_contains "$TMP_ROOT/lib/app_config.dart" 'static const String privacyChoicesUrl = "https://test.example.com/privacy/choices/";'
+assert_contains "$TMP_ROOT/lib/app_config.dart" 'static const String termsUrl = "https://test.example.com/terms/";'
+assert_contains "$TMP_ROOT/lib/app_config.dart" 'static const String supportUrl = "https://test.example.com/support/";'
+assert_contains "$TMP_ROOT/lib/app_config.dart" 'static const String deleteAccountUrl = "https://test.example.com/delete-account/";'
 assert_contains "$TMP_ROOT/lib/app_config.dart" "static const String imageApiUrl = 'https://image-api.test.example.com';"
 assert_contains "$TMP_ROOT/lib/app_config.dart" "static const String imageProjectId = 'a';"
 assert_contains "$TMP_ROOT/lib/app_config.dart" 'static const String? forceOccasionLink = "test-occasion";'

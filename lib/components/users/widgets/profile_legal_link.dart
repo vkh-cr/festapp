@@ -75,30 +75,37 @@ class ProfileLegalLink extends StatelessWidget {
 class AppLegalLinks extends StatelessWidget {
   const AppLegalLinks({
     super.key,
-    this.baseUri,
+    this.overrideUris,
   });
 
-  final Uri? baseUri;
+  final List<Uri>? overrideUris;
 
   @override
   Widget build(BuildContext context) {
-    final rootUri = baseUri ?? Uri.parse(AppConfig.webLink);
-    final links = <({String label, String path})>[
+    final configuredUris = overrideUris ??
+        <Uri>[
+          Uri.parse(AppConfig.privacyUrl),
+          Uri.parse(AppConfig.privacyChoicesUrl),
+          Uri.parse(AppConfig.termsUrl),
+          Uri.parse(AppConfig.supportUrl),
+        ];
+    assert(configuredUris.length == 4);
+    final links = <({String label, Uri uri})>[
       (
         label: UserStrings.privacy,
-        path: 'privacy/',
+        uri: configuredUris[0],
       ),
       (
         label: UserStrings.privacyChoices,
-        path: 'privacy/choices/',
+        uri: configuredUris[1],
       ),
       (
         label: UserStrings.terms,
-        path: 'terms/',
+        uri: configuredUris[2],
       ),
       (
         label: UserStrings.support,
-        path: 'support/',
+        uri: configuredUris[3],
       ),
     ];
 
@@ -110,7 +117,7 @@ class AppLegalLinks extends StatelessWidget {
         for (final link in links)
           ProfileLegalLink(
             label: link.label,
-            uri: rootUri.resolve(link.path),
+            uri: link.uri,
           ),
       ],
     );

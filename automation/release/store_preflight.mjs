@@ -100,6 +100,13 @@ const config = fs.readFileSync(path.join(root, 'automation/project.conf'), 'utf8
 const getConfig = (key) => config.match(new RegExp(`^${key}=(?:"([^"]*)"|(.*))$`, 'm'))?.slice(1).find((v) => v !== undefined)?.trim();
 if (getConfig('APP_NAME') !== manifest.target.name) fail('project.conf APP_NAME disagrees with manifest');
 if (getConfig('DOMAIN') !== new URL(manifest.urls.marketing).hostname) fail('project.conf DOMAIN disagrees with manifest');
+for (const [configKey, manifestUrl] of [
+  ['PRIVACY_URL', manifest.urls.privacy],
+  ['PRIVACY_CHOICES_URL', manifest.urls.privacyChoices],
+  ['SUPPORT_URL', manifest.urls.support],
+]) {
+  if (getConfig(configKey) !== manifestUrl) fail(`project.conf ${configKey} disagrees with manifest`);
+}
 try {
   parseProjectVersion(config);
 } catch (error) {

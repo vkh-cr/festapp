@@ -46,6 +46,43 @@ const projectConfig = await readFile(configPath, 'utf8');
 const configValue = (key) => projectConfig.match(new RegExp(`^${key}=(.*)$`, 'm'))?.[1]
   .trim()
   .replace(/^(['"])(.*)\1$/, '$2');
+const configuredDomain = configValue('DOMAIN');
+const configuredAppName = configValue('APP_NAME');
+const legalPages = [
+  ['PRIVACY_URL', '/privacy/', 'privacy/index.html'],
+  ['PRIVACY_CHOICES_URL', '/privacy/choices/', 'privacy/choices/index.html'],
+  ['TERMS_URL', '/terms/', 'terms/index.html'],
+  ['SUPPORT_URL', '/support/', 'support/index.html'],
+];
+const expectedLegalOrigin = `https://${configuredDomain}`;
+const legalBodies = [];
+for (const [key, expectedPath, output] of legalPages) {
+  const configuredUrl = configValue(key);
+  assert.ok(configuredUrl, `project.conf is missing ${key}`);
+  const url = new URL(configuredUrl);
+  assert.equal(url.origin, expectedLegalOrigin, `${key} must use the configured deploy origin`);
+  assert.equal(url.pathname, expectedPath, `${key} must use the canonical path`);
+  assert.equal(url.search, '', `${key} must not contain a query`);
+  assert.equal(url.hash, '', `${key} must not contain a fragment`);
+  const body = await readFile(path.join(buildDir, output), 'utf8');
+  assert.match(body, /<nav aria-label="Právní informace">/, `${output} is not a rendered legal page`);
+  assert.match(body, /<h1>[^<]+<\/h1>/, `${output} lacks its legal heading`);
+  assert.match(body, new RegExp(`<title>[^<]+ \\| ${configuredAppName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}</title>`), `${output} has foreign tenant branding`);
+  assert.doesNotMatch(body, /window\.__FESTAPP_BUILD_VERSION__/, `${output} resolved to the Flutter SPA shell`);
+  for (const [, navigationPath] of legalPages) {
+    assert.match(body, new RegExp(`href="${navigationPath.replaceAll('/', '\\/')}"`), `${output} lacks the canonical legal navigation`);
+  }
+  legalBodies.push(body);
+}
+assert.equal(new Set(legalBodies).size, legalBodies.length, 'legal routes resolve to duplicate fallback content');
+const deleteAccountUrl = configValue('DELETE_ACCOUNT_URL');
+assert.ok(deleteAccountUrl, 'project.conf is missing DELETE_ACCOUNT_URL');
+const parsedDeleteAccountUrl = new URL(deleteAccountUrl);
+assert.equal(parsedDeleteAccountUrl.origin, expectedLegalOrigin, 'DELETE_ACCOUNT_URL must use the configured deploy origin');
+assert.equal(parsedDeleteAccountUrl.pathname, '/delete-account/', 'DELETE_ACCOUNT_URL must use the canonical path');
+const deleteAccountBody = await readFile(path.join(buildDir, 'delete-account/index.html'), 'utf8');
+assert.match(deleteAccountBody, /<h1>Smazání účtu<\/h1>/, 'account deletion route lacks its confirmation page');
+assert.match(deleteAccountBody, /href="\/privacy\/choices/, 'account deletion page lacks the privacy choices link');
 const supabaseUrl = configValue('SUPABASE_URL');
 const expectedAnonKey = configValue('SUPABASE_ANON_KEY');
 const expectedProjectRef = supabaseUrl?.match(/^https:\/\/([a-z0-9]+)\.supabase\.co\/?$/)?.[1];
@@ -74,6 +111,20 @@ assert.doesNotMatch(flutterHtml, /CSM Ostrava 2026/, 'Flutter loader contains fo
 
 const flutterConfigPath = path.resolve(path.dirname(configPath), '..', 'lib/app_config.dart');
 const flutterConfig = await readFile(flutterConfigPath, 'utf8');
+for (const [key, dartName] of [
+  ['PRIVACY_URL', 'privacyUrl'],
+  ['PRIVACY_CHOICES_URL', 'privacyChoicesUrl'],
+  ['TERMS_URL', 'termsUrl'],
+  ['SUPPORT_URL', 'supportUrl'],
+  ['DELETE_ACCOUNT_URL', 'deleteAccountUrl'],
+]) {
+  const expected = configValue(key).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  assert.match(
+    flutterConfig,
+    new RegExp(`static const String ${dartName}\\s*=\\s*"${expected}";`),
+    `generated Flutter ${dartName} differs from project.conf`,
+  );
+}
 const expectedIsAllUnit = configValue('WEB_IS_ALL_UNIT');
 assert.match(
   flutterConfig,
