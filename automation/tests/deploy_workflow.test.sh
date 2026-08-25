@@ -95,6 +95,23 @@ else
     fail=1
 fi
 
+# Netlify production branches deploy through their Git integration. CI must
+# remain pending until the configured release is actually served and verified.
+for needle in 'Wait for Git-triggered Netlify production deploy' 'festapp-version.json?deploy-sha=' 'Netlify did not publish'; do
+    if grep -F -q "$needle" "$WORKFLOW"; then
+        echo "  ok: netlify job contains '$needle'"
+    else
+        echo "  FAIL: netlify job missing '$needle'"
+        fail=1
+    fi
+done
+if grep -F -q 'Not implemented in CI' "$WORKFLOW"; then
+    echo "  FAIL: netlify job is still a no-op placeholder"
+    fail=1
+else
+    echo "  ok: netlify job is not a no-op placeholder"
+fi
+
 # 7. _worker.js heredoc covers sitemap + form OG inject + extension-less entries.
 for needle in '/sitemap.xml' '/form/' 'WEB_CLIENT_INDEX' 'FLUTTER_ENTRY' 'AUTH_BRIDGE' 'FORCED_OCCASION_PATH' 'FORCE_OCCASION_LINK' 'get_available_occasions' 'get_occasion_seo_data'; do
     if grep -F -q "$needle" "$BUILD_SH"; then
