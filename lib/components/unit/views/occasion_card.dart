@@ -12,6 +12,7 @@ import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/components/occasion/occasion_model.dart';
 import 'package:fstapp/components/occasion/occasion_detail_dialog.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cached_network_image_platform_interface/cached_network_image_platform_interface.dart';
 import 'package:fstapp/components/images/image_url_helper.dart';
 
 class OccasionCard extends StatefulWidget {
@@ -169,6 +170,8 @@ class _OccasionCardState extends State<OccasionCard> {
                           imageUrl: ImageUrlHelper.transformImageUrl(
                               widget.occasion.data![Tb.occasions.data_image]!,
                               width: ImageUrlHelper.mediumWidth),
+                          imageRenderMethodForWeb:
+                              ImageRenderMethodForWeb.HttpGet,
                           fit: BoxFit.cover,
                         ),
                       ),

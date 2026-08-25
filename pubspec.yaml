@@ -106,6 +106,7 @@ dependencies:
   file_picker: ^8.1.7
 
   cached_network_image: any
+  cached_network_image_platform_interface: any
   image: any
   cross_file: any
   flutter_cache_manager: any
