@@ -145,6 +145,13 @@ class StyleControllerIos extends StyleController {
     switch (source) {
       case GeoJsonSource():
         final shapeSource = MLNShapeSource.new$();
+        final ffiOptions = NSMutableDictionary.new$()..init();
+        ffiOptions.setObject(
+          source.tolerance.toNSNumber(),
+          forKey: NSCopying.as(
+            'MLNShapeSourceOptionSimplificationTolerance'.toNSString(),
+          ),
+        );
         if (source.data.startsWith('{')) {
           shapeSource.initWithIdentifier$3(
             ffiId,
@@ -152,13 +159,13 @@ class StyleControllerIos extends StyleController {
               source.data.toNSDataUTF8()!,
               encoding: nsUTF8StringEncoding,
             ),
-            options: NSDictionary.new$(),
+            options: ffiOptions,
           );
         } else {
           shapeSource.initWithIdentifier$1(
             ffiId,
             URL: source.data.toNSURL()!,
-            options: NSDictionary.new$(),
+            options: ffiOptions,
           );
         }
         ffiSource = shapeSource;

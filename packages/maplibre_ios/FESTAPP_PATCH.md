@@ -1,8 +1,8 @@
-# Festapp patch for `maplibre_ios` 0.3.5
+# Festapp patch for `maplibre_ios` 0.3.6
 
 This repository pin adds the missing `MapLibrePlugin` declaration to upstream's
 pre-generated public Swift compatibility header, `MapLibreIos.h`. Upstream
-0.3.5 declares `pluginClass: MapLibrePlugin` and implements the class in Swift,
+0.3.6 declares `pluginClass: MapLibrePlugin` and implements the class in Swift,
 but a clean Release build imports this compatibility header before the dynamic
 Swift header exists, and upstream omitted the plugin class from it.
 

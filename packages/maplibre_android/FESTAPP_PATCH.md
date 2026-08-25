@@ -1,4 +1,4 @@
-# Festapp patch for `maplibre_android` 0.3.5
+# Festapp patch for `maplibre_android` 0.3.6
 
 This repository pin preserves high-resolution Flutter style images without
 letting `BitmapFactory` interpolate them a second time. The shared platform

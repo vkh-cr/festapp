@@ -359,7 +359,7 @@ SWIFT_CLASS_NAMED("MapLibreRegistry")
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 
-// Upstream 0.3.5 implements this Flutter plugin in MapLibrePlugin.swift but
+// Upstream 0.3.6 implements this Flutter plugin in MapLibrePlugin.swift but
 // omitted it from the pre-generated compatibility header used by clean builds.
 #if MAPLIBRE_IOS_HAS_FLUTTER_PLUGIN
 SWIFT_CLASS("_TtC12maplibre_ios14MapLibrePlugin")

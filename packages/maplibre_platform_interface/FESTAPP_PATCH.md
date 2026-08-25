@@ -1,4 +1,4 @@
-# Festapp patch for `maplibre_platform_interface` 0.3.5
+# Festapp patch for `maplibre_platform_interface` 0.3.6
 
 This repository pin adds `StyleController.addImageWithPixelRatio`. Widget
 rasters pass their physical-to-logical pixel ratio through this interface so

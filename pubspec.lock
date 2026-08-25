@@ -285,10 +285,10 @@ packages:
     dependency: transitive
     description:
       name: code_assets
-      sha256: "83ccdaa064c980b5596c35dd64a8d3ecc68620174ab9b90b6343b753aa721687"
+      sha256: bf394f466ba9205f1812a0433b392d6af280f155f56651eda7c18cc32ed493b8
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.0"
+    version: "1.2.1"
   code_builder:
     dependency: transitive
     description:
@@ -985,10 +985,10 @@ packages:
     dependency: transitive
     description:
       name: hooks
-      sha256: "025f060e86d2d4c3c47b56e33caf7f93bf9283340f26d23424ebcfccf34f621e"
+      sha256: eaac480a35ec0814146c2c48d96aaa829e0e44a7662c88ae84c9edf4bc35651f
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.3"
+    version: "2.2.0"
   hotreloader:
     dependency: transitive
     description:
@@ -1233,39 +1233,39 @@ packages:
     dependency: "direct main"
     description:
       name: maplibre
-      sha256: "581e17a1eca80b2be555b00acc03afff22464efd0712d68fcc46be56efa61e59"
+      sha256: "576246ba113835d795dd70cbd82216b5072ed1df60aad0d9ee2ca16a969e7c3a"
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.5"
+    version: "0.3.6"
   maplibre_android:
     dependency: "direct overridden"
     description:
       path: "packages/maplibre_android"
       relative: true
     source: path
-    version: "0.3.5"
+    version: "0.3.6"
   maplibre_ios:
     dependency: "direct overridden"
     description:
       path: "packages/maplibre_ios"
       relative: true
     source: path
-    version: "0.3.5"
+    version: "0.3.6"
   maplibre_platform_interface:
     dependency: "direct overridden"
     description:
       path: "packages/maplibre_platform_interface"
       relative: true
     source: path
-    version: "0.3.5"
+    version: "0.3.6"
   maplibre_web:
     dependency: transitive
     description:
       name: maplibre_web
-      sha256: b8fc47882dfa5f443a3492f28d8c9ae578f937de34b286cd490d1738cfb3b8b7
+      sha256: "3fa53d3f470454d6182d8bbd6c10568c83646692b16b484e942160df3ea4e9fc"
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.5"
+    version: "0.3.6"
   markdown:
     dependency: transitive
     description:
@@ -1342,10 +1342,10 @@ packages:
     dependency: transitive
     description:
       name: native_toolchain_c
-      sha256: "6ba77bb18063eebe9de401f5e6437e95e1438af0a87a3a39084fbd37c90df572"
+      sha256: a1c26117c48cebe5677b0cf0e33a980a79a7c5577effc86f52e5a0d309cdcb60
       url: "https://pub.dev"
     source: hosted
-    version: "0.17.6"
+    version: "0.19.3"
   nested:
     dependency: transitive
     description:
@@ -1366,10 +1366,10 @@ packages:
     dependency: transitive
     description:
       name: objective_c
-      sha256: "100a1c87616ab6ed41ec263b083c0ef3261ee6cd1dc3b0f35f8ddfa4f996fe52"
+      sha256: b7fb95a6d9a4f009edd63dc5ac69f07420b23a16161c6dd8660290b59c602e8e
       url: "https://pub.dev"
     source: hosted
-    version: "9.3.0"
+    version: "9.5.0"
   octo_image:
     dependency: transitive
     description:
@@ -1736,10 +1736,10 @@ packages:
     dependency: transitive
     description:
       name: record_use
-      sha256: "2551bd8eecfe95d14ae75f6021ad0248be5c27f138c2ec12fcb52b500b3ba1ed"
+      sha256: "1cb8564af8d43b464294411db9217f5ec04891c6f22ee2c32d73ae05e88a6bd2"
       url: "https://pub.dev"
     source: hosted
-    version: "0.6.0"
+    version: "1.1.1"
   rxdart:
     dependency: transitive
     description:
