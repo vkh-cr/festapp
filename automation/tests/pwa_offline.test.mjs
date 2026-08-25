@@ -427,6 +427,10 @@ try {
   assert.match(sharedBuild, /apply_config\.sh/);
   assert.match(sharedBuild, /emit_version_manifest\.sh/);
   assert.match(sharedBuild, /verify_web_build\.mjs/);
+  assert.match(sharedBuild, /flutter_version\.mjs/);
+  assert.match(sharedBuild, /fvm install "\$FLUTTER_VERSION"/);
+  assert.match(sharedBuild, /flutter-\$\{FLUTTER_VERSION\}/);
+  assert.match(sharedBuild, /--strip-components=1/);
   assert.match(githubPagesWorkflow, /build_web_bundle\.sh static/);
   assert.doesNotMatch(githubPagesWorkflow, /flutter build web/);
   assert.match(flutterIndex, /serviceWorkerParam: \{ scope: "\/push\/" \}/);

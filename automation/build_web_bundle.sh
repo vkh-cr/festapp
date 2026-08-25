@@ -17,20 +17,29 @@ cd "$PROJECT_ROOT"
 rm -rf -- "$BUILD_WEB_DIR" "$WEB_CLIENT_DIST_DIR"
 
 FLUTTER_VERSION="$(node automation/flutter_version.mjs)"
-FESTAPP_FLUTTER_INSTALL_DIR="${FESTAPP_FLUTTER_INSTALL_DIR:-${HOME}/flutter}"
+FLUTTER_CMD=()
+
 if command -v flutter >/dev/null 2>&1; then
-    FLUTTER_CMD=(flutter)
-elif command -v fvm >/dev/null 2>&1; then
-    FLUTTER_CMD=(fvm flutter)
-else
-    if [ ! -d "$FESTAPP_FLUTTER_INSTALL_DIR" ]; then
-        echo "Installing Flutter ${FLUTTER_VERSION} (linux)..."
-        mkdir -p "$(dirname "$FESTAPP_FLUTTER_INSTALL_DIR")"
-        curl -L "https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_${FLUTTER_VERSION}-stable.tar.xz" \
-            | tar -xJf - -C "$(dirname "$FESTAPP_FLUTTER_INSTALL_DIR")"
+    AVAILABLE_FLUTTER_VERSION="$(flutter --version --machine 2>/dev/null | node -e 'let input="";process.stdin.on("data",c=>input+=c);process.stdin.on("end",()=>{try{process.stdout.write(JSON.parse(input).frameworkVersion||"")}catch{}});')"
+    if [ "$AVAILABLE_FLUTTER_VERSION" = "$FLUTTER_VERSION" ]; then
+        FLUTTER_CMD=(flutter)
     fi
-    export PATH="$FESTAPP_FLUTTER_INSTALL_DIR/bin:$PATH"
-    FLUTTER_CMD=(flutter)
+fi
+
+if [ "${#FLUTTER_CMD[@]}" -eq 0 ] && command -v fvm >/dev/null 2>&1; then
+    fvm install "$FLUTTER_VERSION"
+    FLUTTER_CMD=(fvm spawn "$FLUTTER_VERSION")
+fi
+
+if [ "${#FLUTTER_CMD[@]}" -eq 0 ]; then
+    FESTAPP_FLUTTER_INSTALL_DIR="${FESTAPP_FLUTTER_INSTALL_DIR:-${HOME}/.cache/festapp/flutter-${FLUTTER_VERSION}}"
+    if [ ! -x "$FESTAPP_FLUTTER_INSTALL_DIR/bin/flutter" ]; then
+        echo "Installing Flutter ${FLUTTER_VERSION} (linux)..."
+        mkdir -p "$FESTAPP_FLUTTER_INSTALL_DIR"
+        curl -L "https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_${FLUTTER_VERSION}-stable.tar.xz" \
+            | tar -xJf - --strip-components=1 -C "$FESTAPP_FLUTTER_INSTALL_DIR"
+    fi
+    FLUTTER_CMD=("$FESTAPP_FLUTTER_INSTALL_DIR/bin/flutter")
 fi
 
 ACTUAL_FLUTTER_VERSION="$("${FLUTTER_CMD[@]}" --version --machine | node -e 'let input="";process.stdin.on("data",c=>input+=c);process.stdin.on("end",()=>process.stdout.write(JSON.parse(input).frameworkVersion));')"
