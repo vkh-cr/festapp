@@ -105,10 +105,9 @@ try {
 } catch (error) {
   fail(error.message);
 }
-if (!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(manifest.target.version ?? '')) {
-  fail('app-store target version must be an explicit semantic version');
+if ('version' in manifest.target || 'build' in manifest.target) {
+  fail('app-store manifest must not duplicate the canonical project version or build number');
 }
-if ('build' in manifest.target) fail('app-store manifest must not duplicate the canonical build number');
 
 const project = fs.readFileSync(path.join(root, 'ios/Runner.xcodeproj/project.pbxproj'), 'utf8');
 if (!project.includes(`PRODUCT_BUNDLE_IDENTIFIER = ${manifest.bundleId};`)) fail('main bundle identifier disagrees with manifest');

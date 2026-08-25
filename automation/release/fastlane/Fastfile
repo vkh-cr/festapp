@@ -17,7 +17,7 @@ version_helper = File.expand_path('../project_version.mjs', __dir__)
 version_json, version_error, version_status = Open3.capture3('node', version_helper, '--json')
 raise "Cannot read canonical project version: #{version_error}" unless version_status.success?
 PROJECT_VERSION = JSON.parse(version_json)
-TARGET_VERSION = MANIFEST.fetch('target').fetch('version')
+TARGET_VERSION = PROJECT_VERSION.fetch('version')
 TARGET_BUILD = PROJECT_VERSION.fetch('build')
 PLAY_PACKAGE = MANIFEST.fetch('androidPackage')
 

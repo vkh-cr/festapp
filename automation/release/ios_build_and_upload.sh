@@ -33,7 +33,7 @@ if [ ! -f "$release_manifest" ]; then
   echo "Release manifest not found: $release_manifest"
   exit 1
 fi
-target_version="$(node -e 'const manifest = require(process.argv[1]); process.stdout.write(manifest.target.version)' "$release_manifest")"
+target_version="$(node automation/release/project_version.mjs --version)"
 target_build="$(node automation/release/project_version.mjs --build)"
 "$SCRIPT_DIR/prepare_signing_keychain.sh"
 fvm flutter build ipa --release \

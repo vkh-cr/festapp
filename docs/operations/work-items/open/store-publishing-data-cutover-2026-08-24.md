@@ -34,7 +34,9 @@ one owner: FestappSeed.
 
 - Canonical Apple and Google publishing assets are committed byte-identically
   in FestappSeed after credential-pattern and filename scans.
-- The private manifest owns both bundle IDs, Android package, release branch and target version.
+- The private manifest owns both bundle IDs, Android package and release branch;
+  `automation/project.conf` in the exact Festapp checkout exclusively owns the
+  target version and numeric build.
 - Public release consumers now fail closed without the exact generic
   `FESTAPP_RELEASE_MANIFEST` pointer; no public script contains a tenant path.
 - Public generic consumers and overlay policy are integrated in `main`.
