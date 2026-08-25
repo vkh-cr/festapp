@@ -33,7 +33,9 @@ security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
 
 if ! security find-identity -v -p codesigning "$KEYCHAIN_PATH" | grep -q 'Apple Distribution:'; then
   security import "${private_keys[0]}" -k "$KEYCHAIN_PATH" -P '' -T /usr/bin/codesign -T /usr/bin/security >/dev/null
-  security import "${certificates[0]}" -k "$KEYCHAIN_PATH" -T /usr/bin/codesign -T /usr/bin/security >/dev/null
+  if ! security find-identity -v -p codesigning "$KEYCHAIN_PATH" | grep -q 'Apple Distribution:'; then
+    security import "${certificates[0]}" -k "$KEYCHAIN_PATH" -T /usr/bin/codesign -T /usr/bin/security >/dev/null
+  fi
   security set-key-partition-list -S apple-tool:,apple: -s -k "$keychain_password" "$KEYCHAIN_PATH" >/dev/null
 fi
 
