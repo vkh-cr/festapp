@@ -1,0 +1,19 @@
+{
+  "version": "2026-08-27.1",
+  "status": "draft-blocking",
+  "rules": [
+    { "table": "public.organizations", "path": "data.DEFAULT_UNIT", "reference": "public.units.id", "mapping": "units", "nullable": true, "transform": "numeric-id", "validator": "mapped-or-null" },
+    { "table": "public.organizations", "path": "data.REPRESENTATIVE_OCCASION", "reference": "public.occasions.id", "mapping": "occasions", "nullable": true, "transform": "numeric-id", "validator": "mapped-or-null" },
+    { "table": "public.organizations", "path": "data.DEFAULT_OCCASION", "reference": "public.occasions.id", "mapping": "occasions", "nullable": true, "transform": "numeric-id", "validator": "mapped-or-null" },
+    { "table": "public.external_sync_sources", "path": "supabase_url", "reference": "endpoint", "mapping": "canonical-endpoint", "nullable": true, "transform": "exact-url", "validator": "canonical-or-approved-external" },
+    { "table": "public.external_sync_maps", "path": "*", "reference": "external-sync", "mapping": "reachability-decision", "nullable": false, "transform": "explicit-policy", "validator": "approved-external-or-deletion-ledger" }
+  ],
+  "requiredInventoryFamilies": [
+    "occasion-and-form-payloads",
+    "ticket-order-spot-product-payloads",
+    "transaction-bank-payloads",
+    "client-sync-heads-and-urls",
+    "cron-webhook-urls",
+    "storage-object-references"
+  ]
+}
