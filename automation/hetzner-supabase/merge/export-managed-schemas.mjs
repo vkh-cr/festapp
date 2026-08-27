@@ -17,8 +17,8 @@ import { validateRecipient } from './export-source.mjs';
 
 const PAGE_SIZE = 500;
 const TABLES_QUERY = `SELECT n.nspname AS schema_name, c.relname AS table_name,
-  coalesce(array_agg(a.attname ORDER BY key_columns.ordinality)
-    FILTER (WHERE a.attname IS NOT NULL), ARRAY[]::name[]) AS primary_key
+  to_jsonb(coalesce(array_agg(a.attname ORDER BY key_columns.ordinality)
+    FILTER (WHERE a.attname IS NOT NULL), ARRAY[]::name[])) AS primary_key
 FROM pg_class c
 JOIN pg_namespace n ON n.oid = c.relnamespace
 LEFT JOIN pg_index i ON i.indrelid = c.oid AND i.indisprimary
