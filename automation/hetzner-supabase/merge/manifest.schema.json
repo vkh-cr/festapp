@@ -44,8 +44,8 @@
       "required": ["status", "unresolved_conflicts", "orphan_foreign_keys", "journal_lag"],
       "properties": {
         "status": { "enum": ["pass", "fail", "blocked"] },
-        "unresolved_conflicts": { "type": "integer", "minimum": 0 },
-        "orphan_foreign_keys": { "type": "integer", "minimum": 0 },
+        "unresolved_conflicts": { "type": ["integer", "null"], "minimum": 0 },
+        "orphan_foreign_keys": { "type": ["integer", "null"], "minimum": 0 },
         "journal_lag": { "type": ["integer", "null"], "minimum": 0 },
         "notes": { "type": "array", "items": { "type": "string" } }
       }

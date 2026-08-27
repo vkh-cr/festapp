@@ -87,8 +87,8 @@ export function buildInventoryManifest({ inventory, inventoryChecksum }) {
     },
     validation: {
       status: 'blocked',
-      unresolved_conflicts: 0,
-      orphan_foreign_keys: 0,
+      unresolved_conflicts: null,
+      orphan_foreign_keys: null,
       journal_lag: null,
       notes: inventory.limitations,
     },

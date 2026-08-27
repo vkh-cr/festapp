@@ -40,6 +40,8 @@ test('inventory creates a blocked evidence manifest with the required provenance
   const manifest = buildInventoryManifest({ inventory, inventoryChecksum: 'b'.repeat(64) });
   assert.equal(manifest.phase, 'inventory');
   assert.equal(manifest.validation.status, 'blocked');
+  assert.equal(manifest.validation.unresolved_conflicts, null);
+  assert.equal(manifest.validation.orphan_foreign_keys, null);
   assert.equal(manifest.counts.rows, 5);
   assert.deepEqual(manifest.sources[0], {
     alias: 'default',
