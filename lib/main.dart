@@ -194,19 +194,11 @@ Future<void> initializeEverything() async {
     AppLogger.error('EasyLocalization initialization failed: $e');
   }
 
-  const supabaseUrl = String.fromEnvironment(
-    'FESTAPP_SUPABASE_URL',
-    defaultValue: AppConfig.supabaseUrl,
-  );
-  const supabaseAnonKey = String.fromEnvironment(
-    'FESTAPP_SUPABASE_ANON_KEY',
-    defaultValue: AppConfig.anonKey,
-  );
   var supabaseInitialized = false;
   try {
     await Supabase.initialize(
-      url: supabaseUrl,
-      anonKey: supabaseAnonKey,
+      url: AppConfig.effectiveSupabaseUrl,
+      anonKey: AppConfig.effectiveSupabaseAnonKey,
       // Observe every backend request's outcome so ConnectivityService can tell
       // when the server is unreachable (weak signal / outage), not just when the
       // network interface is down.

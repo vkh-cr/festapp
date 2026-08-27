@@ -153,7 +153,7 @@
         <article class="card span-3"><div class="big green">4</div><h3>Šifrované snapshoty</h3><p>Aplikační i Auth/Storage exporty obou cloudů mají ověřené manifesty a SHA-256.</p></article>
         <article class="card span-3"><div class="big green">41</div><h3>RPC kontraktů</h3><p>Hardening je připravený, ale záměrně nenasazený.</p></article>
         <article class="card span-3"><div class="big green">2</div><h3>Zachované legacy řádky</h3><p>Dvě companion vazby bez společné occasion jsou přesně zachované v privátní karanténě; žádná falešná vazba nebyla vytvořena.</p></article>
-        <article class="card span-3"><div class="big green">1</div><h3>Self-hosted server</h3><p>CAX11 ARM v NBG1; 11/11 služeb healthy, databáze neveřejná.</p></article>
+        <article class="card span-3"><div class="big green">1</div><h3>Self-hosted server</h3><p>CAX11 ARM v NBG1; 11/11 Supabase služeb healthy, Caddy běží a databáze je neveřejná.</p></article>
       </div>
     </section>
 
@@ -167,7 +167,7 @@
         <div class="flow-mid"><span>řízený cutover</span></div>
         <article class="flow-panel">
           <div class="flow-title"><h3>Rehearsal cíl</h3><span class="state live">online / izolovaný</span></div>
-          <div class="nodes"><span class="node">SSH tunel</span><span class="arrow">→</span><span class="node">loopback gateway</span><span class="arrow">→</span><span class="node">Hetzner Supabase</span></div>
+          <div class="nodes"><span class="node">Cloudflare Strict</span><span class="arrow">→</span><span class="node">Caddy</span><span class="arrow">→</span><span class="node">loopback gateway</span><span class="arrow">→</span><span class="node">Hetzner Supabase</span></div>
         </article>
       </div>
     </section>
@@ -193,7 +193,7 @@
           <div class="blocker"><span class="num">3</span><div><strong>Direct DML a adopce RPC</strong><span>47 z 48 occasions není potvrzeně na nové cestě a 8 DML grant skupin stále existuje.</span></div></div>
         </article>
         <article class="card span-6">
-          <div class="blocker"><span class="num">4</span><div><strong>Hostname a poslední 4 Storage URL</strong><span>Všechny čtyři legacy URL mají zkopírovaný objekt. Přepis na <code>api.festapp.net</code> proběhne až s ověřeným originem, aby se nerozbili staří klienti.</span></div></div>
+          <div class="blocker"><span class="num">4</span><div><strong>Finální hostname a poslední 4 Storage URL</strong><span><code>rehearsal-api.festapp.net</code> už prošel Auth/REST/Realtime/Storage i direct-origin testem. Přepis na produkční <code>api.festapp.net</code> proběhne až při finálním gate.</span></div></div>
           <div class="blocker"><span class="num">5</span><div><strong>Klientské releasy</strong><span>Web, Android a iOS musí dostat jednotný <code>api.festapp.net</code>, nové veřejné klíče a full-sync epoch ještě před finálním freeze.</span></div></div>
           <div class="blocker"><span class="num">6</span><div><strong>Produkční rozhodovací brána</strong><span>Rehearsal host je schválený; DNS, produkční import a cutover až po uzavření blockerů a novém výslovném souhlasu.</span></div></div>
         </article>
@@ -210,7 +210,7 @@
     </section>
 
     <section class="section">
-      <div class="callout"><strong>Nejbližší správný krok</strong><p>Zopakovat celý merge z nového snapshotu a současně připravit kanonický hostname a kompatibilní releasy klientů. Produkční cutover smí použít pouze nový freeze/journal snapshot s nulovým lagu.</p></div>
+      <div class="callout"><strong>Nejbližší správný krok</strong><p>Sestavit a ověřit klienty proti hotovému rehearsal originu a zopakovat celý merge z nového snapshotu. Produkční cutover smí použít pouze nový freeze/journal snapshot s nulovým lagu.</p></div>
     </section>
 
     <section class="section">
@@ -224,6 +224,7 @@
         <a href="storage-authority.md">Storage authority</a>
         <a href="deletion-ledger.md">Deletion ledger</a>
         <a href="rehearsal-host-2026-08-27.md">Rehearsal host</a>
+        <a href="rehearsal-origin-2026-08-28.md">Rehearsal origin</a>
         <a href="canonical-schema-rehearsal-2026-08-27.md">Canonical schema rehearsal</a>
       </nav>
     </section>

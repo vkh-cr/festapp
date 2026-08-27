@@ -24,6 +24,10 @@ readonly A_OPERATIONAL_REPAIR_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/
 readonly A_REFERENCE_VALIDATION_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/rehearsal/validate-a-reference-registry.sh"
 readonly ENCRYPTED_BACKUP_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/backup/create-encrypted-rehearsal-backup.sh"
 readonly ENCRYPTED_RESTORE_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/restore/drill-encrypted-rehearsal-backup.sh"
+readonly RUNTIME_COMPOSE="$PROJECT_ROOT/automation/hetzner-supabase/runtime/docker-compose.festapp.yml"
+readonly RUNTIME_CADDYFILE="$PROJECT_ROOT/automation/hetzner-supabase/runtime/Caddyfile"
+readonly RUNTIME_CONFIGURATOR="$PROJECT_ROOT/automation/hetzner-supabase/runtime/configure-rehearsal-env.py"
+readonly TERRAFORM_FIREWALL="$PROJECT_ROOT/automation/hetzner-supabase/terraform/firewall.tf"
 
 [[ -x "$SCRIPT" ]] || { echo "rehearsal schema builder must be executable" >&2; exit 1; }
 [[ -x "$STAGING_SCRIPT" ]] || { echo "merge staging builder must be executable" >&2; exit 1; }
@@ -47,6 +51,29 @@ readonly ENCRYPTED_RESTORE_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/res
 [[ -x "$A_REFERENCE_VALIDATION_SCRIPT" ]] || { echo "reference registry validator must be executable" >&2; exit 1; }
 [[ -x "$ENCRYPTED_BACKUP_SCRIPT" ]] || { echo "encrypted backup script must be executable" >&2; exit 1; }
 [[ -x "$ENCRYPTED_RESTORE_SCRIPT" ]] || { echo "encrypted restore drill must be executable" >&2; exit 1; }
+[[ -r "$RUNTIME_CADDYFILE" ]] || { echo "Caddy origin configuration must be readable" >&2; exit 1; }
+
+for required in 'caddy:' 'network_mode: host' NET_BIND_SERVICE 'read_only: true' \
+  'rehearsal-api.festapp.net'; do
+  rg -Fq "$required" "$RUNTIME_COMPOSE" || { echo "missing public-origin contract $required in $RUNTIME_COMPOSE" >&2; exit 1; }
+done
+for required in trusted_proxies_strict CF-Connecting-IP 'reverse_proxy 127.0.0.1:8000'; do
+  rg -Fq "$required" "$RUNTIME_CADDYFILE" || { echo "missing public-origin contract $required in $RUNTIME_CADDYFILE" >&2; exit 1; }
+done
+for required in FESTAPP_SUPABASE_HOSTNAME 'https://rehearsal-api.festapp.net' \
+  API_EXTERNAL_URL SUPABASE_PUBLIC_URL; do
+  rg -Fq "$required" "$RUNTIME_CONFIGURATOR" || { echo "missing public-origin contract $required in $RUNTIME_CONFIGURATOR" >&2; exit 1; }
+done
+for required in cloudflare_proxy_cidrs '173.245.48.0/20' '2c0f:f248::/32' \
+  local.cloudflare_proxy_cidrs; do
+  rg -Fq "$required" "$TERRAFORM_FIREWALL" || { echo "missing public-origin contract $required in $TERRAFORM_FIREWALL" >&2; exit 1; }
+done
+
+if sed -n '/port        = "80"/,/}/p; /port        = "443"/,/}/p' "$TERRAFORM_FIREWALL" | \
+    rg -q '0\.0\.0\.0/0|::/0'; then
+  echo "public Supabase ports must not allow direct Internet ingress" >&2
+  exit 1
+fi
 
 for required in \
   'FESTAPP_REHEARSAL_ACK' \

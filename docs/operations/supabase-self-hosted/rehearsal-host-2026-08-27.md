@@ -15,7 +15,7 @@ and merge rehearsals, not the production cutover.
 | Runtime | Docker 29.7.2, Compose 5.5.0 |
 | Supabase | pinned `self-hosted/v0.8.0` commit and 11 ARM64 image digests |
 | PostgreSQL | 17.6 |
-| Network | SSH restricted to the approved administrator CIDR; gateway only on loopback; no public PostgreSQL |
+| Network | SSH restricted to the approved administrator CIDR; ports 80/443 restricted to official Cloudflare proxy ranges; gateway only on loopback; no public PostgreSQL |
 | Application state | all 11 Compose services healthy; Auth health endpoint answered |
 
 The host successfully pulled and runs each of the 11 declared service digests
@@ -78,6 +78,11 @@ rows, 762 public scopes, two validated imports and 1,463 files / 606,950,851
 bytes. All prior artifacts and failed drill databases remain preserved; no path
 was deleted. With every retained drill the host still has about 17 GB free.
 
-The next gate is a second complete rehearsal from a newer cloud snapshot,
-followed by canonical hostname/origin preparation and compatible web, Android
-and iOS releases. Production DNS, credentials and writes remain unchanged.
+On 2026-08-28 the isolated `rehearsal-api.festapp.net` origin was activated
+through Cloudflare, Caddy and the loopback gateway. Strict origin TLS, Auth,
+REST, Realtime, a real Storage object and direct-origin denial all passed. The
+full evidence is in `rehearsal-origin-2026-08-28.md`.
+
+The next gate is a second complete rehearsal from a newer cloud snapshot and
+compatible web, Android and iOS releases. Production `api.festapp.net`, cloud
+credentials and write ownership remain unchanged.

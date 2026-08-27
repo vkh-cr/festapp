@@ -12,6 +12,7 @@ import {
 } from './lib.mjs';
 
 const POOLER_HOST = 'aws-0-eu-central-1.pooler.supabase.com';
+const APPROVED_EXPORT_SSH_TARGET = 'root@46.224.187.4';
 
 async function privilegedQuery({ projectRef, token, query, secrets = [] }) {
   const response = await fetch(
@@ -125,6 +126,10 @@ async function main() {
   if (!recipient.startsWith('ssh-ed25519 ')) throw new Error('snapshot recipient must be an SSH Ed25519 public key');
 
   const token = accessToken();
+  const exportSshTarget = process.env.FESTAPP_EXPORT_SSH_TARGET;
+  if (exportSshTarget && exportSshTarget !== APPROVED_EXPORT_SSH_TARGET) {
+    throw new Error('FESTAPP_EXPORT_SSH_TARGET is not the approved rehearsal host');
+  }
   const role = `festapp_export_${Date.now()}`;
   const validUntil = new Date(Date.now() + 60 * 60 * 1000).toISOString();
   const created = [];
@@ -134,8 +139,9 @@ async function main() {
       const password = crypto.randomBytes(32).toString('base64url');
       await createExportRole({ projectRef, token, role, password, validUntil });
       created.push({ alias, projectRef });
-      const username = `${role}.${projectRef}`;
-      const databaseUrl = `postgresql://${encodeURIComponent(username)}:${encodeURIComponent(password)}@${POOLER_HOST}:5432/postgres`;
+      const username = exportSshTarget ? role : `${role}.${projectRef}`;
+      const databaseHost = exportSshTarget ? `db.${projectRef}.supabase.co` : POOLER_HOST;
+      const databaseUrl = `postgresql://${encodeURIComponent(username)}:${encodeURIComponent(password)}@${databaseHost}:5432/postgres`;
       await runExporter({
         alias,
         output: path.join(runDir, `${alias}.dump.age`),

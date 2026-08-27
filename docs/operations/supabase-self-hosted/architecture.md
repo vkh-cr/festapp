@@ -29,5 +29,10 @@ would be a shallow second interface over the same regional PostgreSQL and could
 not make an R2/object write atomic with a relational transaction. Object
 storage remains a separately reconciled side effect with checksums and receipts.
 
+The public front door is proxied DNS/WAF with hostname-specific strict origin
+TLS. Hetzner ports 80 and 443 accept only Cloudflare's published proxy ranges;
+Caddy terminates TLS and forwards to the loopback-only Supabase gateway. No
+Cloudflare Worker, Hyperdrive or D1 hop is used for ordinary Supabase traffic.
+
 Production cloud projects remain read-only for the approved retention period.
 Deleting them always requires a separate explicit approval.

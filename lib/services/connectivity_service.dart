@@ -43,7 +43,7 @@ class ConnectivityService {
   /// Public health endpoint that answers without auth; getting *any* response
   /// from it proves the backend is reachable again.
   static final Uri _healthUri =
-      Uri.parse('${AppConfig.supabaseUrl}/auth/v1/health');
+      Uri.parse('${AppConfig.effectiveSupabaseUrl}/auth/v1/health');
 
   /// Starts the connectivity listener and seeds the interface state. Idempotent.
   static Future<void> initialize() async {
