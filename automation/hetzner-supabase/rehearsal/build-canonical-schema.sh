@@ -16,7 +16,8 @@ fail() {
   exit 1
 }
 
-[[ "${FESTAPP_REHEARSAL_ACK:-}" == "canonical-schema-only" ]] ||
+readonly ACK="${FESTAPP_REHEARSAL_ACK:-}"
+[[ "$ACK" == "canonical-schema-only" || "$ACK" == "resume-after-baseline-ledger-fix" ]] ||
   fail "set FESTAPP_REHEARSAL_ACK=canonical-schema-only"
 [[ "$(id -u)" == "0" ]] || fail "run as root on the isolated rehearsal host"
 [[ "$(hostname -s)" == "$EXPECTED_HOSTNAME" ]] ||
@@ -41,8 +42,25 @@ readonly POSTGRES_MAJOR="$(psql_rehearsal -Atqc "SHOW server_version" | cut -d. 
 
 readonly BUSINESS_RELATIONS="$(psql_rehearsal -Atqc \
   "SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname IN ('public','eshop') AND c.relkind IN ('r','p','v','m','S')")"
-[[ "$BUSINESS_RELATIONS" == "0" ]] ||
-  fail "target is not an empty business-schema foundation ($BUSINESS_RELATIONS relations found)"
+APPLY_BASELINE=true
+if [[ "$ACK" == "canonical-schema-only" ]]; then
+  [[ "$BUSINESS_RELATIONS" == "0" ]] ||
+    fail "target is not an empty business-schema foundation ($BUSINESS_RELATIONS relations found)"
+else
+  readonly RESUME_STATE="$(psql_rehearsal -Atqc "SELECT concat_ws('|',
+    (SELECT count(*) FROM supabase_migrations.schema_migrations),
+    (SELECT count(*) FROM auth.users),
+    (SELECT count(*) FROM storage.objects),
+    to_regclass('public.organizations') IS NOT NULL,
+    to_regclass('public.user_reset_token') IS NOT NULL,
+    to_regclass('eshop.tickets') IS NOT NULL,
+    (SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public' AND c.relkind IN ('r','p','v','m','S')),
+    (SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='eshop' AND c.relkind IN ('r','p','v','m','S'))
+  )")"
+  [[ "$RESUME_STATE" == "0|0|0|true|true|true|113|38" ]] ||
+    fail "target does not match the one approved post-baseline resume state"
+  APPLY_BASELINE=false
+fi
 
 install -d -o root -g root -m 0700 "$EVIDENCE_ROOT"
 readonly RUN_ID="canonical-schema-$(date -u +%Y%m%dT%H%M%SZ)"
@@ -53,6 +71,7 @@ docker compose exec -T db pg_dump -U postgres -d postgres --schema-only --no-own
   >"$RUN_DIR/pre-apply-schema.sql"
 chmod 0600 "$RUN_DIR/pre-apply-schema.sql"
 
+if [[ "$APPLY_BASELINE" == true ]]; then
 psql_rehearsal <<'SQL'
 CREATE SCHEMA IF NOT EXISTS eshop;
 CREATE EXTENSION IF NOT EXISTS dblink WITH SCHEMA public;
@@ -75,6 +94,7 @@ SQL
 psql_rehearsal <"$BASELINE_FILE"
 psql_rehearsal -qc \
   "CREATE SCHEMA IF NOT EXISTS supabase_migrations; CREATE TABLE IF NOT EXISTS supabase_migrations.schema_migrations(version text PRIMARY KEY, statements text[], name text);"
+fi
 
 while IFS= read -r migration_file; do
   filename="$(basename "$migration_file" .sql)"
@@ -85,8 +105,11 @@ while IFS= read -r migration_file; do
   if [[ "$version" > "$BASELINE_VERSION" ]]; then
     psql_rehearsal <"$migration_file"
   fi
-  psql_rehearsal -v version="$version" -v name="$name" -qc \
-    "INSERT INTO supabase_migrations.schema_migrations(version, statements, name) VALUES (:'version', ARRAY[]::text[], :'name') ON CONFLICT (version) DO NOTHING;"
+  psql_rehearsal -v version="$version" -v name="$name" -q <<'SQL'
+INSERT INTO supabase_migrations.schema_migrations(version, statements, name)
+VALUES (:'version', ARRAY[]::text[], :'name')
+ON CONFLICT (version) DO NOTHING;
+SQL
 done < <(find "$MIGRATIONS_DIR" -maxdepth 1 -type f -name '*.sql' | sort)
 
 psql_rehearsal -Atqc "SELECT jsonb_build_object(
