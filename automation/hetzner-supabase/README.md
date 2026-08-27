@@ -34,6 +34,8 @@ node automation/hetzner-supabase/merge/hybrid-readiness.mjs \
   --output "$FESTAPP_MIGRATION_OUTPUT/hybrid-readiness.json"
 node automation/hetzner-supabase/merge/tenant-config-inventory.mjs \
   --output "$FESTAPP_MIGRATION_OUTPUT/tenant-configs.json"
+node automation/hetzner-supabase/merge/migration-history-inventory.mjs \
+  --output "$FESTAPP_MIGRATION_OUTPUT/migration-history.json"
 ```
 
 Each source catalog inventory also writes a sibling `*.manifest.json`. It
@@ -72,6 +74,14 @@ permission to deploy. It requires the complete 41-signature client-sync
 expansion to exist first and intentionally aborts on missing or additional
 overloads. Apply it only inside the ordered expansion/rehearsal workflow; never
 as an isolated hotfix to the current drifted `default` cloud project.
+
+`migration-history-inventory.mjs` compares the immutable repository migration
+set with the read-only `supabase_migrations.schema_migrations` history of both
+approved sources. A missing history row is not proof that the SQL effect is
+absent, and a recorded row is not proof that its current effect matches the
+repository. The report never emits deployment permission; use it to identify
+history divergence that must be reconciled by catalog comparison in a rehearsal
+database.
 
 `SUPABASE_ACCESS_TOKEN` may be supplied in the environment or in the repository
 root `.env.local`. The scripts never print it. Source aliases are pinned to the
