@@ -5,6 +5,7 @@ import {
   SOURCES,
   REPOSITORY_ROOT,
   assertPrivateOutput,
+  assertNewEvidencePaths,
   buildInventoryManifest,
   sha256,
   stableJson,
@@ -24,6 +25,10 @@ test('source aliases are pinned to the approved cloud projects', () => {
 test('production evidence cannot be written inside the repository', () => {
   assert.throws(() => assertPrivateOutput(path.join(REPOSITORY_ROOT, 'inventory.json')));
   assert.equal(assertPrivateOutput('/tmp/festapp-wave-0/inventory.json'), '/tmp/festapp-wave-0/inventory.json');
+});
+
+test('existing evidence is never overwritten', () => {
+  assert.throws(() => assertNewEvidencePaths([new URL(import.meta.url).pathname]), /refusing to overwrite/);
 });
 
 test('stable JSON and fingerprints do not depend on object key order', () => {

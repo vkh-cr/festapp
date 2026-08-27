@@ -4,6 +4,8 @@ import path from 'node:path';
 import {
   SOURCES,
   accessToken,
+  assertCanonicalDefaultTarget,
+  assertNewEvidencePaths,
   assertPrivateOutput,
   buildInventoryManifest,
   managementQuery,
@@ -264,6 +266,7 @@ async function main() {
   const output = assertPrivateOutput(args.output);
   const projectRef = SOURCES[args.source];
   const token = accessToken();
+  if (args.source === 'default') await assertCanonicalDefaultTarget({ token });
   const rows = await managementQuery({ projectRef, token, query: catalogSql });
   const catalog = rows[0]?.inventory;
   if (!catalog || !Array.isArray(catalog.relations)) {
@@ -310,9 +313,10 @@ async function main() {
   const inventoryChecksum = sha256(stableJson(inventory));
   const manifest = buildInventoryManifest({ inventory, inventoryChecksum });
   const manifestOutput = output.replace(/\.json$/i, '') + '.manifest.json';
+  assertNewEvidencePaths([output, manifestOutput]);
   fs.mkdirSync(path.dirname(output), { recursive: true, mode: 0o700 });
-  fs.writeFileSync(output, `${JSON.stringify(inventory, null, 2)}\n`, { mode: 0o600 });
-  fs.writeFileSync(manifestOutput, `${JSON.stringify(manifest, null, 2)}\n`, { mode: 0o600 });
+  fs.writeFileSync(output, `${JSON.stringify(inventory, null, 2)}\n`, { mode: 0o600, flag: 'wx' });
+  fs.writeFileSync(manifestOutput, `${JSON.stringify(manifest, null, 2)}\n`, { mode: 0o600, flag: 'wx' });
   process.stdout.write(`inventory ${args.source}: ${catalog.postgres_version}, ${catalog.relations.length} relations, ${inventory.schema_fingerprint_sha256}\n`);
 }
 

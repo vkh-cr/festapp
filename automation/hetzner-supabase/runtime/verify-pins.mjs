@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 
 const manifestPath = new URL('./pins.json', import.meta.url);
@@ -24,6 +25,72 @@ for (const [name, source] of Object.entries(pins.sources)) {
   assert.match(source, /^https:\/\//, `${name} must cite an HTTPS primary source`);
 }
 process.stdout.write(`runtime pins valid: ${pins.supabase.release}, ${Object.keys(pins.supabase.images).length} immutable images\n`);
+
+if (process.argv.includes('--online')) await verifyOnline();
+
+async function verifyOnline() {
+  const latestRepositories = {
+    dockerCompose: 'docker/compose',
+    caddy: 'caddyserver/caddy',
+    terraform: 'hashicorp/terraform',
+    hcloudProvider: 'hetznercloud/terraform-provider-hcloud',
+  };
+  for (const [name, repository] of Object.entries(latestRepositories)) {
+    const release = await fetchJson(`https://api.github.com/repos/${repository}/releases/latest`);
+    assert.equal(release.prerelease, false, `${name} latest release must be stable`);
+    assert.equal(release.draft, false, `${name} latest release must be published`);
+    assert.equal(release.tag_name.replace(/^v/, ''), pins.host[name], `${name} is no longer latest stable`);
+  }
+
+  const refs = await fetchJson('https://api.github.com/repos/supabase/supabase/git/matching-refs/tags/self-hosted/v');
+  const latestRef = refs.map((value) => value.ref.replace('refs/tags/', ''))
+    .filter((value) => /^self-hosted\/v\d+\.\d+\.\d+$/.test(value))
+    .sort(compareReleaseTags).at(-1);
+  assert.equal(latestRef, pins.supabase.release, 'Supabase bundle is no longer latest stable');
+  const tagRef = refs.find((value) => value.ref === `refs/tags/${latestRef}`);
+  const commit = tagRef.object.type === 'tag'
+    ? (await fetchJson(tagRef.object.url)).object.sha
+    : tagRef.object.sha;
+  assert.equal(commit, pins.supabase.commit, 'Supabase release commit changed');
+
+  const compose = await fetch(`https://raw.githubusercontent.com/supabase/supabase/${pins.supabase.release}/docker/docker-compose.yml`).then(assertResponse);
+  const composeImages = new Set((await compose.text()).split(/\r?\n/)
+    .map((line) => line.match(/^\s+image:\s+(\S+)$/)?.[1]).filter(Boolean));
+  for (const [name, pinned] of Object.entries(pins.supabase.images)) {
+    if (name !== 'caddy') assert.ok(composeImages.has(pinned.split('@')[0]), `${name} is not in the selected Supabase bundle`);
+    const inspected = JSON.parse(execFileSync('docker', ['manifest', 'inspect', '--verbose', pinned.split('@')[0]], { encoding: 'utf8' }));
+    const manifests = Array.isArray(inspected) ? inspected : [inspected];
+    const amd64 = manifests.find((value) => value.Descriptor?.platform?.os === 'linux' && value.Descriptor?.platform?.architecture === 'amd64') ?? manifests[0];
+    assert.equal(amd64.Descriptor.digest, pinned.split('@')[1], `${name} amd64 digest changed`);
+  }
+
+  const [ubuntu, docker, postgres] = await Promise.all([
+    fetch('https://ubuntu.com/download/server').then(assertResponse).then((value) => value.text()),
+    fetch('https://docs.docker.com/engine/release-notes/29/').then(assertResponse).then((value) => value.text()),
+    fetch('https://www.postgresql.org/docs/release/').then(assertResponse).then((value) => value.text()),
+  ]);
+  assert.ok(ubuntu.includes(`Ubuntu ${pins.host.ubuntu}`), 'Ubuntu pin is not present on the official latest-LTS page');
+  assert.ok(docker.includes(pins.host.dockerEngine), 'Docker Engine pin is not present in current official release notes');
+  assert.ok(postgres.includes(`PostgreSQL ${pins.supabase.upstreamPostgresLatestStable}`), 'upstream PostgreSQL stable reference is stale');
+  process.stdout.write('online runtime pins verified against primary upstreams and amd64 registries\n');
+}
+
+async function fetchJson(url) {
+  return fetch(url, { headers: { accept: 'application/vnd.github+json', 'user-agent': 'festapp-runtime-pin-verifier' } })
+    .then(assertResponse).then((response) => response.json());
+}
+
+function assertResponse(response) {
+  if (!response.ok) throw new Error(`upstream verification failed: HTTP ${response.status} ${response.url}`);
+  return response;
+}
+
+function compareReleaseTags(left, right) {
+  const parse = (value) => value.match(/v(\d+)\.(\d+)\.(\d+)$/).slice(1).map(Number);
+  const a = parse(left);
+  const b = parse(right);
+  return a[0] - b[0] || a[1] - b[1] || a[2] - b[2];
+}
 
 function stableJson(value) {
   if (Array.isArray(value)) return `[${value.map(stableJson).join(',')}]`;

@@ -39,6 +39,43 @@ export function accessToken() {
   return token;
 }
 
+export function canonicalDefaultConfig() {
+  const config = parseKeyValueFile(path.join(REPOSITORY_ROOT, 'automation/project.conf'));
+  const supabaseUrl = config.get('SUPABASE_URL');
+  const projectRef = supabaseUrl?.match(/^https:\/\/([a-z0-9]+)\.supabase\.co$/)?.[1];
+  const organization = Number(config.get('ORGANIZATION_ID'));
+  const occasionLink = config.get('FORCE_OCCASION_LINK') ?? '';
+  if (projectRef !== SOURCES.default || !Number.isSafeInteger(organization)) {
+    throw new Error('canonical default source does not match automation/project.conf');
+  }
+  if (occasionLink && !/^[a-zA-Z0-9_-]+$/.test(occasionLink)) {
+    throw new Error('configured occasion link is not safe to verify');
+  }
+  return { projectRef, organization, occasionLink };
+}
+
+export async function assertCanonicalDefaultTarget({ token }) {
+  const target = canonicalDefaultConfig();
+  if (!target.occasionLink) return target;
+  const rows = await managementQuery({
+    projectRef: target.projectRef,
+    token,
+    query: `SELECT EXISTS (
+      SELECT 1 FROM public.occasions WHERE link = '${target.occasionLink}'
+    ) AS occasion_exists`,
+  });
+  if (!rows[0]?.occasion_exists) {
+    throw new Error('configured occasion is absent from canonical default source');
+  }
+  return target;
+}
+
+export function assertNewEvidencePaths(paths) {
+  for (const filePath of paths) {
+    if (fs.existsSync(filePath)) throw new Error(`refusing to overwrite existing evidence: ${filePath}`);
+  }
+}
+
 export function assertPrivateOutput(outputPath) {
   const absolute = path.resolve(outputPath);
   const relative = path.relative(REPOSITORY_ROOT, absolute);
