@@ -172,6 +172,11 @@ test('encrypted source export accepts only an approved project identity', () => 
     () => parseApprovedConnection('default', `postgresql://postgres.${SOURCES.a}:secret@aws-0-eu-central-1.pooler.supabase.com/postgres`),
     /approved source ref/,
   );
+  const temporary = parseApprovedConnection(
+    'default',
+    `postgresql://festapp_export_1787840000000.${SOURCES.default}:secret@aws-0-eu-central-1.pooler.supabase.com/postgres`,
+  );
+  assert.equal(temporary.username, `festapp_export_1787840000000.${SOURCES.default}`);
   assert.equal(validateRecipient('age1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq'),
     'age1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq');
   assert.equal(validateRecipient('ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEexampleexampleexampleexampleexample user@host'),
