@@ -28,6 +28,10 @@ export function buildIdentityDecisions(report) {
   if (report.auth.same_uuid_different_email.length !== 0) {
     throw new Error('same UUID with different e-mail requires a separate manual decision');
   }
+  if ((report.auth.same_provider_identity_different_uuid?.length ?? 0) !== 0 ||
+      (report.auth.same_verified_phone_different_uuid?.length ?? 0) !== 0) {
+    throw new Error('provider identity or verified phone collision requires a separate manual decision');
+  }
   const decisions = report.auth.same_email_different_uuid.map((collision) => {
     if (collision.status !== 'manual-merge-required' || !collision.default_verified || !collision.a_verified) {
       throw new Error('ambiguous or unverified identity cannot use the canonical verified-email rule');

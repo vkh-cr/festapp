@@ -34,7 +34,7 @@ async function sourceRows(projectRef) {
   const identities = await managementQuery({
     projectRef,
     token,
-    query: `SELECT user_id::text, provider FROM auth.identities ORDER BY user_id, provider`,
+    query: `SELECT user_id::text, provider, provider_id FROM auth.identities ORDER BY user_id, provider, provider_id`,
   });
   const mfa = await managementQuery({
     projectRef,
@@ -45,7 +45,8 @@ async function sourceRows(projectRef) {
   const providersByUser = groupByUser(identities);
   const mfaByUser = groupByUser(mfa);
   for (const user of users) {
-    user.providers = [...new Set((providersByUser.get(user.id) ?? []).map((identity) => identity.provider))].sort();
+    user.provider_links = (providersByUser.get(user.id) ?? []).map(({ provider, provider_id }) => ({ provider, provider_id }));
+    user.providers = [...new Set(user.provider_links.map((identity) => identity.provider))].sort();
     user.mfa = (mfaByUser.get(user.id) ?? []).map(({ factor_type, status }) => ({ factor_type, status }));
   }
   const storage = await managementQuery({
@@ -83,6 +84,8 @@ const report = {
     status: 'blocked',
     same_uuid_different_email: auth.same_uuid_different_email.length,
     same_email_different_uuid: auth.same_email_different_uuid.length,
+    same_provider_identity_different_uuid: auth.same_provider_identity_different_uuid.length,
+    same_verified_phone_different_uuid: auth.same_verified_phone_different_uuid.length,
     storage_key_collisions: storage.length,
     storage_content_blockers: storage.filter((value) => value.status === 'content-collision-blocker').length,
     notes: [

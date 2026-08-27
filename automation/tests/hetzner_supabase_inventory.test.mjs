@@ -82,6 +82,18 @@ test('identity collisions block conflicting UUID and verified-email merges', () 
   assert.equal(result.same_email_different_uuid[0].email_hmac.length, 64);
 });
 
+test('identity inventory detects provider-key and verified-phone collisions outside e-mail matches', () => {
+  const result = classifyAuthCollisions(
+    [{ id: 'd1', normalized_email: 'd@example.test', verified: true, normalized_phone: '+4201', phone_verified: true, provider_links: [{ provider: 'google', provider_id: 'provider-key' }] }],
+    [{ id: 'a1', normalized_email: 'a@example.test', verified: true, normalized_phone: '+4201', phone_verified: true, provider_links: [{ provider: 'google', provider_id: 'provider-key' }] }],
+    Buffer.alloc(32, 3),
+  );
+  assert.equal(result.same_provider_identity_different_uuid.length, 1);
+  assert.equal(result.same_verified_phone_different_uuid.length, 1);
+  assert.equal(result.same_provider_identity_different_uuid[0].provider_id_hmac.length, 64);
+  assert.equal(result.same_verified_phone_different_uuid[0].phone_hmac.length, 64);
+});
+
 test('Storage collisions never treat matching metadata as content proof', () => {
   const result = classifyStorageCollisions(
     [{ bucket_id: 'public', name: 'same.jpg', etag: 'etag', size: '12' }],
@@ -163,7 +175,8 @@ test('identity resolver verifies collision provenance and blocks nontrivial Auth
 
 function simpleEmailAuthState() {
   return {
-    providers: ['email'], mfa: [], phone_hmac: null, phone_verified: false,
+    providers: ['email'], provider_links: [{ provider: 'email', provider_id_hmac: '1'.repeat(64) }],
+    mfa: [], phone_hmac: null, phone_verified: false,
     is_sso_user: false, is_anonymous: false,
     pending_tokens: { confirmation: false, recovery: false, email_change: false, phone_change: false, reauthentication: false },
   };
