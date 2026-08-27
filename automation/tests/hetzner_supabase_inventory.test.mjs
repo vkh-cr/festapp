@@ -107,9 +107,12 @@ test('Storage collisions never treat matching metadata as content proof', () => 
 
 test('verified e-mail collisions preserve default UUID and force source password reset', () => {
   const collisionReport = {
+    report_version: 2,
     sources: SOURCES,
     auth: {
       same_uuid_different_email: [],
+      same_provider_identity_different_uuid: [],
+      same_verified_phone_different_uuid: [],
       same_email_different_uuid: [{
         default_user_id: 'default-user',
         a_user_id: 'a-user',
@@ -144,10 +147,13 @@ test('verified e-mail collisions preserve default UUID and force source password
 
 test('identity resolver blocks unverified or UUID/e-mail ambiguity', () => {
   const report = {
+    report_version: 2,
     sources: SOURCES,
     auth: {
       same_uuid_different_email: [{ id: 'blocker' }],
       same_email_different_uuid: [],
+      same_provider_identity_different_uuid: [],
+      same_verified_phone_different_uuid: [],
     },
   };
   report.report_sha256 = sha256(stableJson(report));
@@ -156,9 +162,12 @@ test('identity resolver blocks unverified or UUID/e-mail ambiguity', () => {
 
 test('identity resolver verifies collision provenance and blocks nontrivial Auth state', () => {
   const report = {
+    report_version: 2,
     sources: SOURCES,
     auth: {
       same_uuid_different_email: [],
+      same_provider_identity_different_uuid: [],
+      same_verified_phone_different_uuid: [],
       same_email_different_uuid: [{
         default_user_id: 'default-user', a_user_id: 'a-user', email_hmac: 'f'.repeat(64),
         default_verified: true, a_verified: true, status: 'manual-merge-required',
@@ -171,6 +180,16 @@ test('identity resolver verifies collision provenance and blocks nontrivial Auth
   assert.throws(() => buildIdentityDecisions(report), /provider, MFA/);
   report.report_sha256 = '0'.repeat(64);
   assert.throws(() => buildIdentityDecisions(report), /checksum mismatch/);
+});
+
+test('identity resolver rejects older reports without global provider and phone evidence', () => {
+  const report = {
+    report_version: 1,
+    sources: SOURCES,
+    auth: { same_uuid_different_email: [], same_email_different_uuid: [] },
+  };
+  report.report_sha256 = sha256(stableJson(report));
+  assert.throws(() => buildIdentityDecisions(report), /report v2/);
 });
 
 function simpleEmailAuthState() {

@@ -22,14 +22,19 @@ export function buildIdentityDecisions(report) {
   if (!claimedChecksum || actualChecksum !== claimedChecksum) {
     throw new Error('collision report checksum mismatch');
   }
+  if (report.report_version !== 2 ||
+      !Array.isArray(report.auth?.same_provider_identity_different_uuid) ||
+      !Array.isArray(report.auth?.same_verified_phone_different_uuid)) {
+    throw new Error('collision report v2 with provider and phone evidence is required');
+  }
   if (report.sources?.default !== SOURCES.default || report.sources?.a !== SOURCES.a) {
     throw new Error('collision report source identity mismatch');
   }
   if (report.auth.same_uuid_different_email.length !== 0) {
     throw new Error('same UUID with different e-mail requires a separate manual decision');
   }
-  if ((report.auth.same_provider_identity_different_uuid?.length ?? 0) !== 0 ||
-      (report.auth.same_verified_phone_different_uuid?.length ?? 0) !== 0) {
+  if (report.auth.same_provider_identity_different_uuid.length !== 0 ||
+      report.auth.same_verified_phone_different_uuid.length !== 0) {
     throw new Error('provider identity or verified phone collision requires a separate manual decision');
   }
   const decisions = report.auth.same_email_different_uuid.map((collision) => {
