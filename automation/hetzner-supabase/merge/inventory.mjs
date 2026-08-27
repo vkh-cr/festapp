@@ -5,6 +5,7 @@ import {
   SOURCES,
   accessToken,
   assertPrivateOutput,
+  buildInventoryManifest,
   managementQuery,
   quoteIdentifier,
   sha256,
@@ -189,9 +190,12 @@ async function main() {
       'no row payloads or production identities are included',
     ],
   };
-  inventory.manifest_sha256 = sha256(stableJson(inventory));
+  const inventoryChecksum = sha256(stableJson(inventory));
+  const manifest = buildInventoryManifest({ inventory, inventoryChecksum });
+  const manifestOutput = output.replace(/\.json$/i, '') + '.manifest.json';
   fs.mkdirSync(path.dirname(output), { recursive: true, mode: 0o700 });
   fs.writeFileSync(output, `${JSON.stringify(inventory, null, 2)}\n`, { mode: 0o600 });
+  fs.writeFileSync(manifestOutput, `${JSON.stringify(manifest, null, 2)}\n`, { mode: 0o600 });
   process.stdout.write(`inventory ${args.source}: ${catalog.postgres_version}, ${catalog.relations.length} relations, ${inventory.schema_fingerprint_sha256}\n`);
 }
 

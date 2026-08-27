@@ -26,6 +26,10 @@ function differences(leftValues, rightValues, keys) {
   });
 }
 
+function structuralRelations(values) {
+  return values.map(({ total_bytes, estimated_rows, ...relation }) => relation);
+}
+
 const [defaultPath, aPath] = process.argv.slice(2);
 if (!defaultPath || !aPath) {
   throw new Error('usage: schema-fingerprint.mjs DEFAULT_INVENTORY A_INVENTORY');
@@ -50,7 +54,7 @@ const report = {
       String(aInventory.catalog.postgres_version_num).slice(0, 2),
   },
   differences: {
-    relations: differences(defaultInventory.catalog.relations, aInventory.catalog.relations, ['schema_name', 'table_name']),
+    relations: differences(structuralRelations(defaultInventory.catalog.relations), structuralRelations(aInventory.catalog.relations), ['schema_name', 'table_name']),
     columns: differences(defaultInventory.catalog.columns, aInventory.catalog.columns, ['schema_name', 'table_name', 'column_name']),
     constraints: differences(defaultInventory.catalog.constraints, aInventory.catalog.constraints, ['schema_name', 'table_name', 'constraint_name']),
     routines: differences(defaultInventory.catalog.routines, aInventory.catalog.routines, ['schema_name', 'routine_name', 'identity_arguments']),

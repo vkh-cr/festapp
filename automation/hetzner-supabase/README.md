@@ -9,8 +9,10 @@ directory outside the repository.
 
 ## Current implemented boundary
 
-Wave 0 inventory and its decision gate are implemented. Run both source
-inventories into one private directory:
+The Wave 0 inventory foundation and its fail-closed decision gate are
+implemented. Provider history, collision scans, all-writer classification and
+manual decisions remain required before Wave 0 can pass. Run both source
+catalog inventories into one private directory:
 
 ```bash
 export FESTAPP_MIGRATION_OUTPUT=/absolute/private/path/wave-0
@@ -22,6 +24,10 @@ node automation/hetzner-supabase/merge/schema-fingerprint.mjs \
   "$FESTAPP_MIGRATION_OUTPUT/default.json" \
   "$FESTAPP_MIGRATION_OUTPUT/a.json"
 ```
+
+Each inventory also writes a sibling `*.manifest.json`. It deliberately remains
+`blocked` and unsigned until all Wave 0 evidence is attached and signed by the
+approved evidence process.
 
 `SUPABASE_ACCESS_TOKEN` may be supplied in the environment or in the repository
 root `.env.local`. The scripts never print it. Source aliases are pinned to the
