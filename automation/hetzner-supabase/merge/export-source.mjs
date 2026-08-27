@@ -47,8 +47,6 @@ export function pgDumpArgs(connection) {
     '--serializable-deferrable',
     '--schema', 'public',
     '--schema', 'eshop',
-    '--schema', 'auth',
-    '--schema', 'storage',
     '--host', connection.host,
     '--port', connection.port,
     '--username', connection.username,
@@ -130,6 +128,7 @@ async function main() {
     },
     artifact: {
       format: 'pg_dump-custom+age',
+      schemas: ['public', 'eshop'],
       path_basename: path.basename(output),
       bytes: fs.statSync(output).size,
       sha256: await fileSha256(output),

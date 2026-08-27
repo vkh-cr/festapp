@@ -70,9 +70,9 @@ async function createExportRole({ projectRef, token, role, password, validUntil 
 CREATE ROLE ${identifier} LOGIN PASSWORD '${password}' VALID UNTIL '${validUntil}' NOINHERIT;
 ALTER ROLE ${identifier} BYPASSRLS;
 GRANT pg_read_all_data TO ${identifier};
-GRANT USAGE ON SCHEMA public, eshop, auth, storage TO ${identifier};
-GRANT SELECT ON ALL TABLES IN SCHEMA public, eshop, auth, storage TO ${identifier};
-GRANT SELECT ON ALL SEQUENCES IN SCHEMA public, eshop, auth, storage TO ${identifier};
+GRANT USAGE ON SCHEMA public, eshop TO ${identifier};
+GRANT SELECT ON ALL TABLES IN SCHEMA public, eshop TO ${identifier};
+GRANT SELECT ON ALL SEQUENCES IN SCHEMA public, eshop TO ${identifier};
 COMMIT;`,
   });
 }
@@ -84,9 +84,9 @@ async function disableExportRole({ projectRef, token, role }) {
     token,
     query: `BEGIN;
 ALTER ROLE ${identifier} NOLOGIN NOBYPASSRLS;
-REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public, eshop, auth, storage FROM ${identifier};
-REVOKE ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public, eshop, auth, storage FROM ${identifier};
-REVOKE USAGE ON SCHEMA public, eshop, auth, storage FROM ${identifier};
+REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public, eshop FROM ${identifier};
+REVOKE ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public, eshop FROM ${identifier};
+REVOKE USAGE ON SCHEMA public, eshop FROM ${identifier};
 REVOKE pg_read_all_data FROM ${identifier};
 COMMIT;`,
   });
@@ -98,7 +98,7 @@ COMMIT;`,
       (SELECT count(*)::int FROM pg_namespace n
         CROSS JOIN LATERAL aclexplode(n.nspacl) acl
         JOIN pg_roles granted_role ON granted_role.oid = acl.grantee
-        WHERE n.nspname IN ('public', 'eshop', 'auth', 'storage')
+        WHERE n.nspname IN ('public', 'eshop')
           AND granted_role.rolname = '${role}') AS direct_schema_grants,
       (SELECT count(*)::int FROM information_schema.role_table_grants WHERE grantee = '${role}') AS table_grants
       FROM pg_roles WHERE rolname = '${role}'`,
