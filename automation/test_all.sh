@@ -281,6 +281,7 @@ if [ "$RUN_AUTOMATION" = true ]; then
       "$SCRIPT_DIR/tests/pwa_manifest.test.mjs" \
       "$SCRIPT_DIR/tests/pwa_reconcile.test.mjs" \
       "$SCRIPT_DIR/tests/pwa_storage_bridge.test.mjs" \
+      "$SCRIPT_DIR/tests/hetzner_supabase_inventory.test.mjs" \
       "$SCRIPT_DIR/tests/private_inputs_schema.test.mjs" \
       "$SCRIPT_DIR/tests/recovery_readiness.test.mjs" \
       "$WEB_CLIENT_DIR/tests/core/pwa_client_adapter.test.js"

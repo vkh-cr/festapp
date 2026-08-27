@@ -5,6 +5,7 @@ import {
   SOURCES,
   REPOSITORY_ROOT,
   assertPrivateOutput,
+  buildInventoryManifest,
   sha256,
   stableJson,
 } from '../hetzner-supabase/merge/lib.mjs';
@@ -24,4 +25,27 @@ test('production evidence cannot be written inside the repository', () => {
 test('stable JSON and fingerprints do not depend on object key order', () => {
   assert.equal(stableJson({ b: 2, a: 1 }), stableJson({ a: 1, b: 2 }));
   assert.equal(sha256(stableJson({ b: 2, a: 1 })), sha256(stableJson({ a: 1, b: 2 })));
+});
+
+test('inventory creates a blocked evidence manifest with the required provenance', () => {
+  const inventory = {
+    source: { alias: 'default', project_ref: SOURCES.default },
+    generated_at: '2026-08-27T12:00:00.000Z',
+    schema_fingerprint_sha256: 'a'.repeat(64),
+    catalog: { relations: [{}, {}] },
+    exact_row_counts: { 'public.a': 2, 'public.b': 3 },
+    edge_functions: { functions: [{}] },
+    limitations: ['collision pass incomplete'],
+  };
+  const manifest = buildInventoryManifest({ inventory, inventoryChecksum: 'b'.repeat(64) });
+  assert.equal(manifest.phase, 'inventory');
+  assert.equal(manifest.validation.status, 'blocked');
+  assert.equal(manifest.counts.rows, 5);
+  assert.deepEqual(manifest.sources[0], {
+    alias: 'default',
+    project_ref: SOURCES.default,
+    schema_fingerprint: 'a'.repeat(64),
+    snapshot_at: inventory.generated_at,
+    journal_position: null,
+  });
 });

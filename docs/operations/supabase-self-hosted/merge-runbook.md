@@ -3,7 +3,9 @@
 ## Wave 0: read-only inventory
 
 1. Create a private `0700` evidence directory outside the repository.
-2. Run `inventory.mjs` for `default` and `a`; preserve both `0600` manifests.
+2. Run `inventory.mjs` for `default` and `a`; preserve each `0600` inventory and
+   sibling evidence manifest. Inventory manifests remain blocked and unsigned
+   until all evidence below is attached and the approved signing step runs.
 3. Generate the schema drift report with `schema-fingerprint.mjs`.
 4. Add provider metrics for 30/90-day database and Storage growth, WAL rate and
    peak connections. The catalog snapshot intentionally cannot infer history.

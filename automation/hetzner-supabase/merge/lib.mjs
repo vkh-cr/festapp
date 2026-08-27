@@ -61,6 +61,42 @@ export function sha256(value) {
   return crypto.createHash('sha256').update(value).digest('hex');
 }
 
+export function buildInventoryManifest({ inventory, inventoryChecksum }) {
+  const counts = inventory.exact_row_counts;
+  return {
+    manifest_version: 1,
+    run_id: `inventory-${inventory.source.alias}-${inventory.generated_at.replaceAll(/[^0-9]/g, '')}`,
+    phase: 'inventory',
+    sources: [{
+      alias: inventory.source.alias,
+      project_ref: inventory.source.project_ref,
+      schema_fingerprint: inventory.schema_fingerprint_sha256,
+      snapshot_at: inventory.generated_at,
+      journal_position: null,
+    }],
+    transformation_version: 'inventory-only-2026-08-27.1',
+    counts: {
+      relations: inventory.catalog.relations.length,
+      counted_tables: Object.keys(counts).length,
+      rows: Object.values(counts).reduce((sum, value) => sum + value, 0),
+      edge_functions: inventory.edge_functions.functions.length,
+    },
+    checksums: {
+      schema: inventory.schema_fingerprint_sha256,
+      inventory: inventoryChecksum,
+    },
+    validation: {
+      status: 'blocked',
+      unresolved_conflicts: 0,
+      orphan_foreign_keys: 0,
+      journal_lag: null,
+      notes: inventory.limitations,
+    },
+    created_at: inventory.generated_at,
+    signature: null,
+  };
+}
+
 export async function managementQuery({ projectRef, token, query }) {
   if (!Object.values(SOURCES).includes(projectRef)) {
     throw new Error(`unapproved source project: ${projectRef}`);
