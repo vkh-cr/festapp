@@ -86,3 +86,24 @@ keeps the rehearsal run blocked until an explicit `repair` decision or an
 `omit-with-ledger` decision names the checksum of private evidence. The two
 known orphan `default.user_companions` rows therefore remain preserved and
 blocked; this step does not import them or mutate either cloud source.
+
+## Encrypted read-only source snapshot
+
+Never write a plaintext production dump. Prepare a private `0700` output
+directory outside the repository, provide the exact source database URL only in
+the process environment, and encrypt the `pg_dump` stream directly to a native
+age recipient:
+
+```bash
+FESTAPP_SOURCE_DATABASE_URL='postgresql://...' \
+FESTAPP_EXPORT_AGE_RECIPIENT='age1...' \
+  node automation/hetzner-supabase/merge/export-source.mjs \
+  default /private/evidence/default.dump.age
+```
+
+Repeat with alias `a` and that project's URL. The exporter accepts only the two
+hard-coded approved project refs, requires TLS, keeps the password out of child
+process arguments, refuses a group/world-accessible directory, never overwrites
+an artifact, and writes a sibling `0600` checksum manifest. A failed stream is
+preserved for diagnosis and must not be mistaken for a complete artifact because
+it has no manifest.
