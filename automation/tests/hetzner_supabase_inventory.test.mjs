@@ -30,6 +30,7 @@ import {
   buildMigrationHistoryReport,
 } from '../hetzner-supabase/merge/migration-history-inventory.mjs';
 import { buildCanonicalDriftReport } from '../hetzner-supabase/merge/canonical-drift.mjs';
+import { buildTableImportReadiness } from '../hetzner-supabase/merge/table-import-readiness.mjs';
 
 test('source aliases are pinned to the approved cloud projects', () => {
   assert.deepEqual(SOURCES, {
@@ -98,6 +99,32 @@ test('canonical drift compares both pinned sources to an isolated PG17 target', 
     changed: 0,
   });
   assert.equal(report.validation.status, 'blocked');
+  assert.equal(report.validation.production_mutations_performed, false);
+});
+
+test('table import readiness blocks incompatible and required target columns', () => {
+  const relation = { schema_name: 'public', table_name: 'items', relkind: 'r' };
+  const column = (column_name, overrides = {}) => ({
+    ...relation, column_name, data_type: 'bigint', udt_schema: 'pg_catalog', udt_name: 'int8',
+    is_nullable: 'NO', column_default: null, is_identity: 'NO', identity_generation: null,
+    is_generated: 'NEVER', ...overrides,
+  });
+  const inventory = {
+    source: { alias: 'default', project_ref: SOURCES.default },
+    catalog: { relations: [relation], columns: [column('id'), column('legacy')] },
+    exact_row_counts: { 'public.items': 4 },
+  };
+  const report = buildTableImportReadiness({
+    inventory,
+    targetCatalog: {
+      postgres_version: '17.6', relations: [relation],
+      columns: [column('id', { data_type: 'text', udt_name: 'text' }), column('required')],
+    },
+  });
+  assert.equal(report.summary.blocked_tables, 1);
+  assert.deepEqual(report.tables[0].source_only_columns, ['legacy']);
+  assert.deepEqual(report.tables[0].incompatible_columns, ['id']);
+  assert.deepEqual(report.tables[0].required_target_values, ['required']);
   assert.equal(report.validation.production_mutations_performed, false);
 });
 
