@@ -413,12 +413,20 @@ class LegacyMapViewportController implements MapViewportController {
     // A retained map can be put under TickerMode while an earlier camera
     // animation is still pending. If that animation resumes after navigation,
     // it would overwrite this required destination. Navigation state wins over
-    // cosmetic motion, so cancel every pending animation before the raw move.
+    // cosmetic motion, so cancel every pending animation before applying this
+    // required transition.
     controller.stopAnimations();
-    controller.mapController.move(
-      command.destination,
-      command.zoom + 1,
-    );
+    if (command.transition == CameraTransition.animated) {
+      await controller.animateTo(
+        dest: command.destination,
+        zoom: command.zoom + 1,
+      );
+    } else {
+      controller.mapController.move(
+        command.destination,
+        command.zoom + 1,
+      );
+    }
     final raw = controller.mapController.camera;
     final actual = MapCameraState(center: raw.center, zoom: raw.zoom - 1);
     final centerMatches = const Distance().as(

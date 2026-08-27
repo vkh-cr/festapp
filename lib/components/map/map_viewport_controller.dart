@@ -10,12 +10,15 @@ class MapCameraState {
 
 enum CameraApplyStatus { applied, retryable, rejected, staleSurface }
 
+enum CameraTransition { immediate, animated }
+
 final class CameraCommand {
   final String surfaceId;
   final LatLng destination;
   final double zoom;
   final double centerToleranceMeters;
   final double zoomTolerance;
+  final CameraTransition transition;
 
   const CameraCommand({
     required this.surfaceId,
@@ -23,6 +26,7 @@ final class CameraCommand {
     required this.zoom,
     this.centerToleranceMeters = 3,
     this.zoomTolerance = 0.05,
+    this.transition = CameraTransition.immediate,
   });
 }
 

@@ -32,11 +32,13 @@ final class _FakeViewportController implements MapViewportController {
   @override
   Future<CameraApplyResult> applyCamera(CameraCommand command) async {
     applications.add(command);
+    if (command.transition == CameraTransition.animated) {
+      await animateTo(command.destination, zoom: command.zoom);
+    }
     camera = MapCameraState(
       center: command.destination,
       zoom: command.zoom,
     );
-    animations.add((destination: command.destination, zoom: command.zoom));
     return CameraApplyResult(
       status: CameraApplyStatus.applied,
       surfaceId: command.surfaceId,
@@ -96,9 +98,13 @@ void main() {
     expect(surface.applications, hasLength(1));
     expect(surface.camera.center, const LatLng(50.0755, 14.4378));
     expect(surface.camera.zoom, MapLocateCoordinator.minimumZoom);
+    expect(
+      surface.applications.single.transition,
+      CameraTransition.animated,
+    );
   });
 
-  test('recenters the active viewport on the current position at local zoom',
+  test('animates the active viewport to the current position at local zoom',
       () async {
     final viewport = MapViewportCoordinator();
     final surface = _FakeViewportController(const MapCameraState(

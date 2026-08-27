@@ -34,12 +34,19 @@ class MapLibreViewportController implements MapViewportController {
   Future<CameraApplyResult> applyCamera(CameraCommand command) async {
     var observedRevision = _cameraRevision;
     var attempts = 1;
-    // Required navigation interrupts older cosmetic camera transitions and
-    // applies center and zoom atomically on iOS.
-    await controller.moveCamera(
-      center: _toGeographic(command.destination),
-      zoom: command.zoom,
-    );
+    // Required navigation replaces older cosmetic camera transitions and
+    // applies center and zoom as one command.
+    if (command.transition == CameraTransition.animated) {
+      await controller.animateCamera(
+        center: _toGeographic(command.destination),
+        zoom: command.zoom,
+      );
+    } else {
+      await controller.moveCamera(
+        center: _toGeographic(command.destination),
+        zoom: command.zoom,
+      );
+    }
     var actual = camera;
     while (!_matches(command, actual) && !_invalidated && attempts < 3) {
       await _waitForCameraChange(observedRevision);

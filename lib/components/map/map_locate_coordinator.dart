@@ -52,6 +52,7 @@ class MapLocateCoordinator {
         surfaceId: surfaceId,
         destination: LatLng(position.latitude, position.longitude),
         zoom: zoom,
+        transition: CameraTransition.animated,
       ));
       if (!_remainsCurrent(surfaceId, isActive)) return MapLocateResult.ignored;
       return result.isApplied
