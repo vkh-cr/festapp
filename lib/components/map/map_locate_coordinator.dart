@@ -9,8 +9,6 @@ import 'package:latlong2/latlong.dart';
 enum MapLocateResult { recentered, denied, ignored }
 
 class MapLocateCoordinator {
-  static const double minimumZoom = 16;
-
   final MapViewportCoordinator _viewport;
   final Future<Position?> Function() _currentPosition;
   bool _isLocating = false;
@@ -55,7 +53,7 @@ class MapLocateCoordinator {
       }
       if (!_remainsCurrent(surfaceId, isActive)) return MapLocateResult.ignored;
       final zoom = math.min(
-        math.max(_viewport.directionLayoutZoom, minimumZoom),
+        _viewport.directionLayoutZoom,
         MapZoomLimits.interactionMaximum,
       );
       final result = await _viewport.applyCamera(CameraCommand(

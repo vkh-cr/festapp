@@ -97,14 +97,14 @@ void main() {
     );
     expect(surface.applications, hasLength(1));
     expect(surface.camera.center, const LatLng(50.0755, 14.4378));
-    expect(surface.camera.zoom, MapLocateCoordinator.minimumZoom);
+    expect(surface.camera.zoom, 10);
     expect(
       surface.applications.single.transition,
       CameraTransition.animated,
     );
   });
 
-  test('animates the active viewport to the current position at local zoom',
+  test('animates to the current position without changing the local zoom',
       () async {
     final viewport = MapViewportCoordinator();
     final surface = _FakeViewportController(const MapCameraState(
@@ -125,7 +125,7 @@ void main() {
     expect(surface.animations, hasLength(1));
     expect(
         surface.animations.single.destination, const LatLng(50.0755, 14.4378));
-    expect(surface.animations.single.zoom, MapLocateCoordinator.minimumZoom);
+    expect(surface.animations.single.zoom, 10);
   });
 
   test('recenters from the displayed location without a second GPS request',
