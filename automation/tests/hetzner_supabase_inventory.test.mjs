@@ -29,6 +29,7 @@ import {
 import {
   buildMigrationHistoryReport,
 } from '../hetzner-supabase/merge/migration-history-inventory.mjs';
+import { buildCanonicalDriftReport } from '../hetzner-supabase/merge/canonical-drift.mjs';
 
 test('source aliases are pinned to the approved cloud projects', () => {
   assert.deepEqual(SOURCES, {
@@ -73,6 +74,26 @@ test('existing evidence is never overwritten', () => {
 test('stable JSON and fingerprints do not depend on object key order', () => {
   assert.equal(stableJson({ b: 2, a: 1 }), stableJson({ a: 1, b: 2 }));
   assert.equal(sha256(stableJson({ b: 2, a: 1 })), sha256(stableJson({ a: 1, b: 2 })));
+});
+
+test('canonical drift compares both pinned sources to an isolated PG17 target', () => {
+  const catalog = (relationName) => ({
+    postgres_version: '17.6',
+    postgres_version_num: '170006',
+    relations: [{ schema_name: 'public', table_name: relationName, relkind: 'r', total_bytes: 1, estimated_rows: 2 }],
+    columns: [], constraints: [], routines: [], policies: [], grants: [],
+    extensions: [], publications: [], roles: [], collations: [],
+  });
+  const report = buildCanonicalDriftReport({
+    defaultInventory: { source: { alias: 'default', project_ref: SOURCES.default }, schema_fingerprint_sha256: 'd'.repeat(64), catalog: catalog('same') },
+    aInventory: { source: { alias: 'a', project_ref: SOURCES.a }, schema_fingerprint_sha256: 'a'.repeat(64), catalog: catalog('legacy') },
+    targetCatalog: catalog('same'),
+  });
+  assert.equal(report.comparisons.default.unresolved_catalog_differences, 0);
+  assert.equal(report.comparisons.a.unresolved_catalog_differences, 2);
+  assert.deepEqual(report.comparisons.a.scope_counts, { application: 2, platform: 0 });
+  assert.equal(report.validation.status, 'blocked');
+  assert.equal(report.validation.production_mutations_performed, false);
 });
 
 test('inventory creates a blocked evidence manifest with the required provenance', () => {
