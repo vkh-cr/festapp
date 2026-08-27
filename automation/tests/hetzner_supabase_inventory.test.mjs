@@ -31,6 +31,7 @@ import {
 } from '../hetzner-supabase/merge/migration-history-inventory.mjs';
 import { buildCanonicalDriftReport } from '../hetzner-supabase/merge/canonical-drift.mjs';
 import { buildTableImportReadiness } from '../hetzner-supabase/merge/table-import-readiness.mjs';
+import { parseApprovedConnection, pgDumpArgs } from '../hetzner-supabase/merge/export-source.mjs';
 
 test('source aliases are pinned to the approved cloud projects', () => {
   assert.deepEqual(SOURCES, {
@@ -142,6 +143,31 @@ test('default transform policy fails closed on ambiguous companion history', () 
   assert.ok(policy.rules.filter((rule) => rule.action.includes('omit')).every(
     (rule) => rule.precondition === 'source-nonnull-count-equals-zero',
   ));
+});
+
+test('encrypted source export accepts only an approved project identity', () => {
+  const direct = parseApprovedConnection(
+    'default',
+    `postgresql://postgres:secret@db.${SOURCES.default}.supabase.co:5432/postgres`,
+  );
+  assert.equal(direct.projectRef, SOURCES.default);
+  assert.equal(direct.connectionKind, 'direct');
+  assert.equal(pgDumpArgs(direct).includes('secret'), false);
+
+  const pooled = parseApprovedConnection(
+    'a',
+    `postgresql://postgres.${SOURCES.a}:secret@aws-0-eu-central-1.pooler.supabase.com:5432/postgres`,
+  );
+  assert.equal(pooled.projectRef, SOURCES.a);
+  assert.equal(pooled.connectionKind, 'session-pooler');
+  assert.throws(
+    () => parseApprovedConnection('default', `postgresql://postgres:secret@db.${SOURCES.a}.supabase.co/postgres`),
+    /approved source ref/,
+  );
+  assert.throws(
+    () => parseApprovedConnection('default', `postgresql://postgres.${SOURCES.a}:secret@aws-0-eu-central-1.pooler.supabase.com/postgres`),
+    /approved source ref/,
+  );
 });
 
 test('inventory creates a blocked evidence manifest with the required provenance', () => {
