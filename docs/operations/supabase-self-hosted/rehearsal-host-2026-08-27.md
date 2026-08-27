@@ -63,7 +63,11 @@ resize.
 
 ## Next gate
 
-Build the canonical schema baseline on this isolated host, reconcile the 2,231
-catalog differences, and execute the first logical PG15-to-PG17 staging import.
-Production DNS, credentials and writes remain unchanged until two successful
-rehearsals and an explicit cutover approval.
+The canonical schema baseline is built from commit `f87dbf47e`: PostgreSQL 17.6,
+101 recorded repository migrations, zero Auth users and zero Storage objects.
+See `canonical-schema-rehearsal-2026-08-27.md`.
+
+The next step is to inventory this canonical target, reconcile the 2,231 source
+catalog differences against it, and prepare the first logical PG15-to-PG17
+staging import. Production DNS, credentials and writes remain unchanged until
+two successful rehearsals and an explicit cutover approval.
