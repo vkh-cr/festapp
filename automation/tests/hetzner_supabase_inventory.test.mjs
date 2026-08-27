@@ -128,6 +128,21 @@ test('table import readiness blocks incompatible and required target columns', (
   assert.equal(report.validation.production_mutations_performed, false);
 });
 
+test('default transform policy fails closed on ambiguous companion history', () => {
+  const policy = JSON.parse(fs.readFileSync(
+    path.join(REPOSITORY_ROOT, 'automation/hetzner-supabase/merge/default-transform-policy.json'),
+    'utf8',
+  ));
+  assert.equal(policy.source.projectRef, SOURCES.default);
+  assert.equal(policy.status, 'blocked-pending-private-companion-decisions');
+  assert.equal(policy.evidence.userCompanions.unresolvedRows, 2);
+  assert.equal(policy.productionMutationsPerformed, false);
+  assert.equal(policy.rules.find((rule) => rule.table === 'public.user_companions').onFailure, 'block');
+  assert.ok(policy.rules.filter((rule) => rule.action.includes('omit')).every(
+    (rule) => rule.precondition === 'source-nonnull-count-equals-zero',
+  ));
+});
+
 test('inventory creates a blocked evidence manifest with the required provenance', () => {
   const inventory = {
     source: { alias: 'default', project_ref: SOURCES.default },
