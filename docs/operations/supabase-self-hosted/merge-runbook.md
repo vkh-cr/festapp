@@ -64,3 +64,25 @@ If a migration fails, stop. Do not repair the partially applied target by hand
 and do not add a force/overwrite mode. Recreate the empty rehearsal foundation
 through the separately reviewed restore procedure, preserve the failed evidence,
 then rerun the exact automated sequence.
+
+## Empty private merge staging
+
+After the canonical schema evidence passes, prepare the locked staging ledger:
+
+```bash
+FESTAPP_REHEARSAL_ACK=prepare-empty-private-merge-staging \
+  automation/hetzner-supabase/rehearsal/prepare-merge-staging.sh
+```
+
+The script is additive and single-use. It refuses any host except the exact
+rehearsal hostname, any PostgreSQL major except 17, a migration ledger other
+than 101, non-empty Auth or Storage, or an existing `festapp_merge` schema. The
+schema is inaccessible to `anon`, `authenticated` and `service_role` and starts
+with zero rows.
+
+Rows which cannot satisfy the canonical contract must be inserted into
+`festapp_merge.quarantined_rows`, never silently discarded. A quarantined row
+keeps the rehearsal run blocked until an explicit `repair` decision or an
+`omit-with-ledger` decision names the checksum of private evidence. The two
+known orphan `default.user_companions` rows therefore remain preserved and
+blocked; this step does not import them or mutate either cloud source.
