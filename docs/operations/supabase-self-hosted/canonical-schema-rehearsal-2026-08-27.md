@@ -47,7 +47,29 @@ settled window and during realistic restore/merge load.
 
 ## Next gate
 
-Generate a catalog inventory of this canonical target, classify the source
-`default` and `a` differences against it, and prepare the reviewed logical
-PG15-to-PG17 staging importer. Importing source rows remains a separate step and
-must keep all production sources read-only.
+The canonical target catalog was captured after the build. Its private catalog
+artifact has SHA-256
+`3fb3aef680b5c8fb5769b2d50f7226878a3cbe98193781e6e3db652f3ae5d139` and
+the normalized target schema fingerprint is
+`574e6ed0d6f3a7e0afad597fec7b20246a7267592d0bdd9944f5f54cb2ffd042`.
+
+The first three-way comparison produced an important blocker:
+
+| Source compared with repository target | Application-schema differences | Platform differences |
+|---|---:|---:|
+| `default` | 2,075 | 623 |
+| `a` | 171 | 637 |
+
+This does not authorize choosing `a` as the canonical data source. It proves
+that the current repository baseline is structurally much closer to source `a`
+than to `default`, while the approved data identity still starts from
+`default`. A naive native `default` schema restore would therefore overwrite or
+conflict with a large part of the repository-owned target. The differences must
+now be classified as source-only legacy, target expansion or semantic mismatch,
+and `default` data must be imported through a reviewed schema boundary rather
+than assuming schema equivalence.
+
+Private comparison evidence is stored as `canonical-drift-v2.json`, report
+SHA-256 `5cc0f559d8b80d27fb276f4171ee7a528eaa1bc54a6744902899716d222fc38e`.
+Importing source rows remains a separate step and must keep both production
+sources read-only.
