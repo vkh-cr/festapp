@@ -92,6 +92,11 @@ test('canonical drift compares both pinned sources to an isolated PG17 target', 
   assert.equal(report.comparisons.default.unresolved_catalog_differences, 0);
   assert.equal(report.comparisons.a.unresolved_catalog_differences, 2);
   assert.deepEqual(report.comparisons.a.scope_counts, { application: 2, platform: 0 });
+  assert.deepEqual(report.comparisons.a.classification_counts.application, {
+    source_only: 1,
+    target_only: 1,
+    changed: 0,
+  });
   assert.equal(report.validation.status, 'blocked');
   assert.equal(report.validation.production_mutations_performed, false);
 });
