@@ -150,7 +150,7 @@
     <section class="section">
       <div class="section-head"><div><h2>Kde jsme právě teď</h2><p class="section-note">Rehearsal infrastruktura je reálná a online; produkční cutover zůstává uzavřený.</p></div><div class="tag">REHEARSAL · ONLINE</div></div>
       <div class="grid">
-        <article class="card span-3"><div class="big green">2</div><h3>Cloudové zdroje</h3><p><code>default</code> a <code>a</code> jsou read-only zinventarizované.</p></article>
+        <article class="card span-3"><div class="big green">4</div><h3>Šifrované snapshoty</h3><p>Aplikační i Auth/Storage exporty obou cloudů mají ověřené manifesty a SHA-256.</p></article>
         <article class="card span-3"><div class="big green">41</div><h3>RPC kontraktů</h3><p>Hardening je připravený, ale záměrně nenasazený.</p></article>
         <article class="card span-3"><div class="big amber">2</div><h3>Nevyřešené řádky</h3><p>Dvě historické companion vazby jsou osiřelé a vyžadují výslovné rozhodnutí opravit, nebo evidovaně vynechat.</p></article>
         <article class="card span-3"><div class="big green">1</div><h3>Self-hosted server</h3><p>CAX11 ARM v NBG1; 11/11 služeb healthy, databáze neveřejná.</p></article>
@@ -178,7 +178,7 @@
         <div class="step active"><span class="dot">1</span><span class="step-name">Wave 0 · Evidence</span><span class="step-desc">Inventura hotová z velké části; zbývá schema/writer/capacity/ownership klasifikace.</span><span class="step-status">probíhá</span></div>
         <div class="step done"><span class="dot">✓</span><span class="step-name">Architektura</span><span class="step-desc">PG17, pinned Supabase bundle, journalované RPC, Cloudflare mimo DB write path.</span><span class="step-status">rozhodnuto</span></div>
         <div class="step done"><span class="dot">✓</span><span class="step-name">Rehearsal základ</span><span class="step-desc">Terraform, chráněný Hetzner CAX11, hardened host a pinned Supabase stack.</span><span class="step-status">online</span></div>
-        <div class="step active"><span class="dot">4</span><span class="step-name">Rehearsal ×2</span><span class="step-desc">Kanonický baseline i prázdný privátní staging jsou na serveru; následuje read-only export, staging import a dva kompletní nácviky.</span><span class="step-status">probíhá</span></div>
+        <div class="step active"><span class="dot">4</span><span class="step-name">Rehearsal ×2</span><span class="step-desc">První snapshot je šifrovaný a raw staging obou zdrojů je na serveru; následuje transformační import, validace a druhý kompletní nácvik.</span><span class="step-status">probíhá</span></div>
         <div class="step todo"><span class="dot">5</span><span class="step-name">Cutover</span><span class="step-desc">Freeze, import, nulový lag, DNS/config přepnutí a otevření cílových zápisů.</span><span class="step-status">nezačalo</span></div>
         <div class="step todo"><span class="dot">6</span><span class="step-name">Stabilizace</span><span class="step-desc">Cloudy zůstanou read-only po retenční dobu; odstranění až po novém schválení.</span><span class="step-status">nezačalo</span></div>
       </div>
@@ -210,7 +210,7 @@
     </section>
 
     <section class="section">
-      <div class="callout"><strong>Nejbližší správný krok</strong><p>Sestavit kontrolovatelný read-only export a naplnit privátní staging. Dvě osiřelé companion vazby se zachovají v karanténě a import zůstane blokovaný do výslovného rozhodnutí. Ostatní známé tabulkové transformace <code>default</code> jsou uzavřené a všech 100 tabulek zdroje <code>a</code> je tvarově kompatibilních.</p></div>
+      <div class="callout"><strong>Nejbližší správný krok</strong><p>Transformovat raw staging do canonical targetu, vytvořit ID mapy a zachovat dvě osiřelé companion vazby v karanténě. Import zůstane blokovaný do výslovného rozhodnutí a před cutoverem vždy vznikne nový aktuální freeze/journal snapshot.</p></div>
     </section>
 
     <section class="section">
