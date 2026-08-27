@@ -7,12 +7,16 @@ readonly STAGING_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/rehearsal/pre
 readonly SOURCE_DATABASE_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/rehearsal/prepare-source-staging-databases.sh"
 readonly FOREIGN_BRIDGE_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/rehearsal/prepare-foreign-staging-bridge.sh"
 readonly DEFAULT_IMPORT_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/rehearsal/import-default-canonical.sh"
+readonly DEFAULT_MANAGED_IMPORT_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/rehearsal/import-default-managed.sh"
+readonly DEFAULT_AUTH_VALIDATION_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/rehearsal/validate-default-auth-continuity.sh"
 
 [[ -x "$SCRIPT" ]] || { echo "rehearsal schema builder must be executable" >&2; exit 1; }
 [[ -x "$STAGING_SCRIPT" ]] || { echo "merge staging builder must be executable" >&2; exit 1; }
 [[ -x "$SOURCE_DATABASE_SCRIPT" ]] || { echo "source staging database builder must be executable" >&2; exit 1; }
 [[ -x "$FOREIGN_BRIDGE_SCRIPT" ]] || { echo "foreign staging bridge builder must be executable" >&2; exit 1; }
 [[ -x "$DEFAULT_IMPORT_SCRIPT" ]] || { echo "default canonical importer must be executable" >&2; exit 1; }
+[[ -x "$DEFAULT_MANAGED_IMPORT_SCRIPT" ]] || { echo "default managed importer must be executable" >&2; exit 1; }
+[[ -x "$DEFAULT_AUTH_VALIDATION_SCRIPT" ]] || { echo "default Auth validator must be executable" >&2; exit 1; }
 
 for required in \
   'FESTAPP_REHEARSAL_ACK' \
@@ -107,6 +111,38 @@ done
 
 if rg -n 'DROP (DATABASE|SCHEMA|TABLE)|TRUNCATE|DELETE FROM' "$DEFAULT_IMPORT_SCRIPT"; then
   echo "default canonical importer contains a destructive statement" >&2
+  exit 1
+fi
+
+for required in \
+  'import-default-auth-and-storage-metadata' \
+  'EXPECTED_AUTH_MIGRATIONS="76"' \
+  'EXPECTED_STORAGE_MIGRATIONS="61"' \
+  "NOT IN (('auth','schema_migrations'),('storage','migrations'))" \
+  'session_replication_role = replica' \
+  'jsonb_populate_record' \
+  'default-managed-foreign-keys' \
+  "'default-storage-object-payloads','blocked'" \
+  "'object_payloads_copied',false"; do
+  rg -Fq "$required" "$DEFAULT_MANAGED_IMPORT_SCRIPT" || { echo "missing default managed import safety contract: $required" >&2; exit 1; }
+done
+
+if rg -n 'DROP (DATABASE|SCHEMA|TABLE)|TRUNCATE|DELETE FROM' "$DEFAULT_MANAGED_IMPORT_SCRIPT"; then
+  echo "default managed importer contains a destructive statement" >&2
+  exit 1
+fi
+
+for required in \
+  'validate-default-auth-credential-continuity' \
+  'changed_password_hashes' \
+  'changed_refresh_tokens' \
+  "'default-auth-credential-continuity','pass'" \
+  'without exposing credentials'; do
+  rg -Fq "$required" "$DEFAULT_AUTH_VALIDATION_SCRIPT" || { echo "missing default Auth validation contract: $required" >&2; exit 1; }
+done
+
+if rg -n 'DROP (DATABASE|SCHEMA|TABLE)|TRUNCATE|DELETE FROM' "$DEFAULT_AUTH_VALIDATION_SCRIPT"; then
+  echo "default Auth validator contains a destructive statement" >&2
   exit 1
 fi
 

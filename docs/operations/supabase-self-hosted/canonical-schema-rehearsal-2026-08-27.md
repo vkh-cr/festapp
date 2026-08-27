@@ -161,6 +161,24 @@ and proves that final state requires a fresh freeze/journal snapshot.
 On the Hetzner host, `festapp_stage_default` and `festapp_stage_a` are separate,
 non-public PG17 databases. The application restores contain 70 and 100 source
 tables respectively; raw managed JSONB staging contains exactly 55,317 and
-802,012 rows. The canonical database still has zero Auth users, zero Storage
-objects, zero import runs and zero quarantined rows. All 11 services remain
-healthy and 22.9 GB disk remained available after staging.
+802,012 rows. All 11 services remained healthy and 22.9 GB disk was available
+after staging.
+
+## Default canonical import
+
+The guarded rehearsal import copied all 70 `default` application tables into
+the repository-owned canonical schema. It imported 69,916 canonical rows and
+preserved the two non-representable legacy `user_companions` rows verbatim in
+the private quarantine instead of deleting or silently omitting them. All 172
+application foreign keys have zero orphans. Evidence is root-only at
+`/var/lib/festapp-rehearsal-evidence/default-canonical-import-20260827T195523Z`.
+
+The follow-up managed import preserved the target runtime's own Auth and
+Storage migration ledgers while importing 231 users, 224 identities, 736
+sessions, 11,944 refresh tokens, five buckets and 264 Storage metadata rows.
+All managed foreign keys have zero orphans. Credential continuity then proved
+that 228 password-bearing accounts retain byte-for-byte identical
+`encrypted_password` hashes, three accounts remain intentionally passwordless,
+and zero users, identities, sessions or refresh tokens are missing. No secret,
+identity or password hash is stored in Git. Storage object payload copying and
+the two quarantined companion decisions keep the rehearsal run blocked.

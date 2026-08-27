@@ -26,6 +26,16 @@ Before cutover:
 - any unknown writer, unsupported active build or direct-DML bypass is a hard
   no-go. Choose a full maintenance freeze if journal coverage cannot be proven.
 
+Auth continuity is a separate hard gate. Every imported user UUID and
+`encrypted_password` value must match the fresh source snapshot exactly; hashes
+must never be re-created or replaced with temporary passwords. Provider
+identities, MFA records, sessions and refresh tokens must also reconcile with
+zero missing or changed rows. Exercise password, OAuth and refresh-token login
+canaries against the target before routing users. A mismatch for one account is
+a no-go. Existing access-JWT continuity must be tested independently because a
+JWT signing-key change can invalidate an already-issued access token even when
+the password hash and refresh token are preserved perfectly.
+
 ## 2. Freshness gate
 
 The encrypted exports produced during rehearsal are test inputs only and must
