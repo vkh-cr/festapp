@@ -49,9 +49,11 @@ export function pgDumpArgs(connection) {
   ];
 }
 
-function validateRecipient(recipient) {
-  if (!/^age1[0-9a-z]{20,}$/.test(recipient)) {
-    throw new Error('FESTAPP_EXPORT_AGE_RECIPIENT must be a native age recipient');
+export function validateRecipient(recipient) {
+  const nativeAge = /^age1[0-9a-z]{20,}$/.test(recipient);
+  const sshEd25519 = /^ssh-ed25519 [A-Za-z0-9+/]+={0,2}(?: [^\r\n]+)?$/.test(recipient);
+  if (!nativeAge && !sshEd25519) {
+    throw new Error('FESTAPP_EXPORT_AGE_RECIPIENT must be a native age or SSH Ed25519 recipient');
   }
   return recipient;
 }

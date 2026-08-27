@@ -31,7 +31,11 @@ import {
 } from '../hetzner-supabase/merge/migration-history-inventory.mjs';
 import { buildCanonicalDriftReport } from '../hetzner-supabase/merge/canonical-drift.mjs';
 import { buildTableImportReadiness } from '../hetzner-supabase/merge/table-import-readiness.mjs';
-import { parseApprovedConnection, pgDumpArgs } from '../hetzner-supabase/merge/export-source.mjs';
+import {
+  parseApprovedConnection,
+  pgDumpArgs,
+  validateRecipient,
+} from '../hetzner-supabase/merge/export-source.mjs';
 
 test('source aliases are pinned to the approved cloud projects', () => {
   assert.deepEqual(SOURCES, {
@@ -168,6 +172,11 @@ test('encrypted source export accepts only an approved project identity', () => 
     () => parseApprovedConnection('default', `postgresql://postgres.${SOURCES.a}:secret@aws-0-eu-central-1.pooler.supabase.com/postgres`),
     /approved source ref/,
   );
+  assert.equal(validateRecipient('age1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq'),
+    'age1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq');
+  assert.equal(validateRecipient('ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEexampleexampleexampleexampleexample user@host'),
+    'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEexampleexampleexampleexampleexample user@host');
+  assert.throws(() => validateRecipient('ssh-rsa unsafe'), /native age or SSH Ed25519/);
 });
 
 test('inventory creates a blocked evidence manifest with the required provenance', () => {
