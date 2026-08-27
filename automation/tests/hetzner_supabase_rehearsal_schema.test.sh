@@ -72,13 +72,14 @@ fi
 
 for required in \
   'prepare-read-only-foreign-staging-bridge' \
-  'resume-after-local-trust-fdw-fix' \
+  'resume-through-internal-supavisor' \
   'festapp_stage_reader' \
   'VALID UNTIL' \
   'NOBYPASSRLS' \
   'GRANT SELECT ON ALL TABLES IN SCHEMA public, eshop, festapp_managed_source' \
   'CREATE EXTENSION postgres_fdw WITH SCHEMA extensions' \
-  "OPTIONS (ADD password_required 'false')" \
+  "OPTIONS (host 'supavisor', port '5432'" \
+  "SET user 'festapp_stage_reader.your-tenant-id'" \
   'IMPORT FOREIGN SCHEMA public FROM SERVER festapp_stage_default' \
   'IMPORT FOREIGN SCHEMA public FROM SERVER festapp_stage_a' \
   'reader_bypass_rls'; do
