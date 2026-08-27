@@ -17,6 +17,11 @@ function parseArgs(argv) {
 }
 
 export function buildIdentityDecisions(report) {
+  const { report_sha256: claimedChecksum, ...unsignedReport } = report;
+  const actualChecksum = sha256(stableJson(unsignedReport));
+  if (!claimedChecksum || actualChecksum !== claimedChecksum) {
+    throw new Error('collision report checksum mismatch');
+  }
   if (report.sources?.default !== SOURCES.default || report.sources?.a !== SOURCES.a) {
     throw new Error('collision report source identity mismatch');
   }
@@ -26,6 +31,9 @@ export function buildIdentityDecisions(report) {
   const decisions = report.auth.same_email_different_uuid.map((collision) => {
     if (collision.status !== 'manual-merge-required' || !collision.default_verified || !collision.a_verified) {
       throw new Error('ambiguous or unverified identity cannot use the canonical verified-email rule');
+    }
+    if (!isSimpleEmailIdentity(collision.default_auth_state) || !isSimpleEmailIdentity(collision.a_auth_state)) {
+      throw new Error('provider, MFA, phone, SSO, anonymous or pending-token state requires a manual identity decision');
     }
     return {
       source_project: 'a',
@@ -37,6 +45,9 @@ export function buildIdentityDecisions(report) {
       source_password: 'require-reset',
       memberships: 'merge-after-user-id-remap',
       providers: 'reconcile-without-duplicate-email-identity',
+      provider_evidence: 'email-only-on-both-sources',
+      mfa_evidence: 'none-on-both-sources',
+      pending_token_evidence: 'none-on-both-sources',
       status: 'approved-by-execution-rule',
     };
   });
@@ -52,6 +63,12 @@ export function buildIdentityDecisions(report) {
       unresolved: 0,
     },
   };
+}
+
+function isSimpleEmailIdentity(state) {
+  if (!state || stableJson(state.providers) !== stableJson(['email']) || state.mfa.length !== 0) return false;
+  if (state.phone_hmac !== null || state.phone_verified || state.is_sso_user || state.is_anonymous) return false;
+  return Object.values(state.pending_tokens).every((value) => value === false);
 }
 
 async function main() {

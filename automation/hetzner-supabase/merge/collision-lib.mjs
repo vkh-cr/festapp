@@ -22,6 +22,8 @@ export function classifyAuthCollisions(defaultUsers, aUsers, key) {
         a_email_hmac: evidenceHash(user.normalized_email, key),
         default_verified: Boolean(byId.verified),
         a_verified: Boolean(user.verified),
+        default_auth_state: safeAuthState(byId, key),
+        a_auth_state: safeAuthState(user, key),
       };
       if (byId.normalized_email !== user.normalized_email) sameUuidDifferentEmail.push(entry);
       else sameIdentity.push(entry);
@@ -34,11 +36,31 @@ export function classifyAuthCollisions(defaultUsers, aUsers, key) {
         email_hmac: evidenceHash(user.normalized_email, key),
         default_verified: Boolean(byEmail.verified),
         a_verified: Boolean(user.verified),
+        default_auth_state: safeAuthState(byEmail, key),
+        a_auth_state: safeAuthState(user, key),
         status: byEmail.verified && user.verified ? 'manual-merge-required' : 'ambiguous-unverified-blocker',
       });
     }
   }
   return { same_uuid_different_email: sameUuidDifferentEmail, same_email_different_uuid: sameEmailDifferentUuid, same_identity: sameIdentity };
+}
+
+function safeAuthState(user, key) {
+  return {
+    providers: user.providers ?? [],
+    mfa: user.mfa ?? [],
+    phone_hmac: evidenceHash(user.normalized_phone, key),
+    phone_verified: Boolean(user.phone_verified),
+    is_sso_user: Boolean(user.is_sso_user),
+    is_anonymous: Boolean(user.is_anonymous),
+    pending_tokens: {
+      confirmation: Boolean(user.confirmation_pending),
+      recovery: Boolean(user.recovery_pending),
+      email_change: Boolean(user.email_change_pending),
+      phone_change: Boolean(user.phone_change_pending),
+      reauthentication: Boolean(user.reauthentication_pending),
+    },
+  };
 }
 
 export function classifyStorageCollisions(defaultObjects, aObjects, key) {

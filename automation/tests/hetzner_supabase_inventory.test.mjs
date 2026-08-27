@@ -94,9 +94,8 @@ test('Storage collisions never treat matching metadata as content proof', () => 
 });
 
 test('verified e-mail collisions preserve default UUID and force source password reset', () => {
-  const result = buildIdentityDecisions({
+  const collisionReport = {
     sources: SOURCES,
-    report_sha256: 'c'.repeat(64),
     auth: {
       same_uuid_different_email: [],
       same_email_different_uuid: [{
@@ -105,10 +104,14 @@ test('verified e-mail collisions preserve default UUID and force source password
         email_hmac: 'd'.repeat(64),
         default_verified: true,
         a_verified: true,
+        default_auth_state: simpleEmailAuthState(),
+        a_auth_state: simpleEmailAuthState(),
         status: 'manual-merge-required',
       }],
     },
-  });
+  };
+  collisionReport.report_sha256 = sha256(stableJson(collisionReport));
+  const result = buildIdentityDecisions(collisionReport);
   assert.equal(result.validation.unresolved, 0);
   assert.deepEqual(result.decisions[0], {
     source_project: 'a',
@@ -120,20 +123,51 @@ test('verified e-mail collisions preserve default UUID and force source password
     source_password: 'require-reset',
     memberships: 'merge-after-user-id-remap',
     providers: 'reconcile-without-duplicate-email-identity',
+    provider_evidence: 'email-only-on-both-sources',
+    mfa_evidence: 'none-on-both-sources',
+    pending_token_evidence: 'none-on-both-sources',
     status: 'approved-by-execution-rule',
   });
 });
 
 test('identity resolver blocks unverified or UUID/e-mail ambiguity', () => {
-  assert.throws(() => buildIdentityDecisions({
+  const report = {
     sources: SOURCES,
-    report_sha256: 'e'.repeat(64),
     auth: {
       same_uuid_different_email: [{ id: 'blocker' }],
       same_email_different_uuid: [],
     },
-  }), /same UUID/);
+  };
+  report.report_sha256 = sha256(stableJson(report));
+  assert.throws(() => buildIdentityDecisions(report), /same UUID/);
 });
+
+test('identity resolver verifies collision provenance and blocks nontrivial Auth state', () => {
+  const report = {
+    sources: SOURCES,
+    auth: {
+      same_uuid_different_email: [],
+      same_email_different_uuid: [{
+        default_user_id: 'default-user', a_user_id: 'a-user', email_hmac: 'f'.repeat(64),
+        default_verified: true, a_verified: true, status: 'manual-merge-required',
+        default_auth_state: simpleEmailAuthState(),
+        a_auth_state: { ...simpleEmailAuthState(), mfa: [{ factor_type: 'totp', status: 'verified' }] },
+      }],
+    },
+  };
+  report.report_sha256 = sha256(stableJson(report));
+  assert.throws(() => buildIdentityDecisions(report), /provider, MFA/);
+  report.report_sha256 = '0'.repeat(64);
+  assert.throws(() => buildIdentityDecisions(report), /checksum mismatch/);
+});
+
+function simpleEmailAuthState() {
+  return {
+    providers: ['email'], mfa: [], phone_hmac: null, phone_verified: false,
+    is_sso_user: false, is_anonymous: false,
+    pending_tokens: { confirmation: false, recovery: false, email_change: false, phone_change: false, reauthentication: false },
+  };
+}
 
 test('write-authority scanner distinguishes RPC, DML, Storage and side effects', () => {
   const signals = scanWriteSignals(`

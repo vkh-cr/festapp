@@ -19,8 +19,35 @@ async function sourceRows(projectRef) {
     projectRef,
     token,
     query: `SELECT id::text, lower(trim(email)) AS normalized_email,
-      email_confirmed_at IS NOT NULL AS verified FROM auth.users ORDER BY id`,
+      nullif(trim(phone), '') AS normalized_phone,
+      email_confirmed_at IS NOT NULL AS verified,
+      phone_confirmed_at IS NOT NULL AS phone_verified,
+      COALESCE(is_sso_user, false) AS is_sso_user,
+      COALESCE(is_anonymous, false) AS is_anonymous,
+      nullif(confirmation_token, '') IS NOT NULL AS confirmation_pending,
+      nullif(recovery_token, '') IS NOT NULL AS recovery_pending,
+      (nullif(email_change_token_current, '') IS NOT NULL OR nullif(email_change_token_new, '') IS NOT NULL OR email_change_confirm_status <> 0) AS email_change_pending,
+      nullif(phone_change_token, '') IS NOT NULL AS phone_change_pending,
+      nullif(reauthentication_token, '') IS NOT NULL AS reauthentication_pending
+      FROM auth.users ORDER BY id`,
   });
+  const identities = await managementQuery({
+    projectRef,
+    token,
+    query: `SELECT user_id::text, provider FROM auth.identities ORDER BY user_id, provider`,
+  });
+  const mfa = await managementQuery({
+    projectRef,
+    token,
+    query: `SELECT user_id::text, factor_type::text, status::text
+      FROM auth.mfa_factors ORDER BY user_id, factor_type, status`,
+  });
+  const providersByUser = groupByUser(identities);
+  const mfaByUser = groupByUser(mfa);
+  for (const user of users) {
+    user.providers = [...new Set((providersByUser.get(user.id) ?? []).map((identity) => identity.provider))].sort();
+    user.mfa = (mfaByUser.get(user.id) ?? []).map(({ factor_type, status }) => ({ factor_type, status }));
+  }
   const storage = await managementQuery({
     projectRef,
     token,
@@ -29,6 +56,16 @@ async function sourceRows(projectRef) {
       FROM storage.objects ORDER BY bucket_id, name`,
   });
   return { users, storage };
+}
+
+function groupByUser(rows) {
+  const grouped = new Map();
+  for (const row of rows) {
+    const values = grouped.get(row.user_id) ?? [];
+    values.push(row);
+    grouped.set(row.user_id, values);
+  }
+  return grouped;
 }
 
 const canonical = await sourceRows(SOURCES.default);
