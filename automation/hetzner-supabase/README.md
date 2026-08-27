@@ -1,0 +1,32 @@
+# Festapp self-hosted Supabase migration
+
+This directory contains reproducible, secret-free automation for the migration
+described in `docs/plans/festapp-self-hosted-supabase-hetzner-plan-2026-08-27.md`.
+
+Production exports, identity mappings, access tokens, database credentials and
+raw inventory results must never be stored here. Real runs require an output
+directory outside the repository.
+
+## Current implemented boundary
+
+Wave 0 inventory and its decision gate are implemented. Run both source
+inventories into one private directory:
+
+```bash
+export FESTAPP_MIGRATION_OUTPUT=/absolute/private/path/wave-0
+node automation/hetzner-supabase/merge/inventory.mjs \
+  --source default --output "$FESTAPP_MIGRATION_OUTPUT/default.json"
+node automation/hetzner-supabase/merge/inventory.mjs \
+  --source a --output "$FESTAPP_MIGRATION_OUTPUT/a.json"
+node automation/hetzner-supabase/merge/schema-fingerprint.mjs \
+  "$FESTAPP_MIGRATION_OUTPUT/default.json" \
+  "$FESTAPP_MIGRATION_OUTPUT/a.json"
+```
+
+`SUPABASE_ACCESS_TOKEN` may be supplied in the environment or in the repository
+root `.env.local`. The scripts never print it. Source aliases are pinned to the
+two approved project refs and cannot be redirected with `.env.local` project
+metadata.
+
+Do not provision infrastructure or implement a production importer until the
+Wave 0 gate in the merge runbook is approved.
