@@ -152,7 +152,7 @@
       <div class="grid">
         <article class="card span-3"><div class="big green">2</div><h3>Cloudové zdroje</h3><p><code>default</code> a <code>a</code> jsou read-only zinventarizované.</p></article>
         <article class="card span-3"><div class="big green">41</div><h3>RPC kontraktů</h3><p>Hardening je připravený, ale záměrně nenasazený.</p></article>
-        <article class="card span-3"><div class="big amber">2 231</div><h3>Schema rozdílů</h3><p>Musí se klasifikovat a ověřit v rehearsal databázi.</p></article>
+        <article class="card span-3"><div class="big green">101</div><h3>Kanonických migrací</h3><p>Čistý PG17 baseline je aplikovaný; Auth i Storage zůstávají prázdné.</p></article>
         <article class="card span-3"><div class="big green">1</div><h3>Self-hosted server</h3><p>CAX11 ARM v NBG1; 11/11 služeb healthy, databáze neveřejná.</p></article>
       </div>
     </section>
@@ -178,7 +178,7 @@
         <div class="step active"><span class="dot">1</span><span class="step-name">Wave 0 · Evidence</span><span class="step-desc">Inventura hotová z velké části; zbývá schema/writer/capacity/ownership klasifikace.</span><span class="step-status">probíhá</span></div>
         <div class="step done"><span class="dot">✓</span><span class="step-name">Architektura</span><span class="step-desc">PG17, pinned Supabase bundle, journalované RPC, Cloudflare mimo DB write path.</span><span class="step-status">rozhodnuto</span></div>
         <div class="step done"><span class="dot">✓</span><span class="step-name">Rehearsal základ</span><span class="step-desc">Terraform, chráněný Hetzner CAX11, hardened host a pinned Supabase stack.</span><span class="step-status">online</span></div>
-        <div class="step active"><span class="dot">4</span><span class="step-name">Rehearsal ×2</span><span class="step-desc">Dva kompletní restore + merge + journal catch-up nácviky z různých snapshotů.</span><span class="step-status">další krok</span></div>
+        <div class="step active"><span class="dot">4</span><span class="step-name">Rehearsal ×2</span><span class="step-desc">Kanonický baseline hotový; následuje katalogové srovnání, staging import a dva kompletní nácviky.</span><span class="step-status">probíhá</span></div>
         <div class="step todo"><span class="dot">5</span><span class="step-name">Cutover</span><span class="step-desc">Freeze, import, nulový lag, DNS/config přepnutí a otevření cílových zápisů.</span><span class="step-status">nezačalo</span></div>
         <div class="step todo"><span class="dot">6</span><span class="step-name">Stabilizace</span><span class="step-desc">Cloudy zůstanou read-only po retenční dobu; odstranění až po novém schválení.</span><span class="step-status">nezačalo</span></div>
       </div>
@@ -188,7 +188,7 @@
       <div class="section-head"><div><h2>Co teď konkrétně blokuje postup</h2></div></div>
       <div class="grid">
         <article class="card span-6">
-          <div class="blocker"><span class="num">1</span><div><strong>Schema a migration-history drift</strong><span>Nelze bezpečně pustit „chybějící migrace“. Je nutné postavit čistý baseline a porovnat skutečné katalogové efekty.</span></div></div>
+          <div class="blocker"><span class="num">1</span><div><strong>Schema a migration-history drift</strong><span>Čistý baseline je hotový. Teď je nutné porovnat skutečné katalogové efekty a klasifikovat rozdíly obou zdrojů.</span></div></div>
           <div class="blocker"><span class="num">2</span><div><strong>Neúplná write-authority mapa</strong><span>Ještě není dokázán jediný write owner pro každý tenant, entrypoint a ne-Flutter zapisovatel.</span></div></div>
           <div class="blocker"><span class="num">3</span><div><strong>Direct DML a adopce RPC</strong><span>47 z 48 occasions není potvrzeně na nové cestě a 8 DML grant skupin stále existuje.</span></div></div>
         </article>
@@ -210,7 +210,7 @@
     </section>
 
     <section class="section">
-      <div class="callout"><strong>Nejbližší správný krok</strong><p>Na už běžícím izolovaném hostu sestavit canonical schema baseline, klasifikovat 2 231 katalogových rozdílů a provést první logický PG15 → PG17 staging import. Produkce se při tom stále nemění.</p></div>
+      <div class="callout"><strong>Nejbližší správný krok</strong><p>Vygenerovat katalogový otisk hotového canonical targetu, klasifikovat proti němu rozdíly zdrojů <code>default</code> a <code>a</code> a připravit první logický PG15 → PG17 staging import. Produkce se při tom stále nemění.</p></div>
     </section>
 
     <section class="section">
@@ -223,6 +223,7 @@
         <a href="storage-authority.md">Storage authority</a>
         <a href="deletion-ledger.md">Deletion ledger</a>
         <a href="rehearsal-host-2026-08-27.md">Rehearsal host</a>
+        <a href="canonical-schema-rehearsal-2026-08-27.md">Canonical schema rehearsal</a>
       </nav>
     </section>
   </main>
