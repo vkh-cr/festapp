@@ -106,6 +106,9 @@ COMMIT;
     throw new Error(`managed staging stream failed (age=${decryptCode}, copy=${copyCode}): ${decryptError || copyError}`);
   }
   if (!completed || rows !== expectedRows) throw new Error(`managed staging row mismatch: ${rows}/${expectedRows}`);
+  await run('ssh', ['-o', 'BatchMode=yes', sshTarget,
+    `cd ${COMPOSE_DIR} && docker compose exec -T db psql -X -v ON_ERROR_STOP=1 -U postgres -d ${database} -c "CREATE INDEX festapp_managed_source_relation_idx ON festapp_managed_source.rows(source_schema,source_table); ANALYZE festapp_managed_source.rows"`,
+  ]);
   const observed = (await run('ssh', ['-o', 'BatchMode=yes', sshTarget,
     `cd ${COMPOSE_DIR} && docker compose exec -T db psql -X -Atq -U postgres -d ${database} -c "SELECT count(*) FROM festapp_managed_source.rows"`,
   ])).trim();

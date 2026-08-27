@@ -136,7 +136,7 @@
     <section class="hero">
       <div class="eyebrow">Krátká odpověď</div>
       <h1>Rehearsal Supabase <span class="answer">už běží.</span></h1>
-      <p class="lead">Na skutečném Hetzner CAX11 v účtu Mendelio běží chráněný ARM64 stack se všemi 11 službami healthy. Je to izolované rehearsal prostředí: DNS ani produkční data zatím přesunuty nebyly.</p>
+      <p class="lead">Na skutečném Hetzner CAX11 v účtu Mendelio běží chráněný ARM64 stack se všemi 11 službami healthy. V izolovaném rehearsalu je ověřená sloučená kopie obou cloudů; produkční write owner ani DNS se zatím nezměnily.</p>
       <div class="hero-meta">
         <span class="pill"><strong>Produkce:</strong> beze změny</span>
         <span class="pill"><strong>Mazání:</strong> žádné</span>
@@ -152,7 +152,7 @@
       <div class="grid">
         <article class="card span-3"><div class="big green">4</div><h3>Šifrované snapshoty</h3><p>Aplikační i Auth/Storage exporty obou cloudů mají ověřené manifesty a SHA-256.</p></article>
         <article class="card span-3"><div class="big green">41</div><h3>RPC kontraktů</h3><p>Hardening je připravený, ale záměrně nenasazený.</p></article>
-        <article class="card span-3"><div class="big amber">2</div><h3>Nevyřešené řádky</h3><p>Dvě historické companion vazby jsou osiřelé a vyžadují výslovné rozhodnutí opravit, nebo evidovaně vynechat.</p></article>
+        <article class="card span-3"><div class="big green">2</div><h3>Zachované legacy řádky</h3><p>Dvě companion vazby bez společné occasion jsou přesně zachované v privátní karanténě; žádná falešná vazba nebyla vytvořena.</p></article>
         <article class="card span-3"><div class="big green">1</div><h3>Self-hosted server</h3><p>CAX11 ARM v NBG1; 11/11 služeb healthy, databáze neveřejná.</p></article>
       </div>
     </section>
@@ -173,12 +173,12 @@
     </section>
 
     <section class="section">
-      <div class="section-head"><div><h2>Mapa celé migrace</h2><p class="section-note">Žlutá fáze je jediná aktivní. Další kroky nezačnou, dokud nebude bezpečně uzavřena.</p></div></div>
+      <div class="section-head"><div><h2>Mapa celé migrace</h2><p class="section-note">První kompletní merge rehearsal je validovaný. Aktivní je provozní ověření a příprava druhého čerstvého běhu.</p></div></div>
       <div class="timeline">
-        <div class="step active"><span class="dot">1</span><span class="step-name">Wave 0 · Evidence</span><span class="step-desc">Inventura hotová z velké části; zbývá schema/writer/capacity/ownership klasifikace.</span><span class="step-status">probíhá</span></div>
+        <div class="step done"><span class="dot">✓</span><span class="step-name">Wave 0 · Evidence</span><span class="step-desc">Schéma, kolize, ID mapy, Auth, Storage a transformační pravidla jsou doložené.</span><span class="step-status">hotovo</span></div>
         <div class="step done"><span class="dot">✓</span><span class="step-name">Architektura</span><span class="step-desc">PG17, pinned Supabase bundle, journalované RPC, Cloudflare mimo DB write path.</span><span class="step-status">rozhodnuto</span></div>
         <div class="step done"><span class="dot">✓</span><span class="step-name">Rehearsal základ</span><span class="step-desc">Terraform, chráněný Hetzner CAX11, hardened host a pinned Supabase stack.</span><span class="step-status">online</span></div>
-        <div class="step active"><span class="dot">4</span><span class="step-name">Rehearsal ×2</span><span class="step-desc">První snapshot je šifrovaný a raw staging obou zdrojů je na serveru; následuje transformační import, validace a druhý kompletní nácvik.</span><span class="step-status">probíhá</span></div>
+        <div class="step active"><span class="dot">4</span><span class="step-name">Rehearsal ×2</span><span class="step-desc">První kompletní sloučení je validované: 7 198 Auth uživatelů, 1 199 Storage objektů a dopředný client_sync rebuild. Zbývá druhý čerstvý nácvik a restore drill.</span><span class="step-status">1 / 2</span></div>
         <div class="step todo"><span class="dot">5</span><span class="step-name">Cutover</span><span class="step-desc">Freeze, import, nulový lag, DNS/config přepnutí a otevření cílových zápisů.</span><span class="step-status">nezačalo</span></div>
         <div class="step todo"><span class="dot">6</span><span class="step-name">Stabilizace</span><span class="step-desc">Cloudy zůstanou read-only po retenční dobu; odstranění až po novém schválení.</span><span class="step-status">nezačalo</span></div>
       </div>
@@ -188,13 +188,13 @@
       <div class="section-head"><div><h2>Co teď konkrétně blokuje postup</h2></div></div>
       <div class="grid">
         <article class="card span-6">
-          <div class="blocker"><span class="num">1</span><div><strong>Schema a migration-history drift</strong><span>Čistý baseline je hotový. Třícestné srovnání našlo 2 075 aplikačních rozdílů pro <code>default</code> a 171 pro <code>a</code>; je nutná klasifikace, ne surový restore.</span></div></div>
+          <div class="blocker"><span class="num">1</span><div><strong>Druhý čerstvý rehearsal</strong><span>První transformovaný merge prošel. Druhý musí použít nový snapshot/final marker a zopakovat stejné mapování a validace bez resetu prvního důkazu.</span></div></div>
           <div class="blocker"><span class="num">2</span><div><strong>Neúplná write-authority mapa</strong><span>Ještě není dokázán jediný write owner pro každý tenant, entrypoint a ne-Flutter zapisovatel.</span></div></div>
           <div class="blocker"><span class="num">3</span><div><strong>Direct DML a adopce RPC</strong><span>47 z 48 occasions není potvrzeně na nové cestě a 8 DML grant skupin stále existuje.</span></div></div>
         </article>
         <article class="card span-6">
-          <div class="blocker"><span class="num">4</span><div><strong>Kapacita a provozní vlastníci</strong><span>CAX11 má po startu asi 2,0 GiB MemAvailable bez OOM. Po obou bězích musí mít ≥15 % dostupné RAM, CPU PSI avg60 &lt;10 %, žádnou run queue &gt;2 po 5 minut a load15 &lt;2,0; dále rozhodne latence, WAL a disk.</span></div></div>
-          <div class="blocker"><span class="num">5</span><div><strong>Rehearsal důkaz</strong><span>PG15 zdroj <code>a</code> se musí logicky transformovat do PG17 stagingu a celý proces dvakrát nacvičit.</span></div></div>
+          <div class="blocker"><span class="num">4</span><div><strong>Backup a restore</strong><span>Je nutný šifrovaný off-host backup a izolovaný restore drill. První load test prošel: 200/200 setů, 0 chyb, průměr 114 ms a po testu 2,05 GB MemAvailable.</span></div></div>
+          <div class="blocker"><span class="num">5</span><div><strong>Klientské releasy</strong><span>Web, Android a iOS musí dostat jednotný <code>api.festapp.net</code>, nové veřejné klíče a full-sync epoch ještě před finálním freeze.</span></div></div>
           <div class="blocker"><span class="num">6</span><div><strong>Produkční rozhodovací brána</strong><span>Rehearsal host je schválený; DNS, produkční import a cutover až po uzavření blockerů a novém výslovném souhlasu.</span></div></div>
         </article>
       </div>
@@ -204,13 +204,13 @@
       <div class="section-head"><div><h2>Co už je bezpečně připravené</h2></div></div>
       <div class="grid">
         <article class="card span-4"><h3>Runtime pinning</h3><p>Supabase <code>self-hosted/v0.8.0</code>, PG 17.6 a kontejnery připnuté digesty. Před provisioningem se znovu ověří nejnovější stabilní bundle.</p></article>
-        <article class="card span-4"><h3>Data a identity</h3><p>Výchozí canonical zdroj je <code>default</code>; 13 Auth kolizí má privátní rozhodnutí. Privátní staging a ID mapy jsou nasazené, prázdné a aplikačním rolím nepřístupné.</p></article>
-        <article class="card span-4"><h3>Storage hranice</h3><p>1 199 objektů se má aditivně kopírovat do self-hosted Supabase Storage a hashově ověřit. R2 image delivery zůstává oddělené.</p></article>
+        <article class="card span-4"><h3>Data a identity</h3><p>Oba zdroje jsou <code>validated</code>. U 13 stejných ověřených e-mailů zůstalo default UUID a heslo; všechny reference z <code>a</code> jsou přemapované.</p></article>
+        <article class="card span-4"><h3>Storage hranice</h3><p>1 199 objektů / 521,9 MB je v self-hosted Supabase Storage hashově ověřeno. R2 image delivery zůstává oddělené a merge do něj nic nezapisoval.</p></article>
       </div>
     </section>
 
     <section class="section">
-      <div class="callout"><strong>Nejbližší správný krok</strong><p>Transformovat raw staging do canonical targetu, vytvořit ID mapy a zachovat dvě osiřelé companion vazby v karanténě. Import zůstane blokovaný do výslovného rozhodnutí a před cutoverem vždy vznikne nový aktuální freeze/journal snapshot.</p></div>
+      <div class="callout"><strong>Nejbližší správný krok</strong><p>Dokončit šifrovaný backup/restore drill a zopakovat celý merge z nového snapshotu. Potom připravit releasy klientů; produkční cutover smí použít pouze nový freeze/journal snapshot s nulovým lagu.</p></div>
     </section>
 
     <section class="section">

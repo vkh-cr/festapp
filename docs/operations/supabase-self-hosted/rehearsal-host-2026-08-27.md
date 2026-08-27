@@ -23,10 +23,10 @@ on `aarch64`. The separate authenticated Docker Hub registry recheck was blocked
 by the anonymous pull limit and therefore remains an explicit pre-production
 gate; it is not recorded as passed.
 
-No DNS was changed, no production data or identities were imported, and neither
-existing Supabase cloud source was mutated or deleted. Storage remains in the
-Supabase architecture for this phase; the existing R2 image-delivery path stays
-separate.
+No DNS or production write owner was changed, and neither existing Supabase
+cloud source was mutated or deleted. An isolated rehearsal copy of both clouds
+is now imported and validated on this host. Storage remains in the Supabase
+architecture; the existing R2 image-delivery path stays separate.
 
 ## Monthly operating price
 
@@ -61,13 +61,15 @@ with steady traffic. If those or the application latency/disk gates fail, the
 next reviewed option is CAX21; idle cache occupancy alone is not a reason to
 resize.
 
-## Next gate
+## Current post-merge state and next gate
 
-The canonical schema baseline is built from commit `f87dbf47e`: PostgreSQL 17.6,
-101 recorded repository migrations, zero Auth users and zero Storage objects.
-See `canonical-schema-rehearsal-2026-08-27.md`.
+The first full transformed merge is validated: 7,198 Auth users, 1,199 Storage
+objects, zero validated FK orphans, preserved password hashes and a forward-only
+client-sync rebuild. A 200-transaction concurrent materializer test completed
+without error at 114.301 ms average per six-component set. After load the host
+had 2.05 GB available RAM, zero memory PSI/OOM and 20.4 GB (51%) disk free.
 
-The next step is to inventory this canonical target, reconcile the 2,231 source
-catalog differences against it, and prepare the first logical PG15-to-PG17
-staging import. Production DNS, credentials and writes remain unchanged until
-two successful rehearsals and an explicit cutover approval.
+The next gate is encrypted off-host backup plus an isolated restore drill, then
+a second complete rehearsal from a newer cloud snapshot. Production DNS,
+credentials and writes remain unchanged until that proof and compatible web,
+Android and iOS releases are ready.
