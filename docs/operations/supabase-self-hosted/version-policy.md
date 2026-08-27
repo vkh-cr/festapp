@@ -25,6 +25,9 @@ sources, resolve new digests, inspect breaking/security changes, run the full
 restore suite and commit the updated manifest. A newer release is adopted only
 as a complete tested bundle. Mutable `latest` tags are prohibited.
 
+Run `node runtime/verify-pins.mjs --online` to compare release pins with primary
+upstreams and re-resolve every declared container digest for `linux/amd64`.
+
 No update workflow may invoke Supabase `reset.sh`, `docker compose down -v`,
 volume pruning or any equivalent deletion command. Cloud sources remain intact
 and writable/read-only according to the current migration wave until a separate

@@ -2,7 +2,7 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
-import { accessToken, assertPrivateOutput, managementQuery, sha256, stableJson, SOURCES } from './lib.mjs';
+import { accessToken, assertCanonicalDefaultTarget, assertNewEvidencePaths, assertPrivateOutput, managementQuery, sha256, stableJson, SOURCES } from './lib.mjs';
 import { classifyAuthCollisions, classifyStorageCollisions } from './collision-lib.mjs';
 
 const outputIndex = process.argv.indexOf('--output');
@@ -12,6 +12,7 @@ if (outputIndex < 0 || !process.argv[outputIndex + 1]) {
 const output = assertPrivateOutput(process.argv[outputIndex + 1]);
 const token = accessToken();
 const hmacKey = crypto.randomBytes(32);
+await assertCanonicalDefaultTarget({ token });
 
 async function sourceRows(projectRef) {
   const users = await managementQuery({
@@ -55,6 +56,7 @@ const report = {
   },
 };
 report.report_sha256 = sha256(stableJson(report));
+assertNewEvidencePaths([output]);
 fs.mkdirSync(path.dirname(output), { recursive: true, mode: 0o700 });
-fs.writeFileSync(output, `${JSON.stringify(report, null, 2)}\n`, { mode: 0o600 });
+fs.writeFileSync(output, `${JSON.stringify(report, null, 2)}\n`, { mode: 0o600, flag: 'wx' });
 process.stdout.write(`collision inventory: auth_uuid=${report.validation.same_uuid_different_email}, auth_email=${report.validation.same_email_different_uuid}, storage_keys=${report.validation.storage_key_collisions}, sha256=${report.report_sha256}\n`);
