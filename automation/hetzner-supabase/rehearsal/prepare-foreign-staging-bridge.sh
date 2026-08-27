@@ -8,7 +8,7 @@ readonly READER_ROLE="festapp_stage_reader"
 
 fail() { echo "ERROR: $*" >&2; exit 1; }
 readonly ACK="${FESTAPP_REHEARSAL_ACK:-}"
-[[ "$ACK" == "prepare-read-only-foreign-staging-bridge" || "$ACK" == "resume-after-local-trust-fdw-fix" ]] ||
+[[ "$ACK" == "prepare-read-only-foreign-staging-bridge" || "$ACK" == "resume-through-internal-supavisor" ]] ||
   fail "set FESTAPP_REHEARSAL_ACK=prepare-read-only-foreign-staging-bridge"
 [[ "$(id -u)" == "0" ]] || fail "run as root on rehearsal host"
 [[ "$(hostname -s)" == "$EXPECTED_HOSTNAME" ]] || fail "refusing unexpected host"
@@ -62,25 +62,22 @@ REVOKE ALL ON SCHEMA festapp_stage_default_public, festapp_stage_default_eshop,
   festapp_stage_a_managed FROM PUBLIC, anon, authenticated, service_role;
 
 CREATE SERVER festapp_stage_default FOREIGN DATA WRAPPER postgres_fdw
-  OPTIONS (host '127.0.0.1', port '5432', dbname 'festapp_stage_default');
+  OPTIONS (host 'supavisor', port '5432', dbname 'festapp_stage_default');
 CREATE SERVER festapp_stage_a FOREIGN DATA WRAPPER postgres_fdw
-  OPTIONS (host '127.0.0.1', port '5432', dbname 'festapp_stage_a');
+  OPTIONS (host 'supavisor', port '5432', dbname 'festapp_stage_a');
 CREATE USER MAPPING FOR postgres SERVER festapp_stage_default
-  OPTIONS (user '$READER_ROLE', password '$READER_PASSWORD');
+  OPTIONS (user '$READER_ROLE.your-tenant-id', password '$READER_PASSWORD');
 CREATE USER MAPPING FOR postgres SERVER festapp_stage_a
-  OPTIONS (user '$READER_ROLE', password '$READER_PASSWORD');
-
-ALTER USER MAPPING FOR postgres SERVER festapp_stage_default
-  OPTIONS (ADD password_required 'false');
-ALTER USER MAPPING FOR postgres SERVER festapp_stage_a
-  OPTIONS (ADD password_required 'false');
+  OPTIONS (user '$READER_ROLE.your-tenant-id', password '$READER_PASSWORD');
 SQL
 else
 psql_db postgres <<'SQL'
+ALTER SERVER festapp_stage_default OPTIONS (SET host 'supavisor');
+ALTER SERVER festapp_stage_a OPTIONS (SET host 'supavisor');
 ALTER USER MAPPING FOR postgres SERVER festapp_stage_default
-  OPTIONS (ADD password_required 'false');
+  OPTIONS (SET user 'festapp_stage_reader.your-tenant-id');
 ALTER USER MAPPING FOR postgres SERVER festapp_stage_a
-  OPTIONS (ADD password_required 'false');
+  OPTIONS (SET user 'festapp_stage_reader.your-tenant-id');
 SQL
 fi
 
