@@ -7,7 +7,8 @@ readonly EVIDENCE_ROOT="${FESTAPP_REHEARSAL_EVIDENCE_ROOT:-/var/lib/festapp-rehe
 readonly READER_ROLE="festapp_stage_reader"
 
 fail() { echo "ERROR: $*" >&2; exit 1; }
-[[ "${FESTAPP_REHEARSAL_ACK:-}" == "prepare-read-only-foreign-staging-bridge" ]] ||
+readonly ACK="${FESTAPP_REHEARSAL_ACK:-}"
+[[ "$ACK" == "prepare-read-only-foreign-staging-bridge" || "$ACK" == "resume-after-local-trust-fdw-fix" ]] ||
   fail "set FESTAPP_REHEARSAL_ACK=prepare-read-only-foreign-staging-bridge"
 [[ "$(id -u)" == "0" ]] || fail "run as root on rehearsal host"
 [[ "$(hostname -s)" == "$EXPECTED_HOSTNAME" ]] || fail "refusing unexpected host"
@@ -17,12 +18,19 @@ docker compose config -q
 psql_db() { local database="$1"; shift; docker compose exec -T db psql -X -v ON_ERROR_STOP=1 -U postgres -d "$database" "$@"; }
 
 readonly MAIN_STATE="$(psql_db postgres -Atqc "SELECT concat_ws('|', split_part(current_setting('server_version'),'.',1), (SELECT count(*) FROM auth.users), (SELECT count(*) FROM storage.objects), (SELECT count(*) FROM festapp_merge.import_runs), to_regnamespace('festapp_stage_default_public') IS NULL, (SELECT count(*) FROM pg_roles WHERE rolname='$READER_ROLE'), (SELECT count(*) FROM pg_foreign_server WHERE srvname LIKE 'festapp_stage_%'))")"
-[[ "$MAIN_STATE" == "17|0|0|0|t|0|0" ]] || fail "canonical target is not approved empty bridge state ($MAIN_STATE)"
+if [[ "$ACK" == "prepare-read-only-foreign-staging-bridge" ]]; then
+  [[ "$MAIN_STATE" == "17|0|0|0|t|0|0" ]] || fail "canonical target is not approved empty bridge state ($MAIN_STATE)"
+else
+  [[ "$MAIN_STATE" == "17|0|0|0|f|1|2" ]] || fail "canonical target is not approved FDW resume state ($MAIN_STATE)"
+  readonly RESUME_STATE="$(psql_db postgres -Atqc "SELECT concat_ws('|', (SELECT count(*) FROM pg_foreign_table), (SELECT count(*) FROM pg_user_mappings WHERE srvname IN ('festapp_stage_default','festapp_stage_a')), (SELECT count(*) FROM pg_namespace WHERE nspname LIKE 'festapp_stage_%'))")"
+  [[ "$RESUME_STATE" == "0|2|6" ]] || fail "unexpected partial FDW state ($RESUME_STATE)"
+fi
 readonly DEFAULT_STATE="$(psql_db festapp_stage_default -Atqc "SELECT concat_ws('|', (SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname IN ('public','eshop') AND c.relkind IN ('r','p')), (SELECT count(*) FROM festapp_managed_source.rows))")"
 readonly A_STATE="$(psql_db festapp_stage_a -Atqc "SELECT concat_ws('|', (SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname IN ('public','eshop') AND c.relkind IN ('r','p')), (SELECT count(*) FROM festapp_managed_source.rows))")"
 [[ "$DEFAULT_STATE" == "70|55317" ]] || fail "default staging state mismatch ($DEFAULT_STATE)"
 [[ "$A_STATE" == "100|802012" ]] || fail "a staging state mismatch ($A_STATE)"
 
+if [[ "$ACK" == "prepare-read-only-foreign-staging-bridge" ]]; then
 readonly READER_PASSWORD="$(openssl rand -base64 36 | tr -d '\n')"
 psql_db postgres <<SQL
 CREATE ROLE $READER_ROLE LOGIN PASSWORD '$READER_PASSWORD'
@@ -62,6 +70,21 @@ CREATE USER MAPPING FOR postgres SERVER festapp_stage_default
 CREATE USER MAPPING FOR postgres SERVER festapp_stage_a
   OPTIONS (user '$READER_ROLE', password '$READER_PASSWORD');
 
+ALTER USER MAPPING FOR postgres SERVER festapp_stage_default
+  OPTIONS (ADD password_required 'false');
+ALTER USER MAPPING FOR postgres SERVER festapp_stage_a
+  OPTIONS (ADD password_required 'false');
+SQL
+else
+psql_db postgres <<'SQL'
+ALTER USER MAPPING FOR postgres SERVER festapp_stage_default
+  OPTIONS (ADD password_required 'false');
+ALTER USER MAPPING FOR postgres SERVER festapp_stage_a
+  OPTIONS (ADD password_required 'false');
+SQL
+fi
+
+psql_db postgres <<'SQL'
 IMPORT FOREIGN SCHEMA public FROM SERVER festapp_stage_default INTO festapp_stage_default_public;
 IMPORT FOREIGN SCHEMA eshop FROM SERVER festapp_stage_default INTO festapp_stage_default_eshop;
 IMPORT FOREIGN SCHEMA festapp_managed_source LIMIT TO (rows) FROM SERVER festapp_stage_default INTO festapp_stage_default_managed;
