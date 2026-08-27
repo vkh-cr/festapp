@@ -13,6 +13,8 @@
    webhook, payment/bank callback, image worker and manual script.
 6. Perform the separately approved private identity/Storage collision pass.
    Never place identities, mappings or object listings in Git.
+   Apply `resolve-auth-collisions.mjs` only when every collision is the approved
+   verified-email/default-UUID case; any ambiguity remains a blocker.
 7. Resolve every schema drift and collision, and assign an owner to every manual
    decision.
 8. Select a source-compatible PostgreSQL major and pinned Supabase release.

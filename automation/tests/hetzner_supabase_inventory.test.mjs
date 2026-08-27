@@ -14,6 +14,8 @@ import {
   classifyAuthCollisions,
   classifyStorageCollisions,
 } from '../hetzner-supabase/merge/collision-lib.mjs';
+import { buildIdentityDecisions } from '../hetzner-supabase/merge/resolve-auth-collisions.mjs';
+import { scanWriteSignals } from '../hetzner-supabase/merge/write-authority-inventory.mjs';
 
 test('source aliases are pinned to the approved cloud projects', () => {
   assert.deepEqual(SOURCES, {
@@ -89,4 +91,64 @@ test('Storage collisions never treat matching metadata as content proof', () => 
   assert.equal(result.length, 1);
   assert.equal(result[0].status, 'requires-object-sha256-confirmation');
   assert.equal(result[0].object_key_hmac.length, 64);
+});
+
+test('verified e-mail collisions preserve default UUID and force source password reset', () => {
+  const result = buildIdentityDecisions({
+    sources: SOURCES,
+    report_sha256: 'c'.repeat(64),
+    auth: {
+      same_uuid_different_email: [],
+      same_email_different_uuid: [{
+        default_user_id: 'default-user',
+        a_user_id: 'a-user',
+        email_hmac: 'd'.repeat(64),
+        default_verified: true,
+        a_verified: true,
+        status: 'manual-merge-required',
+      }],
+    },
+  });
+  assert.equal(result.validation.unresolved, 0);
+  assert.deepEqual(result.decisions[0], {
+    source_project: 'a',
+    source_user_id: 'a-user',
+    target_user_id: 'default-user',
+    email_hmac: 'd'.repeat(64),
+    rule: 'verified-email-prefer-default-v1',
+    canonical_password: 'preserve-default-hash',
+    source_password: 'require-reset',
+    memberships: 'merge-after-user-id-remap',
+    providers: 'reconcile-without-duplicate-email-identity',
+    status: 'approved-by-execution-rule',
+  });
+});
+
+test('identity resolver blocks unverified or UUID/e-mail ambiguity', () => {
+  assert.throws(() => buildIdentityDecisions({
+    sources: SOURCES,
+    report_sha256: 'e'.repeat(64),
+    auth: {
+      same_uuid_different_email: [{ id: 'blocker' }],
+      same_email_different_uuid: [],
+    },
+  }), /same UUID/);
+});
+
+test('write-authority scanner distinguishes RPC, DML, Storage and side effects', () => {
+  const signals = scanWriteSignals(`
+    await supabase.from('orders').insert(payload);
+    await supabase.rpc('create_order', payload);
+    await supabase.storage.from('public-files').remove(['a']);
+    SELECT cron.schedule('job', '* * * * *', $$ SELECT net.http_post(url := 'x') $$);
+    await sendEmail();
+  `);
+  assert.deepEqual(signals, [
+    'database-webhook',
+    'direct-dml',
+    'email-side-effect',
+    'rpc',
+    'sql-cron',
+    'storage-mutation',
+  ]);
 });
