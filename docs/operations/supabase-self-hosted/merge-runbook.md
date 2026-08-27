@@ -110,9 +110,10 @@ it has no manifest.
 
 For the rehearsal, use `rehearsal-export-clouds.mjs`. It creates a unique
 one-hour export role separately in each approved project, grants only
-`pg_read_all_data` plus `BYPASSRLS`, streams both encrypted snapshots, and then
-sets the role to `NOLOGIN NOBYPASSRLS` and revokes the read grant. It does not
-drop the disabled role, so the run leaves an auditable non-destructive record.
+read access to `public`, `eshop`, `auth` and `storage` plus `BYPASSRLS`, streams
+both encrypted snapshots, and then sets the role to `NOLOGIN NOBYPASSRLS` and
+revokes every temporary schema/table/sequence grant. It does not drop the
+disabled role, so the run leaves an auditable non-destructive record.
 
 ```bash
 node automation/hetzner-supabase/merge/rehearsal-export-clouds.mjs \
