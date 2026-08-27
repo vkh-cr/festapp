@@ -9,7 +9,8 @@ const digestPattern = /^[a-z0-9./_-]+:[A-Za-z0-9._-]+@sha256:[a-f0-9]{64}$/;
 const versionPattern = /^\d+(?:\.\d+)+(?: LTS)?$/;
 
 assert.equal(pins.manifestVersion, 1);
-assert.equal(pins.architecture, 'linux/amd64');
+assert.equal(pins.architecture, 'linux/arm64');
+assert.equal(pins.supabase.registryEvidence.platform, pins.architecture);
 assert.equal(pins.policy, 'latest-stable-compatible-bundle');
 assert.match(pins.supabase.release, /^self-hosted\/v\d+\.\d+\.\d+$/);
 assert.match(pins.supabase.commit, /^[a-f0-9]{40}$/);
@@ -19,7 +20,7 @@ for (const [name, version] of Object.entries(pins.host)) {
   assert.match(version, versionPattern, `${name} must be an exact stable version`);
 }
 for (const [name, image] of Object.entries(pins.supabase.images)) {
-  assert.match(image, digestPattern, `${name} must be pinned by tag and amd64 digest`);
+  assert.match(image, digestPattern, `${name} must be pinned by tag and arm64 digest`);
 }
 for (const [name, source] of Object.entries(pins.sources)) {
   assert.match(source, /^https:\/\//, `${name} must cite an HTTPS primary source`);
@@ -66,8 +67,9 @@ async function verifyOnline() {
         throw new Error(`${name} registry verification failed; authenticate Docker before the provisioning gate: ${error.message}`);
       }
       const manifests = Array.isArray(inspected) ? inspected : [inspected];
-      const amd64 = manifests.find((value) => value.Descriptor?.platform?.os === 'linux' && value.Descriptor?.platform?.architecture === 'amd64') ?? manifests[0];
-      assert.equal(amd64.Descriptor.digest, pinned.split('@')[1], `${name} amd64 digest changed`);
+      const arm64 = manifests.find((value) => value.Descriptor?.platform?.os === 'linux' && value.Descriptor?.platform?.architecture === 'arm64');
+      assert.ok(arm64, `${name} has no linux/arm64 registry manifest`);
+      assert.equal(arm64.Descriptor.digest, pinned.split('@')[1], `${name} arm64 digest changed`);
     }
   }
 
@@ -82,7 +84,7 @@ async function verifyOnline() {
   assert.equal(latestUbuntu, pins.host.ubuntu, 'Ubuntu pin is no longer the latest official LTS');
   assert.equal(latestDocker, pins.host.dockerEngine, 'Docker Engine pin is no longer the first stable v29 release');
   assert.equal(latestPostgres, pins.supabase.upstreamPostgresLatestStable, 'upstream PostgreSQL stable reference is stale');
-  process.stdout.write(`online stable release pins verified against primary upstreams${process.argv.includes('--registry') ? ' and amd64 registries' : ''}\n`);
+  process.stdout.write(`online stable release pins verified against primary upstreams${process.argv.includes('--registry') ? ' and arm64 registries' : ''}\n`);
 }
 
 async function fetchJson(url) {

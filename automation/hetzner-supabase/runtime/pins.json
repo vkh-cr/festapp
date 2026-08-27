@@ -1,7 +1,7 @@
 {
   "manifestVersion": 1,
   "checkedAt": "2026-08-27T00:00:00Z",
-  "architecture": "linux/amd64",
+  "architecture": "linux/arm64",
   "policy": "latest-stable-compatible-bundle",
   "host": {
     "ubuntu": "26.04 LTS",
@@ -20,22 +20,22 @@
     "registryEvidence": {
       "resolvedAt": "2026-08-27T00:00:00Z",
       "resolver": "docker manifest inspect --verbose",
-      "platform": "linux/amd64",
-      "authenticatedRefreshRequiredBeforeProvisioning": true
+      "platform": "linux/arm64",
+      "authenticatedRefreshRequiredBeforeProduction": true
     },
     "images": {
-      "studio": "supabase/studio:2026.08.03-sha-022b374@sha256:2616bb9ed337963fe27ce682b1783875083537d5fb54bfea4c399fb0c56ff03e",
-      "envoy": "envoyproxy/envoy:v1.39.0@sha256:f6e2f57b1bef8235083a2553b523508cf97d8991c893fd2aae3a94a6b21096a2",
-      "auth": "supabase/gotrue:v2.189.0@sha256:0a8557cbe0fd53a067726fe656f79eb1b03a1ab3cdde4b59907ce5a1e1a202ab",
-      "rest": "postgrest/postgrest:v14.12@sha256:560895fc1f6cb78f36ae64682c85bfc923c73da2d3a473ae2f55755fd7991ad1",
-      "realtime": "supabase/realtime:v2.102.3@sha256:2cc87edf0db5cebf1f58c9a4116bb80a25ff764c8706b6802fa68d976e66e5d7",
-      "storage": "supabase/storage-api:v1.60.4@sha256:6f706c1184d97b081446527bb62a3193d3d47ad0daafcf738fd5c3e5a62aed97",
-      "imgproxy": "darthsim/imgproxy:v3.30.1@sha256:965c3782818766a477a056016e18f88f9a028bf68b39cb2316978945ac2c0492",
-      "postgresMeta": "supabase/postgres-meta:v0.96.6@sha256:b9edad6fff2d4fb991ecd57837dbe3f21d2efa0f0ccb186f6ccf0e2d57192fed",
-      "edgeRuntime": "supabase/edge-runtime:v1.74.0@sha256:8c17262ecf2fcc43fe19c48d239280592129f2164e61f0f17ba56533120f92d5",
-      "postgres": "supabase/postgres:17.6.1.136@sha256:5a4314708484bec672de2c09653a5c01fb1c84a998564ac231b0325e2238ed5b",
-      "supavisor": "supabase/supavisor:2.9.5@sha256:4dd940610c0ef5c8284ef88a28530566d45b52f7d3de285497a67c169e00cec9",
-      "caddy": "caddy:2.11.4@sha256:98eb57d882ccd5213d1688764db10c1ca2c58a1ca3a6717a3411ad798f7a423a"
+      "studio": "supabase/studio:2026.08.03-sha-022b374@sha256:cb20b9a2b8fbb4f47a616c959dfdbde75668603c38d5ddd018e3f25a9f009937",
+      "envoy": "envoyproxy/envoy:v1.39.0@sha256:5edd669228659835ac243e3ffa5c08a65e92bb267d56da5c28317dbcf5a70292",
+      "auth": "supabase/gotrue:v2.189.0@sha256:cce6c1d00352f22ee7634066012830f69636c157017ea166634c48dbb58eefb7",
+      "rest": "postgrest/postgrest:v14.12@sha256:844785450d6b046ee97f1c67ea37e3ff6b4ed7ee3570b1b91c03f66f032c4805",
+      "realtime": "supabase/realtime:v2.102.3@sha256:11651eb260639365adfd8d886ac1bfba9b069440cf92cc29f400f3b4a6554cb9",
+      "storage": "supabase/storage-api:v1.60.4@sha256:9326eb9c6b74c0a5ba393ab46a08a51d16bc5ea5f2978fc5b0f17fc67c64a4de",
+      "imgproxy": "darthsim/imgproxy:v3.30.1@sha256:74215045236d40d5ee31868aeb72ee7940ae1f38a81ad8f8e6f7e53acb5b563c",
+      "postgresMeta": "supabase/postgres-meta:v0.96.6@sha256:abbb468e4e5a14b5b4edd29caf1fa1d98ee606da89fed3bfc653a6f85985401a",
+      "edgeRuntime": "supabase/edge-runtime:v1.74.0@sha256:ac5a8314e0c45b0f65d091643c1d6f5293e3a38f31fd3d15186e04a9d5c91cb7",
+      "postgres": "supabase/postgres:17.6.1.136@sha256:a9946f08d31e8eb1149229c94e5c26603a9233116807cbbd93d75179cbac516a",
+      "supavisor": "supabase/supavisor:2.9.5@sha256:1dd306835b0215909cf76371a7a20be71268bbc97619f7133b882c5e9a7392e8",
+      "caddy": "caddy:2.11.4@sha256:1172d4213087d3fc30bafc7ff2c2896180eb0c41ff7f75f315568fb36cabdcba"
     }
   },
   "sources": {
