@@ -25,6 +25,11 @@ node automation/hetzner-supabase/merge/schema-fingerprint.mjs \
   "$FESTAPP_MIGRATION_OUTPUT/a.json"
 node automation/hetzner-supabase/merge/collision-inventory.mjs \
   --output "$FESTAPP_MIGRATION_OUTPUT/collisions.json"
+node automation/hetzner-supabase/merge/resolve-auth-collisions.mjs \
+  --input "$FESTAPP_MIGRATION_OUTPUT/collisions.json" \
+  --output "$FESTAPP_MIGRATION_OUTPUT/identity-decisions.json"
+node automation/hetzner-supabase/merge/write-authority-inventory.mjs \
+  --output "$FESTAPP_MIGRATION_OUTPUT/write-authority.json"
 ```
 
 Each inventory also writes a sibling `*.manifest.json`. It deliberately remains
@@ -34,6 +39,11 @@ approved evidence process.
 The collision pass reads Auth e-mails and Storage object keys only in memory.
 Its evidence file contains source UUIDs plus one-run HMAC identifiers; the HMAC
 key and raw identifiers are not persisted. It never resolves a collision.
+The separate resolver applies only the approved, verified-email/default-UUID
+rule and blocks every ambiguous input.
+The write-authority inventory is deliberately blocking: regex discovery creates
+a candidate list, and every entry needs a human-reviewed owner/contract before
+the hybrid design may proceed.
 
 `SUPABASE_ACCESS_TOKEN` may be supplied in the environment or in the repository
 root `.env.local`. The scripts never print it. Source aliases are pinned to the
