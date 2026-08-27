@@ -1240,6 +1240,7 @@ class _MapPageState extends State<MapPage>
       defaultErrorMessage: MapStrings.currentLocationUnavailable,
       futureFunction: () => _locateCoordinator.recenter(
         isActive: () => mounted && _isMapTabActive,
+        displayedLocation: _currentUserLocation.value,
       ),
     );
     if (mounted) setState(() {});

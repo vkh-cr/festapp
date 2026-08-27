@@ -26,6 +26,7 @@ class MapLocateCoordinator {
 
   Future<MapLocateResult> recenter({
     required bool Function() isActive,
+    LatLng? displayedLocation,
   }) async {
     if (_isLocating || !isActive() || !_viewport.isReady) {
       return MapLocateResult.ignored;
@@ -33,24 +34,33 @@ class MapLocateCoordinator {
     _isLocating = true;
     final surfaceId = _viewport.surfaceId;
     try {
-      late final Position? position;
-      try {
-        position = await _currentPosition();
-      } catch (_) {
+      late final LatLng destination;
+      if (displayedLocation != null) {
+        destination = displayedLocation;
+      } else {
+        late final Position? position;
+        try {
+          position = await _currentPosition();
+        } catch (_) {
+          if (!_remainsCurrent(surfaceId, isActive)) {
+            return MapLocateResult.ignored;
+          }
+          rethrow;
+        }
         if (!_remainsCurrent(surfaceId, isActive)) {
           return MapLocateResult.ignored;
         }
-        rethrow;
+        if (position == null) return MapLocateResult.denied;
+        destination = LatLng(position.latitude, position.longitude);
       }
       if (!_remainsCurrent(surfaceId, isActive)) return MapLocateResult.ignored;
-      if (position == null) return MapLocateResult.denied;
       final zoom = math.min(
         math.max(_viewport.directionLayoutZoom, minimumZoom),
         MapZoomLimits.interactionMaximum,
       );
       final result = await _viewport.applyCamera(CameraCommand(
         surfaceId: surfaceId,
-        destination: LatLng(position.latitude, position.longitude),
+        destination: destination,
         zoom: zoom,
         transition: CameraTransition.animated,
       ));

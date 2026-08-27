@@ -128,6 +128,38 @@ void main() {
     expect(surface.animations.single.zoom, MapLocateCoordinator.minimumZoom);
   });
 
+  test('recenters from the displayed location without a second GPS request',
+      () async {
+    final viewport = MapViewportCoordinator();
+    final surface = _FakeViewportController(const MapCameraState(
+      center: LatLng(0, 0),
+      zoom: 10,
+    ));
+    viewport.attach(surface);
+    viewport.markReady();
+    var requests = 0;
+    final unresolvedPosition = Completer<Position?>();
+    final coordinator = MapLocateCoordinator(
+      viewport: viewport,
+      currentPosition: () {
+        requests++;
+        return unresolvedPosition.future;
+      },
+    );
+
+    expect(
+      await coordinator
+          .recenter(
+            isActive: () => true,
+            displayedLocation: const LatLng(49.8209, 18.2625),
+          )
+          .timeout(const Duration(milliseconds: 100)),
+      MapLocateResult.recentered,
+    );
+    expect(requests, 0);
+    expect(surface.camera.center, const LatLng(49.8209, 18.2625));
+  });
+
   test('ignores a second recenter while the location request is in flight',
       () async {
     final viewport = MapViewportCoordinator();

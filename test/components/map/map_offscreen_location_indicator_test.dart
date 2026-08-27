@@ -4,7 +4,7 @@ import 'package:fstapp/components/map/map_current_location_drop.dart';
 import 'package:fstapp/components/map/map_offscreen_location_indicator.dart';
 import 'package:fstapp/components/map/map_location_style.dart';
 
-Widget _app(Offset target) => MaterialApp(
+Widget _app(Offset target, {VoidCallback? onPressed}) => MaterialApp(
       home: Scaffold(
         body: SizedBox(
           width: 400,
@@ -22,7 +22,7 @@ Widget _app(Offset target) => MaterialApp(
                     viewport.height,
                   ),
                 ],
-                onPressed: () {},
+                onPressed: onPressed ?? () {},
               ),
             ],
           ),
@@ -59,5 +59,20 @@ void main() {
       tester.getCenter(dropFinder).dx,
       closeTo(21, 0.01),
     );
+  });
+
+  testWidgets('forwards a tap on the off-screen drop', (tester) async {
+    tester.view.physicalSize = const Size(400, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    var presses = 0;
+
+    await tester.pumpWidget(
+      _app(const Offset(900, 390), onPressed: () => presses++),
+    );
+    await tester.tap(find.byKey(MapOffscreenLocationIndicator.dropKey));
+
+    expect(presses, 1);
   });
 }
