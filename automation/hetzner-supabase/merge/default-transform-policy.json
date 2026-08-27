@@ -47,7 +47,7 @@
     "logEmails": { "rows": 3882, "nonnullData": 0 },
     "userCompanions": {
       "rows": 3,
-      "commonOccasionCountHistogram": { "1": 1, "7": 1, "42": 1 },
+      "commonOccasionCountHistogram": { "0": 2, "1": 1 },
       "unresolvedRows": 2
     }
   },

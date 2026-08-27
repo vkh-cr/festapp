@@ -136,6 +136,7 @@ test('default transform policy fails closed on ambiguous companion history', () 
   assert.equal(policy.source.projectRef, SOURCES.default);
   assert.equal(policy.status, 'blocked-pending-private-companion-decisions');
   assert.equal(policy.evidence.userCompanions.unresolvedRows, 2);
+  assert.deepEqual(policy.evidence.userCompanions.commonOccasionCountHistogram, { 0: 2, 1: 1 });
   assert.equal(policy.productionMutationsPerformed, false);
   assert.equal(policy.rules.find((rule) => rule.table === 'public.user_companions').onFailure, 'block');
   assert.ok(policy.rules.filter((rule) => rule.action.includes('omit')).every(
