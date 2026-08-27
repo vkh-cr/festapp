@@ -74,7 +74,7 @@ const sourceA = await sourceRows(SOURCES.a);
 const auth = classifyAuthCollisions(canonical.users, sourceA.users, hmacKey);
 const storage = classifyStorageCollisions(canonical.storage, sourceA.storage, hmacKey);
 const report = {
-  report_version: 1,
+  report_version: 2,
   generated_at: new Date().toISOString(),
   sources: { default: SOURCES.default, a: SOURCES.a },
   privacy: 'emails and Storage object keys are HMACed with an ephemeral key that is not persisted',
