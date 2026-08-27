@@ -38,9 +38,10 @@ The live pricing API in this same Hetzner account returned, including 21% VAT:
 - optional Hetzner server backup: 20% of server price; total would become
   **EUR 9.30248/month**
 
-Paid Hetzner backups are currently disabled. That is acceptable only for the
-empty rehearsal foundation; encrypted off-host PostgreSQL and Storage backups
-are mandatory before production data is admitted.
+Paid Hetzner backups are currently disabled. Append-only encrypted off-host
+PostgreSQL, Storage and runtime backup plus two isolated restore drills have now
+passed. This rehearsal evidence does not replace the final production backup
+policy or the fresh pre-cutover recovery point.
 
 ## Capacity interpretation
 
@@ -69,7 +70,14 @@ client-sync rebuild. A 200-transaction concurrent materializer test completed
 without error at 114.301 ms average per six-component set. After load the host
 had 2.05 GB available RAM, zero memory PSI/OOM and 20.4 GB (51%) disk free.
 
-The next gate is encrypted off-host backup plus an isolated restore drill, then
-a second complete rehearsal from a newer cloud snapshot. Production DNS,
-credentials and writes remain unchanged until that proof and compatible web,
-Android and iOS releases are ready.
+The post-fix endpoint canary passed old cloud → self-hosted → old cloud with
+exact CSM Ostrava fallback counts (26 information, 47 news, 128 places and 969
+events). A fresh encrypted recovery point then restored exactly into another
+isolated database and Storage path: 7,198 Auth users, 1,199 Storage metadata
+rows, 762 public scopes, two validated imports and 1,463 files / 606,950,851
+bytes. All prior artifacts and failed drill databases remain preserved; no path
+was deleted. With every retained drill the host still has about 17 GB free.
+
+The next gate is a second complete rehearsal from a newer cloud snapshot,
+followed by canonical hostname/origin preparation and compatible web, Android
+and iOS releases. Production DNS, credentials and writes remain unchanged.

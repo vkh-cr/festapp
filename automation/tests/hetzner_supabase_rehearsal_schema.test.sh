@@ -18,6 +18,12 @@ readonly A_STORAGE_IMPORT_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/rehe
 readonly A_DERIVED_REBUILD_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/rehearsal/rebuild-a-client-derived-state.sh"
 readonly MERGED_DERIVED_VALIDATION_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/rehearsal/validate-merged-client-derived-state.sh"
 readonly DEFAULT_COMPANION_VALIDATION_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/rehearsal/validate-default-companion-quarantine.sh"
+readonly A_SEMANTIC_REPAIR_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/rehearsal/repair-a-semantic-references.sh"
+readonly A_PAYLOAD_REPAIR_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/rehearsal/repair-a-embedded-payloads.sh"
+readonly A_OPERATIONAL_REPAIR_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/rehearsal/repair-a-operational-references.sh"
+readonly A_REFERENCE_VALIDATION_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/rehearsal/validate-a-reference-registry.sh"
+readonly ENCRYPTED_BACKUP_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/backup/create-encrypted-rehearsal-backup.sh"
+readonly ENCRYPTED_RESTORE_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/restore/drill-encrypted-rehearsal-backup.sh"
 
 [[ -x "$SCRIPT" ]] || { echo "rehearsal schema builder must be executable" >&2; exit 1; }
 [[ -x "$STAGING_SCRIPT" ]] || { echo "merge staging builder must be executable" >&2; exit 1; }
@@ -35,6 +41,12 @@ readonly DEFAULT_COMPANION_VALIDATION_SCRIPT="$PROJECT_ROOT/automation/hetzner-s
 [[ -x "$A_DERIVED_REBUILD_SCRIPT" ]] || { echo "source a derived-state rebuilder must be executable" >&2; exit 1; }
 [[ -x "$MERGED_DERIVED_VALIDATION_SCRIPT" ]] || { echo "merged derived-state validator must be executable" >&2; exit 1; }
 [[ -x "$DEFAULT_COMPANION_VALIDATION_SCRIPT" ]] || { echo "default companion validator must be executable" >&2; exit 1; }
+[[ -x "$A_SEMANTIC_REPAIR_SCRIPT" ]] || { echo "semantic reference repair must be executable" >&2; exit 1; }
+[[ -x "$A_PAYLOAD_REPAIR_SCRIPT" ]] || { echo "embedded payload repair must be executable" >&2; exit 1; }
+[[ -x "$A_OPERATIONAL_REPAIR_SCRIPT" ]] || { echo "operational reference repair must be executable" >&2; exit 1; }
+[[ -x "$A_REFERENCE_VALIDATION_SCRIPT" ]] || { echo "reference registry validator must be executable" >&2; exit 1; }
+[[ -x "$ENCRYPTED_BACKUP_SCRIPT" ]] || { echo "encrypted backup script must be executable" >&2; exit 1; }
+[[ -x "$ENCRYPTED_RESTORE_SCRIPT" ]] || { echo "encrypted restore drill must be executable" >&2; exit 1; }
 
 for required in \
   'FESTAPP_REHEARSAL_ACK' \
@@ -305,6 +317,27 @@ done
 if rg -n 'DROP (DATABASE|SCHEMA|TABLE)|TRUNCATE|DELETE FROM' \
   "$A_DERIVED_REBUILD_SCRIPT" "$MERGED_DERIVED_VALIDATION_SCRIPT" "$DEFAULT_COMPANION_VALIDATION_SCRIPT"; then
   echo "derived-state validation tooling contains a destructive statement" >&2
+  exit 1
+fi
+
+for contract in \
+  "$A_SEMANTIC_REPAIR_SCRIPT:registered-forward-only-repair-v1:a-reference-registry-completeness:deleted_rows" \
+  "$A_PAYLOAD_REPAIR_SCRIPT:registered-embedded-payload-repair-v1:retained_unmapped_historical_snapshot_ids:deleted_rows" \
+  "$A_OPERATIONAL_REPAIR_SCRIPT:service_role_external_sync_execute:storage_url_rewrite_deferred_to_api_hostname:deleted_rows" \
+  "$A_REFERENCE_VALIDATION_SCRIPT:known_reference_mismatches:api.festapp.net-cutover:deleted_rows" \
+  "$ENCRYPTED_BACKUP_SCRIPT:plaintext_artifacts_written:false:cloud_sources_mutated" \
+  "$ENCRYPTED_RESTORE_SCRIPT:restore-encrypted-backup-into-new-isolated-target:production_target_mutated:deleted_paths"; do
+  IFS=: read -r script required_a required_b required_c <<<"$contract"
+  for required in "$required_a" "$required_b" "$required_c"; do
+    rg -Fq "$required" "$script" || { echo "missing repair/recovery contract $required in $script" >&2; exit 1; }
+  done
+done
+
+if rg -n 'DROP (DATABASE|SCHEMA|TABLE)|TRUNCATE|DELETE FROM|rm -|unlink' \
+  "$A_SEMANTIC_REPAIR_SCRIPT" "$A_PAYLOAD_REPAIR_SCRIPT" \
+  "$A_OPERATIONAL_REPAIR_SCRIPT" "$A_REFERENCE_VALIDATION_SCRIPT" \
+  "$ENCRYPTED_BACKUP_SCRIPT" "$ENCRYPTED_RESTORE_SCRIPT"; then
+  echo "repair/recovery tooling contains an unapproved destructive statement" >&2
   exit 1
 fi
 
