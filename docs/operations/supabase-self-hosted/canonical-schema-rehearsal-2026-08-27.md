@@ -132,3 +132,35 @@ canonical schema and keeps its rehearsal run blocked. It cannot be resolved
 without either a repair decision or an `omit-with-ledger` decision tied to a
 private evidence checksum. This makes the user's no-deletion constraint an
 enforced staging invariant rather than an informal instruction.
+
+## Encrypted rehearsal snapshots and raw staging
+
+Both production clouds remained online and read-only while encrypted rehearsal
+snapshots were streamed outside Git to the existing SSH Ed25519 identity. Valid
+artifacts are identified only by a sibling manifest and matching SHA-256:
+
+| Artifact | Bytes | Rows | SHA-256 |
+|---|---:|---:|---|
+| `default.dump.age` | 4,629,627 | application custom archive | `cc00726fbc9f68a86a135699002e04b2643c945abc1b205b3146309c6e62d211` |
+| `a.dump.age` | 260,569,205 | application custom archive | `418c6a3421509853e638175fce7d43e96e620cfd4de5cc731acf68e907ddcb05` |
+| `default.managed.jsonl.age` | 22,836,739 | 55,317 | `b1a592d778d3a88ae5569569d716e6208df4611e5574d6177fa829b3ecad1e7d` |
+| `a.managed.jsonl.age` | 334,409,467 | 802,012 | `8af16cdb817ca9771182dd46c90525fcddb61f0a05ece2f9e9b9b17e35caeea8` |
+
+All files and manifests are `0600` under `0700` directories. Three disabled
+audit roles remain in `default` and one in `a`; every role is `NOLOGIN`,
+`NOBYPASSRLS`, has no `pg_read_all_data` membership and has zero direct schema
+or table grants. They are intentionally not dropped.
+
+The first managed export used 500-row API pages and measured the actual cost of
+roughly 1,600 round trips. Production benchmarks proved 10,000-row pages return
+the largest Auth payloads in 1.8–2.0 seconds at about 3.5 MB, so subsequent
+rehearsals use about 82 requests without parallel source load. During the long
+page window `a` changed by 17 rows; this is accepted only as rehearsal evidence
+and proves that final state requires a fresh freeze/journal snapshot.
+
+On the Hetzner host, `festapp_stage_default` and `festapp_stage_a` are separate,
+non-public PG17 databases. The application restores contain 70 and 100 source
+tables respectively; raw managed JSONB staging contains exactly 55,317 and
+802,012 rows. The canonical database still has zero Auth users, zero Storage
+objects, zero import runs and zero quarantined rows. All 11 services remain
+healthy and 22.9 GB disk remained available after staging.
