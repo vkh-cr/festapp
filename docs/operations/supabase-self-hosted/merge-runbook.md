@@ -153,3 +153,16 @@ the target extension foundation and deny connection/schema access to public
 application roles. Restore application pre-data and data only; post-data
 constraints are intentionally validated after transformation against the
 canonical target, not forced onto a raw source staging copy.
+
+Managed rows are staged as encrypted-stream-to-`COPY` JSONB, not restored over
+runtime Auth or Storage:
+
+```bash
+node automation/hetzner-supabase/merge/stage-managed-export.mjs \
+  default /private/default.managed.jsonl.age ~/.ssh/id_ed25519
+```
+
+Repeat for `a`. The loader verifies the source ref, encrypted artifact checksum,
+exact hostname, PostgreSQL major, absent staging schema and final row count. It
+creates only `festapp_managed_source.rows` inside the matching isolated source
+database; plaintext rows exist only in the streaming process memory.

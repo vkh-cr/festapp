@@ -37,6 +37,7 @@ import {
   validateRecipient,
 } from '../hetzner-supabase/merge/export-source.mjs';
 import { buildPageQuery } from '../hetzner-supabase/merge/export-managed-schemas.mjs';
+import { csvField } from '../hetzner-supabase/merge/stage-managed-export.mjs';
 
 test('source aliases are pinned to the approved cloud projects', () => {
   assert.deepEqual(SOURCES, {
@@ -198,6 +199,11 @@ test('managed schema export pages only approved primary-key tables', () => {
     () => buildPageQuery({ schema_name: 'storage', table_name: 'objects', primary_key: [] }, 0),
     /no primary key/,
   );
+});
+
+test('managed staging CSV escapes JSON without plaintext files', () => {
+  assert.equal(csvField('a"b'), '"a""b"');
+  assert.equal(csvField('{"key":"value"}'), '"{""key"":""value""}"');
 });
 
 test('inventory creates a blocked evidence manifest with the required provenance', () => {
