@@ -135,3 +135,21 @@ Every `auth` and `storage` table must have a primary key; there is no `ctid`
 fallback. The read-only API pages are streamed directly into age encryption.
 This page-window consistency is sufficient only for rehearsal. The final
 cutover uses the separately defined freeze/final-marker freshness gate.
+
+## Isolated raw-source staging databases
+
+Application archives are never restored over the canonical database. Prepare
+two additive, non-public PostgreSQL databases on the exact rehearsal host:
+
+```bash
+FESTAPP_REHEARSAL_ACK=prepare-empty-source-staging-databases \
+  automation/hetzner-supabase/rehearsal/prepare-source-staging-databases.sh
+```
+
+The guarded builder refuses an existing staging database, non-empty target Auth
+or Storage, a missing private merge schema, a PostgreSQL major other than 17 or
+any other hostname. `festapp_stage_default` and `festapp_stage_a` contain only
+the target extension foundation and deny connection/schema access to public
+application roles. Restore application pre-data and data only; post-data
+constraints are intentionally validated after transformation against the
+canonical target, not forced onto a raw source staging copy.
