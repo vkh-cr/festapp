@@ -105,6 +105,11 @@ DECLARE
 BEGIN
   SELECT run_id INTO STRICT import_run FROM festapp_merge.import_runs WHERE source_alias='a' AND status='prepared';
 
+  IF EXISTS (SELECT 1 FROM festapp_stage_a_eshop.planned_changes
+    WHERE change_type NOT LIKE 'forms.%') THEN
+    RAISE EXCEPTION 'planned_changes contains an unregistered polymorphic subject type';
+  END IF;
+
   FOR relation IN
     SELECT foreign_table_schema source_schema,
       replace(foreign_table_schema,'festapp_stage_a_','') target_schema,
@@ -154,6 +159,41 @@ BEGIN
       END IF;
 
       IF mapping_table IS NULL THEN
+        mapping_table:=CASE relation.target_schema||'.'||relation.table_name||'.'||target_column.column_name
+          WHEN 'public.events.occasion' THEN 'public.occasions'
+          WHEN 'public.email_templates.unit' THEN 'public.units'
+          WHEN 'public.log_app_config.organization' THEN 'public.organizations'
+          WHEN 'public.role_info.occasion' THEN 'public.occasions'
+          ELSE NULL
+        END;
+      END IF;
+
+      IF relation.target_schema='public' AND relation.table_name='organizations'
+        AND target_column.column_name='data' THEN
+        expression:=format($expression$
+          CASE WHEN s.data ? 'DEFAULT_OCCASION' THEN jsonb_set(
+            CASE WHEN s.data ? 'REPRESENTATIVE_OCCASION' THEN jsonb_set(
+              CASE WHEN s.data ? 'DEFAULT_UNIT' THEN jsonb_set(s.data,
+                '{DEFAULT_UNIT}',coalesce((SELECT to_jsonb(m.target_id::bigint) FROM festapp_merge.id_mappings m WHERE m.run_id=%1$L AND m.source_table='public.units' AND m.source_id=s.data->>'DEFAULT_UNIT'),s.data->'DEFAULT_UNIT'),false)
+              ELSE s.data END,
+              '{REPRESENTATIVE_OCCASION}',coalesce((SELECT to_jsonb(m.target_id::bigint) FROM festapp_merge.id_mappings m WHERE m.run_id=%1$L AND m.source_table='public.occasions' AND m.source_id=s.data->>'REPRESENTATIVE_OCCASION'),s.data->'REPRESENTATIVE_OCCASION'),false)
+            ELSE CASE WHEN s.data ? 'DEFAULT_UNIT' THEN jsonb_set(s.data,
+              '{DEFAULT_UNIT}',coalesce((SELECT to_jsonb(m.target_id::bigint) FROM festapp_merge.id_mappings m WHERE m.run_id=%1$L AND m.source_table='public.units' AND m.source_id=s.data->>'DEFAULT_UNIT'),s.data->'DEFAULT_UNIT'),false)
+            ELSE s.data END END,
+            '{DEFAULT_OCCASION}',coalesce((SELECT to_jsonb(m.target_id::bigint) FROM festapp_merge.id_mappings m WHERE m.run_id=%1$L AND m.source_table='public.occasions' AND m.source_id=s.data->>'DEFAULT_OCCASION'),s.data->'DEFAULT_OCCASION'),false)
+          ELSE CASE WHEN s.data ? 'REPRESENTATIVE_OCCASION' THEN jsonb_set(
+            CASE WHEN s.data ? 'DEFAULT_UNIT' THEN jsonb_set(s.data,
+              '{DEFAULT_UNIT}',coalesce((SELECT to_jsonb(m.target_id::bigint) FROM festapp_merge.id_mappings m WHERE m.run_id=%1$L AND m.source_table='public.units' AND m.source_id=s.data->>'DEFAULT_UNIT'),s.data->'DEFAULT_UNIT'),false)
+            ELSE s.data END,
+            '{REPRESENTATIVE_OCCASION}',coalesce((SELECT to_jsonb(m.target_id::bigint) FROM festapp_merge.id_mappings m WHERE m.run_id=%1$L AND m.source_table='public.occasions' AND m.source_id=s.data->>'REPRESENTATIVE_OCCASION'),s.data->'REPRESENTATIVE_OCCASION'),false)
+          ELSE CASE WHEN s.data ? 'DEFAULT_UNIT' THEN jsonb_set(s.data,
+            '{DEFAULT_UNIT}',coalesce((SELECT to_jsonb(m.target_id::bigint) FROM festapp_merge.id_mappings m WHERE m.run_id=%1$L AND m.source_table='public.units' AND m.source_id=s.data->>'DEFAULT_UNIT'),s.data->'DEFAULT_UNIT'),false)
+          ELSE s.data END END END
+        $expression$,import_run);
+      ELSIF relation.target_schema='eshop' AND relation.table_name='planned_changes'
+        AND target_column.column_name='subject_id' THEN
+        expression:=format('CASE WHEN s.change_type LIKE ''forms.%%'' THEN coalesce((SELECT m.target_id::bigint FROM festapp_merge.id_mappings m WHERE m.run_id=%L AND m.source_table=''public.forms'' AND m.source_id=s.subject_id::text),s.subject_id) ELSE s.subject_id END',import_run);
+      ELSIF mapping_table IS NULL THEN
         expression:=format('s.%I',target_column.column_name);
       ELSIF own_strict_mapping THEN
         expression:=format('(SELECT m.target_id::%s FROM festapp_merge.id_mappings m WHERE m.run_id=%L AND m.source_table=%L AND m.source_id=s.%I::text)',

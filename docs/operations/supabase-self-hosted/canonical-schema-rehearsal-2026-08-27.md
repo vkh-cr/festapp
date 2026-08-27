@@ -220,5 +220,61 @@ sets: 200 succeeded, none failed, average latency was 114.301 ms per set and
 throughput was 34.995 sets/s. After the test all 11 services were healthy,
 `MemAvailable` was 2.05 GB, memory PSI and OOM count were zero, and 20.4 GB
 (51%) of the 40 GB disk remained available. The canonical database was 1.155 GB.
-This measured rehearsal does not justify a price increase from CAX11; backup,
-restore and a second fresh-snapshot rehearsal remain mandatory before cutover.
+This measured rehearsal does not justify a price increase from CAX11. Backup
+and restore subsequently passed; a second fresh-snapshot rehearsal remains
+mandatory before cutover.
+
+## Semantic reference correction and switch rehearsal — 2026-08-28
+
+The first endpoint canary exposed a real gap that ordinary PostgreSQL FK checks
+could not see: `public.events.occasion` is a semantic reference without a
+declared FK. The imported rows existed, but 969 CSM Ostrava events still held
+source occasion `643` instead of mapped target occasion `1072551`. The target
+therefore returned zero events through the released-client fallback path. The
+canary blocked cutover before any production switch.
+
+The reference inventory was expanded and repaired forward-only. No row or file
+was deleted. The rehearsal now validates:
+
+- scalar references in events, e-mail templates, app-config logs, role info and
+  polymorphic planned changes;
+- organization JSON defaults and representative occasion IDs;
+- blueprint spot IDs and live IDs embedded in order/order-history payloads;
+- preserved historical snapshot IDs whose source entity no longer exists;
+- transaction audit snapshot IDs, merged-identity UUID references and the
+  rebuilt client-sync URL surface;
+- the retired inter-project sync as preserved but inert: no cron and no
+  `service_role` execute path;
+- four remaining legacy Supabase Storage image URLs, all backed by copied
+  Storage objects and explicitly gated for rewrite to `api.festapp.net` during
+  hostname cutover.
+
+The old-cloud → self-hosted → old-cloud application canary then passed. CSM
+Ostrava matched semantically on title and link while IDs were intentionally
+remapped. All released-client fallback counts were exact on both endpoints:
+26 information rows, 47 news rows, 128 places and 969 events. Client-sync v1
+remains deliberately disabled on the rehearsal endpoint until the canonical
+publisher/object-origin gate passes; the tested database fallback is complete.
+
+## Encrypted post-fix recovery point
+
+An append-only encrypted backup was created outside the repository as run
+`20260827T220127Z`, then restored into new isolated database
+`festapp_restore_2026082722012720260827221138` and a new Storage path. The drill
+matched 7,198 Auth users, 1,199 Storage metadata rows, 762 public scopes, two
+validated imports and exactly 1,463 physical files / 606,950,851 bytes. It
+wrote no plaintext backup artifact, changed neither cloud source nor the live
+rehearsal database, and deleted no path. All 11 services remained healthy.
+
+The remaining production gates are a second complete merge from a newer
+freeze/journal snapshot, canonical hostname/origin and four-URL rewrite,
+compatible web/Android/iOS releases, and the final write-authority/DML gate.
+
+The dynamic repair/validation sequence was also rerun end-to-end against the
+earlier isolated pre-fix restore database. It derived repair counts from that
+snapshot and the deterministic map rather than today's fixed cardinalities.
+All four phases passed, the restored CSM scope moved from 969 rows on old
+occasion `643` to 969 on target `1072551`, and every validation result passed.
+This proves script repeatability independently of the already-repaired live
+rehearsal database; it is not a substitute for the required newer cloud
+snapshot rehearsal.

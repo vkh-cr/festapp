@@ -132,7 +132,7 @@
 </head>
 <body>
   <header class="wrap">
-    <div class="brand"><span class="brand-mark" aria-hidden="true"></span> Festapp infrastructure · stav k 27. 8. 2026</div>
+    <div class="brand"><span class="brand-mark" aria-hidden="true"></span> Festapp infrastructure · stav k 28. 8. 2026</div>
     <section class="hero">
       <div class="eyebrow">Krátká odpověď</div>
       <h1>Rehearsal Supabase <span class="answer">už běží.</span></h1>
@@ -178,7 +178,7 @@
         <div class="step done"><span class="dot">✓</span><span class="step-name">Wave 0 · Evidence</span><span class="step-desc">Schéma, kolize, ID mapy, Auth, Storage a transformační pravidla jsou doložené.</span><span class="step-status">hotovo</span></div>
         <div class="step done"><span class="dot">✓</span><span class="step-name">Architektura</span><span class="step-desc">PG17, pinned Supabase bundle, journalované RPC, Cloudflare mimo DB write path.</span><span class="step-status">rozhodnuto</span></div>
         <div class="step done"><span class="dot">✓</span><span class="step-name">Rehearsal základ</span><span class="step-desc">Terraform, chráněný Hetzner CAX11, hardened host a pinned Supabase stack.</span><span class="step-status">online</span></div>
-        <div class="step active"><span class="dot">4</span><span class="step-name">Rehearsal ×2</span><span class="step-desc">První kompletní sloučení je validované: 7 198 Auth uživatelů, 1 199 Storage objektů a dopředný client_sync rebuild. Zbývá druhý čerstvý nácvik a restore drill.</span><span class="step-status">1 / 2</span></div>
+        <div class="step active"><span class="dot">4</span><span class="step-name">Rehearsal ×2</span><span class="step-desc">První sloučení, semantic-reference oprava, endpoint switch canary i dva izolované restore drilly prošly. Zbývá druhý kompletní běh z čerstvého snapshotu.</span><span class="step-status">1 / 2</span></div>
         <div class="step todo"><span class="dot">5</span><span class="step-name">Cutover</span><span class="step-desc">Freeze, import, nulový lag, DNS/config přepnutí a otevření cílových zápisů.</span><span class="step-status">nezačalo</span></div>
         <div class="step todo"><span class="dot">6</span><span class="step-name">Stabilizace</span><span class="step-desc">Cloudy zůstanou read-only po retenční dobu; odstranění až po novém schválení.</span><span class="step-status">nezačalo</span></div>
       </div>
@@ -193,7 +193,7 @@
           <div class="blocker"><span class="num">3</span><div><strong>Direct DML a adopce RPC</strong><span>47 z 48 occasions není potvrzeně na nové cestě a 8 DML grant skupin stále existuje.</span></div></div>
         </article>
         <article class="card span-6">
-          <div class="blocker"><span class="num">4</span><div><strong>Backup a restore</strong><span>Je nutný šifrovaný off-host backup a izolovaný restore drill. První load test prošel: 200/200 setů, 0 chyb, průměr 114 ms a po testu 2,05 GB MemAvailable.</span></div></div>
+          <div class="blocker"><span class="num">4</span><div><strong>Hostname a poslední 4 Storage URL</strong><span>Všechny čtyři legacy URL mají zkopírovaný objekt. Přepis na <code>api.festapp.net</code> proběhne až s ověřeným originem, aby se nerozbili staří klienti.</span></div></div>
           <div class="blocker"><span class="num">5</span><div><strong>Klientské releasy</strong><span>Web, Android a iOS musí dostat jednotný <code>api.festapp.net</code>, nové veřejné klíče a full-sync epoch ještě před finálním freeze.</span></div></div>
           <div class="blocker"><span class="num">6</span><div><strong>Produkční rozhodovací brána</strong><span>Rehearsal host je schválený; DNS, produkční import a cutover až po uzavření blockerů a novém výslovném souhlasu.</span></div></div>
         </article>
@@ -210,7 +210,7 @@
     </section>
 
     <section class="section">
-      <div class="callout"><strong>Nejbližší správný krok</strong><p>Dokončit šifrovaný backup/restore drill a zopakovat celý merge z nového snapshotu. Potom připravit releasy klientů; produkční cutover smí použít pouze nový freeze/journal snapshot s nulovým lagu.</p></div>
+      <div class="callout"><strong>Nejbližší správný krok</strong><p>Zopakovat celý merge z nového snapshotu a současně připravit kanonický hostname a kompatibilní releasy klientů. Produkční cutover smí použít pouze nový freeze/journal snapshot s nulovým lagu.</p></div>
     </section>
 
     <section class="section">

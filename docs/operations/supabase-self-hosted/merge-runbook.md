@@ -173,3 +173,40 @@ Repeat for `a`. The loader verifies the source ref, encrypted artifact checksum,
 exact hostname, PostgreSQL major, absent staging schema and final row count. It
 creates only `festapp_managed_source.rows` inside the matching isolated source
 database; plaintext rows exist only in the streaming process memory.
+
+## Required source-a post-import sequence
+
+The relational importer deliberately leaves source `a` blocked. Declared FKs
+are insufficient because the production schema also contains undeclared scalar,
+polymorphic and JSON references. Every fresh rehearsal must run the following
+forward-only sequence against its newly created target; none of these scripts
+has a force, delete or overwrite mode:
+
+```bash
+FESTAPP_REHEARSAL_ACK=repair-a-registered-semantic-references-forward-only \
+  automation/hetzner-supabase/rehearsal/repair-a-semantic-references.sh
+
+FESTAPP_REHEARSAL_ACK=repair-a-registered-embedded-payloads-forward-only \
+  automation/hetzner-supabase/rehearsal/repair-a-embedded-payloads.sh
+
+FESTAPP_REHEARSAL_ACK=repair-a-operational-references-forward-only \
+  automation/hetzner-supabase/rehearsal/repair-a-operational-references.sh
+
+FESTAPP_REHEARSAL_ACK=validate-a-reference-registry \
+  automation/hetzner-supabase/rehearsal/validate-a-reference-registry.sh
+```
+
+The final validator is the only step allowed to return the import to
+`validated`. It compares registered source values through the deterministic ID
+map, verifies transformed payload equality, proves obsolete inter-project sync
+is inert, and requires the four known legacy Storage links to have copied
+objects. Their host rewrite remains a separate `api.festapp.net` activation
+gate. High sequence values are not compacted in place: a fresh target may use a
+new deterministic allocation policy only before import and only when the full
+reference registry proves every dependent value is transformed.
+
+After validation, perform an application-level endpoint canary in this order:
+old cloud → self-hosted tunnel → old cloud. Compare semantic config values and
+released-client fallback counts rather than requiring equal numeric IDs. For
+CSM Ostrava the proven baseline is 26 information rows, 47 news rows, 128
+places and 969 events.
