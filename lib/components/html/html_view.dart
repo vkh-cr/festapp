@@ -8,6 +8,7 @@ import 'package:fstapp/app_config.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fwfh_cached_network_image/fwfh_cached_network_image.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cached_network_image_platform_interface/cached_network_image_platform_interface.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
@@ -162,6 +163,7 @@ class _HtmlViewState extends State<HtmlView> {
               : CachedNetworkImage(
                   imageUrl: src,
                   cacheManager: DefaultCacheManager(),
+                  imageRenderMethodForWeb: ImageRenderMethodForWeb.HttpGet,
                 );
           return Align(
             alignment: Alignment.center,
@@ -253,9 +255,7 @@ class _YoutubeEmbedState extends State<_YoutubeEmbed> {
     if (widget.isOffline) return;
     final generation = ++_controllerGeneration;
     final origin = await _appOrigin;
-    if (!mounted ||
-        generation != _controllerGeneration ||
-        widget.isOffline) {
+    if (!mounted || generation != _controllerGeneration || widget.isOffline) {
       return;
     }
 
