@@ -12,6 +12,8 @@ export function classifyAuthCollisions(defaultUsers, aUsers, key) {
   const sameUuidDifferentEmail = [];
   const sameEmailDifferentUuid = [];
   const sameIdentity = [];
+  const sameProviderIdentityDifferentUuid = [];
+  const sameVerifiedPhoneDifferentUuid = [];
   for (const user of aUsers) {
     const byId = defaultById.get(user.id);
     if (byId) {
@@ -42,12 +44,51 @@ export function classifyAuthCollisions(defaultUsers, aUsers, key) {
       });
     }
   }
-  return { same_uuid_different_email: sameUuidDifferentEmail, same_email_different_uuid: sameEmailDifferentUuid, same_identity: sameIdentity };
+  const defaultProviderLinks = new Map();
+  for (const user of defaultUsers) for (const link of user.provider_links ?? []) {
+    defaultProviderLinks.set(`${link.provider}\0${link.provider_id}`, user);
+  }
+  for (const user of aUsers) for (const link of user.provider_links ?? []) {
+    const canonical = defaultProviderLinks.get(`${link.provider}\0${link.provider_id}`);
+    if (canonical && canonical.id !== user.id) {
+      sameProviderIdentityDifferentUuid.push({
+        provider: link.provider,
+        provider_id_hmac: evidenceHash(link.provider_id, key),
+        default_user_id: canonical.id,
+        a_user_id: user.id,
+        status: 'manual-provider-collision-blocker',
+      });
+    }
+  }
+  const defaultPhones = new Map(defaultUsers.filter((user) => user.normalized_phone && user.phone_verified)
+    .map((user) => [user.normalized_phone, user]));
+  for (const user of aUsers.filter((value) => value.normalized_phone && value.phone_verified)) {
+    const canonical = defaultPhones.get(user.normalized_phone);
+    if (canonical && canonical.id !== user.id) {
+      sameVerifiedPhoneDifferentUuid.push({
+        phone_hmac: evidenceHash(user.normalized_phone, key),
+        default_user_id: canonical.id,
+        a_user_id: user.id,
+        status: 'manual-phone-collision-blocker',
+      });
+    }
+  }
+  return {
+    same_uuid_different_email: sameUuidDifferentEmail,
+    same_email_different_uuid: sameEmailDifferentUuid,
+    same_provider_identity_different_uuid: sameProviderIdentityDifferentUuid,
+    same_verified_phone_different_uuid: sameVerifiedPhoneDifferentUuid,
+    same_identity: sameIdentity,
+  };
 }
 
 function safeAuthState(user, key) {
   return {
     providers: user.providers ?? [],
+    provider_links: (user.provider_links ?? []).map(({ provider, provider_id }) => ({
+      provider,
+      provider_id_hmac: evidenceHash(provider_id, key),
+    })),
     mfa: user.mfa ?? [],
     phone_hmac: evidenceHash(user.normalized_phone, key),
     phone_verified: Boolean(user.phone_verified),
