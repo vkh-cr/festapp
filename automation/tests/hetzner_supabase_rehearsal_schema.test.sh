@@ -6,11 +6,13 @@ readonly SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/rehearsal/build-canon
 readonly STAGING_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/rehearsal/prepare-merge-staging.sh"
 readonly SOURCE_DATABASE_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/rehearsal/prepare-source-staging-databases.sh"
 readonly FOREIGN_BRIDGE_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/rehearsal/prepare-foreign-staging-bridge.sh"
+readonly DEFAULT_IMPORT_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/rehearsal/import-default-canonical.sh"
 
 [[ -x "$SCRIPT" ]] || { echo "rehearsal schema builder must be executable" >&2; exit 1; }
 [[ -x "$STAGING_SCRIPT" ]] || { echo "merge staging builder must be executable" >&2; exit 1; }
 [[ -x "$SOURCE_DATABASE_SCRIPT" ]] || { echo "source staging database builder must be executable" >&2; exit 1; }
 [[ -x "$FOREIGN_BRIDGE_SCRIPT" ]] || { echo "foreign staging bridge builder must be executable" >&2; exit 1; }
+[[ -x "$DEFAULT_IMPORT_SCRIPT" ]] || { echo "default canonical importer must be executable" >&2; exit 1; }
 
 for required in \
   'FESTAPP_REHEARSAL_ACK' \
@@ -88,6 +90,23 @@ done
 
 if rg -n 'DROP (DATABASE|SCHEMA|TABLE)|TRUNCATE|DELETE FROM' "$FOREIGN_BRIDGE_SCRIPT"; then
   echo "foreign staging bridge contains a destructive statement" >&2
+  exit 1
+fi
+
+for required in \
+  'import-default-with-two-quarantined-companions' \
+  'session_replication_role = replica' \
+  'OVERRIDING SYSTEM VALUE' \
+  'zero-common-occasion-legacy-orphan' \
+  'imported_companions <> 1' \
+  'quarantined_companions <> 2' \
+  "SET status='blocked'" \
+  "'auth-and-storage-import', 'blocked'"; do
+  rg -Fq "$required" "$DEFAULT_IMPORT_SCRIPT" || { echo "missing default import safety contract: $required" >&2; exit 1; }
+done
+
+if rg -n 'DROP (DATABASE|SCHEMA|TABLE)|TRUNCATE|DELETE FROM' "$DEFAULT_IMPORT_SCRIPT"; then
+  echo "default canonical importer contains a destructive statement" >&2
   exit 1
 fi
 
