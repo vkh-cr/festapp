@@ -26,12 +26,39 @@ import {
   buildTenantConfigInventory,
   parseTenantConfig,
 } from '../hetzner-supabase/merge/tenant-config-inventory.mjs';
+import {
+  buildMigrationHistoryReport,
+} from '../hetzner-supabase/merge/migration-history-inventory.mjs';
 
 test('source aliases are pinned to the approved cloud projects', () => {
   assert.deepEqual(SOURCES, {
     default: 'kjdpmixlnhntmxjedpxh',
     a: 'lwfpdjxsdmkfyrzqbrlk',
   });
+});
+
+test('migration history comparison blocks drift and identifies expansion prerequisites', () => {
+  const repository = [
+    { version: '20260801000000', name: 'base', file: '20260801000000_base.sql', sha256: 'a'.repeat(64) },
+    { version: '20260802234000', name: 'client_sync_v1_expansion', file: '20260802234000_client_sync_v1_expansion.sql', sha256: 'b'.repeat(64) },
+    { version: '20260827120000', name: 'harden_client_sync_rpc_search_paths', file: '20260827120000_harden_client_sync_rpc_search_paths.sql', sha256: 'c'.repeat(64) },
+  ];
+  const report = buildMigrationHistoryReport({
+    repository,
+    sources: {
+      default: [{ version: '20260801000000', name: 'base' }],
+      a: repository.slice(0, 2).map(({ version, name }) => ({ version, name })),
+    },
+  });
+  assert.equal(report.validation.status, 'blocked');
+  assert.deepEqual(report.sources.default.repository_versions_not_recorded, [
+    '20260802234000',
+    '20260827120000',
+  ]);
+  assert.equal(report.sources.a.client_sync_expansion_recorded, true);
+  assert.equal(report.sources.default.client_sync_expansion_recorded, false);
+  assert.equal(report.validation.production_mutations_performed, false);
+  assert.match(report.validation.blockers.join('\n'), /default.*client-sync expansion/i);
 });
 
 test('production evidence cannot be written inside the repository', () => {
