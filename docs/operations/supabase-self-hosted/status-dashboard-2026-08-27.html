@@ -152,7 +152,7 @@
       <div class="grid">
         <article class="card span-3"><div class="big green">2</div><h3>Cloudové zdroje</h3><p><code>default</code> a <code>a</code> jsou read-only zinventarizované.</p></article>
         <article class="card span-3"><div class="big green">41</div><h3>RPC kontraktů</h3><p>Hardening je připravený, ale záměrně nenasazený.</p></article>
-        <article class="card span-3"><div class="big amber">2 075</div><h3>Default → target rozdílů</h3><p>V aplikačním schématu; zdroj <code>a</code> má proti targetu 171 rozdílů.</p></article>
+        <article class="card span-3"><div class="big amber">2</div><h3>Blokované default tabulky</h3><p>Z 70 tabulek je 66 tvarově kompatibilních, dvě vyžadují transformaci a dvě rozhodnutí.</p></article>
         <article class="card span-3"><div class="big green">1</div><h3>Self-hosted server</h3><p>CAX11 ARM v NBG1; 11/11 služeb healthy, databáze neveřejná.</p></article>
       </div>
     </section>
@@ -210,7 +210,7 @@
     </section>
 
     <section class="section">
-      <div class="callout"><strong>Nejbližší správný krok</strong><p>Rozdělit katalogové rozdíly na legacy, target expansion a skutečný sémantický konflikt. Teprve potom připravit logický import dat <code>default</code> a PG15 → PG17 staging pro <code>a</code>. Produkce se při tom stále nemění.</p></div>
+      <div class="callout"><strong>Nejbližší správný krok</strong><p>Uzavřít transformační pravidla pro <code>activities</code>, <code>user_companions</code>, <code>inventory_pools</code> a <code>log_emails</code>, potom sestavit read-only export a staging import. Všech 100 tabulek zdroje <code>a</code> je už tvarově kompatibilních s targetem.</p></div>
     </section>
 
     <section class="section">
