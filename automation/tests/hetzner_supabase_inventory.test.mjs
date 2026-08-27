@@ -188,8 +188,8 @@ test('encrypted source export accepts only an approved project identity', () => 
 
 test('managed schema export pages only approved primary-key tables', () => {
   assert.equal(
-    buildPageQuery({ schema_name: 'auth', table_name: 'users', primary_key: ['id'] }, 500),
-    'SELECT to_jsonb(source_row) AS row FROM "auth"."users" AS source_row ORDER BY source_row."id" LIMIT 500 OFFSET 500',
+    buildPageQuery({ schema_name: 'auth', table_name: 'users', primary_key: ['id'] }, 10_000),
+    'SELECT to_jsonb(source_row) AS row FROM "auth"."users" AS source_row ORDER BY source_row."id" LIMIT 10000 OFFSET 10000',
   );
   assert.throws(
     () => buildPageQuery({ schema_name: 'public', table_name: 'users', primary_key: ['id'] }, 0),
@@ -198,6 +198,10 @@ test('managed schema export pages only approved primary-key tables', () => {
   assert.throws(
     () => buildPageQuery({ schema_name: 'storage', table_name: 'objects', primary_key: [] }, 0),
     /no primary key/,
+  );
+  assert.throws(
+    () => buildPageQuery({ schema_name: 'auth', table_name: 'users', primary_key: ['id'] }, 0, 10_001),
+    /invalid managed export page/,
   );
 });
 
