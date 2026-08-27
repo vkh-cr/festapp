@@ -16,6 +16,15 @@ import {
 } from '../hetzner-supabase/merge/collision-lib.mjs';
 import { buildIdentityDecisions } from '../hetzner-supabase/merge/resolve-auth-collisions.mjs';
 import { scanWriteSignals } from '../hetzner-supabase/merge/write-authority-inventory.mjs';
+import {
+  auditLegacyAdapters,
+  buildHybridReadiness,
+  loadWriteAuthorityPolicy,
+} from '../hetzner-supabase/merge/hybrid-readiness.mjs';
+import {
+  buildTenantConfigInventory,
+  parseTenantConfig,
+} from '../hetzner-supabase/merge/tenant-config-inventory.mjs';
 
 test('source aliases are pinned to the approved cloud projects', () => {
   assert.deepEqual(SOURCES, {
@@ -217,4 +226,121 @@ test('write-authority scanner distinguishes RPC, DML, Storage and side effects',
     'sql-cron',
     'storage-mutation',
   ]);
+});
+
+test('all known Flutter DML adapters have an existing typed RPC seam', () => {
+  const policy = loadWriteAuthorityPolicy();
+  const audit = auditLegacyAdapters(policy);
+  assert.equal(audit.entries.length, 9);
+  assert.equal(audit.seam_detected_adapters, 9);
+  assert.equal(audit.coverage_proof, 'partial-static-evidence-not-operation-completeness');
+  assert.ok(audit.rpc_names.length >= 30);
+  assert.ok(audit.rpc_names.includes('save_event_client_sync_v1'));
+  assert.ok(audit.rpc_names.includes('save_profile_client_sync_v1'));
+});
+
+test('hybrid readiness blocks legacy cohorts and direct DML grants', () => {
+  const policy = loadWriteAuthorityPolicy();
+  const codeAudit = auditLegacyAdapters(policy);
+  const functions = codeAudit.rpc_names.map((name) => ({
+    name,
+    identity_arguments: 'p_occasion bigint',
+    security_definer: true,
+    approved_search_path: true,
+  }));
+  const report = buildHybridReadiness({
+    policy,
+    codeAudit,
+    live: {
+      summary: {
+        registry_total: 41,
+        registry_ready: 41,
+        occasion_total: 48,
+        occasion_enabled: 1,
+      },
+      grants: [{ table_name: 'events', grantee: 'authenticated', privileges: ['UPDATE'] }],
+      functions,
+      cohorts: [],
+    },
+  });
+  assert.equal(report.validation.status, 'blocked');
+  assert.equal(report.live.occasion_disabled_or_unclassified, 47);
+  assert.match(report.validation.blockers.join('\n'), /direct-DML/);
+  assert.equal(report.validation.production_mutations_performed, false);
+});
+
+test('Flutter seam evidence never authorizes the global hybrid gate', () => {
+  const policy = loadWriteAuthorityPolicy();
+  const codeAudit = auditLegacyAdapters(policy);
+  const report = buildHybridReadiness({
+    policy,
+    codeAudit,
+    live: {
+      summary: {
+        registry_total: 41,
+        registry_ready: 41,
+        occasion_total: 48,
+        occasion_enabled: 48,
+      },
+      grants: [],
+      cohorts: [],
+      functions: codeAudit.rpc_names.map((name) => ({
+        name,
+        identity_arguments: 'p_occasion bigint',
+        security_definer: true,
+        approved_search_path: true,
+      })),
+    },
+  });
+  assert.equal(report.validation.status, 'blocked');
+  assert.equal(report.validation.hybrid_activation_authorized, false);
+  assert.match(report.validation.blockers.at(-1), /outside this Flutter-seam report/);
+});
+
+test('every RPC overload must independently satisfy the exact security context', () => {
+  const policy = loadWriteAuthorityPolicy();
+  const codeAudit = auditLegacyAdapters(policy);
+  const functions = codeAudit.rpc_names.map((name) => ({
+    name,
+    identity_arguments: 'p_occasion bigint',
+    security_definer: true,
+    approved_search_path: true,
+  }));
+  functions.push({
+    name: functions[0].name,
+    identity_arguments: 'p_payload jsonb',
+    security_definer: true,
+    approved_search_path: false,
+  });
+  const report = buildHybridReadiness({
+    policy,
+    codeAudit,
+    live: {
+      summary: { registry_total: 41, registry_ready: 41, occasion_total: 1, occasion_enabled: 1 },
+      grants: [],
+      cohorts: [],
+      functions,
+    },
+  });
+  assert.equal(report.live.rpc_functions_insecure.length, 1);
+  assert.match(report.live.rpc_functions_insecure[0], /p_payload jsonb/);
+});
+
+test('tenant config inventory excludes keys and exposes broad source-a reachability', () => {
+  const entry = parseTenantConfig(`
+    SUPABASE_URL=https://${SOURCES.a}.supabase.co
+    SUPABASE_ANON_KEY=must-not-escape
+    ORGANIZATION_ID=4
+    FORCE_OCCASION_LINK=
+    IMAGE_PROJECT_ID=a
+    DEPLOY_TARGET=netlify
+    DOMAIN=example.test
+  `, 'origin/prod/example');
+  assert.equal(entry.source_alias, 'a');
+  assert.equal(entry.reachability, 'all-visible-occasions');
+  assert.equal(JSON.stringify(entry).includes('must-not-escape'), false);
+  const report = buildTenantConfigInventory([{ ...entry, status: 'discovered' }]);
+  assert.equal(report.counts.a_broad_reachability, 1);
+  assert.equal(report.validation.status, 'blocked');
+  assert.match(report.validation.blockers[0], /all visible occasions/);
 });
