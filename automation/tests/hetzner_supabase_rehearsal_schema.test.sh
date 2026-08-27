@@ -9,7 +9,7 @@ readonly SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/rehearsal/build-canon
 for required in \
   'FESTAPP_REHEARSAL_ACK' \
   'resume-after-baseline-ledger-fix' \
-  '0|0|0|true|true|true|113|38' \
+  '0|0|0|t|t|t|113|38' \
   'festapp-supabase-rehearsal-01' \
   'EXPECTED_POSTGRES_MAJOR="17"' \
   'target is not an empty business-schema foundation' \

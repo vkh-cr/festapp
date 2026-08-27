@@ -57,7 +57,7 @@ else
     (SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public' AND c.relkind IN ('r','p','v','m','S')),
     (SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='eshop' AND c.relkind IN ('r','p','v','m','S'))
   )")"
-  [[ "$RESUME_STATE" == "0|0|0|true|true|true|113|38" ]] ||
+  [[ "$RESUME_STATE" == "0|0|0|t|t|t|113|38" ]] ||
     fail "target does not match the one approved post-baseline resume state"
   APPLY_BASELINE=false
 fi
