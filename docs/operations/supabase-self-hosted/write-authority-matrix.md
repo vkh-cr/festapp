@@ -80,6 +80,17 @@ authorize hybrid activation. Edge Functions, cron, webhooks, payments, e-mail,
 push, image paths, manual writers, deployed versions and traffic remain in the
 global write-authority gate.
 
+The non-destructive migration
+`supabase/migrations/20260827120000_harden_client_sync_rpc_search_paths.sql`
+is prepared but not deployed. It changes only the `search_path` property of the
+41 enumerated signatures and fails if a signature is missing, overloaded or no
+longer `SECURITY DEFINER`. It does not change function bodies, grants, tenant
+flags or data. A read-only check found 41/41 signatures in source `a`, but 0/41
+in cloud `default`; therefore the hardening must follow the canonical
+client-sync expansion and cannot be pushed independently to the drifted
+`default` project. No current blocker is closed until deployment plus the
+postcondition and behavioral tests pass.
+
 ## Required columns for final approval
 
 Each candidate receives: source project, tenant/cohort, deployed entrypoint,
