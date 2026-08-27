@@ -73,3 +73,27 @@ Private comparison evidence is stored as `canonical-drift-v2.json`, report
 SHA-256 `5cc0f559d8b80d27fb276f4171ee7a528eaa1bc54a6744902899716d222fc38e`.
 Importing source rows remains a separate step and must keep both production
 sources read-only.
+
+## Logical table-import readiness
+
+The table-level pass narrows the broad catalog drift to the data-bearing import
+surface:
+
+| Source | Application tables | Shape-compatible | Blocked transform | Review-only |
+|---|---:|---:|---:|---:|
+| `default` | 70 | 66 | 2 | 2 |
+| `a` | 100 | 100 | 0 | 0 |
+
+No source application table is missing from the target. Source `default` needs
+explicit transformations for four `activities` rows because target `order` is
+non-null, and for three `user_companions` rows because target `occasion` and
+`origin` are required. The `inventory_pools.order` and `log_emails.data` source
+columns require an explicit preserve/archive/drop disposition; they may not be
+silently discarded. Source `a` is table-shape compatible for logical staging,
+but FK, identity, unique-key and embedded-reference transforms remain mandatory.
+
+Private readiness reports are
+`default-table-import-readiness-v2.json` (SHA-256
+`525978b01c6bdc6b3d2daecf0a7244685482dcd3f03d461aaa3f2f520acb2141`)
+and `a-table-import-readiness-v2.json` (SHA-256
+`e3ac7e3414e0d259a63af9092afd008d133742be2c6b154b4a54036575748a00`).
