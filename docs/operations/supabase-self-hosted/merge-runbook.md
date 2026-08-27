@@ -92,7 +92,7 @@ blocked; this step does not import them or mutate either cloud source.
 Never write a plaintext production dump. Prepare a private `0700` output
 directory outside the repository, provide the exact source database URL only in
 the process environment, and encrypt the `pg_dump` stream directly to a native
-age recipient:
+age recipient or an existing SSH Ed25519 public key:
 
 ```bash
 FESTAPP_SOURCE_DATABASE_URL='postgresql://...' \
