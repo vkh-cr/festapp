@@ -26,7 +26,9 @@ restore suite and commit the updated manifest. A newer release is adopted only
 as a complete tested bundle. Mutable `latest` tags are prohibited.
 
 Run `node runtime/verify-pins.mjs --online` to compare release pins with primary
-upstreams and re-resolve every declared container digest for `linux/amd64`.
+upstreams. Before provisioning, authenticate to Docker Hub and run
+`node runtime/verify-pins.mjs --online --registry` to re-resolve every declared
+container digest for `linux/amd64` without relying on anonymous pull quotas.
 
 No update workflow may invoke Supabase `reset.sh`, `docker compose down -v`,
 volume pruning or any equivalent deletion command. Cloud sources remain intact

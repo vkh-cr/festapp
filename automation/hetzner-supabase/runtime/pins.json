@@ -17,6 +17,12 @@
     "postgresMajor": 17,
     "upstreamPostgresLatestStable": "18.6",
     "postgresDecision": "Use the PostgreSQL major tested by the latest stable Supabase bundle for cutover. Upgrade to PostgreSQL 18 only in a separate rehearsed release after Supabase publishes a stable compatible bundle.",
+    "registryEvidence": {
+      "resolvedAt": "2026-08-27T00:00:00Z",
+      "resolver": "docker manifest inspect --verbose",
+      "platform": "linux/amd64",
+      "authenticatedRefreshRequiredBeforeProvisioning": true
+    },
     "images": {
       "studio": "supabase/studio:2026.08.03-sha-022b374@sha256:2616bb9ed337963fe27ce682b1783875083537d5fb54bfea4c399fb0c56ff03e",
       "envoy": "envoyproxy/envoy:v1.39.0@sha256:f6e2f57b1bef8235083a2553b523508cf97d8991c893fd2aae3a94a6b21096a2",
