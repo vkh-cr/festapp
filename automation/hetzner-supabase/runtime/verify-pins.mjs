@@ -58,21 +58,31 @@ async function verifyOnline() {
     .map((line) => line.match(/^\s+image:\s+(\S+)$/)?.[1]).filter(Boolean));
   for (const [name, pinned] of Object.entries(pins.supabase.images)) {
     if (name !== 'caddy') assert.ok(composeImages.has(pinned.split('@')[0]), `${name} is not in the selected Supabase bundle`);
-    const inspected = JSON.parse(execFileSync('docker', ['manifest', 'inspect', '--verbose', pinned.split('@')[0]], { encoding: 'utf8' }));
-    const manifests = Array.isArray(inspected) ? inspected : [inspected];
-    const amd64 = manifests.find((value) => value.Descriptor?.platform?.os === 'linux' && value.Descriptor?.platform?.architecture === 'amd64') ?? manifests[0];
-    assert.equal(amd64.Descriptor.digest, pinned.split('@')[1], `${name} amd64 digest changed`);
+    if (process.argv.includes('--registry')) {
+      let inspected;
+      try {
+        inspected = JSON.parse(execFileSync('docker', ['manifest', 'inspect', '--verbose', pinned.split('@')[0]], { encoding: 'utf8' }));
+      } catch (error) {
+        throw new Error(`${name} registry verification failed; authenticate Docker before the provisioning gate: ${error.message}`);
+      }
+      const manifests = Array.isArray(inspected) ? inspected : [inspected];
+      const amd64 = manifests.find((value) => value.Descriptor?.platform?.os === 'linux' && value.Descriptor?.platform?.architecture === 'amd64') ?? manifests[0];
+      assert.equal(amd64.Descriptor.digest, pinned.split('@')[1], `${name} amd64 digest changed`);
+    }
   }
 
-  const [ubuntu, docker, postgres] = await Promise.all([
+  const [ubuntu, dockerReleaseNotes, postgres] = await Promise.all([
     fetch('https://ubuntu.com/download/server').then(assertResponse).then((value) => value.text()),
-    fetch('https://docs.docker.com/engine/release-notes/29/').then(assertResponse).then((value) => value.text()),
+    fetch('https://raw.githubusercontent.com/docker/docs/main/content/manuals/engine/release-notes/29.md').then(assertResponse).then((value) => value.text()),
     fetch('https://www.postgresql.org/docs/release/').then(assertResponse).then((value) => value.text()),
   ]);
-  assert.ok(ubuntu.includes(`Ubuntu ${pins.host.ubuntu}`), 'Ubuntu pin is not present on the official latest-LTS page');
-  assert.ok(docker.includes(pins.host.dockerEngine), 'Docker Engine pin is not present in current official release notes');
-  assert.ok(postgres.includes(`PostgreSQL ${pins.supabase.upstreamPostgresLatestStable}`), 'upstream PostgreSQL stable reference is stale');
-  process.stdout.write('online runtime pins verified against primary upstreams and amd64 registries\n');
+  const latestUbuntu = ubuntu.match(/Ubuntu (\d+\.\d+ LTS)/)?.[1];
+  const latestDocker = dockerReleaseNotes.match(/^## (\d+\.\d+\.\d+)$/m)?.[1];
+  const latestPostgres = postgres.match(/PostgreSQL (\d+\.\d+)/)?.[1];
+  assert.equal(latestUbuntu, pins.host.ubuntu, 'Ubuntu pin is no longer the latest official LTS');
+  assert.equal(latestDocker, pins.host.dockerEngine, 'Docker Engine pin is no longer the first stable v29 release');
+  assert.equal(latestPostgres, pins.supabase.upstreamPostgresLatestStable, 'upstream PostgreSQL stable reference is stale');
+  process.stdout.write(`online stable release pins verified against primary upstreams${process.argv.includes('--registry') ? ' and amd64 registries' : ''}\n`);
 }
 
 async function fetchJson(url) {
