@@ -97,3 +97,15 @@ Private readiness reports are
 `525978b01c6bdc6b3d2daecf0a7244685482dcd3f03d461aaa3f2f520acb2141`)
 and `a-table-import-readiness-v2.json` (SHA-256
 `e3ac7e3414e0d259a63af9092afd008d133742be2c6b154b4a54036575748a00`).
+
+A read-only aggregate profile resolved three of the four default transform
+families. All four `activities.order` values are non-null, all three obsolete
+`inventory_pools.order` values are null, and all 3,882 obsolete
+`log_emails.data` values are null. These rules are now fail-closed in
+`default-transform-policy.json`.
+
+The remaining blocker is two of three `user_companions` rows. One pair has
+exactly one common occasion and can use the repository migration rule. The
+other pairs have 7 and 42 common occasions and cannot be assigned safely from
+the old schema alone. They require a private explicit decision; no UUID or
+identity is stored in Git and no source row was modified.
