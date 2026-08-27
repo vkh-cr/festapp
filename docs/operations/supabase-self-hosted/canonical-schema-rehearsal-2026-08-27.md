@@ -106,6 +106,9 @@ families. All four `activities.order` values are non-null, all three obsolete
 
 The remaining blocker is two of three `user_companions` rows. One pair has
 exactly one common occasion and can use the repository migration rule. The
-other pairs have 7 and 42 common occasions and cannot be assigned safely from
-the old schema alone. They require a private explicit decision; no UUID or
-identity is stored in Git and no source row was modified.
+other two pairs have no common occasion membership at all and are therefore
+legacy orphan relations under the target FK contract. They require an explicit
+repair-or-omit deletion-ledger decision; no UUID or identity is stored in Git
+and no source row was modified. An earlier exploratory aggregate incorrectly
+counted 7 and 42 owner memberships as common memberships; that evidence was
+rejected and replaced by the exact inner-match histogram `{0: 2, 1: 1}`.
