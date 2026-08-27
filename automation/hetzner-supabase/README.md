@@ -23,11 +23,17 @@ node automation/hetzner-supabase/merge/inventory.mjs \
 node automation/hetzner-supabase/merge/schema-fingerprint.mjs \
   "$FESTAPP_MIGRATION_OUTPUT/default.json" \
   "$FESTAPP_MIGRATION_OUTPUT/a.json"
+node automation/hetzner-supabase/merge/collision-inventory.mjs \
+  --output "$FESTAPP_MIGRATION_OUTPUT/collisions.json"
 ```
 
 Each inventory also writes a sibling `*.manifest.json`. It deliberately remains
 `blocked` and unsigned until all Wave 0 evidence is attached and signed by the
 approved evidence process.
+
+The collision pass reads Auth e-mails and Storage object keys only in memory.
+Its evidence file contains source UUIDs plus one-run HMAC identifiers; the HMAC
+key and raw identifiers are not persisted. It never resolves a collision.
 
 `SUPABASE_ACCESS_TOKEN` may be supplied in the environment or in the repository
 root `.env.local`. The scripts never print it. Source aliases are pinned to the

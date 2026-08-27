@@ -15,3 +15,8 @@
 
 Cloud project deletion is never implied by another gate. It requires explicit
 destructive approval after retention.
+
+Current user directive (2026-08-27): **delete nothing**. This directive covers
+cloud projects, data, Storage objects, DNS records, credentials, branches,
+journals, sync tables, volumes and local evidence. No deletion-ledger row is an
+authorization to remove its target.

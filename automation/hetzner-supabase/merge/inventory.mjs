@@ -151,6 +151,114 @@ async function edgeFunctionInventory({ projectRef, token }) {
   };
 }
 
+async function singleValueQuery({ projectRef, token, query, field }) {
+  const rows = await managementQuery({ projectRef, token, query });
+  return rows[0]?.[field] ?? null;
+}
+
+async function supplementalInventory({ projectRef, token, capabilities }) {
+  const limitations = [];
+  let wal = null;
+  try {
+    wal = await singleValueQuery({
+      projectRef,
+      token,
+      field: 'wal',
+      query: `SELECT jsonb_build_object(
+        'bytes', COALESCE((SELECT sum(size) FROM pg_ls_waldir()), 0),
+        'current_lsn', pg_current_wal_lsn()::text,
+        'retained_slots_bytes', COALESCE((SELECT sum(pg_wal_lsn_diff(pg_current_wal_lsn(), restart_lsn)) FROM pg_replication_slots), 0)
+      ) AS wal`,
+    });
+  } catch (error) {
+    limitations.push(`WAL inventory unavailable: ${error.message}`);
+  }
+
+  let storage = null;
+  if (capabilities.storage_objects && capabilities.storage_buckets) {
+    storage = await singleValueQuery({
+      projectRef,
+      token,
+      field: 'storage',
+      query: `SELECT jsonb_build_object(
+        'bucket_count', (SELECT count(*) FROM storage.buckets),
+        'object_count', (SELECT count(*) FROM storage.objects),
+        'object_bytes', (SELECT COALESCE(sum(CASE WHEN metadata->>'size' ~ '^[0-9]+$' THEN (metadata->>'size')::bigint ELSE 0 END), 0) FROM storage.objects),
+        'objects_without_size', (SELECT count(*) FROM storage.objects WHERE metadata->>'size' IS NULL OR metadata->>'size' !~ '^[0-9]+$')
+      ) AS storage`,
+    });
+  } else {
+    limitations.push('Storage catalog is unavailable');
+  }
+
+  let auth = null;
+  if (capabilities.auth_users) {
+    const users = await singleValueQuery({
+      projectRef,
+      token,
+      field: 'users',
+      query: `SELECT jsonb_build_object(
+        'users', count(*),
+        'verified_email_users', count(*) FILTER (WHERE email_confirmed_at IS NOT NULL),
+        'phone_users', count(*) FILTER (WHERE phone IS NOT NULL)
+      ) AS users FROM auth.users`,
+    });
+    let providers = [];
+    if (capabilities.auth_identities) {
+      providers = await managementQuery({
+        projectRef,
+        token,
+        query: `SELECT provider, count(*)::bigint AS identities
+          FROM auth.identities GROUP BY provider ORDER BY provider`,
+      });
+    }
+    let mfa = [];
+    if (capabilities.auth_mfa_factors) {
+      mfa = await managementQuery({
+        projectRef,
+        token,
+        query: `SELECT factor_type, status, count(*)::bigint AS factors
+          FROM auth.mfa_factors GROUP BY factor_type, status ORDER BY factor_type, status`,
+      });
+    }
+    auth = { ...users, providers, mfa };
+  } else {
+    limitations.push('Auth user catalog is unavailable');
+  }
+
+  let cron = null;
+  if (capabilities.cron_schema) {
+    cron = await singleValueQuery({
+      projectRef,
+      token,
+      field: 'cron',
+      query: `SELECT jsonb_build_object(
+        'job_count', count(*),
+        'jobs', COALESCE(jsonb_agg(jsonb_build_object(
+          'jobid', jobid, 'schedule', schedule, 'active', active,
+          'database', database, 'username', username,
+          'command_md5', md5(command)
+        ) ORDER BY jobid), '[]'::jsonb)
+      ) AS cron FROM cron.job`,
+    });
+  }
+
+  let vault = null;
+  if (capabilities.vault_schema) {
+    try {
+      vault = await singleValueQuery({
+        projectRef,
+        token,
+        field: 'vault',
+        query: `SELECT jsonb_build_object('secret_count', count(*)) AS vault FROM vault.secrets`,
+      });
+    } catch (error) {
+      limitations.push(`Vault count unavailable: ${error.message}`);
+    }
+  }
+  return { wal, storage, auth, cron, vault, limitations };
+}
+
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   const output = assertPrivateOutput(args.output);
@@ -163,6 +271,11 @@ async function main() {
   }
   const counts = await exactCounts({ projectRef, token, relations: catalog.relations });
   const edgeFunctions = await edgeFunctionInventory({ projectRef, token });
+  const supplemental = await supplementalInventory({
+    projectRef,
+    token,
+    capabilities: catalog.capabilities,
+  });
   const generatedAt = new Date().toISOString();
   const fingerprintInput = {
     postgres_version_num: catalog.postgres_version_num,
@@ -186,10 +299,12 @@ async function main() {
     catalog,
     exact_row_counts: counts,
     edge_functions: edgeFunctions,
+    supplemental,
     limitations: [
       'peak connection history and growth require provider metrics export',
-      'storage object bytes and auth/provider collision detail require a separately approved private evidence pass',
+      'Auth identity, natural-key and Storage key/hash collisions require a separately approved private evidence pass',
       'no row payloads or production identities are included',
+      ...supplemental.limitations,
     ],
   };
   const inventoryChecksum = sha256(stableJson(inventory));
