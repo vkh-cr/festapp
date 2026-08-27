@@ -9,6 +9,15 @@ readonly FOREIGN_BRIDGE_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/rehear
 readonly DEFAULT_IMPORT_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/rehearsal/import-default-canonical.sh"
 readonly DEFAULT_MANAGED_IMPORT_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/rehearsal/import-default-managed.sh"
 readonly DEFAULT_AUTH_VALIDATION_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/rehearsal/validate-default-auth-continuity.sh"
+readonly STORAGE_RECEIVER_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/rehearsal/storage-file-receiver.cjs"
+readonly STORAGE_COPY_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/merge/copy-storage-payloads.mjs"
+readonly A_MAPPING_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/rehearsal/prepare-a-id-mappings.sh"
+readonly A_IMPORT_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/rehearsal/import-a-canonical.sh"
+readonly A_AUTH_IMPORT_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/rehearsal/import-a-auth.sh"
+readonly A_STORAGE_IMPORT_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/rehearsal/import-a-storage-metadata.sh"
+readonly A_DERIVED_REBUILD_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/rehearsal/rebuild-a-client-derived-state.sh"
+readonly MERGED_DERIVED_VALIDATION_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/rehearsal/validate-merged-client-derived-state.sh"
+readonly DEFAULT_COMPANION_VALIDATION_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/rehearsal/validate-default-companion-quarantine.sh"
 
 [[ -x "$SCRIPT" ]] || { echo "rehearsal schema builder must be executable" >&2; exit 1; }
 [[ -x "$STAGING_SCRIPT" ]] || { echo "merge staging builder must be executable" >&2; exit 1; }
@@ -17,6 +26,15 @@ readonly DEFAULT_AUTH_VALIDATION_SCRIPT="$PROJECT_ROOT/automation/hetzner-supaba
 [[ -x "$DEFAULT_IMPORT_SCRIPT" ]] || { echo "default canonical importer must be executable" >&2; exit 1; }
 [[ -x "$DEFAULT_MANAGED_IMPORT_SCRIPT" ]] || { echo "default managed importer must be executable" >&2; exit 1; }
 [[ -x "$DEFAULT_AUTH_VALIDATION_SCRIPT" ]] || { echo "default Auth validator must be executable" >&2; exit 1; }
+[[ -r "$STORAGE_RECEIVER_SCRIPT" ]] || { echo "Storage receiver must be readable" >&2; exit 1; }
+[[ -x "$STORAGE_COPY_SCRIPT" ]] || { echo "Storage payload copier must be executable" >&2; exit 1; }
+[[ -x "$A_MAPPING_SCRIPT" ]] || { echo "source a mapping preparer must be executable" >&2; exit 1; }
+[[ -x "$A_IMPORT_SCRIPT" ]] || { echo "source a canonical importer must be executable" >&2; exit 1; }
+[[ -x "$A_AUTH_IMPORT_SCRIPT" ]] || { echo "source a Auth importer must be executable" >&2; exit 1; }
+[[ -x "$A_STORAGE_IMPORT_SCRIPT" ]] || { echo "source a Storage metadata importer must be executable" >&2; exit 1; }
+[[ -x "$A_DERIVED_REBUILD_SCRIPT" ]] || { echo "source a derived-state rebuilder must be executable" >&2; exit 1; }
+[[ -x "$MERGED_DERIVED_VALIDATION_SCRIPT" ]] || { echo "merged derived-state validator must be executable" >&2; exit 1; }
+[[ -x "$DEFAULT_COMPANION_VALIDATION_SCRIPT" ]] || { echo "default companion validator must be executable" >&2; exit 1; }
 
 for required in \
   'FESTAPP_REHEARSAL_ACK' \
@@ -143,6 +161,150 @@ done
 
 if rg -n 'DROP (DATABASE|SCHEMA|TABLE)|TRUNCATE|DELETE FROM' "$DEFAULT_AUTH_VALIDATION_SCRIPT"; then
   echo "default Auth validator contains a destructive statement" >&2
+  exit 1
+fi
+
+for required in \
+  'resolveSecurePath' \
+  'withOptionalVersion' \
+  'GLOBAL_S3_BUCKET' \
+  'TENANT_ID' \
+  'const backendKey = `${tenantId}/${bucket}/${name}`' \
+  'fs.existsSync' \
+  'drain source for resumable verification' \
+  'backend.headObject'; do
+  rg -Fq "$required" "$STORAGE_RECEIVER_SCRIPT" || { echo "missing Storage receiver safety contract: $required" >&2; exit 1; }
+done
+
+for required in \
+  'CONCURRENCY = 4' \
+  'Storage artifact checksum mismatch' \
+  'legacy service_role key is unavailable' \
+  'Storage payload MD5 differs from snapshot metadata' \
+  'cloud_source_mutated: false' \
+  'cloudflare_in_path: false' \
+  'refusing to overwrite Storage evidence'; do
+  rg -Fq "$required" "$STORAGE_COPY_SCRIPT" || { echo "missing Storage copy safety contract: $required" >&2; exit 1; }
+done
+
+if rg -n 'DROP (DATABASE|SCHEMA|TABLE)|TRUNCATE|DELETE FROM|fs\.rm|unlinkSync' "$STORAGE_RECEIVER_SCRIPT" "$STORAGE_COPY_SCRIPT"; then
+  echo "Storage payload tooling contains a destructive statement" >&2
+  exit 1
+fi
+
+for required in \
+  'prepare-a-deterministic-id-mappings' \
+  'identity decision file checksum mismatch' \
+  'cardinality(con.conkey)=1' \
+  "a.atttypid IN ('int2'::regtype,'int4'::regtype,'int8'::regtype)" \
+  'row_number() OVER (ORDER BY s.%I)' \
+  'COPY festapp_merge.id_mappings' \
+  "'public.user_info'" \
+  'verified_pairs<>13' \
+  "'a-id-mapping-preparation','pass'"; do
+  rg -Fq "$required" "$A_MAPPING_SCRIPT" || { echo "missing source a mapping safety contract: $required" >&2; exit 1; }
+done
+
+if rg -n 'DROP (DATABASE|SCHEMA|TABLE)|TRUNCATE|DELETE FROM' "$A_MAPPING_SCRIPT"; then
+  echo "source a mapping preparer contains a destructive statement" >&2
+  exit 1
+fi
+
+for required in \
+  'import-a-relational-data-with-derived-state-blocked' \
+  'WITH RECURSIVE import_run AS' \
+  'festapp_a_mapping_domains' \
+  'ambiguous mapping domain' \
+  "relation.table_name LIKE 'client_%'" \
+  'raw_snapshot_preserved' \
+  'requires_forced_full_sync' \
+  'identity-merged-default-profile-preferred-review-required' \
+  'expected 13 preserved source profiles' \
+  'a row mismatch' \
+  'foreign_key_orphans' \
+  "SET status='blocked'" \
+  "'a-auth-and-storage-import','blocked'"; do
+  rg -Fq "$required" "$A_IMPORT_SCRIPT" || { echo "missing source a import safety contract: $required" >&2; exit 1; }
+done
+
+if rg -n 'DROP (DATABASE|SCHEMA|TABLE)|TRUNCATE|DELETE FROM' "$A_IMPORT_SCRIPT"; then
+  echo "source a canonical importer contains a destructive statement" >&2
+  exit 1
+fi
+
+for required in \
+  'import-a-auth-preserve-password-hashes' \
+  "'auth.refresh_tokens'" \
+  'refresh-token ID mapping count mismatch' \
+  'unexpected rehearsal audit-log duplication profile' \
+  "DISTINCT ON (row_data->>''id'')" \
+  'identical_rehearsal_audit_duplicates_deduplicated' \
+  "relation.table_name='users'" \
+  "relation.table_name='identities'" \
+  'source_rows-13' \
+  'changed_hashes<>0' \
+  'Auth foreign key' \
+  "'a-auth-import','pass'" \
+  "'storage_imported',false"; do
+  rg -Fq "$required" "$A_AUTH_IMPORT_SCRIPT" || { echo "missing source a Auth import safety contract: $required" >&2; exit 1; }
+done
+
+if rg -n 'DROP (DATABASE|SCHEMA|TABLE)|TRUNCATE|DELETE FROM' "$A_AUTH_IMPORT_SCRIPT"; then
+  echo "source a Auth importer contains a destructive statement" >&2
+  exit 1
+fi
+
+for required in \
+  'import-a-storage-metadata-preserve-runtime-ledger' \
+  'Storage bucket overlap is not semantically identical' \
+  'expected one source-only Storage bucket' \
+  "column_record.column_name IN ('owner','owner_id')" \
+  'expected 935 Storage object metadata rows' \
+  'runtime_migration_ledger_rows' \
+  "'a-storage-object-payloads','blocked'" \
+  "'storage_payloads_imported',false"; do
+  rg -Fq "$required" "$A_STORAGE_IMPORT_SCRIPT" || { echo "missing source a Storage metadata safety contract: $required" >&2; exit 1; }
+done
+
+if rg -n 'DROP (DATABASE|SCHEMA|TABLE)|TRUNCATE|DELETE FROM' "$A_STORAGE_IMPORT_SCRIPT"; then
+  echo "source a Storage metadata importer contains a destructive statement" >&2
+  exit 1
+fi
+
+for required in \
+  'rebuild-a-client-derived-state-forward-only' \
+  'forward-only rebuild after canonical merge' \
+  'revision_epoch' \
+  'aggregate_epoch' \
+  'private_program' \
+  'client_sync_release_revision_seq' \
+  "'a-client-derived-state-rebuild'" \
+  "'production_r2_writes',0"; do
+  rg -Fq "$required" "$A_DERIVED_REBUILD_SCRIPT" || { echo "missing derived rebuild safety contract: $required" >&2; exit 1; }
+done
+
+for required in \
+  'validate-merged-client-derived-state' \
+  'content_catalog' \
+  '2097152' \
+  'merged-client-materialization' \
+  'non_enabled_over_budget_components' \
+  "'production_r2_writes',0"; do
+  rg -Fq "$required" "$MERGED_DERIVED_VALIDATION_SCRIPT" || { echo "missing merged derived validation contract: $required" >&2; exit 1; }
+done
+
+for required in \
+  'preserve-unclassifiable-companions-without-activation' \
+  'zero-common-occasion-legacy-orphan' \
+  'privately_preserved_unclassifiable_rows' \
+  "'invented_relationships',0" \
+  "'deleted_rows',0"; do
+  rg -Fq "$required" "$DEFAULT_COMPANION_VALIDATION_SCRIPT" || { echo "missing companion validation contract: $required" >&2; exit 1; }
+done
+
+if rg -n 'DROP (DATABASE|SCHEMA|TABLE)|TRUNCATE|DELETE FROM' \
+  "$A_DERIVED_REBUILD_SCRIPT" "$MERGED_DERIVED_VALIDATION_SCRIPT" "$DEFAULT_COMPANION_VALIDATION_SCRIPT"; then
+  echo "derived-state validation tooling contains a destructive statement" >&2
   exit 1
 fi
 

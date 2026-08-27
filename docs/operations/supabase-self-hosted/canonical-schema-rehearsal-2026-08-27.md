@@ -180,5 +180,45 @@ All managed foreign keys have zero orphans. Credential continuity then proved
 that 228 password-bearing accounts retain byte-for-byte identical
 `encrypted_password` hashes, three accounts remain intentionally passwordless,
 and zero users, identities, sessions or refresh tokens are missing. No secret,
-identity or password hash is stored in Git. Storage object payload copying and
-the two quarantined companion decisions keep the rehearsal run blocked.
+identity or password hash is stored in Git.
+
+## Completed canonical merge
+
+The transformed `a` import allocated 431,457 deterministic mappings and copied
+all canonical business data with zero application/Auth foreign-key orphans.
+Thirteen matching verified e-mail identities were merged under the approved
+`verified-email-prefer-default-v1` rule: the default UUID, profile and password
+hash remain canonical, while every `a` reference maps to that identity. The
+other 6,967 `a` users retain their password hashes byte-for-byte. The combined
+Auth state contains 7,198 users, 7,191 identities, 13,751 sessions and 234,236
+refresh tokens.
+
+Supabase Storage contains six buckets and 1,199 verified payloads totalling
+521,859,566 bytes. Both source copies passed count, size and hash validation and
+an actual Storage API range canary. The first failed-path rehearsal files are
+still retained outside the canonical tenant layout because this work has no
+deletion authority. No merge step wrote to Cloudflare R2.
+
+The 549,293 source `client_%` rows were not copied with stale polymorphic IDs or
+old R2 URLs. Their raw snapshot remains private evidence. Canonical derived
+state was rebuilt forward-only at revision epoch 76,861: 762 public scopes,
+45,942 private vectors, 11,783 aggregate versions and an append-only audit
+commit for every occasion. The enabled `csmostrava2026` scope materializes all
+six components within publisher budgets; an authenticated private handshake
+returns all six current components. Both import runs are now `validated`.
+
+Two default companion relations have no common occasion and therefore cannot
+satisfy the target's required occasion/owner/companion foreign keys. They remain
+verbatim in the private quarantine, inactive and undeleted. The single
+classifiable default relation and two valid `a` relations are active. No
+occasion relationship was invented.
+
+## Post-merge capacity result
+
+A four-client/two-thread test executed 200 complete six-component materializer
+sets: 200 succeeded, none failed, average latency was 114.301 ms per set and
+throughput was 34.995 sets/s. After the test all 11 services were healthy,
+`MemAvailable` was 2.05 GB, memory PSI and OOM count were zero, and 20.4 GB
+(51%) of the 40 GB disk remained available. The canonical database was 1.155 GB.
+This measured rehearsal does not justify a price increase from CAX11; backup,
+restore and a second fresh-snapshot rehearsal remain mandatory before cutover.
