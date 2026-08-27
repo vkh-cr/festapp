@@ -5,8 +5,9 @@ from shlex import quote
 path = Path(".env")
 updates = {
     "COMPOSE_FILE": "docker-compose.yml:docker-compose.festapp.yml",
-    "SUPABASE_PUBLIC_URL": "http://127.0.0.1:8000",
-    "API_EXTERNAL_URL": "http://127.0.0.1:8000/auth/v1",
+    "FESTAPP_SUPABASE_HOSTNAME": "rehearsal-api.festapp.net",
+    "SUPABASE_PUBLIC_URL": "https://rehearsal-api.festapp.net",
+    "API_EXTERNAL_URL": "https://rehearsal-api.festapp.net",
     "SITE_URL": "https://festapp-rehearsal.invalid",
     "ADDITIONAL_REDIRECT_URLS": "",
     "DISABLE_SIGNUP": "true",

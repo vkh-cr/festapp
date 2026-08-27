@@ -65,10 +65,38 @@ export function validateRecipient(recipient) {
 
 function runEncryptedDump({ connection, recipient, output }) {
   return new Promise((resolve, reject) => {
-    const dump = spawn('pg_dump', pgDumpArgs(connection), {
-      env: { ...process.env, PGPASSWORD: connection.password, PGSSLMODE: 'require' },
-      stdio: ['ignore', 'pipe', 'pipe'],
-    });
+    const sshTarget = process.env.FESTAPP_EXPORT_SSH_TARGET;
+    if (sshTarget && sshTarget !== 'root@46.224.187.4') {
+      reject(new Error('FESTAPP_EXPORT_SSH_TARGET is not the approved rehearsal host'));
+      return;
+    }
+    let dump;
+    if (sshTarget) {
+      if (connection.connectionKind !== 'direct') {
+        reject(new Error('remote rehearsal export requires an approved direct source connection'));
+        return;
+      }
+      const shellQuote = (value) => `'${value.replaceAll("'", "'\\''")}'`;
+      const containerName = `festapp-export-${connection.username}-${connection.projectRef.slice(0, 8)}`;
+      const remoteArgs = [
+        'docker', 'run', '-i', '--name', containerName, '--network', 'host',
+        '--entrypoint', 'sh',
+        'supabase/postgres:17.6.1.136@sha256:a9946f08d31e8eb1149229c94e5c26603a9233116807cbbd93d75179cbac516a',
+        '-c',
+        'read -r PGPASSWORD; export PGPASSWORD; export PGSSLMODE=require; exec pg_dump "$@"',
+        'sh', ...pgDumpArgs(connection),
+      ];
+      dump = spawn('ssh', [
+        '-T', '-o', 'BatchMode=yes', '-o', 'ConnectTimeout=10', sshTarget,
+        remoteArgs.map(shellQuote).join(' '),
+      ], { stdio: ['pipe', 'pipe', 'pipe'] });
+      dump.stdin.end(`${connection.password}\n`);
+    } else {
+      dump = spawn('pg_dump', pgDumpArgs(connection), {
+        env: { ...process.env, PGPASSWORD: connection.password, PGSSLMODE: 'require' },
+        stdio: ['ignore', 'pipe', 'pipe'],
+      });
+    }
     const encrypt = spawn('age', ['--recipient', recipient, '--output', output], {
       stdio: ['pipe', 'ignore', 'pipe'],
     });
@@ -125,6 +153,7 @@ async function main() {
       alias,
       project_ref: connection.projectRef,
       connection_kind: connection.connectionKind,
+      execution_host: process.env.FESTAPP_EXPORT_SSH_TARGET ? 'approved-rehearsal-host' : 'local',
     },
     artifact: {
       format: 'pg_dump-custom+age',

@@ -5,6 +5,25 @@ x-logging: &logging
     max-file: "3"
 
 services:
+  caddy:
+    image: caddy:2.11.4@sha256:1172d4213087d3fc30bafc7ff2c2896180eb0c41ff7f75f315568fb36cabdcba
+    container_name: festapp-caddy
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      FESTAPP_SUPABASE_HOSTNAME: ${FESTAPP_SUPABASE_HOSTNAME:-rehearsal-api.festapp.net}
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    read_only: true
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+    security_opt:
+      - no-new-privileges:true
+    logging: *logging
   studio:
     image: supabase/studio:2026.08.03-sha-022b374@sha256:cb20b9a2b8fbb4f47a616c959dfdbde75668603c38d5ddd018e3f25a9f009937
     logging: *logging
@@ -42,3 +61,7 @@ services:
     image: supabase/supavisor:2.9.5@sha256:1dd306835b0215909cf76371a7a20be71268bbc97619f7133b882c5e9a7392e8
     ports: !reset []
     logging: *logging
+
+volumes:
+  caddy-data:
+  caddy-config:

@@ -85,17 +85,24 @@ assert.match(deleteAccountBody, /<h1>Smazání účtu<\/h1>/, 'account deletion 
 assert.match(deleteAccountBody, /href="\/privacy\/choices/, 'account deletion page lacks the privacy choices link');
 const supabaseUrl = configValue('SUPABASE_URL');
 const expectedAnonKey = configValue('SUPABASE_ANON_KEY');
-const expectedProjectRef = supabaseUrl?.match(/^https:\/\/([a-z0-9]+)\.supabase\.co\/?$/)?.[1];
-assert.ok(expectedProjectRef, 'project.conf has an invalid SUPABASE_URL');
+const parsedSupabaseUrl = new URL(supabaseUrl);
+assert.equal(parsedSupabaseUrl.protocol, 'https:', 'project.conf SUPABASE_URL must use HTTPS');
+assert.equal(parsedSupabaseUrl.origin + '/', parsedSupabaseUrl.href.replace(/\/?$/, '/'),
+  'project.conf SUPABASE_URL must be an origin without a path, query, or fragment');
+const expectedProjectRef = parsedSupabaseUrl.hostname.match(/^([a-z0-9]+)\.supabase\.co$/)?.[1];
 assert.ok(expectedAnonKey, 'project.conf is missing SUPABASE_ANON_KEY');
 const anonPayload = JSON.parse(
   Buffer.from(expectedAnonKey.split('.')[1] || '', 'base64url').toString('utf8'),
 );
-assert.equal(
-  anonPayload.ref,
-  expectedProjectRef,
-  'project.conf anon JWT belongs to a different Supabase project',
-);
+assert.equal(anonPayload.role, 'anon', 'project.conf Supabase JWT must use the anon role');
+assert.equal(anonPayload.iss, 'supabase', 'project.conf Supabase JWT must be issued by Supabase');
+if (expectedProjectRef) {
+  assert.equal(
+    anonPayload.ref,
+    expectedProjectRef,
+    'project.conf anon JWT belongs to a different Supabase project',
+  );
+}
 assert.ok(
   main.includes(Buffer.from(expectedAnonKey)),
   'compiled Flutter bundle does not contain the configured Supabase anon key',
