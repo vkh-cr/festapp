@@ -59,7 +59,11 @@ const report = {
     constraints: differences(defaultInventory.catalog.constraints, aInventory.catalog.constraints, ['schema_name', 'table_name', 'constraint_name']),
     routines: differences(defaultInventory.catalog.routines, aInventory.catalog.routines, ['schema_name', 'routine_name', 'identity_arguments']),
     policies: differences(defaultInventory.catalog.policies, aInventory.catalog.policies, ['schema_name', 'table_name', 'policy_name']),
+    grants: differences(defaultInventory.catalog.grants ?? [], aInventory.catalog.grants ?? [], ['schema_name', 'table_name', 'grantee', 'privilege_type']),
     extensions: differences(defaultInventory.catalog.extensions, aInventory.catalog.extensions, ['name']),
+    publications: differences(defaultInventory.catalog.publications ?? [], aInventory.catalog.publications ?? [], ['name']),
+    roles: differences(defaultInventory.catalog.roles ?? [], aInventory.catalog.roles ?? [], ['name']),
+    collations: differences(defaultInventory.catalog.collations ?? [], aInventory.catalog.collations ?? [], ['schema_name', 'name']),
   },
 };
 report.unresolved_schema_drift = Object.values(report.differences).reduce((sum, values) => sum + values.length, 0);

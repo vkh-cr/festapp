@@ -174,6 +174,8 @@ async function main() {
     grants: catalog.grants,
     extensions: catalog.extensions,
     publications: catalog.publications,
+    roles: catalog.roles,
+    collations: catalog.collations,
   };
   const inventory = {
     manifest_version: 1,
