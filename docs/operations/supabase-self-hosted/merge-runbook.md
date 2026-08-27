@@ -107,3 +107,14 @@ process arguments, refuses a group/world-accessible directory, never overwrites
 an artifact, and writes a sibling `0600` checksum manifest. A failed stream is
 preserved for diagnosis and must not be mistaken for a complete artifact because
 it has no manifest.
+
+For the rehearsal, use `rehearsal-export-clouds.mjs`. It creates a unique
+one-hour export role separately in each approved project, grants only
+`pg_read_all_data` plus `BYPASSRLS`, streams both encrypted snapshots, and then
+sets the role to `NOLOGIN NOBYPASSRLS` and revokes the read grant. It does not
+drop the disabled role, so the run leaves an auditable non-destructive record.
+
+```bash
+node automation/hetzner-supabase/merge/rehearsal-export-clouds.mjs \
+  /private/evidence/root ~/.ssh/id_ed25519.pub
+```

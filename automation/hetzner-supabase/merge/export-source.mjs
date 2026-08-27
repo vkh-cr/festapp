@@ -21,14 +21,17 @@ export function parseApprovedConnection(alias, rawUrl) {
   if ((url.pathname || '/postgres') !== '/postgres') {
     throw new Error('source database must be postgres');
   }
-  const direct = url.hostname === `db.${expectedRef}.supabase.co` && url.username === 'postgres';
+  const decodedUsername = decodeURIComponent(url.username);
+  const approvedRole = decodedUsername === 'postgres' || /^festapp_export_[0-9]{13}$/.test(decodedUsername);
+  const direct = url.hostname === `db.${expectedRef}.supabase.co` && approvedRole;
   const pooled = url.hostname.endsWith('.pooler.supabase.com') &&
-    url.username === `postgres.${expectedRef}`;
+    (decodedUsername === `postgres.${expectedRef}` ||
+      new RegExp(`^festapp_export_[0-9]{13}\\.${expectedRef}$`).test(decodedUsername));
   if (!direct && !pooled) throw new Error('database URL does not identify the approved source ref');
   return {
     host: url.hostname,
     port: url.port || '5432',
-    username: decodeURIComponent(url.username),
+    username: decodedUsername,
     password: decodeURIComponent(url.password),
     database: 'postgres',
     projectRef: expectedRef,
