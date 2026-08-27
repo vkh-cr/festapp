@@ -5,10 +5,12 @@ readonly PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 readonly SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/rehearsal/build-canonical-schema.sh"
 readonly STAGING_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/rehearsal/prepare-merge-staging.sh"
 readonly SOURCE_DATABASE_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/rehearsal/prepare-source-staging-databases.sh"
+readonly FOREIGN_BRIDGE_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/rehearsal/prepare-foreign-staging-bridge.sh"
 
 [[ -x "$SCRIPT" ]] || { echo "rehearsal schema builder must be executable" >&2; exit 1; }
 [[ -x "$STAGING_SCRIPT" ]] || { echo "merge staging builder must be executable" >&2; exit 1; }
 [[ -x "$SOURCE_DATABASE_SCRIPT" ]] || { echo "source staging database builder must be executable" >&2; exit 1; }
+[[ -x "$FOREIGN_BRIDGE_SCRIPT" ]] || { echo "foreign staging bridge builder must be executable" >&2; exit 1; }
 
 for required in \
   'FESTAPP_REHEARSAL_ACK' \
@@ -65,6 +67,24 @@ done
 
 if rg -n 'DROP (DATABASE|SCHEMA|TABLE)|TRUNCATE|DELETE FROM' "$SOURCE_DATABASE_SCRIPT"; then
   echo "source staging database builder contains a destructive statement" >&2
+  exit 1
+fi
+
+for required in \
+  'prepare-read-only-foreign-staging-bridge' \
+  'festapp_stage_reader' \
+  'VALID UNTIL' \
+  'NOBYPASSRLS' \
+  'GRANT SELECT ON ALL TABLES IN SCHEMA public, eshop, festapp_managed_source' \
+  'CREATE EXTENSION postgres_fdw WITH SCHEMA extensions' \
+  'IMPORT FOREIGN SCHEMA public FROM SERVER festapp_stage_default' \
+  'IMPORT FOREIGN SCHEMA public FROM SERVER festapp_stage_a' \
+  'reader_bypass_rls'; do
+  rg -Fq "$required" "$FOREIGN_BRIDGE_SCRIPT" || { echo "missing foreign bridge safety contract: $required" >&2; exit 1; }
+done
+
+if rg -n 'DROP (DATABASE|SCHEMA|TABLE)|TRUNCATE|DELETE FROM' "$FOREIGN_BRIDGE_SCRIPT"; then
+  echo "foreign staging bridge contains a destructive statement" >&2
   exit 1
 fi
 
