@@ -136,6 +136,13 @@ fallback. The read-only API pages are streamed directly into age encryption.
 This page-window consistency is sufficient only for rehearsal. The final
 cutover uses the separately defined freeze/final-marker freshness gate.
 
+The managed exporter uses 10,000-row pages. Production measurements on the two
+largest `a` Auth tables returned about 3.5 MB in 1.8–2.0 seconds per page. This
+reduces the measured 802,000-row export from roughly 1,600 API round trips at
+the original conservative page size to about 82 without adding parallel source
+load. Re-benchmark after provider/API changes; do not raise concurrency merely
+to shorten a rehearsal.
+
 ## Isolated raw-source staging databases
 
 Application archives are never restored over the canonical database. Prepare

@@ -15,7 +15,7 @@ import {
 } from './lib.mjs';
 import { validateRecipient } from './export-source.mjs';
 
-const PAGE_SIZE = 500;
+const PAGE_SIZE = 10_000;
 const TABLES_QUERY = `SELECT n.nspname AS schema_name, c.relname AS table_name,
   to_jsonb(coalesce(array_agg(a.attname ORDER BY key_columns.ordinality)
     FILTER (WHERE a.attname IS NOT NULL), ARRAY[]::name[])) AS primary_key
