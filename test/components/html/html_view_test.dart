@@ -1,9 +1,35 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cached_network_image_platform_interface/cached_network_image_platform_interface.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fstapp/components/html/html_view.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 void main() {
+  testWidgets('public HTML images use the stable web byte renderer',
+      (tester) async {
+    const imageUrl =
+        'https://a.img.festapp.net/images/643/information-image.png';
+    await tester.pumpWidget(const MaterialApp(
+      home: Scaffold(
+        body: HtmlView(
+          html: '<img src="$imageUrl">',
+          offlineOverride: false,
+        ),
+      ),
+    ));
+    await tester.pump();
+
+    expect(find.byType(CachedNetworkImage), findsOneWidget);
+    final image = tester.widget<Image>(find.byType(Image));
+    final provider = image.image as CachedNetworkImageProvider;
+    expect(provider.url, imageUrl);
+    expect(
+      provider.imageRenderMethodForWeb,
+      ImageRenderMethodForWeb.HttpGet,
+    );
+  });
+
   test('recognizes common YouTube URL variants', () {
     const id = 'dQw4w9WgXcQ';
     expect(youtubeVideoIdFromUrl('https://youtu.be/$id?si=abc'), id);
