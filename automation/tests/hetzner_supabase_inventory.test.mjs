@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 import test from 'node:test';
 import path from 'node:path';
 import {
@@ -343,4 +344,23 @@ test('tenant config inventory excludes keys and exposes broad source-a reachabil
   assert.equal(report.counts.a_broad_reachability, 1);
   assert.equal(report.validation.status, 'blocked');
   assert.match(report.validation.blockers[0], /all visible occasions/);
+});
+
+test('RPC search-path hardening is exhaustive, fail-closed and non-destructive', () => {
+  const policy = loadWriteAuthorityPolicy();
+  const expected = auditLegacyAdapters(policy).rpc_names;
+  const migrationPath = path.join(
+    REPOSITORY_ROOT,
+    'supabase/migrations/20260827120000_harden_client_sync_rpc_search_paths.sql',
+  );
+  const migration = fs.readFileSync(migrationPath, 'utf8');
+  const altered = [...migration.matchAll(
+    /ALTER FUNCTION public\.([a-z0-9_]+)\([^;]+?\)\s+SET search_path TO public, extensions;/g,
+  )].map((match) => match[1]).sort();
+  assert.deepEqual(altered, expected);
+  assert.equal(altered.length, 41);
+  assert.match(migration, /unexpected client_sync RPC signature count/);
+  assert.match(migration, /non-canonical client_sync RPC overload remains/);
+  assert.doesNotMatch(migration, /\b(?:DELETE|DROP|REVOKE|TRUNCATE)\b/i);
+  assert.doesNotMatch(migration, /CREATE\s+(?:OR\s+REPLACE\s+)?TRIGGER/i);
 });

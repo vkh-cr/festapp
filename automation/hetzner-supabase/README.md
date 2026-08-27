@@ -67,6 +67,12 @@ An app without `FORCE_OCCASION_LINK` is conservatively classified as able to
 reach every visible occasion in its source organization until deployment and
 traffic evidence proves a narrower contract.
 
+The checked-in RPC search-path hardening migration is a prepared artifact, not
+permission to deploy. It requires the complete 41-signature client-sync
+expansion to exist first and intentionally aborts on missing or additional
+overloads. Apply it only inside the ordered expansion/rehearsal workflow; never
+as an isolated hotfix to the current drifted `default` cloud project.
+
 `SUPABASE_ACCESS_TOKEN` may be supplied in the environment or in the repository
 root `.env.local`. The scripts never print it. Source aliases are pinned to the
 two approved project refs and cannot be redirected with `.env.local` project
