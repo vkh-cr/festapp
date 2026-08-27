@@ -41,3 +41,26 @@ signed inventory manifest and explicitly approved:
 - combined sizing, PostgreSQL major and runtime pin;
 - RPO, RTO, cloud retention, DNS owner, secret owner and on-call owner;
 - decision between journaled hybrid and full maintenance freeze.
+
+## Isolated canonical-schema rehearsal
+
+The already approved empty rehearsal host may build the repository-owned schema
+without copying source rows. Transfer the current Festapp checkout to the host,
+verify its commit, and run as root:
+
+```bash
+FESTAPP_REHEARSAL_ACK=canonical-schema-only \
+  automation/hetzner-supabase/rehearsal/build-canonical-schema.sh
+```
+
+The builder refuses any hostname other than
+`festapp-supabase-rehearsal-01`, any PostgreSQL major other than 17, and any
+target that already has a business relation in `public` or `eshop`. It first
+stores a root-only schema snapshot, applies the canonical baseline and only the
+later repository migrations, and records aggregate evidence proving that Auth
+and Storage still contain zero source rows. It never runs `supabase/seed.sql`.
+
+If a migration fails, stop. Do not repair the partially applied target by hand
+and do not add a force/overwrite mode. Recreate the empty rehearsal foundation
+through the separately reviewed restore procedure, preserve the failed evidence,
+then rerun the exact automated sequence.
