@@ -80,6 +80,9 @@ export function buildInventoryManifest({ inventory, inventoryChecksum }) {
       counted_tables: Object.keys(counts).length,
       rows: Object.values(counts).reduce((sum, value) => sum + value, 0),
       edge_functions: inventory.edge_functions.functions.length,
+      storage_objects: Number(inventory.supplemental?.storage?.object_count ?? 0),
+      storage_bytes: Number(inventory.supplemental?.storage?.object_bytes ?? 0),
+      auth_users: Number(inventory.supplemental?.auth?.users ?? 0),
     },
     checksums: {
       schema: inventory.schema_fingerprint_sha256,
