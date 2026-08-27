@@ -112,3 +112,23 @@ repair-or-omit deletion-ledger decision; no UUID or identity is stored in Git
 and no source row was modified. An earlier exploratory aggregate incorrectly
 counted 7 and 42 owner memberships as common memberships; that evidence was
 rejected and replaced by the exact inner-match histogram `{0: 2, 1: 1}`.
+
+## Private merge staging
+
+Commit `84e974e14` was transferred as an immutable root-only source directory and
+the guarded staging builder completed on the rehearsal host at
+`2026-08-27T17:57:39Z`. Evidence is preserved root-only at
+`/var/lib/festapp-rehearsal-evidence/merge-staging-20260827T175739Z`.
+
+The additive transaction created four empty tables in the private
+`festapp_merge` schema: import runs, ID mappings, quarantined rows and validation
+results. Live verification returned `0|0|0|0` rows. Schema usage is false for
+`anon`, `authenticated` and `service_role`; Auth and Storage remain at zero and
+all 11 runtime services remain healthy. No cloud source was mutated and no
+production row was copied.
+
+The quarantine contract preserves any source row that cannot satisfy the
+canonical schema and keeps its rehearsal run blocked. It cannot be resolved
+without either a repair decision or an `omit-with-ledger` decision tied to a
+private evidence checksum. This makes the user's no-deletion constraint an
+enforced staging invariant rather than an informal instruction.

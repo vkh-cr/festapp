@@ -178,7 +178,7 @@
         <div class="step active"><span class="dot">1</span><span class="step-name">Wave 0 · Evidence</span><span class="step-desc">Inventura hotová z velké části; zbývá schema/writer/capacity/ownership klasifikace.</span><span class="step-status">probíhá</span></div>
         <div class="step done"><span class="dot">✓</span><span class="step-name">Architektura</span><span class="step-desc">PG17, pinned Supabase bundle, journalované RPC, Cloudflare mimo DB write path.</span><span class="step-status">rozhodnuto</span></div>
         <div class="step done"><span class="dot">✓</span><span class="step-name">Rehearsal základ</span><span class="step-desc">Terraform, chráněný Hetzner CAX11, hardened host a pinned Supabase stack.</span><span class="step-status">online</span></div>
-        <div class="step active"><span class="dot">4</span><span class="step-name">Rehearsal ×2</span><span class="step-desc">Kanonický baseline hotový; následuje katalogové srovnání, staging import a dva kompletní nácviky.</span><span class="step-status">probíhá</span></div>
+        <div class="step active"><span class="dot">4</span><span class="step-name">Rehearsal ×2</span><span class="step-desc">Kanonický baseline i prázdný privátní staging jsou na serveru; následuje read-only export, staging import a dva kompletní nácviky.</span><span class="step-status">probíhá</span></div>
         <div class="step todo"><span class="dot">5</span><span class="step-name">Cutover</span><span class="step-desc">Freeze, import, nulový lag, DNS/config přepnutí a otevření cílových zápisů.</span><span class="step-status">nezačalo</span></div>
         <div class="step todo"><span class="dot">6</span><span class="step-name">Stabilizace</span><span class="step-desc">Cloudy zůstanou read-only po retenční dobu; odstranění až po novém schválení.</span><span class="step-status">nezačalo</span></div>
       </div>
@@ -204,13 +204,13 @@
       <div class="section-head"><div><h2>Co už je bezpečně připravené</h2></div></div>
       <div class="grid">
         <article class="card span-4"><h3>Runtime pinning</h3><p>Supabase <code>self-hosted/v0.8.0</code>, PG 17.6 a kontejnery připnuté digesty. Před provisioningem se znovu ověří nejnovější stabilní bundle.</p></article>
-        <article class="card span-4"><h3>Data a identity</h3><p>Výchozí canonical zdroj je <code>default</code>; 13 Auth kolizí má privátní rozhodnutí. Import <code>a</code> půjde přes staging a ID mapy.</p></article>
+        <article class="card span-4"><h3>Data a identity</h3><p>Výchozí canonical zdroj je <code>default</code>; 13 Auth kolizí má privátní rozhodnutí. Privátní staging a ID mapy jsou nasazené, prázdné a aplikačním rolím nepřístupné.</p></article>
         <article class="card span-4"><h3>Storage hranice</h3><p>1 199 objektů se má aditivně kopírovat do self-hosted Supabase Storage a hashově ověřit. R2 image delivery zůstává oddělené.</p></article>
       </div>
     </section>
 
     <section class="section">
-      <div class="callout"><strong>Nejbližší správný krok</strong><p>Dvě osiřelé companion vazby při rehearsal importu zachovat v privátní karanténě a import ponechat blokovaný do výslovného rozhodnutí. Potom sestavit read-only export a staging import. Ostatní známé tabulkové transformace <code>default</code> jsou uzavřené a všech 100 tabulek zdroje <code>a</code> je tvarově kompatibilních.</p></div>
+      <div class="callout"><strong>Nejbližší správný krok</strong><p>Sestavit kontrolovatelný read-only export a naplnit privátní staging. Dvě osiřelé companion vazby se zachovají v karanténě a import zůstane blokovaný do výslovného rozhodnutí. Ostatní známé tabulkové transformace <code>default</code> jsou uzavřené a všech 100 tabulek zdroje <code>a</code> je tvarově kompatibilních.</p></div>
     </section>
 
     <section class="section">
