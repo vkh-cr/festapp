@@ -108,12 +108,15 @@ an artifact, and writes a sibling `0600` checksum manifest. A failed stream is
 preserved for diagnosis and must not be mistaken for a complete artifact because
 it has no manifest.
 
-For the rehearsal, use `rehearsal-export-clouds.mjs`. It creates a unique
-one-hour export role separately in each approved project, grants only
-read access to `public`, `eshop`, `auth` and `storage` plus `BYPASSRLS`, streams
-both encrypted snapshots, and then sets the role to `NOLOGIN NOBYPASSRLS` and
+For the rehearsal application schemas, use `rehearsal-export-clouds.mjs`. It
+creates a unique one-hour export role separately in each approved project,
+grants only read access to `public` and `eshop` plus `BYPASSRLS`, streams both
+encrypted snapshots, and then sets the role to `NOLOGIN NOBYPASSRLS` and
 revokes every temporary schema/table/sequence grant. It does not drop the
-disabled role, so the run leaves an auditable non-destructive record.
+disabled role, so the run leaves an auditable non-destructive record. Managed
+`auth` and `storage` schemas are exported separately through the read-only
+Management API path; the temporary role must never inherit their administrative
+owner roles merely to make `pg_dump` pass.
 
 ```bash
 node automation/hetzner-supabase/merge/rehearsal-export-clouds.mjs \
