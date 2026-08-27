@@ -51,11 +51,13 @@ fi
 
 for required in \
   'prepare-empty-source-staging-databases' \
+  'resume-after-vault-schema-fix' \
   'festapp-supabase-rehearsal-01' \
   'festapp_stage_default' \
   'festapp_stage_a' \
   'CREATE DATABASE %I TEMPLATE template0' \
   'REVOKE CONNECT ON DATABASE %I FROM PUBLIC, anon, authenticated, service_role' \
+  'CREATE SCHEMA IF NOT EXISTS vault AUTHORIZATION postgres' \
   'FROM auth.users' \
   'FROM storage.objects'; do
   rg -Fq "$required" "$SOURCE_DATABASE_SCRIPT" || { echo "missing source staging safety contract: $required" >&2; exit 1; }
