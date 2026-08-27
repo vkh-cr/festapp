@@ -122,3 +122,16 @@ owner roles merely to make `pg_dump` pass.
 node automation/hetzner-supabase/merge/rehearsal-export-clouds.mjs \
   /private/evidence/root ~/.ssh/id_ed25519.pub
 ```
+
+After both application manifests exist, export managed rows into the same
+private run directory:
+
+```bash
+node automation/hetzner-supabase/merge/export-managed-schemas.mjs \
+  /private/evidence/root/cloud-snapshots-RUN ~/.ssh/id_ed25519.pub
+```
+
+Every `auth` and `storage` table must have a primary key; there is no `ctid`
+fallback. The read-only API pages are streamed directly into age encryption.
+This page-window consistency is sufficient only for rehearsal. The final
+cutover uses the separately defined freeze/final-marker freshness gate.
