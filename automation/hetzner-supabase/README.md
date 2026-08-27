@@ -30,11 +30,17 @@ node automation/hetzner-supabase/merge/resolve-auth-collisions.mjs \
   --output "$FESTAPP_MIGRATION_OUTPUT/identity-decisions.json"
 node automation/hetzner-supabase/merge/write-authority-inventory.mjs \
   --output "$FESTAPP_MIGRATION_OUTPUT/write-authority.json"
+node automation/hetzner-supabase/merge/hybrid-readiness.mjs \
+  --output "$FESTAPP_MIGRATION_OUTPUT/hybrid-readiness.json"
+node automation/hetzner-supabase/merge/tenant-config-inventory.mjs \
+  --output "$FESTAPP_MIGRATION_OUTPUT/tenant-configs.json"
 ```
 
-Each inventory also writes a sibling `*.manifest.json`. It deliberately remains
-`blocked` and unsigned until all Wave 0 evidence is attached and signed by the
-approved evidence process.
+Each source catalog inventory also writes a sibling `*.manifest.json`. It
+deliberately remains `blocked` and unsigned until all Wave 0 evidence is
+attached and signed by the approved evidence process. The collision,
+write-authority, hybrid-readiness and tenant-config passes are immutable
+supporting evidence files rather than source snapshot manifests.
 
 The collision pass reads Auth e-mails and Storage object keys only in memory.
 Its evidence file contains source UUIDs plus one-run HMAC identifiers; the HMAC
@@ -44,6 +50,22 @@ rule and blocks every ambiguous input.
 The write-authority inventory is deliberately blocking: regex discovery creates
 a candidate list, and every entry needs a human-reviewed owner/contract before
 the hybrid design may proceed.
+
+`hybrid-readiness.mjs` associates the nine known Flutter direct-DML candidates
+with their existing typed `client_sync_v1` command modules, then compares that
+partial seam evidence with read-only evidence from source `a`. It resolves the
+source from production `project.conf` files and verifies configured forced
+occasions before reading live occasion aggregates. Every overload is checked
+independently for `SECURITY DEFINER` and the exact approved `search_path`. The
+report never authorizes the global hybrid gate: it does not prove operation
+completeness, permission checks, deployed traffic or non-Flutter writers. It
+never enables a cohort, changes a grant or deploys a function.
+
+`tenant-config-inventory.mjs` reads only `automation/project.conf` from remote
+`origin/prod/*` refs. Its allowlist excludes anon keys and other configuration.
+An app without `FORCE_OCCASION_LINK` is conservatively classified as able to
+reach every visible occasion in its source organization until deployment and
+traffic evidence proves a narrower contract.
 
 `SUPABASE_ACCESS_TOKEN` may be supplied in the environment or in the repository
 root `.env.local`. The scripts never print it. Source aliases are pinned to the
