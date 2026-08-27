@@ -60,6 +60,24 @@ function scopeCounts(differences) {
   return { application, platform };
 }
 
+function classificationCounts(differences) {
+  const counts = {
+    application: { source_only: 0, target_only: 0, changed: 0 },
+    platform: { source_only: 0, target_only: 0, changed: 0 },
+  };
+  for (const values of Object.values(differences)) {
+    for (const difference of values) {
+      const schemaName = difference.target?.schema_name ?? difference.source?.schema_name ?? null;
+      const scope = schemaName === 'public' || schemaName === 'eshop' ? 'application' : 'platform';
+      const kind = difference.source === null
+        ? 'target_only'
+        : difference.target === null ? 'source_only' : 'changed';
+      counts[scope][kind] += 1;
+    }
+  }
+  return counts;
+}
+
 export function buildCanonicalDriftReport({ defaultInventory, aInventory, targetCatalog }) {
   if (defaultInventory.source?.project_ref !== SOURCES.default || defaultInventory.source?.alias !== 'default') {
     throw new Error('invalid default source identity');
@@ -82,6 +100,7 @@ export function buildCanonicalDriftReport({ defaultInventory, aInventory, target
       source_fingerprint_sha256: inventory.schema_fingerprint_sha256,
       differences,
       scope_counts: scopeCounts(differences),
+      classification_counts: classificationCounts(differences),
       unresolved_catalog_differences: Object.values(differences).reduce((sum, values) => sum + values.length, 0),
     };
   }
