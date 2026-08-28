@@ -6,6 +6,13 @@ mobile identities (`fstapp.jm2025` and `festapp.jm2025`) while pointing only to
 `https://rehearsal-api.festapp.net`. Production DNS and store state were not
 changed.
 
+The final browser audit caught and corrected one release-contract gap: source
+organization `9` is target organization `12`. The client preflight now binds
+`ORGANIZATION_ID` to `backend.organizationId`, so an old cloud numeric ID cannot
+survive a deterministic merge unnoticed. Web and mobile rehearsal candidates
+must be rebuilt from that corrected contract; the earlier organization-9
+artifacts are invalid evidence.
+
 ## Web
 
 The CSM web profile `0.19.92+450` passed the canonical-cutover preflight, Flutter

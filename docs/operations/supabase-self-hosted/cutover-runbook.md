@@ -62,7 +62,7 @@ FESTAPP_CANONICAL_CUTOVER_RELEASE=1 \
 For a self-hosted release, the private manifest must contain a `backend` object
 with `mode: "self-hosted"`, `releaseIntent: "canonical-cutover"`,
 `supabaseOrigin`, `anonKeySha256`, `installationGeneration`, and
-`authStorageKey`, plus `authSiteUrl`, the exact browser-first
+`authStorageKey`, the post-merge `organizationId`, plus `authSiteUrl`, the exact browser-first
 `authRedirectUrls`, and `allowedWebOrigins`. Only the public origins, key
 digest, generation, and storage namespace are recorded; the public key itself
 is not copied into evidence.
@@ -76,6 +76,9 @@ one canonical GoTrue endpoint cannot verify both access-token families without
 reintroducing a second trust path. Imported refresh tokens are exchanged first.
 Only `refresh_token_not_found` or `refresh_token_already_used` clears the local
 session; network failures remain retryable and preserve offline identity.
+The organization ID is equally mandatory because deterministic merge allocation
+can remap it; carrying the cloud ID into a target client returns a semantically
+valid HTTP 200 with the wrong organization or a 404.
 Set `FESTAPP_CANONICAL_CUTOVER_RELEASE=1` for the web, Android and iOS release
 builders. That flag rejects a syntactically valid legacy-cloud manifest. The
 same preflight runs before compilation in all three builders. The completed web

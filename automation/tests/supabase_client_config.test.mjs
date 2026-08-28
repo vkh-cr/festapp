@@ -81,6 +81,7 @@ function makePreflightFixture({ origin, key, generation, authStorageKey, backend
     `SUPABASE_ANON_KEY=${key}`,
     `SUPABASE_AUTH_STORAGE_KEY=${authStorageKey}`,
     `PUSH_APP_GENERATION=${generation}`,
+    'ORGANIZATION_ID=12',
     'WEB_LINK=https://app.example.test',
   ].join('\n'));
   fs.writeFileSync(path.join(fixture, 'lib/app_config.dart'), [
@@ -124,6 +125,7 @@ test('self-hosted canonical cutover preflight binds manifest, key, generation an
       anonKeySha256,
       installationGeneration: generation,
       authStorageKey,
+      organizationId: 12,
       authSiteUrl: 'https://app.example.test',
       authRedirectUrls: [
         'https://app.example.test/reset-password',
@@ -186,6 +188,13 @@ test('self-hosted canonical cutover preflight binds manifest, key, generation an
     assert.match(mismatch.stderr, /anon-key digest mismatch/);
 
     wrongManifest.backend.anonKeySha256 = anonKeySha256;
+    wrongManifest.backend.organizationId = 9;
+    fs.writeFileSync(manifest, JSON.stringify(wrongManifest));
+    const wrongOrganization = runPreflight(fixture, manifest, '--require-canonical-cutover');
+    assert.notEqual(wrongOrganization.status, 0);
+    assert.match(wrongOrganization.stderr, /organization ID mismatch/);
+
+    wrongManifest.backend.organizationId = 12;
     delete wrongManifest.backend.sessionTransition.refreshCanaryEvidenceSha256;
     fs.writeFileSync(manifest, JSON.stringify(wrongManifest));
     const missingRefreshEvidence = runPreflight(
@@ -215,6 +224,7 @@ test('canonical cutover mode refuses an otherwise valid Supabase Cloud manifest'
       anonKeySha256,
       installationGeneration: '',
       authStorageKey,
+      organizationId: 12,
       authSiteUrl: 'https://app.example.test',
       authRedirectUrls: [
         'https://app.example.test/reset-password',

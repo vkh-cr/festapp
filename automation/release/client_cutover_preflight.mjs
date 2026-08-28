@@ -23,6 +23,9 @@ const anonKey = value('SUPABASE_ANON_KEY');
 const configuredAuthStorageKey = value('SUPABASE_AUTH_STORAGE_KEY');
 const authStorageKey = resolvedAuthStorageKey(supabaseOrigin, configuredAuthStorageKey);
 const installationGeneration = value('PUSH_APP_GENERATION');
+const organizationId = Number(value('ORGANIZATION_ID'));
+assert.ok(Number.isSafeInteger(organizationId) && organizationId > 0,
+  'ORGANIZATION_ID must be a positive integer');
 const webOrigin = parseSupabaseOrigin(value('WEB_LINK'));
 const authRedirectUrls = [`${webOrigin}/reset-password`, `${webOrigin}/resetPassword`];
 const anonSha256 = crypto.createHash('sha256').update(anonKey).digest('hex');
@@ -54,6 +57,8 @@ if (!cloudRef || manifestValue || requireCanonicalCutover) {
     'release manifest installation generation mismatch');
   assert.equal(backend.authStorageKey, authStorageKey,
     'release manifest auth storage namespace mismatch');
+  assert.equal(backend.organizationId, organizationId,
+    'release manifest organization ID mismatch');
   assert.equal(backend.authSiteUrl, webOrigin, 'release manifest Auth site URL mismatch');
   assert.deepEqual(
     [...(backend.authRedirectUrls ?? [])].sort(),
@@ -110,6 +115,7 @@ console.log(JSON.stringify({
   anon_key_sha256: anonSha256,
   auth_storage_key: authStorageKey,
   installation_generation: installationGeneration || null,
+  organization_id: organizationId,
   auth_site_url: webOrigin,
   auth_redirect_urls: authRedirectUrls,
   backend_mode: backendMode,
