@@ -66,6 +66,16 @@ with `mode: "self-hosted"`, `releaseIntent: "canonical-cutover"`,
 `authRedirectUrls`, and `allowedWebOrigins`. Only the public origins, key
 digest, generation, and storage namespace are recorded; the public key itself
 is not copied into evidence.
+The same object must contain `sessionTransition` with the fixed
+`refresh-or-reauth` strategy, rejection of legacy access tokens after cutover,
+local sign-out on a terminal refresh failure, explicit permission for the
+source-a cohort to reauthenticate normally, and the SHA-256 of a private
+refresh-canary evidence file. This contract is necessary because the two legacy
+cloud projects used different HS256 secrets and their old tokens have no `kid`;
+one canonical GoTrue endpoint cannot verify both access-token families without
+reintroducing a second trust path. Imported refresh tokens are exchanged first.
+Only `refresh_token_not_found` or `refresh_token_already_used` clears the local
+session; network failures remain retryable and preserve offline identity.
 Set `FESTAPP_CANONICAL_CUTOVER_RELEASE=1` for the web, Android and iOS release
 builders. That flag rejects a syntactically valid legacy-cloud manifest. The
 same preflight runs before compilation in all three builders. The completed web

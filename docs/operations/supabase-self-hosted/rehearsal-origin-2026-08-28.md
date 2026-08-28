@@ -49,6 +49,24 @@ The target generated a new anon key and signing secret. Password hashes are
 preserved, but existing access-token continuity is not implied; login,
 refresh-token and release adoption remain explicit cutover gates.
 
+The refresh-token gate subsequently passed for both imported Auth cohorts on
+the isolated second rehearsal database. One non-overlapping `default` session
+and one non-overlapping `a` session each exchanged its imported refresh token
+through the public rehearsal endpoint, rotated the token, received an HS256
+`authenticated` access token for the same user UUID, and passed `/auth/v1/user`
+with HTTP 200. Only those two isolated target tokens were rotated; neither
+cloud source was mutated and no row was deleted. The private evidence file has
+SHA-256 `4739f8fb3d1de54a6720cd8257b4d1c3950dc6ec1617635e35657744aedd9e82`.
+
+Old access tokens from both cloud projects are deliberately not accepted as a
+second trust path. GoTrue can hold multiple keyed verification keys, but these
+legacy HS256 tokens have no `kid` and fall back to one configured secret. The
+client contract is therefore refresh first, then normal reauthentication only
+for terminal refresh failures. Web already performs that transition when the
+backend origin marker changes; Flutter now persists a rotated refresh token and
+clears only terminal `refresh_token_not_found` or
+`refresh_token_already_used` sessions. Network errors preserve offline identity.
+
 ## Remaining production gates
 
 1. Build and test web/Android/iOS against this rehearsal hostname and key.

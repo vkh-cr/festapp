@@ -130,6 +130,13 @@ test('self-hosted canonical cutover preflight binds manifest, key, generation an
         'https://app.example.test/resetPassword',
       ],
       allowedWebOrigins: ['https://app.example.test'],
+      sessionTransition: {
+        strategy: 'refresh-or-reauth',
+        legacyAccessTokenPolicy: 'reject-after-cutover',
+        terminalRefreshPolicy: 'local-sign-out',
+        sourceAReauthenticationAllowed: true,
+        refreshCanaryEvidenceSha256: 'a'.repeat(64),
+      },
     },
   });
   try {
@@ -177,6 +184,17 @@ test('self-hosted canonical cutover preflight binds manifest, key, generation an
     const mismatch = runPreflight(fixture, manifest, '--require-canonical-cutover');
     assert.notEqual(mismatch.status, 0);
     assert.match(mismatch.stderr, /anon-key digest mismatch/);
+
+    wrongManifest.backend.anonKeySha256 = anonKeySha256;
+    delete wrongManifest.backend.sessionTransition.refreshCanaryEvidenceSha256;
+    fs.writeFileSync(manifest, JSON.stringify(wrongManifest));
+    const missingRefreshEvidence = runPreflight(
+      fixture,
+      manifest,
+      '--require-canonical-cutover',
+    );
+    assert.notEqual(missingRefreshEvidence.status, 0);
+    assert.match(missingRefreshEvidence.stderr, /refresh-canary evidence/);
   } finally {
     fs.rmSync(fixture, { recursive: true, force: true });
   }

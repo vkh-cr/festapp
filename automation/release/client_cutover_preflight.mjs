@@ -65,6 +65,20 @@ if (!cloudRef || manifestValue || requireCanonicalCutover) {
     [webOrigin],
     'release manifest Edge Function CORS allowlist mismatch',
   );
+  if (backend.mode === 'self-hosted') {
+    const transition = backend.sessionTransition;
+    assert.ok(transition, 'self-hosted release manifest is missing its session transition contract');
+    assert.equal(transition.strategy, 'refresh-or-reauth',
+      'self-hosted session transition must refresh or require normal reauthentication');
+    assert.equal(transition.legacyAccessTokenPolicy, 'reject-after-cutover',
+      'legacy access tokens must not remain an alternate trust path');
+    assert.equal(transition.terminalRefreshPolicy, 'local-sign-out',
+      'terminal refresh failures must clear the local session');
+    assert.equal(transition.sourceAReauthenticationAllowed, true,
+      'the merged source-a cohort must explicitly allow normal reauthentication');
+    assert.match(transition.refreshCanaryEvidenceSha256 ?? '', /^[0-9a-f]{64}$/,
+      'self-hosted release requires refresh-canary evidence');
+  }
   if (requireCanonicalCutover) {
     assert.equal(backend.releaseIntent, 'canonical-cutover',
       'canonical cutover build requires releaseIntent=canonical-cutover');
@@ -99,5 +113,6 @@ console.log(JSON.stringify({
   auth_site_url: webOrigin,
   auth_redirect_urls: authRedirectUrls,
   backend_mode: backendMode,
+  session_transition: backendMode === 'self-hosted' ? 'refresh-or-reauth' : null,
   canonical_cutover: requireCanonicalCutover,
 }));
