@@ -197,7 +197,7 @@ export class FormPage extends Component {
         btn.style.justifyContent = 'center';
         btn.style.zIndex = '3000';
 
-        btn.onclick = () => {
+        btn.onclick = async () => {
              // Prioritize context.occasion.link (backend canonical link)
              // Fallback to local link (form link)
              const context = RightsService.context;
@@ -208,7 +208,7 @@ export class FormPage extends Component {
              }
              
              const path = `/${occasionLink}/reservations`;
-             RouterService.openExternalUrl(path, { inCurrentWindow: true });
+             await RouterService.navigateToFlutterRoute(path);
         };
 
         document.body.appendChild(btn);

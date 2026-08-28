@@ -1,4 +1,5 @@
 import { AppConfig } from '../app_config.js';
+import { prepareFlutterRuntime } from './flutter_runtime_handoff.js';
 
 
 export class RouterService {
@@ -13,19 +14,19 @@ export class RouterService {
         window.open(url, '_blank', 'noopener,noreferrer');
     }
 
-    static navigateToOccasionApp(link) {
+    static async navigateToOccasionApp(link) {
         // Navigate to the occasion app root (e.g. /kurin2026)
         // This will likely be handled by the server returning the app index, or 
         // if this SPA handles it, we need logic for it.
         // For now, simple href is safest to ensure full load or external handling.
         const cleanLink = link.split('?')[0];
         const path = `/${cleanLink}`;
-        RouterService.openExternalUrl(path, { inCurrentWindow: true });
+        await RouterService.navigateToFlutterRoute(path);
     }
 
     static navigateToOccasion(link) {
         // For backwards compatibility or default behavior
-        RouterService.navigateToForm(link);
+        return RouterService.navigateToForm(link);
     }
     
     static async navigateToForm(link) {
@@ -57,18 +58,23 @@ export class RouterService {
         return `${baseUrl}/admin`;
     }
 
-    static navigateToLogin() {
+    static async navigateToLogin() {
         const url = RouterService.getLoginUrl();
-        RouterService.openExternalUrl(url, { inCurrentWindow: true });
+        await RouterService.navigateToFlutterRoute(url);
     }
 
-    static navigateToAdmin() {
+    static async navigateToAdmin() {
         const url = RouterService.getAdminUrl();
-        RouterService.openExternalUrl(url, { inCurrentWindow: true });
+        await RouterService.navigateToFlutterRoute(url);
     }
     
-    static navigateToHandover() {
+    static async navigateToHandover() {
         const url = RouterService.getHandoverUrl();
+        await RouterService.navigateToFlutterRoute(url);
+    }
+
+    static async navigateToFlutterRoute(url) {
+        await prepareFlutterRuntime();
         RouterService.openExternalUrl(url, { inCurrentWindow: true });
     }
 
@@ -205,6 +211,7 @@ export class RouterService {
 
         // 3. Execute Redirect Purpose
         if (shouldRedirectToFlutter) {
+             await prepareFlutterRuntime();
              // 1. Handover Strategy:
              // If we are at /transfer in the Web Client, it means we need to perform the handover to Flutter.
              // (In Production, the server handles this, but in Localhost/SPA navigation, we handle it here).

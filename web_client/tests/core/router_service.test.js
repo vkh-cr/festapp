@@ -164,14 +164,14 @@ test('RouterService.Sanitization', async (t) => {
         assert.strictEqual(locationHref, '/some/path?query=1');
     });
 
-    await t.test('should strip query params in navigateToOccasionApp', () => {
+    await t.test('should strip query params in navigateToOccasionApp', async () => {
         let locationHref = '';
         Object.defineProperty(global.window.location, 'href', {
             set: (v) => locationHref = v,
             configurable: true
         });
 
-        RouterService.navigateToOccasionApp('my-event?source=fb');
+        await RouterService.navigateToOccasionApp('my-event?source=fb');
         assert.strictEqual(locationHref, '/my-event');
     });
 
