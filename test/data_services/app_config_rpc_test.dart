@@ -1,0 +1,54 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:fstapp/data_services/app_config_rpc.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+void main() {
+  test('uses v219 when the backend supports the transition contract', () async {
+    final calls = <String>[];
+
+    final result = await loadAppConfigWithLegacyFallback(
+      invoke: (name) async {
+        calls.add(name);
+        return <String, dynamic>{'client_sync_v1': true};
+      },
+    );
+
+    expect(calls, <String>['get_app_config_v219']);
+    expect(result['client_sync_v1'], isTrue);
+  });
+
+  test('falls back to v218 only when v219 is absent', () async {
+    final calls = <String>[];
+
+    final result = await loadAppConfigWithLegacyFallback(
+      invoke: (name) async {
+        calls.add(name);
+        if (name == 'get_app_config_v219') {
+          throw const PostgrestException(
+            message: 'function missing',
+            code: 'PGRST202',
+          );
+        }
+        return <String, dynamic>{
+          'occasion': <String, dynamic>{'id': 1}
+        };
+      },
+    );
+
+    expect(calls, <String>['get_app_config_v219', 'get_app_config_v218']);
+    expect(result['occasion']['id'], 1);
+    expect(result['client_sync_v1'], isFalse);
+  });
+
+  test('does not hide unrelated PostgREST failures', () async {
+    await expectLater(
+      loadAppConfigWithLegacyFallback(
+        invoke: (_) async => throw const PostgrestException(
+          message: 'forbidden',
+          code: '42501',
+        ),
+      ),
+      throwsA(isA<PostgrestException>()),
+    );
+  });
+}

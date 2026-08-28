@@ -10,6 +10,7 @@ import 'package:fstapp/components/inventory/db_inventory_pools.dart';
 import 'package:fstapp/components/news/db_news.dart';
 import 'package:fstapp/components/map/db_places.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
+import 'package:fstapp/data_services/app_config_rpc.dart';
 import 'package:fstapp/data_services/client_sync/client_sync_protocol.dart';
 import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
 import 'package:fstapp/components/occasion/link_model.dart';
@@ -129,7 +130,7 @@ class SynchroService {
   }
 
   static Future<OccasionLinkModel> getAppConfig(LinkModel link) async {
-    var data = await _supabase.rpc("get_app_config_v219", params: {
+    final params = {
       "data_in": {
         "link": link.occasionLink,
         "form_link": link.formLink,
@@ -137,7 +138,10 @@ class SynchroService {
         "organization": AppConfig.organization,
         "platform": await PlatformHelper.getPlatform()
       }
-    });
+    };
+    final data = await loadAppConfigWithLegacyFallback(
+      invoke: (functionName) => _supabase.rpc(functionName, params: params),
+    );
 
     return OccasionLinkModel.fromJson(data);
   }

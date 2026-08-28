@@ -1,0 +1,26 @@
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+typedef AppConfigRpcInvoker = Future<dynamic> Function(String functionName);
+
+/// Selects the transition app-config contract when the backend supports it,
+/// while keeping clients usable against legacy projects during the rollout.
+/// Only PostgREST's exact missing-function response is eligible for fallback;
+/// authorization, connectivity, and server failures remain visible.
+Future<dynamic> loadAppConfigWithLegacyFallback({
+  required AppConfigRpcInvoker invoke,
+}) async {
+  try {
+    return await invoke('get_app_config_v219');
+  } on PostgrestException catch (error) {
+    if (error.code != 'PGRST202') rethrow;
+
+    final legacy = await invoke('get_app_config_v218');
+    if (legacy is! Map) {
+      throw StateError('Legacy app-config response is not an object');
+    }
+    return <String, dynamic>{
+      ...legacy.cast<String, dynamic>(),
+      'client_sync_v1': false,
+    };
+  }
+}
