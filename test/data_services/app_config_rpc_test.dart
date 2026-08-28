@@ -17,6 +17,22 @@ void main() {
     expect(result['client_sync_v1'], isTrue);
   });
 
+  test('uses v218 directly when startup selected the legacy backend', () async {
+    final calls = <String>[];
+
+    final result = await loadAppConfigWithLegacyFallback(
+      useLegacyContract: true,
+      invoke: (name) async {
+        calls.add(name);
+        return <String, dynamic>{'code': 200};
+      },
+    );
+
+    expect(calls, <String>['get_app_config_v218']);
+    expect(result['code'], 200);
+    expect(result['client_sync_v1'], isFalse);
+  });
+
   test('falls back to v218 only when v219 is absent', () async {
     final calls = <String>[];
 
@@ -52,7 +68,8 @@ void main() {
     );
   });
 
-  test('accepts the web runtime wrapper for the exact missing v219 error', () async {
+  test('accepts the web runtime wrapper for the exact missing v219 error',
+      () async {
     final calls = <String>[];
     final result = await loadAppConfigWithLegacyFallback(
       invoke: (name) async {

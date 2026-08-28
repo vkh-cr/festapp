@@ -8,21 +8,29 @@ typedef AppConfigRpcInvoker = Future<dynamic> Function(String functionName);
 /// authorization, connectivity, and server failures remain visible.
 Future<dynamic> loadAppConfigWithLegacyFallback({
   required AppConfigRpcInvoker invoke,
+  bool useLegacyContract = false,
 }) async {
+  if (useLegacyContract) return _loadLegacyAppConfig(invoke);
+
   try {
     return await invoke('get_app_config_v219');
   } catch (error) {
     if (!_isMissingV219(error)) rethrow;
-
-    final legacy = await invoke('get_app_config_v218');
-    if (legacy is! Map) {
-      throw StateError('Legacy app-config response is not an object');
-    }
-    return <String, dynamic>{
-      ...legacy.cast<String, dynamic>(),
-      'client_sync_v1': false,
-    };
+    return _loadLegacyAppConfig(invoke);
   }
+}
+
+Future<Map<String, dynamic>> _loadLegacyAppConfig(
+  AppConfigRpcInvoker invoke,
+) async {
+  final legacy = await invoke('get_app_config_v218');
+  if (legacy is! Map) {
+    throw StateError('Legacy app-config response is not an object');
+  }
+  return <String, dynamic>{
+    ...legacy.cast<String, dynamic>(),
+    'client_sync_v1': false,
+  };
 }
 
 bool _isMissingV219(Object error) {

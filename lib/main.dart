@@ -175,6 +175,7 @@ Future<void> initializeEverything() async {
     isLoggedIn: AuthService.isLoggedIn,
     getFullUserInfo: AuthService.getFullUserInfo,
     getCurrentOccasionId: RightsService.currentOccasionId,
+    useLegacyAppConfig: !resolvedBackend.isCanonical,
   );
 
   try {

@@ -30,15 +30,18 @@ class SynchroService {
   static Future<UserInfoModel> Function() _getFullUserInfo =
       () => throw StateError('SynchroService not configured');
   static int? Function() _getCurrentOccasionId = () => null;
+  static bool _useLegacyAppConfig = false;
 
   static void configure({
     required bool Function() isLoggedIn,
     required Future<UserInfoModel> Function() getFullUserInfo,
     required int? Function() getCurrentOccasionId,
+    required bool useLegacyAppConfig,
   }) {
     _isLoggedIn = isLoggedIn;
     _getFullUserInfo = getFullUserInfo;
     _getCurrentOccasionId = getCurrentOccasionId;
+    _useLegacyAppConfig = useLegacyAppConfig;
   }
 
   static Future<void> refreshOfflineData() async {
@@ -141,6 +144,7 @@ class SynchroService {
     };
     final data = await loadAppConfigWithLegacyFallback(
       invoke: (functionName) => _supabase.rpc(functionName, params: params),
+      useLegacyContract: _useLegacyAppConfig,
     );
 
     return OccasionLinkModel.fromJson(data);
