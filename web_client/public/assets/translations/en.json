@@ -490,6 +490,8 @@
     "ordersTab": "Orders",
     "ordersHistoryTab": "Orders History",
     "setAsUsed": "Set as used",
+    "setAsUnused": "Set as unused",
+    "ticketUsage": "Ticket usage",
     "bigGame": "Big Game: ",
     "selectAttendee": "Select Attendee",
     "searchPlaceholder": "Search (name, email)...",

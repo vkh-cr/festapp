@@ -117,6 +117,10 @@ class OrdersStrings {
 
   static String get confirmTicket =>
       'FeatureOrders.setAsUsed'.tr(); // "Set as used"
+  static String get restoreTicket =>
+      'FeatureOrders.setAsUnused'.tr(); // "Set as unused"
+  static String get ticketUsage =>
+      'FeatureOrders.ticketUsage'.tr(); // "Ticket usage"
 
   // --- Tickets/Items Tab ---
   static String stornoCompleted({required String item}) =>

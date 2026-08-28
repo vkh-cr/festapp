@@ -490,6 +490,8 @@
     "ordersTab": "Objednávky",
     "ordersHistoryTab": "Historie objednávek",
     "setAsUsed": "Změnit na využito",
+    "setAsUnused": "Změnit na nevyužito",
+    "ticketUsage": "Využití vstupenky",
     "bigGame": "Velká hra: ",
     "selectAttendee": "Vybrat účastníka",
     "searchPlaceholder": "Hledat (jméno, email)...",

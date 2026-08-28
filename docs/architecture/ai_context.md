@@ -25,6 +25,17 @@ Business logic is split between **SQL functions** (`database/functions/`) and Da
 - **In Dart/JS**: UI, navigation, file operations (image upload/copy via `workers/image-worker/`)
 - **Hybrid**: Occasion duplication/deletion — SQL copies DB rows, Dart copies images from Storage
 
+## Critical: Pre-Cutover Database Parity
+
+Until the self-hosted database cutover is complete, every database schema,
+function, or data-contract change must remain semantically identical in all
+three database targets: the self-hosted target, the canonical `default` cloud
+Supabase source, and cloud Supabase source `a`. Author the change as canonical
+repository SQL, apply and verify it on every target through the approved release
+workflow, and do not report the database change complete while any target is
+missing it. If one target cannot be updated, stop and record the parity blocker;
+never allow an implicit compatibility fork.
+
 Key SQL directories: `eshop_orders/` (orders), `eshop_forms/` (form→order), `user_permissions/` (RBAC), `events/` (schedule), `inventory/` (capacity).
 
 ## Critical: Security Rules

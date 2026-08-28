@@ -755,11 +755,19 @@ class EshopColumns {
         TICKET_CONFIRM: (Map<String, dynamic> data) => [
               TrinaColumn(
                 enableAutoEditing: false,
-                title: OrdersStrings.confirmTicket, // Re-used for button text
+                title: OrdersStrings.ticketUsage,
                 field: TICKET_CONFIRM,
                 type: TrinaColumnType.text(),
                 width: 200,
                 renderer: (rendererContext) {
+                  final formattedState =
+                      rendererContext.row.cells[TICKET_STATE]?.value as String?;
+                  final isUsed =
+                      formattedState?.split(';').first == OrderModel.usedState;
+                  final actionLabel = isUsed
+                      ? OrdersStrings.restoreTicket
+                      : OrdersStrings.confirmTicket;
+
                   return ElevatedButton(
                     onPressed: () async {
                       final ticketId =
@@ -771,17 +779,22 @@ class EshopColumns {
                       // Using the ticket symbol directly as the confirmation message body for simplicity.
                       var confirm = await DialogHelper.showConfirmationDialog(
                         context,
-                        OrdersStrings.confirmTicket, // Re-used for dialog title
-                        ticketSymbol, // Simple content for the dialog
+                        actionLabel,
+                        ticketSymbol,
                       );
 
                       if (confirm == true) {
-                        await DbTickets.useTicket(ticketId);
-                        // Using a generic success message structure
-                        ToastHelper.Show(
-                          context,
-                          "$ticketSymbol: ${CommonStrings.ok}",
-                        );
+                        if (isUsed) {
+                          await DbTickets.unuseTicket(ticketId);
+                        } else {
+                          await DbTickets.useTicket(ticketId);
+                        }
+                        if (context.mounted) {
+                          ToastHelper.Show(
+                            context,
+                            "$ticketSymbol: ${CommonStrings.ok}",
+                          );
+                        }
                         var afterFunction = data[TICKET_CONFIRM];
                         if (afterFunction is Future<void> Function()?) {
                           afterFunction?.call();
@@ -791,10 +804,10 @@ class EshopColumns {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.check),
+                        Icon(isUsed ? Icons.undo : Icons.check),
                         Padding(
                           padding: const EdgeInsets.all(6),
-                          child: Text(OrdersStrings.confirmTicket),
+                          child: Text(actionLabel),
                         ),
                       ],
                     ),
