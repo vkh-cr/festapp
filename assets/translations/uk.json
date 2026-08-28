@@ -501,7 +501,8 @@
     "notificationSettings": "Налаштування сповіщень",
     "androidInstallHint": "Відкрийте цей сайт на Android у Chrome або Edge і натисніть «Встановити зараз».",
     "appAlreadyInstalled": "Додаток уже встановлено.",
-    "pwaPromptNotSupported": "Ця платформа або браузер не підтримує встановлення PWA або додаток уже встановлено."
+    "pwaPromptNotSupported": "Ця платформа або браузер не підтримує встановлення PWA або додаток уже встановлено.",
+    "oneSignalSecretManagedServerSide": "Ключ OneSignal REST API зберігається в серверному сховищі секретів для сповіщень."
   },
   "FeatureNews": {
     "createNews": "Створити новину",

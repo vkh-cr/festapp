@@ -1,10 +1,10 @@
-CREATE OR REPLACE FUNCTION update_organization_admin(
+CREATE OR REPLACE FUNCTION public.update_organization_admin(
   organization_id bigint,
   title text,
   data jsonb,
   phone_prefixes text[]
 )
-RETURNS SETOF organizations
+RETURNS SETOF public.organizations
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public, extensions

@@ -10,6 +10,7 @@ import 'package:fstapp/components/forms/logic/phone_country_codes.dart';
 import 'package:select_dialog/select_dialog.dart';
 
 import 'package:fstapp/components/_shared/app_panel_helper.dart';
+import 'package:fstapp/components/_shared/admin_strings.dart';
 
 @RoutePage()
 class OrganizationEditPage extends StatefulWidget {
@@ -201,9 +202,9 @@ class _OrganizationEditPageState extends State<OrganizationEditPage> {
                             const SizedBox(height: 8),
                             _buildTextField(
                                 _oneSignalAppIdController, "OneSignal App ID"),
-                            const Text(
-                              "The OneSignal REST API key is managed in the "
-                              "server-only notification secret store.",
+                            Text(
+                              AdministrationStrings
+                                  .oneSignalSecretManagedServerSide,
                             ),
                             const SizedBox(height: 16),
                             Text("Feature Flags",

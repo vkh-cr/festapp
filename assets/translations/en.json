@@ -861,7 +861,8 @@
     "pruneShellsConfirm": "Only unused app versions will be removed. Sign-in, offline data, and fonts remain preserved.",
     "storageUsage": "Browser usage: {usage} MiB of {quota} MiB",
     "storageBlocked": "The app will not remove anything right now. Your data remains safe.",
-    "storageReady": "Retained versions: {retained}; deletable: {deletable}"
+    "storageReady": "Retained versions: {retained}; deletable: {deletable}",
+    "oneSignalSecretManagedServerSide": "The OneSignal REST API key is managed in the server-only notification secret store."
   },
   "GroupStrings": {
     "newGroup": "New Group",

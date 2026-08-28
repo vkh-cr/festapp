@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION set_user_password_token(token uuid, password text)
+CREATE OR REPLACE FUNCTION public.set_user_password_token(token uuid, password text)
  RETURNS jsonb
  LANGUAGE plpgsql
  SECURITY DEFINER

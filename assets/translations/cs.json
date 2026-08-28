@@ -861,7 +861,8 @@
     "pruneShellsConfirm": "Odstraní se pouze nepoužívané verze aplikace. Přihlášení, offline data a fonty zůstanou zachované.",
     "storageUsage": "Využití prohlížeče: {usage} MiB z {quota} MiB",
     "storageBlocked": "Aplikace teď nic neodstraní. Vaše data zůstávají v bezpečí.",
-    "storageReady": "Zachované verze: {retained}; k odstranění: {deletable}"
+    "storageReady": "Zachované verze: {retained}; k odstranění: {deletable}",
+    "oneSignalSecretManagedServerSide": "OneSignal REST API klíč je spravovaný v serverovém úložišti tajných údajů pro oznámení."
   },
   "GroupStrings": {
     "newGroup": "Nová skupina",

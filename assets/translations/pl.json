@@ -385,7 +385,8 @@
     "notificationSettings": "Ustawienia powiadomień",
     "androidInstallHint": "Otwórz tę stronę internetową na swoim telefonie z Androidem w przeglądarce, takiej jak Chrome lub Edge, i kliknij przycisk Zainstaluj teraz.",
     "appAlreadyInstalled": "Aplikacja jest już zainstalowana.",
-    "pwaPromptNotSupported": "Ta platforma lub przeglądarka nie obsługuje instalacji PWA lub aplikacja jest już zainstalowana."
+    "pwaPromptNotSupported": "Ta platforma lub przeglądarka nie obsługuje instalacji PWA lub aplikacja jest już zainstalowana.",
+    "oneSignalSecretManagedServerSide": "Klucz OneSignal REST API jest zarządzany w serwerowym magazynie sekretów powiadomień."
   },
   "FeatureNews": {
     "createNews": "Utwórz wiadomość",

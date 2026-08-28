@@ -1,5 +1,5 @@
-CREATE OR REPLACE FUNCTION get_organization_admin(organization_id bigint)
-RETURNS SETOF organizations
+CREATE OR REPLACE FUNCTION public.get_organization_admin(organization_id bigint)
+RETURNS SETOF public.organizations
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public, extensions
