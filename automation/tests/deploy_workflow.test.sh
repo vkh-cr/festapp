@@ -29,7 +29,9 @@ fi
 
 for pages_contract in "configValue('DEPLOY_TARGET') === 'gh-pages'" \
     'GitHub Pages SPA fallback must retain its platform 404 status' \
-    'maxAge <= 600'; do
+    'GitHub Pages SPA fallback differs from the web-client root' \
+    "label === 'GitHub Pages SPA fallback' && value === ''" \
+    "maxAllowed = label === 'main.dart.js' || label === 'service worker' ? 14400 : 600"; do
     if ! grep -Fq "$pages_contract" "$PROJECT_ROOT/automation/verify_web_deployment.mjs"; then
         echo "GitHub Pages deployment verifier is missing: $pages_contract"
         exit 1

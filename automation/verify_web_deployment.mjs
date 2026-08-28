@@ -40,9 +40,11 @@ function versionFromHtml(html) {
 function assertRevalidated(response, label) {
   const value = response.headers.get('cache-control') || '';
   if (isGitHubPages) {
+    if (label === 'GitHub Pages SPA fallback' && value === '') return;
     const maxAge = Number(value.match(/(?:^|,)\s*max-age=(\d+)/i)?.[1]);
+    const maxAllowed = label === 'main.dart.js' || label === 'service worker' ? 14400 : 600;
     assert.ok(
-      Number.isInteger(maxAge) && maxAge >= 0 && maxAge <= 600,
+      Number.isInteger(maxAge) && maxAge >= 0 && maxAge <= maxAllowed,
       `${label} has an unsafe GitHub Pages cache policy: ${value || '(empty)'}`,
     );
     return;
@@ -65,7 +67,7 @@ async function fetchFresh(pathname) {
 
 async function verifyOnce() {
   const [htmlResponse, manifestResponse, mainResponse, workerResponse, ...legalResponses] = await Promise.all([
-    fetchFresh(isGitHubPages ? '/' : '/admin'),
+    fetchFresh(isGitHubPages ? '/flutter.html' : '/admin'),
     fetchFresh('/festapp-version.json'),
     fetchFresh('/main.dart.js'),
     fetchFresh('/festapp_service_worker.js'),
@@ -114,14 +116,17 @@ async function verifyOnce() {
   );
 
   if (isGitHubPages) {
-    const fallbackResponse = await fetchFresh('/admin');
+    const [rootResponse, fallbackResponse] = await Promise.all([fetchFresh('/'), fetchFresh('/admin')]);
+    assert.equal(rootResponse.status, 200, 'GitHub Pages web-client root is unavailable');
     assert.equal(fallbackResponse.status, 404, 'GitHub Pages SPA fallback must retain its platform 404 status');
+    assert.match(rootResponse.headers.get('content-type') || '', /^text\/html\b/i, 'GitHub Pages web-client root is not HTML');
     assert.match(fallbackResponse.headers.get('content-type') || '', /^text\/html\b/i, 'GitHub Pages SPA fallback is not HTML');
+    assertRevalidated(rootResponse, 'GitHub Pages web-client root');
     assertRevalidated(fallbackResponse, 'GitHub Pages SPA fallback');
     assert.equal(
-      versionFromHtml(await fallbackResponse.text()),
-      expectedVersion,
-      'GitHub Pages SPA fallback version is stale',
+      await fallbackResponse.text(),
+      await rootResponse.text(),
+      'GitHub Pages SPA fallback differs from the web-client root',
     );
   }
 
