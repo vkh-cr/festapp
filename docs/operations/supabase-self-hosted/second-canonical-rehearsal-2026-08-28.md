@@ -96,10 +96,12 @@ mutated. An earlier clean-cluster attempt that exposed the required
 evidence.
 
 This completes two full **snapshot restore and canonical data-merge**
-rehearsals. It does not claim the two complete journal catch-up/cutover
-rehearsals required by the production plan, and it does not authorize
-production cutover. Remaining gates are the journal/forwarder/final-marker
-implementation and two zero-lag catch-up proofs, compatible web/Android/iOS releases,
-password/OAuth/refresh-token and rights/write canaries, the final fresh
-freeze/journal snapshot with zero lag, `api.festapp.net` activation and the four
-legacy Storage URL rewrites, followed by the final single-write-authority gate.
+rehearsals. Because global journal coverage has not been proven, the selected
+production mode is the fail-closed full freeze; journal-hybrid remains
+unauthorized rather than becoming another implementation prerequisite. Web and
+signed iOS rehearsal candidates plus password/refresh/rights/idempotent-write
+canaries now pass. Remaining gates are the queued signed Android AAB, the final
+fresh full-freeze snapshot and final markers, `api.festapp.net` activation and
+the four legacy Storage URL rewrites, followed by store adoption and the final
+single-write-authority gate. This evidence does not authorize production
+cutover.

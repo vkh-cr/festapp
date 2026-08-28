@@ -84,7 +84,9 @@ REST, Realtime, a real Storage object and direct-origin denial all passed. The
 full evidence is in `rehearsal-origin-2026-08-28.md`.
 
 The second complete rehearsal from a newer cloud snapshot passed on 2026-08-28
-in a new isolated database and the rehearsal runtime now targets it. The next
-gate is compatible web, Android and iOS releases plus Auth/rights/write canaries
-and the final freeze snapshot. Production `api.festapp.net`, cloud credentials
-and write ownership remain unchanged.
+in a new isolated database and the rehearsal runtime now targets it. The CSM web
+release, signed iOS candidate and password/refresh/rights/idempotent-write
+canaries now pass; the signed Android command is queued while its paired Windows
+builder is offline. The remaining operational gate is that AAB plus the final
+full-freeze snapshot/marker. Production `api.festapp.net`, cloud credentials,
+stores and write ownership remain unchanged.

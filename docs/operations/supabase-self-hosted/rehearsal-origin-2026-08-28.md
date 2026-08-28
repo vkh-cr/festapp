@@ -69,11 +69,15 @@ clears only terminal `refresh_token_not_found` or
 
 ## Remaining production gates
 
-1. Build and test web/Android/iOS against this rehearsal hostname and key.
-2. Exercise password, refresh-token, rights, Functions and write canaries.
-3. Prepare `api.festapp.net` with the same firewall, Caddy and strict-TLS
+The CSM web release and signed iOS candidate now pass against this hostname.
+Password, refresh-token, rights and idempotent write canaries also pass; the
+application's intentionally disabled Google provider is preserved as disabled.
+The retained details are in `client-release-rehearsal-2026-08-28.md`.
+
+1. Complete the already queued signed Android AAB on the paired Windows builder.
+2. Prepare `api.festapp.net` with the same firewall, Caddy and strict-TLS
    contract, but do not activate it before the final freeze/journal gate.
-4. Rewrite the four retained legacy Storage URLs only when the canonical
+3. Rewrite the four retained legacy Storage URLs only when the canonical
    production hostname is live and verified.
 
 Client release tooling now accepts a custom HTTPS Supabase origin, preserves an
@@ -84,11 +88,9 @@ the same fail-closed client preflight. These are readiness mechanisms, not proof
 that a release has been built or adopted; the gate above remains open until the
 actual web bundle and store artifacts pass against this endpoint.
 
-The rehearsal runtime keeps Auth `SITE_URL` invalid and its redirect allowlist
-empty by default. An auth-enabled client rehearsal must explicitly provide
-`FESTAPP_AUTH_SITE_URL` and same-origin `FESTAPP_AUTH_REDIRECT_URLS` when
-configuring the runtime. Cross-origin callbacks are rejected, and the approved
-browser callback/password flow must pass before production activation.
+The rehearsal runtime now explicitly uses
+`https://festapp-rehearsal-client.pages.dev` as Auth `SITE_URL` and allows only
+its two password-reset routes. Cross-origin callbacks remain rejected.
 
 No cloud project, backup, restore database, Storage object or other retained
 artifact was deleted during this activation.

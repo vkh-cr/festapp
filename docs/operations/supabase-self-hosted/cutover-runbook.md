@@ -83,6 +83,19 @@ bundle verifier additionally proves that the vanilla client, Flutter bundle,
 and auth bridge contain the exact configured origin/key/namespace and no stale
 Supabase Cloud origin.
 
+For a signed iOS rehearsal artifact without an App Store mutation, run the
+build-only path in a clean release worktree:
+
+```bash
+FESTAPP_RELEASE_MANIFEST=/private/path/config.json \
+FESTAPP_IOS_SIGNING_DIR=/private/path/signing \
+FESTAPP_CANONICAL_CUTOVER_RELEASE=1 \
+  automation/release/ios_build_candidate.sh
+```
+
+It verifies bundle/version/certificate and artifact SHA-256 and contains no
+upload implementation. Store upload and release remain separate approvals.
+
 The native callback contract remains browser-first during this migration:
 password recovery and transfer complete on the deployed HTTPS web origin.
 Neither a Supabase hostname nor an unverified Android App Link is treated as a
@@ -134,6 +147,11 @@ snapshot timestamp after both write and Auth-refresh freezes. The final-marker
 gate additionally requires both source markers and passing conflict/FK
 validation. Decision files are append-only private evidence outside Git; the
 gate itself performs no production mutation.
+
+For this migration, `full-freeze` is the selected production mode unless a new
+global writer inventory later proves the stricter hybrid contract. The final
+marker cannot be generated honestly before the real production freeze; passing
+the synthetic gate tests is tooling proof, not cutover authorization.
 
 ## 3. Activation order
 
