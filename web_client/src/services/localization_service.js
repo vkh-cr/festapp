@@ -42,7 +42,7 @@ export class LocalizationService {
         }
     }
 
-    static tr(key, args = {}) {
+    static tr(key, args = {}, fallback = key) {
         // 0. Try direct lookup first (for keys with dots like "Some sentence.")
         let value = LocalizationService.translations[key];
 
@@ -55,7 +55,7 @@ export class LocalizationService {
                 if (value && value[k]) {
                     value = value[k];
                 } else {
-                    return key; // Key not found
+                    return fallback; // Key not found
                 }
             }
         }

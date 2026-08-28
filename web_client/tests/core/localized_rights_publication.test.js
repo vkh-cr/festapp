@@ -4,6 +4,17 @@ import test from 'node:test';
 import { LocalizationService } from '../../src/services/localization_service.js';
 import { RightsService } from '../../src/services/rights_service.js';
 import { SupabaseService } from '../../src/services/supabase_service.js';
+import { CommonStrings } from '../../src/components/shared/common_strings.js';
+
+test('critical admin label never exposes its internal translation key', () => {
+    const originalTranslations = LocalizationService.translations;
+    LocalizationService.translations = {};
+    try {
+        assert.equal(CommonStrings.admin, 'Admin');
+    } finally {
+        LocalizationService.translations = originalTranslations;
+    }
+});
 
 test('rights context is published only after localization is ready', async () => {
     const calls = [];

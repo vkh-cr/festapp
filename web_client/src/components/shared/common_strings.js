@@ -3,7 +3,7 @@ import { LocalizationService } from '../../services/localization_service.js';
 export class CommonStrings {
     static get signIn() { return LocalizationService.tr("FeatureUser.signIn"); }
     static get signOut() { return LocalizationService.tr("FeatureUser.signOut"); }
-    static get admin() { return LocalizationService.tr("FeatureUser.admin"); }
+    static get admin() { return LocalizationService.tr("FeatureUser.admin", {}, "Admin"); }
     static get email() { return LocalizationService.tr("FeatureUser.email"); }
     static get password() { return LocalizationService.tr("FeatureUser.password"); }
     static get login() { return LocalizationService.tr("FeatureUser.logIn"); }
