@@ -73,12 +73,13 @@ async function activate(worker, serviceWorker, environment, timeoutMs) {
 }
 
 function browserEnvironment(overrides = {}) {
+    const root = overrides.globalObject || globalThis;
     return {
-        navigator: overrides.navigator || globalThis.navigator,
-        fetch: overrides.fetch || globalThis.fetch,
-        MessageChannel: overrides.MessageChannel || globalThis.MessageChannel,
-        setTimeout: overrides.setTimeout || globalThis.setTimeout,
-        clearTimeout: overrides.clearTimeout || globalThis.clearTimeout,
+        navigator: overrides.navigator || root.navigator,
+        fetch: overrides.fetch || root.fetch.bind(root),
+        MessageChannel: overrides.MessageChannel || root.MessageChannel,
+        setTimeout: overrides.setTimeout || root.setTimeout.bind(root),
+        clearTimeout: overrides.clearTimeout || root.clearTimeout.bind(root),
     };
 }
 

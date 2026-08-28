@@ -124,3 +124,25 @@ test('preserves the offline worker and caches', async () => {
     assert.equal(result.strategy, 'preserved');
     assert.equal(f.registration.unregistered, 0);
 });
+
+test('binds browser host functions to Window instead of the coordinator object', async () => {
+    const f = fixture();
+    const root = {
+        navigator: f.navigator,
+        MessageChannel: FakeMessageChannel,
+        fetch() {
+            assert.equal(this, root);
+            return manifestFetch();
+        },
+        setTimeout(callback, delay) {
+            assert.equal(this, root);
+            return globalThis.setTimeout(callback, delay);
+        },
+        clearTimeout(timeout) {
+            assert.equal(this, root);
+            return globalThis.clearTimeout(timeout);
+        },
+    };
+    const result = await prepareFlutterRuntime({ globalObject: root, timeoutMs: 50 });
+    assert.equal(result.strategy, 'current');
+});
