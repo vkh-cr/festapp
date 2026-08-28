@@ -14,12 +14,20 @@ class ResolvedBackend {
   const ResolvedBackend({
     required this.supabaseUrl,
     required this.anonKey,
+    required this.organizationId,
+    required this.profileSha256,
     required this.isCanonical,
   });
 
   final String supabaseUrl;
   final String anonKey;
+  final int organizationId;
+  final String profileSha256;
   final bool isCanonical;
+
+  String installationGeneration(String baseGeneration) => isCanonical
+      ? '$baseGeneration/backend-canonical-v1/organization-$organizationId'
+      : baseGeneration;
 }
 
 /// Resolves the one backend a process may use before Supabase is initialized.
@@ -38,6 +46,9 @@ class BackendActivationService {
     String? legacyAnonKey,
     String? canonicalSupabaseUrl,
     String? canonicalAnonKey,
+    int? legacyOrganizationId,
+    int? canonicalOrganizationId,
+    String? canonicalProfileSha256,
     BackendActivationRead? read,
     BackendActivationWrite? write,
     BackendActivationFetch? fetch,
@@ -51,6 +62,11 @@ class BackendActivationService {
             AppConfig.backendActivationCanonicalSupabaseUrl,
         canonicalAnonKey =
             canonicalAnonKey ?? AppConfig.backendActivationCanonicalAnonKey,
+        legacyOrganizationId = legacyOrganizationId ?? AppConfig.organization,
+        canonicalOrganizationId = canonicalOrganizationId ??
+            AppConfig.backendActivationCanonicalOrganizationId,
+        canonicalProfileSha256 = canonicalProfileSha256 ??
+            AppConfig.backendActivationCanonicalProfileSha256,
         _read = read ?? ((key) => StorageHelper.get(key)),
         _write = write ?? ((key, value) => StorageHelper.set(key, value)),
         _fetch = fetch ?? _fetchManifest;
@@ -67,6 +83,9 @@ class BackendActivationService {
   final String legacyAnonKey;
   final String canonicalSupabaseUrl;
   final String canonicalAnonKey;
+  final int legacyOrganizationId;
+  final int canonicalOrganizationId;
+  final String canonicalProfileSha256;
   final BackendActivationRead _read;
   final BackendActivationWrite _write;
   final BackendActivationFetch _fetch;
@@ -76,7 +95,9 @@ class BackendActivationService {
       manifestUrl.isNotEmpty &&
       canonicalManifestSha256.isNotEmpty &&
       canonicalSupabaseUrl.isNotEmpty &&
-      canonicalAnonKey.isNotEmpty;
+      canonicalAnonKey.isNotEmpty &&
+      canonicalOrganizationId > 0 &&
+      RegExp(r'^[0-9a-f]{64}$').hasMatch(canonicalProfileSha256);
 
   Future<ResolvedBackend> resolve() async {
     if (!isEnabled) return _legacy;
@@ -113,12 +134,16 @@ class BackendActivationService {
   ResolvedBackend get _legacy => ResolvedBackend(
         supabaseUrl: legacySupabaseUrl,
         anonKey: legacyAnonKey,
+        organizationId: legacyOrganizationId,
+        profileSha256: '',
         isCanonical: false,
       );
 
   ResolvedBackend get _canonical => ResolvedBackend(
         supabaseUrl: canonicalSupabaseUrl,
         anonKey: canonicalAnonKey,
+        organizationId: canonicalOrganizationId,
+        profileSha256: canonicalProfileSha256,
         isCanonical: true,
       );
 

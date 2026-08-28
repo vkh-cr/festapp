@@ -16,6 +16,7 @@ import {
 import {
   backendActivationDocument,
   canonicalBackendActivationSha256,
+  canonicalBackendProfileSha256,
 } from '../lib/backend_activation_manifest.mjs';
 
 const root = path.resolve(import.meta.dirname, '../..');
@@ -92,6 +93,12 @@ function makePreflightFixture({ origin, key, generation, authStorageKey, backend
     fs.writeFileSync(path.join(fixture, 'web/backend-activation.json'), document);
     fs.writeFileSync(path.join(fixture, 'web_client/public/backend-activation.json'), document);
   }
+  const activationProfileSha256 = activation ? canonicalBackendProfileSha256({
+    tenantId: activation.tenantId,
+    canonicalOrigin: activation.canonicalOrigin,
+    canonicalAnonKey: activation.canonicalKey,
+    canonicalOrganizationId: activation.canonicalOrganizationId,
+  }) : '';
   fs.writeFileSync(path.join(fixture, 'automation/project.conf'), [
     `SUPABASE_URL=${origin}`,
     `SUPABASE_ANON_KEY=${key}`,
@@ -100,6 +107,7 @@ function makePreflightFixture({ origin, key, generation, authStorageKey, backend
     `BACKEND_ACTIVATION_PHASE=${activation?.phase ?? ''}`,
     `BACKEND_ACTIVATION_CANONICAL_SUPABASE_URL=${activation?.canonicalOrigin ?? ''}`,
     `BACKEND_ACTIVATION_CANONICAL_SUPABASE_ANON_KEY=${activation?.canonicalKey ?? ''}`,
+    `BACKEND_ACTIVATION_CANONICAL_ORGANIZATION_ID=${activation?.canonicalOrganizationId ?? ''}`,
     `PUSH_APP_GENERATION=${generation}`,
     'ORGANIZATION_ID=12',
     'WEB_LINK=https://app.example.test',
@@ -114,6 +122,8 @@ function makePreflightFixture({ origin, key, generation, authStorageKey, backend
     `static const String backendActivationCanonicalManifestSha256 = '${activation ? canonicalBackendActivationSha256(activation.tenantId) : ''}';`,
     `static const String backendActivationCanonicalSupabaseUrl = '${activation?.canonicalOrigin ?? ''}';`,
     `static const String backendActivationCanonicalAnonKey = '${activation?.canonicalKey ?? ''}';`,
+    `static const int backendActivationCanonicalOrganizationId = ${activation?.canonicalOrganizationId ?? 0};`,
+    `static const String backendActivationCanonicalProfileSha256 = '${activationProfileSha256}';`,
   ].join('\n'));
   fs.writeFileSync(path.join(fixture, 'web_client/src/app_config.js'), [
     `static supabaseUrl = '${origin}';`,
@@ -123,6 +133,8 @@ function makePreflightFixture({ origin, key, generation, authStorageKey, backend
     `static backendActivationCanonicalManifestSha256 = '${activation ? canonicalBackendActivationSha256(activation.tenantId) : ''}';`,
     `static backendActivationCanonicalSupabaseUrl = '${activation?.canonicalOrigin ?? ''}';`,
     `static backendActivationCanonicalAnonKey = '${activation?.canonicalKey ?? ''}';`,
+    `static backendActivationCanonicalOrganizationId = ${activation?.canonicalOrganizationId ?? 0};`,
+    `static backendActivationCanonicalProfileSha256 = '${activationProfileSha256}';`,
     `auth: '${authStorageKey}'`,
   ].join('\n'));
   const manifest = path.join(fixture, 'release.json');
@@ -251,6 +263,7 @@ test('transition release binds a pinned one-way activation and stable session na
     phase: 'legacy',
     canonicalOrigin: 'https://api.festapp.net',
     canonicalKey,
+    canonicalOrganizationId: 19,
   };
   const backend = {
     mode: 'supabase-cloud',
@@ -274,6 +287,13 @@ test('transition release binds a pinned one-way activation and stable session na
       canonicalManifestSha256: canonicalBackendActivationSha256(activation.tenantId),
       canonicalSupabaseOrigin: activation.canonicalOrigin,
       canonicalAnonKeySha256: crypto.createHash('sha256').update(canonicalKey).digest('hex'),
+      canonicalOrganizationId: activation.canonicalOrganizationId,
+      canonicalProfileSha256: canonicalBackendProfileSha256({
+        tenantId: activation.tenantId,
+        canonicalOrigin: activation.canonicalOrigin,
+        canonicalAnonKey: activation.canonicalKey,
+        canonicalOrganizationId: activation.canonicalOrganizationId,
+      }),
       authStorageKey,
       finalRefreshTokenDeltaRequired: true,
     },

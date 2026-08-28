@@ -12,6 +12,7 @@ import {
 import {
   backendActivationDocument,
   canonicalBackendActivationSha256,
+  canonicalBackendProfileSha256,
 } from '../lib/backend_activation_manifest.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -31,9 +32,12 @@ const activationTenantId = value('BACKEND_ACTIVATION_TENANT_ID');
 const activationPhase = value('BACKEND_ACTIVATION_PHASE');
 const activationCanonicalOriginValue = value('BACKEND_ACTIVATION_CANONICAL_SUPABASE_URL');
 const activationCanonicalAnonKey = value('BACKEND_ACTIVATION_CANONICAL_SUPABASE_ANON_KEY');
+const activationCanonicalOrganizationValue = value(
+  'BACKEND_ACTIVATION_CANONICAL_ORGANIZATION_ID',
+);
 const activationEnabled = Boolean(
   activationTenantId || activationPhase || activationCanonicalOriginValue ||
-  activationCanonicalAnonKey
+  activationCanonicalAnonKey || activationCanonicalOrganizationValue
 );
 const organizationId = Number(value('ORGANIZATION_ID'));
 assert.ok(Number.isSafeInteger(organizationId) && organizationId > 0,
@@ -59,13 +63,19 @@ if (cloudRef) {
 let activation = null;
 if (activationEnabled) {
   assert.ok(activationTenantId && activationPhase && activationCanonicalOriginValue &&
-    activationCanonicalAnonKey, 'backend activation configuration must be complete');
+    activationCanonicalAnonKey && activationCanonicalOrganizationValue,
+  'backend activation configuration must be complete');
   assert.match(activationTenantId, /^[a-z0-9][a-z0-9-]*$/,
     'backend activation tenant ID must be a lowercase slug');
   assert.ok(['legacy', 'canonical'].includes(activationPhase),
     'backend activation phase must be legacy or canonical');
   assert.ok(configuredAuthStorageKey,
     'backend activation requires an explicit stable auth storage namespace');
+  assert.ok(installationGeneration,
+    'backend activation requires a non-empty PUSH_APP_GENERATION');
+  const canonicalOrganizationId = Number(activationCanonicalOrganizationValue);
+  assert.ok(Number.isSafeInteger(canonicalOrganizationId) && canonicalOrganizationId > 0,
+    'canonical activation organization ID must be a positive integer');
   const canonicalOrigin = parseSupabaseOrigin(activationCanonicalOriginValue);
   assert.equal(canonicalOrigin, 'https://api.festapp.net',
     'backend activation canonical origin must be https://api.festapp.net');
@@ -77,6 +87,12 @@ if (activationEnabled) {
   assert.equal(canonicalPayload.role, 'anon', 'canonical activation key must use the anon role');
   assert.equal(canonicalPayload.iss, 'supabase', 'canonical activation key must be issued by Supabase');
   const canonicalSha256 = canonicalBackendActivationSha256(activationTenantId);
+  const canonicalProfileSha256 = canonicalBackendProfileSha256({
+    tenantId: activationTenantId,
+    canonicalOrigin,
+    canonicalAnonKey: activationCanonicalAnonKey,
+    canonicalOrganizationId,
+  });
   const manifestUrl = `${webOrigin}/backend-activation.json`;
   const expectedDocument = backendActivationDocument(activationTenantId, activationPhase);
   for (const relative of ['web/backend-activation.json', 'web_client/public/backend-activation.json']) {
@@ -92,6 +108,8 @@ if (activationEnabled) {
     canonicalSupabaseOrigin: canonicalOrigin,
     canonicalAnonKeySha256: crypto.createHash('sha256')
       .update(activationCanonicalAnonKey).digest('hex'),
+    canonicalOrganizationId,
+    canonicalProfileSha256,
     authStorageKey,
     finalRefreshTokenDeltaRequired: true,
   };
@@ -174,11 +192,19 @@ if (activationEnabled) {
     [flutterConfig, activation.canonicalSupabaseOrigin,
       'generated Flutter canonical origin is stale'],
     [flutterConfig, activationCanonicalAnonKey, 'generated Flutter canonical key is stale'],
+    [flutterConfig, `backendActivationCanonicalOrganizationId = ${activation.canonicalOrganizationId};`,
+      'generated Flutter canonical organization is stale'],
+    [flutterConfig, activation.canonicalProfileSha256,
+      'generated Flutter canonical profile fingerprint is stale'],
     [webConfig, activation.tenantId, 'generated web activation tenant is stale'],
     [webConfig, activation.manifestUrl, 'generated web activation URL is stale'],
     [webConfig, activation.canonicalManifestSha256, 'generated web activation digest is stale'],
     [webConfig, activation.canonicalSupabaseOrigin, 'generated web canonical origin is stale'],
     [webConfig, activationCanonicalAnonKey, 'generated web canonical key is stale'],
+    [webConfig, `backendActivationCanonicalOrganizationId = ${activation.canonicalOrganizationId};`,
+      'generated web canonical organization is stale'],
+    [webConfig, activation.canonicalProfileSha256,
+      'generated web canonical profile fingerprint is stale'],
   ]) assert.ok(text.includes(expected), message);
 }
 assert.ok(flutterConfig.includes(anonKey), 'generated Flutter anon key is stale');

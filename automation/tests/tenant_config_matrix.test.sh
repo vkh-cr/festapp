@@ -44,6 +44,7 @@ grep -qF "supabaseUrl = 'https://fixtureslunovrat.supabase.co'" "$TMP_ROOT/festi
 grep -qE 'organization = 5' "$TMP_ROOT/festivalslunovrat/web_client/src/app_config.js"
 grep -qF "backendActivationTenantId = 'festivalslunovrat'" "$TMP_ROOT/festivalslunovrat/lib/app_config.dart"
 grep -qF "backendActivationCanonicalSupabaseUrl = 'https://api.festapp.net'" "$TMP_ROOT/festivalslunovrat/web_client/src/app_config.js"
+grep -qF 'backendActivationCanonicalOrganizationId = 19' "$TMP_ROOT/festivalslunovrat/web_client/src/app_config.js"
 ! grep -qF "backendActivationCanonicalSupabaseUrl = 'https://fixtureslunovrat.supabase.co'" "$TMP_ROOT/festivalslunovrat/web_client/src/app_config.js"
 cmp "$TMP_ROOT/festivalslunovrat/web/backend-activation.json" \
   "$TMP_ROOT/festivalslunovrat/web_client/public/backend-activation.json"

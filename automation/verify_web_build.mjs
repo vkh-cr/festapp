@@ -10,6 +10,7 @@ import {
 import {
   backendActivationDocument,
   canonicalBackendActivationSha256,
+  canonicalBackendProfileSha256,
 } from './lib/backend_activation_manifest.mjs';
 
 const buildDir = path.resolve(process.argv[2] || 'build/web');
@@ -106,13 +107,18 @@ const activationTenantId = configValue('BACKEND_ACTIVATION_TENANT_ID');
 const activationPhase = configValue('BACKEND_ACTIVATION_PHASE');
 const activationCanonicalUrl = configValue('BACKEND_ACTIVATION_CANONICAL_SUPABASE_URL');
 const activationCanonicalKey = configValue('BACKEND_ACTIVATION_CANONICAL_SUPABASE_ANON_KEY');
+const activationCanonicalOrganizationValue = configValue(
+  'BACKEND_ACTIVATION_CANONICAL_ORGANIZATION_ID',
+);
 const activationValues = [
   activationTenantId,
   activationPhase,
   activationCanonicalUrl,
   activationCanonicalKey,
+  activationCanonicalOrganizationValue,
 ];
 const activationEnabled = activationValues.some(Boolean);
+let expectedCanonicalProfileSha256 = '';
 assert.equal(
   activationValues.every(Boolean),
   activationEnabled,
@@ -144,6 +150,16 @@ if (activationEnabled) {
     'canonical activation origin must be https://api.festapp.net');
   assert.notEqual(activationCanonicalUrl, supabaseUrl,
     'legacy and canonical activation origins must be distinct');
+  const activationCanonicalOrganizationId = Number(activationCanonicalOrganizationValue);
+  assert.ok(Number.isSafeInteger(activationCanonicalOrganizationId) &&
+    activationCanonicalOrganizationId > 0,
+  'canonical activation organization ID must be a positive integer');
+  expectedCanonicalProfileSha256 = canonicalBackendProfileSha256({
+    tenantId: activationTenantId,
+    canonicalOrigin: parseSupabaseOrigin(activationCanonicalUrl),
+    canonicalAnonKey: activationCanonicalKey,
+    canonicalOrganizationId: activationCanonicalOrganizationId,
+  });
   const canonicalAnonPayload = JSON.parse(
     Buffer.from(activationCanonicalKey.split('.')[1] || '', 'base64url').toString('utf8'),
   );
@@ -162,6 +178,8 @@ if (activationEnabled) {
   );
   assert.ok(main.includes(Buffer.from(canonicalBackendActivationSha256(activationTenantId))),
     'compiled Flutter bundle lacks the pinned activation digest');
+  assert.ok(main.includes(Buffer.from(expectedCanonicalProfileSha256)),
+    'compiled Flutter bundle lacks the canonical profile fingerprint');
 }
 const loadingLogo = configValue('WEB_LOADING_LOGO_ASSET');
 assert.ok(loadingLogo, 'project.conf is missing WEB_LOADING_LOGO_ASSET');
@@ -174,6 +192,13 @@ assert.doesNotMatch(flutterHtml, /CSM Ostrava 2026/, 'Flutter loader contains fo
 
 const flutterConfigPath = path.resolve(path.dirname(configPath), '..', 'lib/app_config.dart');
 const flutterConfig = await readFile(flutterConfigPath, 'utf8');
+if (activationEnabled) {
+  assert.match(
+    flutterConfig,
+    new RegExp(`static const int backendActivationCanonicalOrganizationId = ${activationCanonicalOrganizationValue};`),
+    'generated Flutter canonical organization differs from project.conf',
+  );
+}
 for (const [key, dartName] of [
   ['PRIVACY_URL', 'privacyUrl'],
   ['PRIVACY_CHOICES_URL', 'privacyChoicesUrl'],
@@ -251,6 +276,8 @@ if (activationEnabled) {
     'vanilla web bundle lacks the canonical activation origin');
   assert.ok(webAssetBytes.includes(Buffer.from(activationCanonicalKey)),
     'vanilla web bundle lacks the canonical activation key');
+  assert.ok(webAssetBytes.includes(Buffer.from(expectedCanonicalProfileSha256)),
+    'vanilla web bundle lacks the canonical profile fingerprint');
 }
 const bundledCloudOrigins = new Set(
   webAssetSources.flatMap((source) =>

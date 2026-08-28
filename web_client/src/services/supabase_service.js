@@ -40,6 +40,7 @@ export class SupabaseService {
 
     static async _initialize() {
         SupabaseService._backend = await new BackendActivationService().resolve();
+        AppConfig.organization = SupabaseService._backend.organizationId;
         const client = SupabaseService.getClient();
         const activeOrigin = SupabaseService._backend.supabaseUrl;
         const previousOrigin = localStorage.getItem(SupabaseService.originMarkerKey);

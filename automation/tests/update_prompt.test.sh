@@ -135,6 +135,63 @@ if node "$PROJECT_ROOT/automation/verify_web_build.mjs" "$BUILD_DIR" "1.2.3+456"
 else
     echo "  FAIL: coherent web release was rejected by the build gate"; fail=1
 fi
+
+# A completed transition bundle must bind the entire canonical profile. Merely
+# changing the source organization after compilation must invalidate both JS
+# artifacts through the profile fingerprint.
+ACTIVATION_ROOT="$TMP_ROOT/activation"
+mkdir -p "$ACTIVATION_ROOT/automation" "$ACTIVATION_ROOT/lib"
+cp "$PROJECT_ROOT/automation/project.conf" "$ACTIVATION_ROOT/automation/project.conf"
+cp "$PROJECT_ROOT/lib/app_config.dart" "$ACTIVATION_ROOT/lib/app_config.dart"
+CANONICAL_KEY="$(sed -n 's/^BACKEND_ACTIVATION_CANONICAL_SUPABASE_ANON_KEY=//p' \
+  "$PROJECT_ROOT/automation/tests/fixtures/tenants/festivalslunovrat.conf")"
+for entry in \
+  'BACKEND_ACTIVATION_TENANT_ID=fixture-transition' \
+  'BACKEND_ACTIVATION_PHASE=legacy' \
+  'BACKEND_ACTIVATION_CANONICAL_SUPABASE_URL=https://api.festapp.net' \
+  "BACKEND_ACTIVATION_CANONICAL_SUPABASE_ANON_KEY=$CANONICAL_KEY" \
+  'BACKEND_ACTIVATION_CANONICAL_ORGANIZATION_ID=12'; do
+  key=${entry%%=*}
+  sed -i.bak "s#^${key}=.*#${entry}#" "$ACTIVATION_ROOT/automation/project.conf"
+  rm -f "$ACTIVATION_ROOT/automation/project.conf.bak"
+done
+PROFILE_SHA="$(node "$PROJECT_ROOT/automation/release/generate_backend_profile_fingerprint.mjs" \
+  fixture-transition https://api.festapp.net "$CANONICAL_KEY" 12)"
+printf '%s\n' '{"schemaVersion":1,"tenantId":"fixture-transition","generation":0,"backend":"legacy"}' \
+  > "$BUILD_DIR/backend-activation.json"
+CANONICAL_ACTIVATION_SHA="$(printf '%s\n' \
+  '{"schemaVersion":1,"tenantId":"fixture-transition","generation":1,"backend":"canonical"}' \
+  | shasum -a 256 | awk '{print $1}')"
+printf '%s\n%s\n%s\n%s\n' \
+  'https://api.festapp.net' "$CANONICAL_KEY" "$CANONICAL_ACTIVATION_SHA" "$PROFILE_SHA" \
+  >> "$BUILD_DIR/main.dart.js"
+cp "$BUILD_DIR/main.dart.js" "$BUILD_DIR/main.dart.1.2.3-456.js"
+printf '%s\n%s\n%s\n' 'https://api.festapp.net' "$CANONICAL_KEY" "$PROFILE_SHA" \
+  >> "$BUILD_DIR/web-assets/app.js"
+sed -i.bak \
+  's/^  static const int backendActivationCanonicalOrganizationId = .*/  static const int backendActivationCanonicalOrganizationId = 12;/' \
+  "$ACTIVATION_ROOT/lib/app_config.dart"
+rm -f "$ACTIVATION_ROOT/lib/app_config.dart.bak"
+if node "$PROJECT_ROOT/automation/verify_web_build.mjs" "$BUILD_DIR" "1.2.3+456" \
+    "$ACTIVATION_ROOT/automation/project.conf" cloudflare > /dev/null; then
+    echo "  ok: transition bundle binds its complete canonical profile"
+else
+    echo "  FAIL: coherent transition profile was rejected"; fail=1
+fi
+sed -i.bak \
+  's/^BACKEND_ACTIVATION_CANONICAL_ORGANIZATION_ID=.*/BACKEND_ACTIVATION_CANONICAL_ORGANIZATION_ID=13/' \
+  "$ACTIVATION_ROOT/automation/project.conf"
+rm -f "$ACTIVATION_ROOT/automation/project.conf.bak"
+sed -i.bak \
+  's/^  static const int backendActivationCanonicalOrganizationId = .*/  static const int backendActivationCanonicalOrganizationId = 13;/' \
+  "$ACTIVATION_ROOT/lib/app_config.dart"
+rm -f "$ACTIVATION_ROOT/lib/app_config.dart.bak"
+if node "$PROJECT_ROOT/automation/verify_web_build.mjs" "$BUILD_DIR" "1.2.3+456" \
+    "$ACTIVATION_ROOT/automation/project.conf" cloudflare > /dev/null 2>&1; then
+    echo "  FAIL: build gate accepted a stale canonical organization profile"; fail=1
+else
+    echo "  ok: build gate rejects a stale canonical organization profile"
+fi
 mkdir -p "$TMP_ROOT/partial/automation"
 cp "$PROJECT_ROOT/automation/project.conf" "$TMP_ROOT/partial/automation/project.conf"
 sed -i.bak 's/^BACKEND_ACTIVATION_PHASE=.*/BACKEND_ACTIVATION_PHASE=legacy/' \

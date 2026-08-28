@@ -3,6 +3,7 @@ import { webcrypto } from 'node:crypto';
 import test from 'node:test';
 
 import { BackendActivationService } from '../../src/services/backend_activation_service.js';
+import { canonicalBackendProfileSha256 } from '../../../automation/lib/backend_activation_manifest.mjs';
 
 const tenantId = 'festival-test';
 const canonicalDocument = new TextEncoder().encode(
@@ -19,6 +20,9 @@ const config = {
   backendActivationCanonicalManifestSha256: digest,
   backendActivationCanonicalSupabaseUrl: 'https://api.festapp.net',
   backendActivationCanonicalAnonKey: 'canonical-key',
+  backendActivationCanonicalOrganizationId: 12,
+  backendActivationCanonicalProfileSha256: digest,
+  organization: 9,
 };
 
 function memoryStorage() {
@@ -37,15 +41,15 @@ test('activation defaults to legacy and accepts only the pinned canonical bytes'
     fetchImpl: async () => { throw new Error('offline'); },
   });
   assert.equal((await unavailable.resolve()).supabaseUrl, config.supabaseUrl);
+  assert.equal((await unavailable.resolve()).organizationId, 9);
 
   const activated = new BackendActivationService({
     config, storage, subtle: webcrypto.subtle,
     fetchImpl: async () => new Response(canonicalDocument),
   });
-  assert.equal(
-    (await activated.resolve()).supabaseUrl,
-    config.backendActivationCanonicalSupabaseUrl,
-  );
+  const canonical = await activated.resolve();
+  assert.equal(canonical.supabaseUrl, config.backendActivationCanonicalSupabaseUrl);
+  assert.equal(canonical.organizationId, 12);
   assert.equal(storage.values.size, 1);
 });
 
@@ -59,6 +63,48 @@ test('canonical activation is monotonic when the remote document disappears', as
   });
   assert.equal((await service.resolve()).isCanonical, true);
 });
+
+for (const [name, legacyOrganizationId, canonicalOrganizationId] of [
+  ['csmostrava2026', 9, 12],
+  ['cavfotofest', 3, 6],
+  ['hvezdamorska', 4, 7],
+]) {
+  test(`switches the complete ${name} profile`, async () => {
+    const tenantConfig = {
+      ...config,
+      organization: legacyOrganizationId,
+      backendActivationCanonicalOrganizationId: canonicalOrganizationId,
+      backendActivationCanonicalProfileSha256: canonicalBackendProfileSha256({
+        tenantId,
+        canonicalOrigin: config.backendActivationCanonicalSupabaseUrl,
+        canonicalAnonKey: config.backendActivationCanonicalAnonKey,
+        canonicalOrganizationId,
+      }),
+    };
+    const legacy = await new BackendActivationService({
+      config: tenantConfig,
+      storage: memoryStorage(),
+      subtle: webcrypto.subtle,
+      fetchImpl: async () => { throw new Error('legacy phase'); },
+    }).resolve();
+    assert.deepEqual(
+      [legacy.supabaseUrl, legacy.anonKey, legacy.organizationId],
+      [config.supabaseUrl, config.anonKey, legacyOrganizationId],
+    );
+
+    const canonical = await new BackendActivationService({
+      config: tenantConfig,
+      storage: memoryStorage(),
+      subtle: webcrypto.subtle,
+      fetchImpl: async () => new Response(canonicalDocument),
+    }).resolve();
+    assert.deepEqual(
+      [canonical.supabaseUrl, canonical.anonKey, canonical.organizationId],
+      [config.backendActivationCanonicalSupabaseUrl,
+        config.backendActivationCanonicalAnonKey, canonicalOrganizationId],
+    );
+  });
+}
 
 test('a modified activation response cannot select the canonical writer', async () => {
   const storage = memoryStorage();

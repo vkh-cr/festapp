@@ -23,3 +23,27 @@ export function canonicalBackendActivationSha256(tenantId) {
     .update(backendActivationDocument(tenantId, 'canonical'))
     .digest('hex');
 }
+
+export function canonicalBackendProfileSha256({
+  tenantId,
+  canonicalOrigin,
+  canonicalAnonKey,
+  canonicalOrganizationId,
+}) {
+  if (!/^[a-z0-9][a-z0-9-]*$/.test(tenantId)) {
+    throw new Error('backend activation tenant ID must be a lowercase slug');
+  }
+  if (!Number.isSafeInteger(canonicalOrganizationId) || canonicalOrganizationId <= 0) {
+    throw new Error('canonical organization ID must be a positive integer');
+  }
+  const anonKeySha256 = crypto.createHash('sha256').update(canonicalAnonKey).digest('hex');
+  const profile = JSON.stringify({
+    schemaVersion: backendActivationSchemaVersion,
+    tenantId,
+    generation: canonicalBackendGeneration,
+    canonicalOrigin,
+    anonKeySha256,
+    canonicalOrganizationId,
+  });
+  return crypto.createHash('sha256').update(profile).digest('hex');
+}

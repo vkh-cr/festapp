@@ -37,6 +37,7 @@ Each mobile row closes only when its private evidence records all of:
 
 - shared source commit and tenant overlay commit;
 - release-manifest SHA-256 and pinned activation-document SHA-256;
+- legacy and mapped canonical organization IDs plus the canonical cache-generation proof;
 - bundle/package ID, semantic version and build/version code read back from the
   signed IPA/AAB;
 - signed artifact SHA-256, signing identity and store listing match;
@@ -61,13 +62,13 @@ verified by completed-bundle inspection:
 | Production ref | Public site | Source family |
 | --- | --- | --- |
 | `prod/absolventskyvelehrad` | `app.absolventskyvelehrad.cz` | `a` |
-| `prod/cavfotofest` | `clovekavira.netlify.app` | `a` |
-| `prod/csmostrava2026` | `csmostrava.festapp.net` | `a` |
+| `prod/cavfotofest` | `clovekavira.netlify.app` | `a`, organization `3→6` |
+| `prod/csmostrava2026` | `csmostrava.festapp.net` | `a`, organization `9→12` |
 | `prod/doobiscup` | `biscup.netlify.app` | `a` |
 | `prod/farnostopava` | `rezervace.farnostopava.cz` | `a` |
 | `prod/festapp` | `vstupenky.online` | `default` |
 | `prod/festapptickets` | `vstupenky.online` | `default` (duplicate deployment ownership must be resolved) |
-| `prod/hvezdamorska` | `hvezdamorska.netlify.app` | `a` |
+| `prod/hvezdamorska` | `hvezdamorska.netlify.app` | `a`, organization `4→7` |
 | `prod/jubileum2025` | `jubileum2025.netlify.app` | `a` |
 
 Five legacy refs currently lack `automation/project.conf` and therefore cannot

@@ -9,6 +9,8 @@ export class AppConfig {
     static backendActivationCanonicalManifestSha256 = '';
     static backendActivationCanonicalSupabaseUrl = '';
     static backendActivationCanonicalAnonKey = '';
+    static backendActivationCanonicalOrganizationId = 0;
+    static backendActivationCanonicalProfileSha256 = '';
     static organization = 1;
     static forceOccasionLink = null;
     static isAllUnit = false;

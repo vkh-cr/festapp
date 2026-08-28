@@ -13,10 +13,23 @@ void main() {
     '"backend":"canonical"}\n',
   );
   final canonicalSha = sha256.convert(canonicalBytes).toString();
+  String canonicalProfileSha(int organizationId) => sha256
+      .convert(utf8.encode(jsonEncode({
+        'schemaVersion': 1,
+        'tenantId': tenant,
+        'generation': 1,
+        'canonicalOrigin': canonicalUrl,
+        'anonKeySha256':
+            sha256.convert(utf8.encode('canonical-key')).toString(),
+        'canonicalOrganizationId': organizationId,
+      })))
+      .toString();
 
   BackendActivationService service({
     required Map<String, String> storage,
     required Future<List<int>> Function(Uri) fetch,
+    int legacyOrganizationId = 9,
+    int canonicalOrganizationId = 12,
   }) =>
       BackendActivationService(
         tenantId: tenant,
@@ -24,8 +37,11 @@ void main() {
         canonicalManifestSha256: canonicalSha,
         legacySupabaseUrl: legacyUrl,
         legacyAnonKey: 'legacy-key',
+        legacyOrganizationId: legacyOrganizationId,
         canonicalSupabaseUrl: canonicalUrl,
         canonicalAnonKey: 'canonical-key',
+        canonicalOrganizationId: canonicalOrganizationId,
+        canonicalProfileSha256: canonicalProfileSha(canonicalOrganizationId),
         read: (key) async => storage[key],
         write: (key, value) async => storage[key] = value,
         fetch: fetch,
@@ -39,6 +55,8 @@ void main() {
     ).resolve();
 
     expect(resolved.supabaseUrl, legacyUrl);
+    expect(resolved.organizationId, 9);
+    expect(resolved.installationGeneration('release-1'), 'release-1');
     expect(resolved.isCanonical, isFalse);
   });
 
@@ -49,6 +67,11 @@ void main() {
       fetch: (_) async => canonicalBytes,
     ).resolve();
     expect(first.supabaseUrl, canonicalUrl);
+    expect(first.organizationId, 12);
+    expect(
+      first.installationGeneration('release-1'),
+      'release-1/backend-canonical-v1/organization-12',
+    );
     expect(first.isCanonical, isTrue);
 
     final sticky = await service(
@@ -58,6 +81,41 @@ void main() {
     expect(sticky.supabaseUrl, canonicalUrl);
     expect(sticky.isCanonical, isTrue);
   });
+
+  for (final mapping in const [
+    ('csmostrava2026', 9, 12),
+    ('cavfotofest', 3, 6),
+    ('hvezdamorska', 4, 7),
+  ]) {
+    test(
+        'switches the complete ${mapping.$1} profile ${mapping.$2} -> ${mapping.$3}',
+        () async {
+      final legacy = await service(
+        storage: {},
+        legacyOrganizationId: mapping.$2,
+        canonicalOrganizationId: mapping.$3,
+        fetch: (_) async => throw Exception('legacy phase'),
+      ).resolve();
+      expect(legacy.supabaseUrl, legacyUrl);
+      expect(legacy.anonKey, 'legacy-key');
+      expect(legacy.organizationId, mapping.$2);
+      expect(legacy.installationGeneration('transition-v1'), 'transition-v1');
+
+      final canonical = await service(
+        storage: {},
+        legacyOrganizationId: mapping.$2,
+        canonicalOrganizationId: mapping.$3,
+        fetch: (_) async => canonicalBytes,
+      ).resolve();
+      expect(canonical.supabaseUrl, canonicalUrl);
+      expect(canonical.anonKey, 'canonical-key');
+      expect(canonical.organizationId, mapping.$3);
+      expect(
+        canonical.installationGeneration('transition-v1'),
+        'transition-v1/backend-canonical-v1/organization-${mapping.$3}',
+      );
+    });
+  }
 
   test('rejects a modified or legacy activation response', () async {
     final storage = <String, String>{};
@@ -81,8 +139,11 @@ void main() {
       canonicalManifestSha256: canonicalSha,
       legacySupabaseUrl: legacyUrl,
       legacyAnonKey: 'legacy-key',
+      legacyOrganizationId: 9,
       canonicalSupabaseUrl: canonicalUrl,
       canonicalAnonKey: 'canonical-key',
+      canonicalOrganizationId: 12,
+      canonicalProfileSha256: canonicalProfileSha(12),
       read: (_) async => throw Exception('storage unavailable'),
       write: (_, __) async {},
       fetch: (_) async => canonicalBytes,
@@ -95,8 +156,11 @@ void main() {
       canonicalManifestSha256: canonicalSha,
       legacySupabaseUrl: legacyUrl,
       legacyAnonKey: 'legacy-key',
+      legacyOrganizationId: 9,
       canonicalSupabaseUrl: canonicalUrl,
       canonicalAnonKey: 'canonical-key',
+      canonicalOrganizationId: 12,
+      canonicalProfileSha256: canonicalProfileSha(12),
       read: (_) async => null,
       write: (_, __) async => throw Exception('storage unavailable'),
       fetch: (_) async => canonicalBytes,

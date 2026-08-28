@@ -89,10 +89,13 @@ BACKEND_ACTIVATION_TENANT_ID="${BACKEND_ACTIVATION_TENANT_ID:-}"
 BACKEND_ACTIVATION_PHASE="${BACKEND_ACTIVATION_PHASE:-}"
 BACKEND_ACTIVATION_CANONICAL_SUPABASE_URL="${BACKEND_ACTIVATION_CANONICAL_SUPABASE_URL:-}"
 BACKEND_ACTIVATION_CANONICAL_SUPABASE_ANON_KEY="${BACKEND_ACTIVATION_CANONICAL_SUPABASE_ANON_KEY:-}"
-if [ -n "$BACKEND_ACTIVATION_TENANT_ID$BACKEND_ACTIVATION_PHASE$BACKEND_ACTIVATION_CANONICAL_SUPABASE_URL$BACKEND_ACTIVATION_CANONICAL_SUPABASE_ANON_KEY" ]; then
+BACKEND_ACTIVATION_CANONICAL_ORGANIZATION_ID="${BACKEND_ACTIVATION_CANONICAL_ORGANIZATION_ID:-}"
+BACKEND_ACTIVATION_CANONICAL_PROFILE_SHA256=""
+if [ -n "$BACKEND_ACTIVATION_TENANT_ID$BACKEND_ACTIVATION_PHASE$BACKEND_ACTIVATION_CANONICAL_SUPABASE_URL$BACKEND_ACTIVATION_CANONICAL_SUPABASE_ANON_KEY$BACKEND_ACTIVATION_CANONICAL_ORGANIZATION_ID" ]; then
     [ -n "$BACKEND_ACTIVATION_TENANT_ID" ] && [ -n "$BACKEND_ACTIVATION_PHASE" ] && \
         [ -n "$BACKEND_ACTIVATION_CANONICAL_SUPABASE_URL" ] && \
-        [ -n "$BACKEND_ACTIVATION_CANONICAL_SUPABASE_ANON_KEY" ] || {
+        [ -n "$BACKEND_ACTIVATION_CANONICAL_SUPABASE_ANON_KEY" ] && \
+        [ -n "$BACKEND_ACTIVATION_CANONICAL_ORGANIZATION_ID" ] || {
         echo "Error: backend activation configuration must be complete"; exit 1;
     }
     [[ "$BACKEND_ACTIVATION_TENANT_ID" =~ ^[a-z0-9][a-z0-9-]*$ ]] || {
@@ -101,12 +104,21 @@ if [ -n "$BACKEND_ACTIVATION_TENANT_ID$BACKEND_ACTIVATION_PHASE$BACKEND_ACTIVATI
     case "$BACKEND_ACTIVATION_PHASE" in legacy|canonical) ;; *)
         echo "Error: BACKEND_ACTIVATION_PHASE must be legacy or canonical"; exit 1 ;;
     esac
+    [[ "$BACKEND_ACTIVATION_CANONICAL_ORGANIZATION_ID" =~ ^[1-9][0-9]*$ ]] || {
+        echo "Error: BACKEND_ACTIVATION_CANONICAL_ORGANIZATION_ID must be a positive integer"; exit 1;
+    }
     BACKEND_ACTIVATION_CANONICAL_SUPABASE_URL="$(node \
         "$PROJECT_ROOT/automation/lib/supabase_client_config.mjs" origin \
         "$BACKEND_ACTIVATION_CANONICAL_SUPABASE_URL")" || exit 1
     [ "$BACKEND_ACTIVATION_CANONICAL_SUPABASE_URL" != "$SUPABASE_ORIGIN" ] || {
         echo "Error: backend activation canonical origin must differ from the legacy origin"; exit 1;
     }
+    BACKEND_ACTIVATION_CANONICAL_PROFILE_SHA256="$(node \
+        "$PROJECT_ROOT/automation/release/generate_backend_profile_fingerprint.mjs" \
+        "$BACKEND_ACTIVATION_TENANT_ID" \
+        "$BACKEND_ACTIVATION_CANONICAL_SUPABASE_URL" \
+        "$BACKEND_ACTIVATION_CANONICAL_SUPABASE_ANON_KEY" \
+        "$BACKEND_ACTIVATION_CANONICAL_ORGANIZATION_ID")" || exit 1
 fi
 BACKEND_ACTIVATION_MANIFEST_URL="${WEB_LINK%/}/backend-activation.json"
 BACKEND_ACTIVATION_CANONICAL_MANIFEST_SHA256="$(node \
@@ -283,7 +295,8 @@ if [ -f "$APP_CONFIG" ]; then
         "$BACKEND_ACTIVATION_MANIFEST_URL" \
         "$BACKEND_ACTIVATION_CANONICAL_MANIFEST_SHA256" \
         "$BACKEND_ACTIVATION_CANONICAL_SUPABASE_URL" \
-        "$BACKEND_ACTIVATION_CANONICAL_SUPABASE_ANON_KEY" <<'PY'
+        "$BACKEND_ACTIVATION_CANONICAL_SUPABASE_ANON_KEY" \
+        "$BACKEND_ACTIVATION_CANONICAL_PROFILE_SHA256" <<'PY'
 import pathlib
 import re
 import sys
@@ -293,6 +306,7 @@ names = [
     "backendActivationTenantId", "backendActivationManifestUrl",
     "backendActivationCanonicalManifestSha256",
     "backendActivationCanonicalSupabaseUrl", "backendActivationCanonicalAnonKey",
+    "backendActivationCanonicalProfileSha256",
 ]
 source = path.read_text(encoding="utf-8")
 for name, value in zip(names, sys.argv[2:]):
@@ -303,6 +317,7 @@ for name, value in zip(names, sys.argv[2:]):
         raise SystemExit(f"Could not update web {name}")
 path.write_text(source, encoding="utf-8")
 PY
+    sed_inplace "s|static backendActivationCanonicalOrganizationId = .*;|static backendActivationCanonicalOrganizationId = ${BACKEND_ACTIVATION_CANONICAL_ORGANIZATION_ID:-0};|g" "$APP_CONFIG"
 
     # Update Organization
     if [ ! -z "$ORGANIZATION_ID" ]; then
@@ -400,7 +415,8 @@ PY
         "$BACKEND_ACTIVATION_TENANT_ID" "$BACKEND_ACTIVATION_MANIFEST_URL" \
         "$BACKEND_ACTIVATION_CANONICAL_MANIFEST_SHA256" \
         "$BACKEND_ACTIVATION_CANONICAL_SUPABASE_URL" \
-        "$BACKEND_ACTIVATION_CANONICAL_SUPABASE_ANON_KEY" <<'PY'
+        "$BACKEND_ACTIVATION_CANONICAL_SUPABASE_ANON_KEY" \
+        "$BACKEND_ACTIVATION_CANONICAL_PROFILE_SHA256" <<'PY'
 import pathlib
 import re
 import sys
@@ -410,6 +426,7 @@ names = [
     "supabaseAuthStorageKey", "backendActivationTenantId",
     "backendActivationManifestUrl", "backendActivationCanonicalManifestSha256",
     "backendActivationCanonicalSupabaseUrl", "backendActivationCanonicalAnonKey",
+    "backendActivationCanonicalProfileSha256",
 ]
 source = path.read_text(encoding="utf-8")
 for name, value in zip(names, sys.argv[2:]):
@@ -421,6 +438,7 @@ for name, value in zip(names, sys.argv[2:]):
         raise SystemExit(f"Could not update Flutter {name}")
 path.write_text(source, encoding="utf-8")
 PY
+    sed_inplace "s|static const int backendActivationCanonicalOrganizationId = .*;|static const int backendActivationCanonicalOrganizationId = ${BACKEND_ACTIVATION_CANONICAL_ORGANIZATION_ID:-0};|g" "$FLUTTER_CONFIG"
 
     # Update App Name (used as the app title / OccasionHomePage.homePageTitle)
     if [ ! -z "$APP_NAME" ]; then
@@ -435,7 +453,7 @@ PY
 
     # Update Organization
     if [ ! -z "$ORGANIZATION_ID" ]; then
-        sed_inplace "s|static const int organization = .*;|static const int organization = $ORGANIZATION_ID;|g" "$FLUTTER_CONFIG"
+        sed_inplace "s|static int organization = .*;|static int organization = $ORGANIZATION_ID;|g" "$FLUTTER_CONFIG"
     fi
 
     # Update Is App Supported

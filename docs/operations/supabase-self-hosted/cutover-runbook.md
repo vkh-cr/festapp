@@ -93,6 +93,19 @@ This applies independently to every tenant overlay. In the 2026-08-28
 Slunovrat rehearsal, source organization `1` mapped to canonical organization
 `19`; the legacy value must not be copied into web, iOS, or Android config.
 
+The validated source-`a` organization mappings for the first web transition
+wave are authoritative release inputs:
+
+| Tenant | Legacy organization | Canonical organization |
+| --- | ---: | ---: |
+| CSM Ostrava | 9 | 12 |
+| Člověk a víra | 3 | 6 |
+| Hvězda Mořská | 4 | 7 |
+
+The transition profile must compile both values and switch organization,
+origin and public key atomically. A completed bundle is accepted only when it
+contains the SHA-256 fingerprint of that complete canonical profile.
+
 ### Store release before the write cutover
 
 A tenant that must publish mobile binaries before the production freeze uses
@@ -105,12 +118,14 @@ BACKEND_ACTIVATION_TENANT_ID=<tenant-slug>
 BACKEND_ACTIVATION_PHASE=legacy
 BACKEND_ACTIVATION_CANONICAL_SUPABASE_URL=https://api.festapp.net
 BACKEND_ACTIVATION_CANONICAL_SUPABASE_ANON_KEY=<canonical-public-anon-key>
+BACKEND_ACTIVATION_CANONICAL_ORGANIZATION_ID=<mapped-target-organization-id>
 ```
 
 `apply_config.sh` emits `backend-activation.json` and bakes the SHA-256 of the
 exact future canonical document into Flutter and the vanilla web client. A
 client can therefore select only its compiled legacy backend or its compiled
-canonical backend; the remote document cannot supply an origin or key. Missing,
+canonical backend profile (origin, public key and mapped organization ID); the
+remote document cannot supply any of those values. Missing,
 modified and legacy documents select legacy. Once the exact canonical document
 is observed, a local monotonic marker prevents rollback to the old writer.
 Every process resolves this choice before constructing Supabase, and Flutter
@@ -120,6 +135,7 @@ The corresponding private release manifest must record
 `backend.activation.strategy: "pinned-one-way-manifest"`, the tenant, current
 phase, manifest URL, canonical document and anon-key SHA-256 values, stable auth
 storage key, canonical origin, and `finalRefreshTokenDeltaRequired: true`.
+It must also record `canonicalOrganizationId`, proven from the final ID mapping.
 The common release preflight compares this object with configuration, generated
 clients and both emitted public manifest copies.
 
@@ -141,7 +157,10 @@ An already running native process cannot safely replace its Supabase singleton.
 Once the legacy source is frozen its late write must fail, never be silently
 lost. Backgrounding and foregrounding alone do not switch an existing process;
 the app must be fully restarted, and only the next cold start resolves the
-canonical activation. Normal installations retain their session because refresh
+canonical activation. That cold start also runs a distinct canonical
+installation generation before reading cached occasion IDs, because the
+organization and occasion numeric IDs may have been remapped. Normal
+installations retain their session because refresh
 tokens and the storage namespace migrate unchanged. Only a token already
 expired, revoked, terminally consumed, or belonging to an approved merged
 identity follows ordinary reauthentication/local-sign-out policy.

@@ -56,6 +56,7 @@ cp "$PROJECT_ROOT/automation/hetzner-supabase/merge/source-registry.json" \
 cp "$PROJECT_ROOT/automation/lib/supabase_client_config.mjs" "$TMP_ROOT/automation/lib/supabase_client_config.mjs"
 cp "$PROJECT_ROOT/automation/lib/backend_activation_manifest.mjs" "$TMP_ROOT/automation/lib/backend_activation_manifest.mjs"
 cp "$PROJECT_ROOT/automation/release/generate_backend_activation_manifest.mjs" "$TMP_ROOT/automation/release/generate_backend_activation_manifest.mjs"
+cp "$PROJECT_ROOT/automation/release/generate_backend_profile_fingerprint.mjs" "$TMP_ROOT/automation/release/generate_backend_profile_fingerprint.mjs"
 cp "$PROJECT_ROOT/automation/release/render_legal_pages.mjs" "$TMP_ROOT/automation/release/render_legal_pages.mjs"
 cp "$PROJECT_ROOT"/automation/release/legal/*.md "$TMP_ROOT/automation/release/legal/"
 cp "$PROJECT_ROOT/automation/templates/web/delete-account/index.html" "$TMP_ROOT/automation/templates/web/delete-account/index.html"
@@ -224,7 +225,7 @@ assert_contains "$TMP_ROOT/lib/app_config.dart" "static const String supabaseUrl
 assert_contains "$TMP_ROOT/lib/app_config.dart" "'test-anon-key-fixture';"
 assert_contains "$TMP_ROOT/lib/app_config.dart" "static const String supabaseAuthStorageKey = 'sb-test-auth-token';"
 assert_contains "$TMP_ROOT/lib/app_config.dart" "static const String backendActivationTenantId = '';"
-assert_contains "$TMP_ROOT/lib/app_config.dart" "static const int organization = 42;"
+assert_contains "$TMP_ROOT/lib/app_config.dart" "static int organization = 42;"
 assert_contains "$TMP_ROOT/lib/app_config.dart" "static const bool isAllUnit = true;"
 assert_contains "$TMP_ROOT/lib/app_config.dart" 'static const String webLink = "https://test.example.com";'
 assert_contains "$TMP_ROOT/lib/app_config.dart" 'static const String privacyUrl = "https://test.example.com/privacy/";'
@@ -306,6 +307,7 @@ for (const [key, value] of Object.entries({
   BACKEND_ACTIVATION_PHASE: 'legacy',
   BACKEND_ACTIVATION_CANONICAL_SUPABASE_URL: 'https://api.festapp.net',
   BACKEND_ACTIVATION_CANONICAL_SUPABASE_ANON_KEY: 'fixture-canonical-key',
+  BACKEND_ACTIVATION_CANONICAL_ORGANIZATION_ID: '84',
 })) {
   const line = `${key}=${value}`;
   source = new RegExp(`^${key}=.*$`, 'm').test(source)
@@ -330,6 +332,10 @@ assert_contains "$TMP_ROOT/lib/app_config.dart" \
     "static const String backendActivationManifestUrl = 'https://test.example.com/backend-activation.json';"
 assert_contains "$TMP_ROOT/web_client/src/app_config.js" \
     "static backendActivationCanonicalSupabaseUrl = 'https://api.festapp.net';"
+assert_contains "$TMP_ROOT/web_client/src/app_config.js" \
+    'static backendActivationCanonicalOrganizationId = 84;'
+assert_contains "$TMP_ROOT/lib/app_config.dart" \
+    'static const int backendActivationCanonicalOrganizationId = 84;'
 EXPECTED_ACTIVATION_SHA="$(node --input-type=module - \
     "$TMP_ROOT/automation/lib/backend_activation_manifest.mjs" <<'NODE'
 const modulePath = process.argv[2];
@@ -338,6 +344,11 @@ process.stdout.write(canonicalBackendActivationSha256('fixture-transition'));
 NODE
 )"
 assert_contains "$TMP_ROOT/lib/app_config.dart" "$EXPECTED_ACTIVATION_SHA"
+EXPECTED_PROFILE_SHA="$(node \
+    "$TMP_ROOT/automation/release/generate_backend_profile_fingerprint.mjs" \
+    fixture-transition https://api.festapp.net fixture-canonical-key 84)"
+assert_contains "$TMP_ROOT/lib/app_config.dart" "$EXPECTED_PROFILE_SHA"
+assert_contains "$TMP_ROOT/web_client/src/app_config.js" "$EXPECTED_PROFILE_SHA"
 
 sed -i.bak \
     's#^BACKEND_ACTIVATION_CANONICAL_SUPABASE_URL=.*#BACKEND_ACTIVATION_CANONICAL_SUPABASE_URL=https://api.example.com#' \
@@ -363,6 +374,7 @@ for (const key of [
   'BACKEND_ACTIVATION_PHASE',
   'BACKEND_ACTIVATION_CANONICAL_SUPABASE_URL',
   'BACKEND_ACTIVATION_CANONICAL_SUPABASE_ANON_KEY',
+  'BACKEND_ACTIVATION_CANONICAL_ORGANIZATION_ID',
 ]) source = source.replace(new RegExp(`^${key}=.*$`, 'm'), `${key}=`);
 fs.writeFileSync(configPath, source);
 NODE
@@ -372,6 +384,7 @@ NODE
 assert_not_file "$TMP_ROOT/web/backend-activation.json"
 assert_not_file "$TMP_ROOT/web_client/public/backend-activation.json"
 assert_contains "$TMP_ROOT/lib/app_config.dart" "static const String backendActivationTenantId = '';"
+assert_contains "$TMP_ROOT/lib/app_config.dart" "static const String backendActivationCanonicalProfileSha256 = '';"
 
 for invalid_url in \
     'https://user:pass@api.example.com' \

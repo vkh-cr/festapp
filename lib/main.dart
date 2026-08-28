@@ -147,9 +147,22 @@ Future<void> initializeEverything() async {
   WidgetsFlutterBinding.ensureInitialized();
   AppLogger.debug('Widgets binding initialized');
 
+  final resolvedBackend = await BackendActivationService().resolve();
+  AppConfig.organization = resolvedBackend.organizationId;
+  ConnectivityService.configureBackendOrigin(resolvedBackend.supabaseUrl);
+  AppLogger.debug(
+    'Backend selected: ${resolvedBackend.isCanonical ? 'canonical' : 'legacy'} '
+    'for organization ${resolvedBackend.organizationId} '
+    '(profile ${resolvedBackend.profileSha256.isEmpty ? 'legacy' : resolvedBackend.profileSha256.substring(0, 12)})',
+  );
+
   var allowPersistedOccasionData = false;
   try {
-    await InstallationCutoverService().run();
+    await InstallationCutoverService(
+      generation: resolvedBackend.installationGeneration(
+        AppConfig.effectivePushAppGeneration,
+      ),
+    ).run();
     allowPersistedOccasionData = true;
     AppLogger.debug('Installation generation is current');
   } catch (e) {
@@ -157,12 +170,6 @@ Future<void> initializeEverything() async {
     // cache is read until the idempotent migration succeeds.
     AppLogger.error('Installation cutover failed: $e');
   }
-
-  final resolvedBackend = await BackendActivationService().resolve();
-  ConnectivityService.configureBackendOrigin(resolvedBackend.supabaseUrl);
-  AppLogger.debug(
-    'Backend selected: ${resolvedBackend.isCanonical ? 'canonical' : 'legacy'}',
-  );
 
   SynchroService.configure(
     isLoggedIn: AuthService.isLoggedIn,

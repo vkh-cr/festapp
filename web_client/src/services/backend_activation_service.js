@@ -28,7 +28,10 @@ export class BackendActivationService {
             this.config.backendActivationManifestUrl &&
             this.config.backendActivationCanonicalManifestSha256 &&
             this.config.backendActivationCanonicalSupabaseUrl &&
-            this.config.backendActivationCanonicalAnonKey
+            this.config.backendActivationCanonicalAnonKey &&
+            Number.isSafeInteger(this.config.backendActivationCanonicalOrganizationId) &&
+            this.config.backendActivationCanonicalOrganizationId > 0 &&
+            /^[0-9a-f]{64}$/.test(this.config.backendActivationCanonicalProfileSha256)
         );
     }
 
@@ -89,6 +92,8 @@ export class BackendActivationService {
         return Object.freeze({
             supabaseUrl: this.config.supabaseUrl,
             anonKey: this.config.anonKey,
+            organizationId: this.config.organization,
+            profileSha256: '',
             isCanonical: false,
         });
     }
@@ -97,6 +102,8 @@ export class BackendActivationService {
         return Object.freeze({
             supabaseUrl: this.config.backendActivationCanonicalSupabaseUrl,
             anonKey: this.config.backendActivationCanonicalAnonKey,
+            organizationId: this.config.backendActivationCanonicalOrganizationId,
+            profileSha256: this.config.backendActivationCanonicalProfileSha256,
             isCanonical: true,
         });
     }
