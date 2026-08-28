@@ -56,6 +56,19 @@ const MAX_EXPLICIT_PRUNE_OPERATIONS = 100;
 const EMERGENCY_RECOVERY_CACHE_NAMES = new Set([
   'festapp-app-shell-0.19.85+418',
 ]);
+// These releases predate the web-client -> Flutter runtime coordinator. A new
+// worker must take control without reloading their existing page; otherwise
+// the old worker can keep serving the old web client that has no way to
+// activate its successor. Per-client cache pinning below keeps that open page
+// coherent, while its next full navigation deliberately enters the new shell.
+// Remove this bounded migration list once supported installations are newer
+// than 0.19.93+458.
+const HANDOFF_BOOTSTRAP_CACHE_NAMES = new Set([
+  'festapp-app-shell-0.19.93+455',
+  'festapp-app-shell-0.19.93+456',
+  'festapp-app-shell-0.19.93+457',
+  'festapp-app-shell-0.19.93+458',
+]);
 
 function withStorageTimeout(promise) {
   let timeoutId;
@@ -83,6 +96,15 @@ async function requiresEmergencyCutover() {
   try {
     const names = await withStorageTimeout(caches.keys());
     return names.some((name) => EMERGENCY_RECOVERY_CACHE_NAMES.has(name));
+  } catch (_) {
+    return false;
+  }
+}
+
+async function requiresHandoffBootstrapActivation() {
+  try {
+    const names = await withStorageTimeout(caches.keys());
+    return names.some((name) => HANDOFF_BOOTSTRAP_CACHE_NAMES.has(name));
   } catch (_) {
     return false;
   }
@@ -119,7 +141,10 @@ function waitForClientVersion(clientId) {
 self.addEventListener('install', (event) => {
   event.waitUntil((async () => {
     await precacheAtomically();
-    if (await requiresEmergencyCutover()) await self.skipWaiting();
+    if (await requiresEmergencyCutover() ||
+        await requiresHandoffBootstrapActivation()) {
+      await self.skipWaiting();
+    }
   })());
 });
 

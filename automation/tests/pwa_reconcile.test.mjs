@@ -33,6 +33,7 @@ test('one reconcile policy retains exactly current and live known shells', async
     ];
     let keysFail = false;
     let deleteBehavior = 'success';
+    let skipWaitingCalls = 0;
     const clients = [{ id: 'flutter', postMessage() {} }, { id: 'webclient', postMessage() {} }];
     const context = {
       URL, Request, Response, Promise, setTimeout, clearTimeout,
@@ -61,11 +62,25 @@ test('one reconcile policy retains exactly current and live known shells', async
           claim: async () => {},
           get: async (id) => clients.find((client) => client.id === id),
         },
-        skipWaiting: async () => {},
+        skipWaiting: async () => { skipWaitingCalls++; },
         addEventListener: (type, handler) => { handlers[type] = handler; },
       },
     };
     vm.runInNewContext(source, context);
+
+    async function dispatchInstall() {
+      let installation;
+      handlers.install({ waitUntil: (value) => { installation = value; } });
+      await installation;
+    }
+
+    await dispatchInstall();
+    assert.equal(skipWaitingCalls, 0, 'ordinary upgrades remain user coordinated');
+    names.push('festapp-app-shell-0.19.93+457');
+    await dispatchInstall();
+    assert.equal(skipWaitingCalls, 1,
+      'a pre-coordinator web client must not strand its successor waiting');
+    names = names.filter((name) => name !== 'festapp-app-shell-0.19.93+457');
 
     const dispatch = async (data, source = clients[0]) => {
       let pending = Promise.resolve();
