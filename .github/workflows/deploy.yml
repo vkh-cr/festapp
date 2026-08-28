@@ -112,6 +112,31 @@ jobs:
           flutter-version: ${{ steps.flutter-version.outputs.version }}
           channel: 'stable'
 
+      - name: Materialize the private tenant release manifest
+        env:
+          BRANCH: ${{ needs.detect.outputs.branch }}
+          CSM_MANIFEST: ${{ secrets.FESTAPP_RELEASE_MANIFEST_CSMOSTRAVA2026 }}
+          HVEZDA_MORSKA_MANIFEST: ${{ secrets.FESTAPP_RELEASE_MANIFEST_HVEZDAMORSKA }}
+          CAV_MANIFEST: ${{ secrets.FESTAPP_RELEASE_MANIFEST_CAVFOTOFEST }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          case "$BRANCH" in
+            prod/csmostrava2026) RELEASE_MANIFEST="$CSM_MANIFEST" ;;
+            prod/hvezdamorska) RELEASE_MANIFEST="$HVEZDA_MORSKA_MANIFEST" ;;
+            prod/cavfotofest) RELEASE_MANIFEST="$CAV_MANIFEST" ;;
+            *) echo "::error::No private release manifest mapping for $BRANCH."; exit 1 ;;
+          esac
+          test -n "$RELEASE_MANIFEST" || {
+            echo "::error::The private release manifest secret for $BRANCH is empty."
+            exit 1
+          }
+          RELEASE_MANIFEST_PATH="$RUNNER_TEMP/festapp-release-manifest.json"
+          printf '%s' "$RELEASE_MANIFEST" > "$RELEASE_MANIFEST_PATH"
+          chmod 0600 "$RELEASE_MANIFEST_PATH"
+          jq -e '.schemaVersion and .backend' "$RELEASE_MANIFEST_PATH" >/dev/null
+          echo "FESTAPP_RELEASE_MANIFEST=$RELEASE_MANIFEST_PATH" >> "$GITHUB_ENV"
+
       - name: Build (Flutter + Web Client) via shared script
         run: ./automation/cloudflare_build.sh
 

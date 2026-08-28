@@ -68,8 +68,18 @@ for job in cloudflare netlify gh-pages skipped; do
     fi
 done
 
-# 4. Cloudflare job references the right secrets / conf keys.
-for needle in 'CLOUDFLARE_API_TOKEN' 'CLOUDFLARE_ACCOUNT_ID' 'CLOUDFLARE_PROJECT_NAME' 'ensure-pages-project.mjs'; do
+# 4. Cloudflare job references the right secrets / conf keys. Each production
+# tenant must materialize its own private release manifest before the shared
+# build preflight runs; one cross-tenant manifest would fail closed.
+for needle in \
+    'CLOUDFLARE_API_TOKEN' \
+    'CLOUDFLARE_ACCOUNT_ID' \
+    'CLOUDFLARE_PROJECT_NAME' \
+    'FESTAPP_RELEASE_MANIFEST_CSMOSTRAVA2026' \
+    'FESTAPP_RELEASE_MANIFEST_HVEZDAMORSKA' \
+    'FESTAPP_RELEASE_MANIFEST_CAVFOTOFEST' \
+    'FESTAPP_RELEASE_MANIFEST=$RELEASE_MANIFEST_PATH' \
+    'ensure-pages-project.mjs'; do
     if grep -F -q "$needle" "$WORKFLOW"; then
         echo "  ok: cloudflare job references '$needle'"
     else
