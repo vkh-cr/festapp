@@ -150,6 +150,22 @@ for needle in '/sitemap.xml' '/form/' 'WEB_CLIENT_INDEX' 'FLUTTER_ENTRY' 'AUTH_B
     fi
 done
 
+# Social crawlers must always receive a real image asset. Event-specific images
+# still come from get_occasion_seo_data; this only validates the no-image
+# fallback shared by Cloudflare, Netlify, and the base web-client document.
+for social_source in \
+    "$BUILD_SH" \
+    "$PROJECT_ROOT/netlify/edge-functions/inject-og.js" \
+    "$PROJECT_ROOT/web_client/index.html"; do
+    if grep -F -q 'web-app-manifest-512x512.png' "$social_source" &&
+        ! grep -F -q '/og_image.jpg' "$social_source"; then
+        echo "  ok: $(basename "$social_source") uses a published social-image fallback"
+    else
+        echo "  FAIL: $(basename "$social_source") references a missing social-image fallback"
+        fail=1
+    fi
+done
+
 # 8. A deploy is not successful until the custom domain repeatedly serves one
 # coherent HTML/manifest/main/service-worker generation.
 for needle in 'verify_web_deployment.mjs' '"https://${DOMAIN}" "${VERSION}"'; do

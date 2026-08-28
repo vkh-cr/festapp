@@ -10,6 +10,10 @@ function normalizedOrigin(value, label) {
   return url.origin;
 }
 
+function escapedRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 export async function verifyLegacyOriginRedirect({
   legacyOrigin,
   canonicalOrigin,
@@ -48,7 +52,11 @@ export async function verifyLegacyOriginRedirect({
   assert.match(retirement.headers.get('content-type') || '', /javascript/i, 'retirement worker is not JavaScript');
   const retirementSource = await retirement.text();
   assert.match(retirementSource, /FESTAPP_LEGACY_ORIGIN_RETIREMENT/, 'retirement worker marker is missing');
-  assert.ok(retirementSource.includes(JSON.stringify(canonical)), 'retirement worker canonical origin is wrong');
+  assert.match(
+    retirementSource,
+    new RegExp(`CANONICAL_ORIGIN\\s*=\\s*(['"])${escapedRegExp(canonical)}\\1`),
+    'retirement worker canonical origin is wrong',
+  );
 
   const pushWorker = await fetchImpl(`${legacy}/push/OneSignalSDKWorker.js?source=${nonce}`, {
     redirect: 'manual',

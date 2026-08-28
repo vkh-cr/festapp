@@ -185,7 +185,7 @@ async function handleForm(request, env, path) {
     let imageUrl;
     if (imagePath && imagePath.startsWith("http")) imageUrl = imagePath;
     else if (imagePath) imageUrl = `https://img.festapp.net/${imagePath}`;
-    else imageUrl = `${url.origin}/og_image.jpg`;
+    else imageUrl = `${url.origin}/web-app-manifest-512x512.png`;
     const fullTitle = `${title} - ${unitTitle || orgTitle}`;
 
     let page = baseHtml;

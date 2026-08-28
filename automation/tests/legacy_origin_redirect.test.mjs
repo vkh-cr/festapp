@@ -18,7 +18,7 @@ function compliantFetch(url, options = {}) {
   }
   if (parsed.pathname === '/festapp_service_worker.js') {
     return response(
-      `const FESTAPP_LEGACY_ORIGIN_RETIREMENT=true; const CANONICAL_ORIGIN=${JSON.stringify(canonical)};`,
+      `const FESTAPP_LEGACY_ORIGIN_RETIREMENT=true; const CANONICAL_ORIGIN='${canonical}';`,
       200,
       { 'content-type': 'application/javascript' },
     );
