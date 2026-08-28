@@ -1,7 +1,7 @@
 # Work item: rotate exposed runtime credentials
 
 Opened: 2026-08-24
-Updated: 2026-08-24
+Updated: 2026-08-28
 Status: blocked
 Verification: release
 
@@ -27,6 +27,12 @@ secret values to Festapp or Git.
 - Tracked runtime env files were removed from FestappSeed HEAD.
 - A versioned, tested provisioning contract and non-secret example were added.
 - Festapp shared/tenant branches now document the external provisioning boundary.
+- The OneSignal REST credential was removed from the Flutter organization model,
+  editor and broad admin RPC contract. Migration
+  `20260828110000_move_onesignal_credentials_server_side.sql` extracts existing
+  values into a no-direct-grants server-only table, and delivery consumers use
+  a service-role-only RPC. An isolated migration test moved 10/10 rows and left
+  zero legacy JSON keys without recording any value.
 
 ## Next action
 
@@ -34,6 +40,11 @@ Using the authorized service consoles and FestappSeed process, inventory the
 credential types from `supabase/aksmcz.env`, `supabase/festapp.env` and
 `supabase/slunovratopava.env` without printing values; rotate each live value and
 record only service, timestamp and revocation receipt.
+
+For OneSignal specifically, provision the replacement only into the server-only
+notification secret store, run notification plus account-deletion vendor
+canaries, revoke the historical credential and prove its authentication fails.
+Never put the replacement back into `organizations.data`.
 
 ## Remaining order
 
@@ -71,3 +82,4 @@ Rotation requires authenticated external service access and destructive revocati
 | Date | Action | Receipt/evidence | Result |
 |---|---|---|---|
 | 2026-08-24 | Remove tracked runtime env files | FestappSeed `4e7adbdb` | HEAD clean; historical values still require rotation |
+| 2026-08-28 | Remove OneSignal credential from client/admin JSON boundary | isolated server-only migration and SQL/Edge tests | code path complete; provider rotation and revocation still pending |

@@ -161,6 +161,9 @@ the synthetic gate tests is tooling proof, not cutover authorization.
 1. Keep target side effects disabled during import and replay.
 2. Verify Auth, rights, orders/tickets/QR, finance, Storage, Realtime, Functions,
    images and per-tenant isolation against the final data.
+   Verify notification credentials are absent from organization JSON/admin RPC,
+   present only behind the service-role delivery-config RPC, and backed by a
+   completed provider rotation/revocation receipt.
 3. Switch server-side writers, callbacks and workers to the canonical endpoint.
 4. Activate the already-published client configuration/minimum version.
 5. Switch the Cloudflare front door only after origin health and credentials

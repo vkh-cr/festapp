@@ -205,6 +205,14 @@ gate. High sequence values are not compacted in place: a fresh target may use a
 new deterministic allocation policy only before import and only when the full
 reference registry proves every dependent value is transformed.
 
+Both relational importers also extract any legacy
+`organizations.data.ONESIGNAL_REST_API_KEY` into
+`organization_notification_secrets` under the mapped target organization ID and
+remove the JSON key before the row becomes client-visible. The semantic repair
+and final registry validator preserve that separation. A fresh merge must fail
+if any source credential lacks a server-only target row or any target
+organization JSON still contains the key.
+
 After validation, perform an application-level endpoint canary in this order:
 old cloud → self-hosted tunnel → old cloud. Compare semantic config values and
 released-client fallback counts rather than requiring equal numeric IDs. For

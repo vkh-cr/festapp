@@ -95,17 +95,47 @@ BEGIN
     IF column_list IS NULL THEN
       RAISE EXCEPTION 'no common import columns for %.%', relation.target_schema, relation.table_name;
     END IF;
-    EXECUTE format(
-      'INSERT INTO %I.%I (%s) OVERRIDING SYSTEM VALUE SELECT %s FROM %I.%I',
-      relation.target_schema, relation.table_name, column_list, column_list,
-      relation.source_schema, relation.table_name
-    );
+    IF relation.target_schema='public' AND relation.table_name='organizations' THEN
+      EXECUTE format(
+        'INSERT INTO public.organizations (id,created_at,updated_at,data,title,phone_prefixes) OVERRIDING SYSTEM VALUE SELECT id,created_at,updated_at,data-''ONESIGNAL_REST_API_KEY'',title,phone_prefixes FROM %I.%I',
+        relation.source_schema, relation.table_name
+      );
+    ELSE
+      EXECUTE format(
+        'INSERT INTO %I.%I (%s) OVERRIDING SYSTEM VALUE SELECT %s FROM %I.%I',
+        relation.target_schema, relation.table_name, column_list, column_list,
+        relation.source_schema, relation.table_name
+      );
+    END IF;
     EXECUTE format('SELECT count(*) FROM %I.%I', relation.source_schema, relation.table_name) INTO source_rows;
     EXECUTE format('SELECT count(*) FROM %I.%I', relation.target_schema, relation.table_name) INTO target_rows;
     IF source_rows <> target_rows THEN
       RAISE EXCEPTION 'row mismatch for %.%: source %, target %', relation.target_schema, relation.table_name, source_rows, target_rows;
     END IF;
   END LOOP;
+
+  INSERT INTO public.organization_notification_secrets(
+    organization,
+    onesignal_rest_api_key
+  )
+  SELECT id, data->>'ONESIGNAL_REST_API_KEY'
+  FROM festapp_stage_default_public.organizations
+  WHERE nullif(data->>'ONESIGNAL_REST_API_KEY', '') IS NOT NULL
+  ON CONFLICT (organization) DO NOTHING;
+
+  IF EXISTS (
+    SELECT 1 FROM festapp_stage_default_public.organizations source
+    WHERE nullif(source.data->>'ONESIGNAL_REST_API_KEY', '') IS NOT NULL
+      AND NOT EXISTS (
+        SELECT 1 FROM public.organization_notification_secrets secret
+        WHERE secret.organization=source.id
+      )
+  ) OR EXISTS (
+    SELECT 1 FROM public.organizations
+    WHERE data ? 'ONESIGNAL_REST_API_KEY'
+  ) THEN
+    RAISE EXCEPTION 'default OneSignal credentials did not converge to server-only storage';
+  END IF;
 
   WITH shared AS (
     SELECT companion_row.*,

@@ -307,6 +307,20 @@ if rg -n 'DROP (DATABASE|SCHEMA|TABLE)|TRUNCATE|DELETE FROM' "$A_IMPORT_SCRIPT";
   exit 1
 fi
 
+for contract in \
+  "$DEFAULT_IMPORT_SCRIPT:organization_notification_secrets:default OneSignal credentials did not converge" \
+  "$A_IMPORT_SCRIPT:organization_notification_secrets:source a OneSignal credentials did not converge" \
+  "$A_SEMANTIC_REPAIR_SCRIPT:source_record.data - 'ONESIGNAL_REST_API_KEY':organization JSON reference repair did not converge" \
+  "$A_REFERENCE_VALIDATION_SCRIPT:2026-08-28.1:ONESIGNAL_REST_API_KEY"; do
+  IFS=: read -r script required_a required_b <<<"$contract"
+  for required in "$required_a" "$required_b"; do
+    rg -Fq "$required" "$script" || {
+      echo "missing server-only notification credential contract $required in $script" >&2
+      exit 1
+    }
+  done
+done
+
 for required in \
   'import-a-auth-preserve-password-hashes' \
   "'auth.refresh_tokens'" \

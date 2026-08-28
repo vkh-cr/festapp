@@ -179,7 +179,7 @@ BEGIN
       IF relation.target_schema='public' AND relation.table_name='organizations'
         AND target_column.column_name='data' THEN
         expression:=format($expression$
-          CASE WHEN s.data ? 'DEFAULT_OCCASION' THEN jsonb_set(
+          (CASE WHEN s.data ? 'DEFAULT_OCCASION' THEN jsonb_set(
             CASE WHEN s.data ? 'REPRESENTATIVE_OCCASION' THEN jsonb_set(
               CASE WHEN s.data ? 'DEFAULT_UNIT' THEN jsonb_set(s.data,
                 '{DEFAULT_UNIT}',coalesce((SELECT to_jsonb(m.target_id::bigint) FROM festapp_merge.id_mappings m WHERE m.run_id=%1$L AND m.source_table='public.units' AND m.source_id=s.data->>'DEFAULT_UNIT'),s.data->'DEFAULT_UNIT'),false)
@@ -196,7 +196,7 @@ BEGIN
             '{REPRESENTATIVE_OCCASION}',coalesce((SELECT to_jsonb(m.target_id::bigint) FROM festapp_merge.id_mappings m WHERE m.run_id=%1$L AND m.source_table='public.occasions' AND m.source_id=s.data->>'REPRESENTATIVE_OCCASION'),s.data->'REPRESENTATIVE_OCCASION'),false)
           ELSE CASE WHEN s.data ? 'DEFAULT_UNIT' THEN jsonb_set(s.data,
             '{DEFAULT_UNIT}',coalesce((SELECT to_jsonb(m.target_id::bigint) FROM festapp_merge.id_mappings m WHERE m.run_id=%1$L AND m.source_table='public.units' AND m.source_id=s.data->>'DEFAULT_UNIT'),s.data->'DEFAULT_UNIT'),false)
-          ELSE s.data END END END
+          ELSE s.data END END END) - 'ONESIGNAL_REST_API_KEY'
         $expression$,import_run);
       ELSIF relation.target_schema='eshop' AND relation.table_name='planned_changes'
         AND target_column.column_name='subject_id' THEN
@@ -235,6 +235,37 @@ BEGIN
       RAISE EXCEPTION 'a row mismatch %.%: expected %, inserted %, delta %',relation.target_schema,relation.table_name,expected_rows,inserted_rows,after_rows-before_rows;
     END IF;
   END LOOP;
+
+  INSERT INTO public.organization_notification_secrets(
+    organization,
+    onesignal_rest_api_key
+  )
+  SELECT mapping.target_id::bigint, source.data->>'ONESIGNAL_REST_API_KEY'
+  FROM festapp_stage_a_public.organizations source
+  JOIN festapp_merge.id_mappings mapping
+    ON mapping.run_id=import_run
+    AND mapping.source_table='public.organizations'
+    AND mapping.source_id=source.id::text
+  WHERE nullif(source.data->>'ONESIGNAL_REST_API_KEY', '') IS NOT NULL
+  ON CONFLICT (organization) DO NOTHING;
+
+  IF EXISTS (
+    SELECT 1 FROM festapp_stage_a_public.organizations source
+    JOIN festapp_merge.id_mappings mapping
+      ON mapping.run_id=import_run
+      AND mapping.source_table='public.organizations'
+      AND mapping.source_id=source.id::text
+    WHERE nullif(source.data->>'ONESIGNAL_REST_API_KEY', '') IS NOT NULL
+      AND NOT EXISTS (
+        SELECT 1 FROM public.organization_notification_secrets secret
+        WHERE secret.organization=mapping.target_id::bigint
+      )
+  ) OR EXISTS (
+    SELECT 1 FROM public.organizations
+    WHERE data ? 'ONESIGNAL_REST_API_KEY'
+  ) THEN
+    RAISE EXCEPTION 'source a OneSignal credentials did not converge to server-only storage';
+  END IF;
 
   INSERT INTO festapp_merge.quarantined_rows(run_id,source_table,source_primary_key,source_row,reason)
   SELECT import_run,'public.user_info',jsonb_build_object('id',s.id),to_jsonb(s),

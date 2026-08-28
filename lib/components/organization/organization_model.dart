@@ -31,7 +31,6 @@ class OrganizationModel {
   String? defaultUrl;
   String? defaultLanguage;
   String? oneSignalAppId;
-  String? oneSignalRestApiKey;
   bool? isRegistrationEnabled;
   bool?
       isUnitCreationEnabled; // Not in user JSON request but kept as it was there
@@ -47,7 +46,6 @@ class OrganizationModel {
     this.defaultUrl,
     this.defaultLanguage,
     this.oneSignalAppId,
-    this.oneSignalRestApiKey,
     this.isRegistrationEnabled,
     this.isUnitCreationEnabled,
     this.isAppSupported,
@@ -67,7 +65,6 @@ class OrganizationModel {
       defaultUrl: json['DEFAULT_URL'] as String?,
       defaultLanguage: json['DEFAULT_LANGUAGE'] as String?,
       oneSignalAppId: json['ONESIGNAL_APP_ID'] as String?,
-      oneSignalRestApiKey: json['ONESIGNAL_REST_API_KEY'] as String?,
       isRegistrationEnabled: json['IS_REGISTRATION_ENABLED'] as bool?,
       isUnitCreationEnabled: json['IS_UNIT_CREATION_ENABLED'] as bool?,
       isAppSupported: json['IS_APP_SUPPORTED'] as bool?,
@@ -100,7 +97,6 @@ class OrganizationModel {
     addIfNotEmpty('DEFAULT_URL', defaultUrl);
     addIfNotEmpty('DEFAULT_LANGUAGE', defaultLanguage);
     addIfNotEmpty('ONESIGNAL_APP_ID', oneSignalAppId);
-    addIfNotEmpty('ONESIGNAL_REST_API_KEY', oneSignalRestApiKey);
     addIfNotEmpty('IS_REGISTRATION_ENABLED', isRegistrationEnabled);
     addIfNotEmpty('IS_UNIT_CREATION_ENABLED', isUnitCreationEnabled);
     addIfNotEmpty('IS_APP_SUPPORTED', isAppSupported);

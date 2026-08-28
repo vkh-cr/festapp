@@ -38,7 +38,6 @@ class _OrganizationEditPageState extends State<OrganizationEditPage> {
   final _defaultUnitController = TextEditingController();
   final _representativeOccasionController = TextEditingController();
   final _oneSignalAppIdController = TextEditingController();
-  final _oneSignalRestApiKeyController = TextEditingController();
   final _phonePrefixesController = TextEditingController();
 
   // Flags
@@ -68,7 +67,6 @@ class _OrganizationEditPageState extends State<OrganizationEditPage> {
         _representativeOccasionController.text =
             org.representativeOccasion?.toString() ?? '';
         _oneSignalAppIdController.text = org.oneSignalAppId ?? '';
-        _oneSignalRestApiKeyController.text = org.oneSignalRestApiKey ?? '';
         _phonePrefixesController.text = org.phonePrefixes?.join(', ') ?? '';
 
         _isRegistrationEnabled = org.isRegistrationEnabled ?? false;
@@ -78,7 +76,6 @@ class _OrganizationEditPageState extends State<OrganizationEditPage> {
         _platforms = org.platforms?.toList() ?? [];
       }
     } catch (e) {
-
       if (mounted) {
         ToastHelper.Show(context, "Failed to load organization data.",
             severity: ToastSeverity.NotOk);
@@ -107,7 +104,6 @@ class _OrganizationEditPageState extends State<OrganizationEditPage> {
         defaultUrl: _defaultUrlController.text,
         defaultLanguage: _defaultLanguageController.text,
         oneSignalAppId: _oneSignalAppIdController.text,
-        oneSignalRestApiKey: _oneSignalRestApiKeyController.text,
         defaultUnit: int.tryParse(_defaultUnitController.text),
         representativeOccasion:
             int.tryParse(_representativeOccasionController.text),
@@ -130,7 +126,6 @@ class _OrganizationEditPageState extends State<OrganizationEditPage> {
       // Update local state manually to reflect changes immediately
       RightsService.updateOrganizationLocally(updatedOrg);
     } catch (e) {
-
       if (mounted) {
         ToastHelper.Show(context, "Error saving: $e",
             severity: ToastSeverity.NotOk);
@@ -206,8 +201,10 @@ class _OrganizationEditPageState extends State<OrganizationEditPage> {
                             const SizedBox(height: 8),
                             _buildTextField(
                                 _oneSignalAppIdController, "OneSignal App ID"),
-                            _buildTextField(_oneSignalRestApiKeyController,
-                                "OneSignal REST API Key"),
+                            const Text(
+                              "The OneSignal REST API key is managed in the "
+                              "server-only notification secret store.",
+                            ),
                             const SizedBox(height: 16),
                             Text("Feature Flags",
                                 style: Theme.of(context).textTheme.titleMedium),
@@ -347,6 +344,7 @@ class _OrganizationEditPageState extends State<OrganizationEditPage> {
       ],
     );
   }
+
   Widget _buildPrefixesSelector(BuildContext context) {
     // Current prefixes from controller to list
     List<String> currentPrefixes = _phonePrefixesController.text

@@ -6,9 +6,14 @@ CREATE OR REPLACE FUNCTION update_organization_admin(
 RETURNS SETOF organizations
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = public, extensions
 AS $$
 BEGIN
+  IF update_organization_admin.data ? 'ONESIGNAL_REST_API_KEY' THEN
+    RAISE invalid_parameter_value
+      USING MESSAGE = 'OneSignal REST API key is managed server-side';
+  END IF;
+
   -- Verify admin status
   IF EXISTS (
     SELECT 1
@@ -24,7 +29,10 @@ BEGIN
       title = COALESCE(update_organization_admin.title, organizations.title),
       data = organizations.data || update_organization_admin.data
     WHERE id = organization_id
-    RETURNING *;
+    RETURNING organizations.id, organizations.created_at,
+      organizations.updated_at,
+      organizations.data - 'ONESIGNAL_REST_API_KEY',
+      organizations.title, organizations.phone_prefixes;
   ELSE
     RAISE EXCEPTION 'Access Denied: User is not an admin of this organization.';
   END IF;

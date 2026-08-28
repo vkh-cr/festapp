@@ -69,8 +69,8 @@ BEGIN
     SELECT 1 FROM festapp_stage_a_public.organizations source
     JOIN festapp_merge.id_mappings self ON self.run_id=import_run AND self.source_table='public.organizations' AND self.source_id=source.id::text
     JOIN public.organizations target ON target.id=self.target_id::bigint
-    WHERE (target.data-'DEFAULT_UNIT'-'REPRESENTATIVE_OCCASION'-'DEFAULT_OCCASION')
-      IS DISTINCT FROM (source.data-'DEFAULT_UNIT'-'REPRESENTATIVE_OCCASION'-'DEFAULT_OCCASION')
+    WHERE (target.data-'DEFAULT_UNIT'-'REPRESENTATIVE_OCCASION'-'DEFAULT_OCCASION'-'ONESIGNAL_REST_API_KEY')
+      IS DISTINCT FROM (source.data-'DEFAULT_UNIT'-'REPRESENTATIVE_OCCASION'-'DEFAULT_OCCASION'-'ONESIGNAL_REST_API_KEY')
   ) THEN RAISE EXCEPTION 'organization JSON non-reference content changed'; END IF;
 
   SELECT count(*) INTO legacy_storage_links FROM public.images
@@ -89,8 +89,8 @@ BEGIN
   THEN RAISE EXCEPTION 'legacy backend URL remains in rebuilt client-sync state'; END IF;
 
   UPDATE festapp_merge.validation_results SET status='pass',observed=jsonb_build_object(
-    'registry_version','2026-08-27.2','known_reference_mismatches',0,
-    'required_inventory_families',6,'legacy_storage_links',legacy_storage_links,
+    'registry_version','2026-08-28.1','known_reference_mismatches',0,
+    'required_inventory_families',7,'legacy_storage_links',legacy_storage_links,
     'legacy_storage_links_with_copied_objects',legacy_storage_links,
     'storage_url_rewrite_gate','api.festapp.net-cutover',
     'external_sync_runtime_inert',true,'deleted_rows',0)

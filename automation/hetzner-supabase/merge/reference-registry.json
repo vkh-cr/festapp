@@ -1,5 +1,5 @@
 {
-  "version": "2026-08-27.2",
+  "version": "2026-08-28.1",
   "status": "rehearsal-validated-cutover-blocking",
   "rules": [
     { "table": "public.organizations", "path": "data.DEFAULT_UNIT", "reference": "public.units.id", "mapping": "units", "nullable": true, "transform": "numeric-id", "validator": "mapped-or-null" },
@@ -22,6 +22,7 @@
     { "table": "eshop.transaction_pairing_events", "path": "transaction_snapshot_id", "reference": "eshop.transactions.id-or-deleted-audit-snapshot", "mapping": "transactions when live", "nullable": false, "transform": "mapped-when-live", "validator": "mapped-or-retained-snapshot" },
     { "table": "public.external_sync_sources", "path": "vstupenky_remote", "reference": "retired-inter-project-sync", "mapping": "preserve-inert", "nullable": false, "transform": "revoke-runtime-entrypoints", "validator": "no-cron-and-no-service-role-execute" },
     { "table": "public.images", "path": "link", "reference": "storage-or-r2-object", "mapping": "preserve-r2; rewrite-four-legacy-storage-links-at-canonical-hostname-cutover", "nullable": false, "transform": "registered-url", "validator": "object-exists-and-approved-host" }
+    ,{ "table": "public.organizations", "path": "data.ONESIGNAL_REST_API_KEY", "reference": "server-only-notification-credential", "mapping": "organization_notification_secrets by mapped organization id", "nullable": true, "transform": "extract-and-remove", "validator": "service-role-rpc-only" }
   ],
   "requiredInventoryFamilies": [
     "occasion-and-form-payloads",

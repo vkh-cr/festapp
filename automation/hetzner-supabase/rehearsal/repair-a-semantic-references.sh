@@ -107,7 +107,7 @@ BEGIN
     JOIN festapp_merge.id_mappings self ON self.run_id=import_run
       AND self.source_table='public.organizations' AND self.source_id=source.id::text
   LOOP
-    transformed_data:=source_record.data;
+    transformed_data:=source_record.data - 'ONESIGNAL_REST_API_KEY';
     IF transformed_data ? 'DEFAULT_UNIT' THEN
       SELECT to_jsonb(target_id::bigint) INTO STRICT mapped_value FROM festapp_merge.id_mappings
       WHERE run_id=import_run AND source_table='public.units' AND source_id=transformed_data->>'DEFAULT_UNIT';
