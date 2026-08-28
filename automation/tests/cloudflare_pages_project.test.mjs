@@ -37,6 +37,7 @@ test('creates a missing project, configures public worker env, and adds domain',
   assert.equal(result.created, true);
   assert.equal(result.domainAdded, true);
   assert.equal(result.dnsAdded, true);
+  assert.equal(result.dnsStatus, 'created');
   assert.equal(calls[1].options.method, 'POST');
   assert.deepEqual(calls[1].body, { name: config.project, production_branch: config.branch });
   assert.equal(calls[2].body.deployment_configs.production.env_vars.SUPABASE_URL.value,
@@ -63,17 +64,15 @@ test('updates only owned environment-variable keys on an existing project', asyn
     if (calls.length === 2) return response(200, {
       name: config.project, production_branch: config.branch,
     });
-    if (calls.length === 3) return response(200, { name: config.domain, status: 'active' });
-    if (calls.length === 4) return response(200, [{ id: 'zone-id', name: config.zone }]);
-    return response(200, [{
-      type: 'CNAME', name: config.domain, content: 'hvezdamorska.pages.dev', proxied: true,
-    }]);
+    return response(200, { name: config.domain, status: 'active' });
   };
 
   const result = await ensurePagesProject(config, fetchImpl);
   assert.equal(result.created, false);
   assert.equal(result.domainAdded, false);
   assert.equal(result.dnsAdded, false);
+  assert.equal(result.dnsStatus, 'active-custom-domain');
+  assert.equal(calls.length, 3);
   assert.deepEqual(Object.keys(calls[1].body.deployment_configs.production.env_vars).sort(),
     ['ORGANIZATION_ID', 'SUPABASE_ANON_KEY', 'SUPABASE_URL']);
 });
@@ -86,7 +85,7 @@ test('refuses to replace a conflicting custom-domain DNS record', async () => {
     if (call === 2) return response(200, {
       name: config.project, production_branch: config.branch,
     });
-    if (call === 3) return response(200, { name: config.domain, status: 'active' });
+    if (call === 3) return response(200, { name: config.domain, status: 'initializing' });
     if (call === 4) return response(200, [{ id: 'zone-id', name: config.zone }]);
     return response(200, [{
       type: 'A', name: config.domain, content: '192.0.2.10', proxied: true,

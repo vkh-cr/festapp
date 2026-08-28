@@ -14,13 +14,17 @@ and verifies the custom domain before reporting success.
 ## Cloudflare Pages project setup
 
 Both `.github/workflows/deploy.yml` and `automation/deploy_direct.sh` run
-`ensure-pages-project.mjs` before upload. With a token carrying Pages Write and
-Zone DNS Write it
-idempotently creates a missing Direct Upload project, pins its production
-branch, sets the three public Worker variables, and attaches `DOMAIN` as the
+`ensure-pages-project.mjs` before upload. The first activation uses a token
+carrying Pages Write and Zone DNS Write to
+idempotently create a missing Direct Upload project, pin its production
+branch, set the three public Worker variables, and attach `DOMAIN` as the
 custom hostname. It also creates the exact proxied CNAME from `DOMAIN` to the
 project's `pages.dev` origin. An existing conflicting DNS record fails closed;
 unrelated variables, records, and domains are retained.
+
+After Cloudflare Pages reports the custom domain `active`, later deploys need
+only Pages Write. The active Pages binding is the routing proof, so routine
+deploys do not unnecessarily require or exercise zone-wide DNS permissions.
 
 The branch configuration owns:
 

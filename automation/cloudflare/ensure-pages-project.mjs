@@ -128,43 +128,53 @@ export async function ensurePagesProject(config, fetchImpl = fetch) {
     domain = requireSuccess('Cloudflare Pages custom-domain lookup', domainLookup);
   }
 
-  const zoneLookup = requireSuccess('Cloudflare zone lookup', await zoneApi(
-    fetchImpl,
-    config.token,
-    `/zones?name=${encodeURIComponent(config.zone)}&account.id=${encodeURIComponent(config.accountId)}`,
-  ));
-  if (!Array.isArray(zoneLookup) || zoneLookup.length !== 1 || zoneLookup[0].name !== config.zone) {
-    throw new Error(`Cloudflare zone lookup returned no unique ${config.zone} zone`);
-  }
-  const zoneId = zoneLookup[0].id;
-  const dnsLookup = requireSuccess('Cloudflare Pages DNS lookup', await zoneApi(
-    fetchImpl,
-    config.token,
-    `/zones/${encodeURIComponent(zoneId)}/dns_records?name=${encodeURIComponent(config.domain)}`,
-  ));
   const expectedDnsTarget = `${config.project}.pages.dev`;
   let dnsAdded = false;
-  if (dnsLookup.length === 0) {
-    requireSuccess('Cloudflare Pages DNS creation', await zoneApi(
+  let dnsStatus = 'active-custom-domain';
+  // Once Pages reports the custom domain active, Cloudflare has already
+  // validated its routing. Avoid requiring Zone DNS permissions on every
+  // subsequent deploy; the narrower Pages token is sufficient from then on.
+  // Initializing/new domains still require an exact, fail-closed DNS check.
+  if (domain.status !== 'active') {
+    const zoneLookup = requireSuccess('Cloudflare zone lookup', await zoneApi(
       fetchImpl,
       config.token,
-      `/zones/${encodeURIComponent(zoneId)}/dns_records`,
-      {
-        method: 'POST',
-        body: JSON.stringify({
-          type: 'CNAME',
-          name: config.domain,
-          content: expectedDnsTarget,
-          proxied: true,
-          ttl: 1,
-          comment: 'Managed by Festapp Cloudflare Pages deployment automation',
-        }),
-      },
+      `/zones?name=${encodeURIComponent(config.zone)}&account.id=${encodeURIComponent(config.accountId)}`,
     ));
-    dnsAdded = true;
-  } else if (dnsLookup.length !== 1 || dnsLookup[0].type !== 'CNAME' ||
-      dnsLookup[0].content !== expectedDnsTarget || dnsLookup[0].proxied !== true) {
-    throw new Error(`refusing to overwrite conflicting DNS for ${config.domain}`);
+    if (!Array.isArray(zoneLookup) || zoneLookup.length !== 1 || zoneLookup[0].name !== config.zone) {
+      throw new Error(`Cloudflare zone lookup returned no unique ${config.zone} zone`);
+    }
+    const zoneId = zoneLookup[0].id;
+    const dnsLookup = requireSuccess('Cloudflare Pages DNS lookup', await zoneApi(
+      fetchImpl,
+      config.token,
+      `/zones/${encodeURIComponent(zoneId)}/dns_records?name=${encodeURIComponent(config.domain)}`,
+    ));
+    if (dnsLookup.length === 0) {
+      requireSuccess('Cloudflare Pages DNS creation', await zoneApi(
+        fetchImpl,
+        config.token,
+        `/zones/${encodeURIComponent(zoneId)}/dns_records`,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            type: 'CNAME',
+            name: config.domain,
+            content: expectedDnsTarget,
+            proxied: true,
+            ttl: 1,
+            comment: 'Managed by Festapp Cloudflare Pages deployment automation',
+          }),
+        },
+      ));
+      dnsAdded = true;
+      dnsStatus = 'created';
+    } else if (dnsLookup.length !== 1 || dnsLookup[0].type !== 'CNAME' ||
+        dnsLookup[0].content !== expectedDnsTarget || dnsLookup[0].proxied !== true) {
+      throw new Error(`refusing to overwrite conflicting DNS for ${config.domain}`);
+    } else {
+      dnsStatus = 'verified';
+    }
   }
 
   return {
@@ -176,6 +186,7 @@ export async function ensurePagesProject(config, fetchImpl = fetch) {
     domainAdded,
     dnsTarget: expectedDnsTarget,
     dnsAdded,
+    dnsStatus,
   };
 }
 
