@@ -186,6 +186,24 @@ class _EventCardState extends State<_EventCard>
     }
   }
 
+  Future<void> _toggleInlineDetails() async {
+    final shouldReveal = !widget.expanded;
+    widget.onToggle();
+    if (!shouldReveal) return;
+
+    // AnimatedCrossFade needs one animation cycle before ensureVisible can
+    // measure the expanded card. Without this, a final-row detail can open
+    // underneath the persistent bottom navigation and appear to do nothing.
+    await Future<void>.delayed(const Duration(milliseconds: 220));
+    if (!mounted || !widget.expanded) return;
+    await Scrollable.ensureVisible(
+      context,
+      alignment: 1,
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeOut,
+    );
+  }
+
   Color _toPastel(BuildContext context, Color color) {
     final HSLColor hslColor = HSLColor.fromColor(color);
     final double saturated =
@@ -224,7 +242,6 @@ class _EventCardState extends State<_EventCard>
     final event = widget.event;
     final expanded = widget.expanded;
     final controller = widget.controller;
-    final onToggle = widget.onToggle;
 
     final bool isActivity = event.isActivity;
 
@@ -605,7 +622,7 @@ class _EventCardState extends State<_EventCard>
                     ? null
                     : () {
                         if (canExpandInline) {
-                          onToggle();
+                          _toggleInlineDetails();
                         } else {
                           if (isActivity) {
                             showDialog(
