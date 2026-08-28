@@ -62,12 +62,13 @@ const EMERGENCY_RECOVERY_CACHE_NAMES = new Set([
 // activate its successor. Per-client cache pinning below keeps that open page
 // coherent, while its next full navigation deliberately enters the new shell.
 // Remove this bounded migration list once supported installations are newer
-// than 0.19.93+458.
+// than 0.19.93+459.
 const HANDOFF_BOOTSTRAP_CACHE_NAMES = new Set([
   'festapp-app-shell-0.19.93+455',
   'festapp-app-shell-0.19.93+456',
   'festapp-app-shell-0.19.93+457',
   'festapp-app-shell-0.19.93+458',
+  'festapp-app-shell-0.19.93+459',
 ]);
 
 function withStorageTimeout(promise) {
