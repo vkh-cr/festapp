@@ -193,6 +193,21 @@ else
     fail=1
 fi
 
+# Migrated Netlify tenants own their legacy-origin retirement boundary as an
+# explicit overlay. This keeps redirects and service-worker retirement scoped
+# to the matching production branch instead of leaking between tenants.
+for tenant in cavfotofest hvezdamorska; do
+    policy="$PROJECT_ROOT/automation/tenant-overlays/$tenant.paths"
+    for path in netlify.toml web_client/public/netlify-retire-worker.js; do
+        if grep -Fx -q "$path" "$policy"; then
+            echo "  ok: $tenant overlay owns '$path'"
+        else
+            echo "  FAIL: $tenant overlay missing '$path'"
+            fail=1
+        fi
+    done
+done
+
 echo
 if [ $fail -ne 0 ]; then
     echo "❌ deploy workflow test FAILED"
