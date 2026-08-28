@@ -73,6 +73,7 @@ function htmlResponse(body, originHeaders) {
   const headers = new Headers(originHeaders || {});
   headers.set("content-type", "text/html; charset=utf-8");
   headers.set("cache-control", "no-cache, must-revalidate");
+  headers.set("x-festapp-runtime", "cloudflare-pages");
   headers.delete("location");
   headers.delete("content-length");
   headers.delete("content-range");

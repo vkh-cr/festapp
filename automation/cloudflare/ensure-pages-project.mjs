@@ -135,7 +135,9 @@ export async function ensurePagesProject(config, fetchImpl = fetch) {
   // validated its routing. Avoid requiring Zone DNS permissions on every
   // subsequent deploy; the narrower Pages token is sufficient from then on.
   // Initializing/new domains still require an exact, fail-closed DNS check.
-  if (domain.status !== 'active') {
+  if (domain.status !== 'active' && config.manageDns === false) {
+    dnsStatus = 'external-dns-required';
+  } else if (domain.status !== 'active') {
     const zoneLookup = requireSuccess('Cloudflare zone lookup', await zoneApi(
       fetchImpl,
       config.token,
@@ -221,7 +223,7 @@ export function configFromEnvironment(env = process.env) {
   const organizationId = required(organizationName, env[organizationName]);
   if (!/^[1-9][0-9]*$/.test(organizationId)) throw new Error('ORGANIZATION_ID must be positive');
   const labels = assertDomain(required('DOMAIN', env.DOMAIN)).split('.');
-  if (labels.length < 3) throw new Error('DOMAIN must be a subdomain of its Cloudflare zone');
+  if (labels.length < 2) throw new Error('DOMAIN must be a DNS hostname');
   const domain = labels.join('.');
   return {
     token: required('CF_API_TOKEN', env.CF_API_TOKEN),
@@ -230,6 +232,7 @@ export function configFromEnvironment(env = process.env) {
     branch: assertBranch(required('BRANCH', env.BRANCH)),
     domain,
     zone: labels.slice(-2).join('.'),
+    manageDns: env.CLOUDFLARE_MANAGE_DNS !== 'false',
     phase,
     runtimeSupabaseUrl: supabaseUrl.origin,
     runtimeSupabaseAnonKey: required(keyName, env[keyName]),

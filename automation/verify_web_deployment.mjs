@@ -82,6 +82,13 @@ async function verifyOnce() {
     assert.equal(response.status, 200, `${label} returned HTTP ${response.status}`);
     assertRevalidated(response, label);
   }
+  if (configValue('DEPLOY_TARGET') === 'cloudflare') {
+    assert.equal(
+      htmlResponse.headers.get('x-festapp-runtime'),
+      'cloudflare-pages',
+      'production domain is not served by the canonical Cloudflare Pages worker',
+    );
+  }
   for (let index = 0; index < legalResponses.length; index++) {
     const response = legalResponses[index];
     const [key] = legalRoutes[index];
