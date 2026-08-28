@@ -1,0 +1,15 @@
+# Source/data overlay paths for the original Festapp / Vstupenky.online tenant.
+# The public application is deployed at live.festapp.net while WEB_LINK may
+# continue to point at the Vstupenky.online service surface.
+automation/project.conf
+automation/release/legal/**
+automation/release/ExportOptions.plist
+android/app/src/main/res/mipmap-*/ic_launcher.png
+ios/Runner/Assets.xcassets/AppIcon.appiconset/*.png
+web/android-chrome-*.png
+web/apple-touch-icon.png
+web/favicon*.png
+web/favicon.ico
+web/favicon.svg
+web/fstapplogo.png
+web/web-app-manifest-*.png

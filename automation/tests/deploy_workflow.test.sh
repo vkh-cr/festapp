@@ -157,6 +157,7 @@ done
 for branch_mapping in \
     'prod/cavfotofest) TENANT_ID=cavfotofest' \
     'prod/csmostrava2026) TENANT_ID=csmostrava2026' \
+    'prod/festapp) TENANT_ID=festapp' \
     'prod/hvezdamorska) TENANT_ID=hvezdamorska'; do
     if grep -F -q "$branch_mapping" "$WORKFLOW"; then
         echo "  ok: tenant gate routes '$branch_mapping'"

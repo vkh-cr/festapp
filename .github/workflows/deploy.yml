@@ -3,8 +3,8 @@ name: Deploy
 # Conf-driven router. Each prod/* branch declares its target in
 # automation/project.conf (DEPLOY_TARGET=cloudflare | netlify | gh-pages).
 # Branches without DEPLOY_TARGET (or with DEPLOY_TARGET=skip) are ignored, so
-# legacy branches such as prod/festapp keep using their own workflow until
-# they opt in.
+# branches routed to gh-pages keep their hosting adapter in web.yml while the
+# same overlay, legal and release checks remain mandatory here.
 
 on:
   push:
@@ -27,6 +27,7 @@ jobs:
           case "$BRANCH" in
             prod/cavfotofest) TENANT_ID=cavfotofest ;;
             prod/csmostrava2026) TENANT_ID=csmostrava2026 ;;
+            prod/festapp) TENANT_ID=festapp ;;
             prod/hvezdamorska) TENANT_ID=hvezdamorska ;;
             *) echo "No unified-overlay policy for $BRANCH"; exit 0 ;;
           esac
