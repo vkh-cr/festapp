@@ -9,6 +9,10 @@ import {
   parseSupabaseOrigin,
   resolvedAuthStorageKey,
 } from '../lib/supabase_client_config.mjs';
+import {
+  backendActivationDocument,
+  canonicalBackendActivationSha256,
+} from '../lib/backend_activation_manifest.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const configPath = path.join(root, 'automation/project.conf');
@@ -23,6 +27,14 @@ const anonKey = value('SUPABASE_ANON_KEY');
 const configuredAuthStorageKey = value('SUPABASE_AUTH_STORAGE_KEY');
 const authStorageKey = resolvedAuthStorageKey(supabaseOrigin, configuredAuthStorageKey);
 const installationGeneration = value('PUSH_APP_GENERATION');
+const activationTenantId = value('BACKEND_ACTIVATION_TENANT_ID');
+const activationPhase = value('BACKEND_ACTIVATION_PHASE');
+const activationCanonicalOriginValue = value('BACKEND_ACTIVATION_CANONICAL_SUPABASE_URL');
+const activationCanonicalAnonKey = value('BACKEND_ACTIVATION_CANONICAL_SUPABASE_ANON_KEY');
+const activationEnabled = Boolean(
+  activationTenantId || activationPhase || activationCanonicalOriginValue ||
+  activationCanonicalAnonKey
+);
 const organizationId = Number(value('ORGANIZATION_ID'));
 assert.ok(Number.isSafeInteger(organizationId) && organizationId > 0,
   'ORGANIZATION_ID must be a positive integer');
@@ -44,8 +56,49 @@ if (cloudRef) {
   assert.ok(installationGeneration, 'self-hosted release requires a non-empty PUSH_APP_GENERATION');
 }
 
+let activation = null;
+if (activationEnabled) {
+  assert.ok(activationTenantId && activationPhase && activationCanonicalOriginValue &&
+    activationCanonicalAnonKey, 'backend activation configuration must be complete');
+  assert.match(activationTenantId, /^[a-z0-9][a-z0-9-]*$/,
+    'backend activation tenant ID must be a lowercase slug');
+  assert.ok(['legacy', 'canonical'].includes(activationPhase),
+    'backend activation phase must be legacy or canonical');
+  assert.ok(configuredAuthStorageKey,
+    'backend activation requires an explicit stable auth storage namespace');
+  const canonicalOrigin = parseSupabaseOrigin(activationCanonicalOriginValue);
+  assert.equal(canonicalOrigin, 'https://api.festapp.net',
+    'backend activation canonical origin must be https://api.festapp.net');
+  assert.notEqual(canonicalOrigin, supabaseOrigin,
+    'backend activation canonical origin must differ from the legacy origin');
+  const canonicalPayload = JSON.parse(Buffer.from(
+    activationCanonicalAnonKey.split('.')[1] || '', 'base64url',
+  ).toString('utf8'));
+  assert.equal(canonicalPayload.role, 'anon', 'canonical activation key must use the anon role');
+  assert.equal(canonicalPayload.iss, 'supabase', 'canonical activation key must be issued by Supabase');
+  const canonicalSha256 = canonicalBackendActivationSha256(activationTenantId);
+  const manifestUrl = `${webOrigin}/backend-activation.json`;
+  const expectedDocument = backendActivationDocument(activationTenantId, activationPhase);
+  for (const relative of ['web/backend-activation.json', 'web_client/public/backend-activation.json']) {
+    assert.equal(fs.readFileSync(path.join(root, relative), 'utf8'), expectedDocument,
+      `${relative} differs from the configured activation phase`);
+  }
+  activation = {
+    tenantId: activationTenantId,
+    phase: activationPhase,
+    strategy: 'pinned-one-way-manifest',
+    manifestUrl,
+    canonicalManifestSha256: canonicalSha256,
+    canonicalSupabaseOrigin: canonicalOrigin,
+    canonicalAnonKeySha256: crypto.createHash('sha256')
+      .update(activationCanonicalAnonKey).digest('hex'),
+    authStorageKey,
+    finalRefreshTokenDeltaRequired: true,
+  };
+}
+
 const manifestValue = process.env.FESTAPP_RELEASE_MANIFEST?.trim();
-if (!cloudRef || manifestValue || requireCanonicalCutover) {
+if (!cloudRef || manifestValue || requireCanonicalCutover || activationEnabled) {
   assert.ok(manifestValue, 'release backend validation requires FESTAPP_RELEASE_MANIFEST');
   const manifest = JSON.parse(fs.readFileSync(path.resolve(manifestValue), 'utf8'));
   const backend = manifest.backend;
@@ -65,12 +118,16 @@ if (!cloudRef || manifestValue || requireCanonicalCutover) {
     [...authRedirectUrls].sort(),
     'release manifest Auth redirect allowlist mismatch',
   );
+  if (activationEnabled) {
+    assert.deepEqual(backend.activation, activation,
+      'release manifest backend activation contract mismatch');
+  }
   assert.deepEqual(
     backend.allowedWebOrigins,
     [webOrigin],
     'release manifest Edge Function CORS allowlist mismatch',
   );
-  if (backend.mode === 'self-hosted') {
+  if (backend.mode === 'self-hosted' || activationEnabled) {
     const transition = backend.sessionTransition;
     assert.ok(transition, 'self-hosted release manifest is missing its session transition contract');
     assert.equal(transition.strategy, 'refresh-or-reauth',
@@ -87,8 +144,8 @@ if (!cloudRef || manifestValue || requireCanonicalCutover) {
   if (requireCanonicalCutover) {
     assert.equal(backend.releaseIntent, 'canonical-cutover',
       'canonical cutover build requires releaseIntent=canonical-cutover');
-    assert.equal(backend.mode, 'self-hosted',
-      'canonical cutover build refuses a Supabase Cloud backend');
+    assert.ok(backend.mode === 'self-hosted' || activationEnabled,
+      'canonical cutover build requires a self-hosted backend or pinned activation transition');
   }
 }
 
@@ -99,12 +156,30 @@ for (const [text, expression, message] of [
     'generated Flutter Supabase origin is stale'],
   [flutterConfig, `static const String pushAppGeneration = '${escapeRegExp(installationGeneration)}';`,
     'generated Flutter installation generation is stale'],
+  [flutterConfig, `static const String supabaseAuthStorageKey = '${escapeRegExp(authStorageKey)}';`,
+    'generated Flutter auth storage namespace is stale'],
   [webConfig, `static supabaseUrl = '${escapeRegExp(supabaseOrigin)}';`,
     'generated web Supabase origin is stale'],
   [webConfig, `auth: '${escapeRegExp(authStorageKey)}'`,
     'generated web auth storage namespace is stale'],
 ]) {
   assert.match(text, new RegExp(expression), message);
+}
+if (activationEnabled) {
+  for (const [text, expected, message] of [
+    [flutterConfig, activation.tenantId, 'generated Flutter activation tenant is stale'],
+    [flutterConfig, activation.manifestUrl, 'generated Flutter activation URL is stale'],
+    [flutterConfig, activation.canonicalManifestSha256,
+      'generated Flutter activation digest is stale'],
+    [flutterConfig, activation.canonicalSupabaseOrigin,
+      'generated Flutter canonical origin is stale'],
+    [flutterConfig, activationCanonicalAnonKey, 'generated Flutter canonical key is stale'],
+    [webConfig, activation.tenantId, 'generated web activation tenant is stale'],
+    [webConfig, activation.manifestUrl, 'generated web activation URL is stale'],
+    [webConfig, activation.canonicalManifestSha256, 'generated web activation digest is stale'],
+    [webConfig, activation.canonicalSupabaseOrigin, 'generated web canonical origin is stale'],
+    [webConfig, activationCanonicalAnonKey, 'generated web canonical key is stale'],
+  ]) assert.ok(text.includes(expected), message);
 }
 assert.ok(flutterConfig.includes(anonKey), 'generated Flutter anon key is stale');
 assert.ok(webConfig.includes(anonKey), 'generated web anon key is stale');
@@ -119,6 +194,7 @@ console.log(JSON.stringify({
   auth_site_url: webOrigin,
   auth_redirect_urls: authRedirectUrls,
   backend_mode: backendMode,
-  session_transition: backendMode === 'self-hosted' ? 'refresh-or-reauth' : null,
+  session_transition: backendMode === 'self-hosted' || activationEnabled ? 'refresh-or-reauth' : null,
   canonical_cutover: requireCanonicalCutover,
+  backend_activation: activation,
 }));

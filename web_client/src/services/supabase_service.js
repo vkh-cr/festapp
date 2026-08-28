@@ -1,9 +1,11 @@
 import { AppConfig } from '../app_config.js';
 import { createClient } from '@supabase/supabase-js';
+import { BackendActivationService } from './backend_activation_service.js';
 
 export class SupabaseService {
     static _client = null;
     static _initialization = null;
+    static _backend = null;
     static tokenKey = AppConfig.Keys.auth;
     static originMarkerKey = 'festapp-supabase-auth-origin';
     static clientOptions = Object.freeze({
@@ -12,9 +14,13 @@ export class SupabaseService {
 
     static getClient() {
         if (!SupabaseService._client) {
+            if (!SupabaseService._backend) {
+                throw new Error('SupabaseService.initialize() must resolve the backend first');
+            }
+            const backend = SupabaseService._backend;
             SupabaseService._client = createClient(
-                AppConfig.supabaseUrl,
-                AppConfig.anonKey,
+                backend.supabaseUrl,
+                backend.anonKey,
                 SupabaseService.clientOptions,
             );
         }
@@ -33,12 +39,14 @@ export class SupabaseService {
     }
 
     static async _initialize() {
+        SupabaseService._backend = await new BackendActivationService().resolve();
         const client = SupabaseService.getClient();
+        const activeOrigin = SupabaseService._backend.supabaseUrl;
         const previousOrigin = localStorage.getItem(SupabaseService.originMarkerKey);
         const { data, error } = await client.auth.getSession();
         if (error) throw error;
         const session = data?.session;
-        if (session && previousOrigin !== AppConfig.supabaseUrl) {
+        if (session && previousOrigin !== activeOrigin) {
             const refreshToken = session.refresh_token;
             if (!refreshToken) throw new Error('Stored Supabase session has no refresh token');
             const { data: refreshed, error: refreshError } =
@@ -51,13 +59,13 @@ export class SupabaseService {
                         console.warn('Local Supabase session cleanup failed', signOutError);
                     }
                     localStorage.removeItem(SupabaseService.tokenKey);
-                    localStorage.setItem(SupabaseService.originMarkerKey, AppConfig.supabaseUrl);
+                    localStorage.setItem(SupabaseService.originMarkerKey, activeOrigin);
                     return client;
                 }
                 throw refreshError ?? new Error('Supabase session refresh returned no session');
             }
         }
-        localStorage.setItem(SupabaseService.originMarkerKey, AppConfig.supabaseUrl);
+        localStorage.setItem(SupabaseService.originMarkerKey, activeOrigin);
         return client;
     }
 

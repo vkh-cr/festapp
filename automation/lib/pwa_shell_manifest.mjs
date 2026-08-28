@@ -6,6 +6,7 @@ const excludedNames = new Set([
   '_headers',
   '_redirects',
   '_worker.js',
+  'backend-activation.json',
   'flutter_service_worker.js',
   'festapp_service_worker.js',
 ]);

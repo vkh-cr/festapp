@@ -34,6 +34,7 @@ echo "Temp project root: $TMP_ROOT"
 mkdir -p "$TMP_ROOT/automation" \
          "$TMP_ROOT/automation/hetzner-supabase/merge" \
          "$TMP_ROOT/automation/lib" \
+         "$TMP_ROOT/automation/release" \
          "$TMP_ROOT/automation/release/legal" \
          "$TMP_ROOT/automation/templates/web/delete-account" \
          "$TMP_ROOT/android/app/src/main/kotlin/fstapp/example" \
@@ -53,6 +54,8 @@ cp "$PROJECT_ROOT/automation/apply_config.sh" "$TMP_ROOT/automation/apply_config
 cp "$PROJECT_ROOT/automation/hetzner-supabase/merge/source-registry.json" \
    "$TMP_ROOT/automation/hetzner-supabase/merge/source-registry.json"
 cp "$PROJECT_ROOT/automation/lib/supabase_client_config.mjs" "$TMP_ROOT/automation/lib/supabase_client_config.mjs"
+cp "$PROJECT_ROOT/automation/lib/backend_activation_manifest.mjs" "$TMP_ROOT/automation/lib/backend_activation_manifest.mjs"
+cp "$PROJECT_ROOT/automation/release/generate_backend_activation_manifest.mjs" "$TMP_ROOT/automation/release/generate_backend_activation_manifest.mjs"
 cp "$PROJECT_ROOT/automation/release/render_legal_pages.mjs" "$TMP_ROOT/automation/release/render_legal_pages.mjs"
 cp "$PROJECT_ROOT"/automation/release/legal/*.md "$TMP_ROOT/automation/release/legal/"
 cp "$PROJECT_ROOT/automation/templates/web/delete-account/index.html" "$TMP_ROOT/automation/templates/web/delete-account/index.html"
@@ -123,6 +126,14 @@ assert_missing() {
         echo "  ok: $file does not contain '$needle'"
     fi
 }
+assert_not_file() {
+    if [ -e "$1" ]; then
+        echo "  FAIL: unexpected file exists: $1"
+        fail=1
+    else
+        echo "  ok: file is absent: $1"
+    fi
+}
 
 echo
 echo "--- web/index.html (Flutter template) ---"
@@ -188,6 +199,7 @@ echo
 echo "--- web_client/src/app_config.js ---"
 assert_contains "$TMP_ROOT/web_client/src/app_config.js" "static supabaseUrl = 'https://test.supabase.co';"
 assert_contains "$TMP_ROOT/web_client/src/app_config.js" "static anonKey = 'test-anon-key-fixture';"
+assert_contains "$TMP_ROOT/web_client/src/app_config.js" "static backendActivationTenantId = '';"
 assert_contains "$TMP_ROOT/web_client/src/app_config.js" "auth: 'sb-test-auth-token'"
 assert_contains "$TMP_ROOT/web_client/src/app_config.js" "static organization = 42;"
 assert_contains "$TMP_ROOT/web_client/src/app_config.js" "static isAllUnit = true;"
@@ -210,6 +222,8 @@ echo
 echo "--- lib/app_config.dart ---"
 assert_contains "$TMP_ROOT/lib/app_config.dart" "static const String supabaseUrl = 'https://test.supabase.co';"
 assert_contains "$TMP_ROOT/lib/app_config.dart" "'test-anon-key-fixture';"
+assert_contains "$TMP_ROOT/lib/app_config.dart" "static const String supabaseAuthStorageKey = 'sb-test-auth-token';"
+assert_contains "$TMP_ROOT/lib/app_config.dart" "static const String backendActivationTenantId = '';"
 assert_contains "$TMP_ROOT/lib/app_config.dart" "static const int organization = 42;"
 assert_contains "$TMP_ROOT/lib/app_config.dart" "static const bool isAllUnit = true;"
 assert_contains "$TMP_ROOT/lib/app_config.dart" 'static const String webLink = "https://test.example.com";'
@@ -280,6 +294,84 @@ printf '\nSUPABASE_AUTH_STORAGE_KEY=sb-previous-cloud-auth-token\n' >> "$TMP_ROO
 }
 assert_contains "$TMP_ROOT/web_client/src/app_config.js" "auth: 'sb-previous-cloud-auth-token'"
 assert_contains "$TMP_ROOT/web_client/public/auth_bridge.html" "const SUPABASE_KEY = 'sb-previous-cloud-auth-token';"
+
+echo
+echo "--- one-way backend activation generation ---"
+node - "$TMP_ROOT/automation/project.conf" <<'NODE'
+const fs = require('fs');
+const configPath = process.argv[2];
+let source = fs.readFileSync(configPath, 'utf8');
+for (const [key, value] of Object.entries({
+  BACKEND_ACTIVATION_TENANT_ID: 'fixture-transition',
+  BACKEND_ACTIVATION_PHASE: 'legacy',
+  BACKEND_ACTIVATION_CANONICAL_SUPABASE_URL: 'https://api.festapp.net',
+  BACKEND_ACTIVATION_CANONICAL_SUPABASE_ANON_KEY: 'fixture-canonical-key',
+})) {
+  const line = `${key}=${value}`;
+  source = new RegExp(`^${key}=.*$`, 'm').test(source)
+    ? source.replace(new RegExp(`^${key}=.*$`, 'm'), line)
+    : `${source.trimEnd()}\n${line}\n`;
+}
+fs.writeFileSync(configPath, source);
+NODE
+./automation/apply_config.sh > apply_config-activation.log 2>&1 || {
+    echo "apply_config.sh rejected complete activation configuration. Log:"
+    cat apply_config-activation.log
+    exit 1
+}
+cmp -s "$TMP_ROOT/web/backend-activation.json" \
+       "$TMP_ROOT/web_client/public/backend-activation.json" || {
+    echo "activation manifests differ" >&2; exit 1;
+}
+assert_contains "$TMP_ROOT/web/backend-activation.json" '"backend":"legacy"'
+assert_contains "$TMP_ROOT/lib/app_config.dart" \
+    "static const String backendActivationTenantId = 'fixture-transition';"
+assert_contains "$TMP_ROOT/lib/app_config.dart" \
+    "static const String backendActivationManifestUrl = 'https://test.example.com/backend-activation.json';"
+assert_contains "$TMP_ROOT/web_client/src/app_config.js" \
+    "static backendActivationCanonicalSupabaseUrl = 'https://api.festapp.net';"
+EXPECTED_ACTIVATION_SHA="$(node --input-type=module - \
+    "$TMP_ROOT/automation/lib/backend_activation_manifest.mjs" <<'NODE'
+const modulePath = process.argv[2];
+const { canonicalBackendActivationSha256 } = await import(`file://${modulePath}`);
+process.stdout.write(canonicalBackendActivationSha256('fixture-transition'));
+NODE
+)"
+assert_contains "$TMP_ROOT/lib/app_config.dart" "$EXPECTED_ACTIVATION_SHA"
+
+sed -i.bak \
+    's#^BACKEND_ACTIVATION_CANONICAL_SUPABASE_URL=.*#BACKEND_ACTIVATION_CANONICAL_SUPABASE_URL=https://api.example.com#' \
+    "$TMP_ROOT/automation/project.conf"
+set +e
+./automation/apply_config.sh > apply_config-activation-same-origin.log 2>&1
+same_origin_status=$?
+set -e
+if [ "$same_origin_status" -eq 0 ]; then
+    echo "apply_config.sh accepted identical legacy and canonical origins" >&2
+    exit 1
+fi
+assert_contains "$TMP_ROOT/apply_config-activation-same-origin.log" \
+    'backend activation canonical origin must differ from the legacy origin'
+mv "$TMP_ROOT/automation/project.conf.bak" "$TMP_ROOT/automation/project.conf"
+
+node - "$TMP_ROOT/automation/project.conf" <<'NODE'
+const fs = require('fs');
+const configPath = process.argv[2];
+let source = fs.readFileSync(configPath, 'utf8');
+for (const key of [
+  'BACKEND_ACTIVATION_TENANT_ID',
+  'BACKEND_ACTIVATION_PHASE',
+  'BACKEND_ACTIVATION_CANONICAL_SUPABASE_URL',
+  'BACKEND_ACTIVATION_CANONICAL_SUPABASE_ANON_KEY',
+]) source = source.replace(new RegExp(`^${key}=.*$`, 'm'), `${key}=`);
+fs.writeFileSync(configPath, source);
+NODE
+./automation/apply_config.sh > apply_config-activation-disabled.log 2>&1 || {
+    cat apply_config-activation-disabled.log; exit 1;
+}
+assert_not_file "$TMP_ROOT/web/backend-activation.json"
+assert_not_file "$TMP_ROOT/web_client/public/backend-activation.json"
+assert_contains "$TMP_ROOT/lib/app_config.dart" "static const String backendActivationTenantId = '';"
 
 for invalid_url in \
     'https://user:pass@api.example.com' \

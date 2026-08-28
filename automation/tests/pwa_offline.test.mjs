@@ -55,6 +55,8 @@ try {
   assert.match(worker, /event\.data === 'SKIP_WAITING'/);
   assert.match(worker, /FESTAPP_QUERY_BUILD_VERSION/);
   assert.match(worker, /url\.pathname === '\/festapp-version\.json'/);
+  assert.match(worker, /url\.pathname === '\/backend-activation\.json'/);
+  assert.match(worker, /fetch\(request, \{ cache: 'no-store' \}\)/);
   assert.match(worker, /url\.origin === 'https:\/\/fonts\.gstatic\.com'/);
   assert.match(worker, /url\.origin === 'https:\/\/fonts\.googleapis\.com'/);
   assert.match(worker, /festapp-used-fonts-v1/);
@@ -64,6 +66,11 @@ try {
   assert.match(worker, /const FORCED_OCCASION_PATH = "\/csmostrava2026";/);
   assert.match(worker, /cache\.put\(request, response\.clone\(\)\)/);
   const coreUrls = JSON.parse(worker.match(/const CORE_URLS = (\[[\s\S]*?\]);/)[1]);
+  const precacheUrls = JSON.parse(
+    worker.match(/const PRECACHE_URLS = (\[[\s\S]*?\]);/)[1],
+  );
+  assert.ok(!precacheUrls.includes('/backend-activation.json'),
+    'backend activation must not be part of the app-shell precache');
   assert.ok(coreUrls.includes('/main.dart.js'));
   assert.ok(coreUrls.includes('/flutter?pwa-cache=1'));
   assert.ok(coreUrls.includes('/privacy/'),
@@ -98,6 +105,8 @@ try {
   const cachedWebClient = new Response('<html>generic event list</html>');
   const cachedPrivacy = new Response('<html>privacy policy</html>');
   let networkCalls = 0;
+  let activationNetworkCalls = 0;
+  let activationDocument = '{"schemaVersion":1,"tenantId":"test","generation":1,"backend":"legacy"}\n';
   let serverVersion = '1.2.3+5';
   let cachePutFails = false;
   const cachedPuts = [];
@@ -161,8 +170,15 @@ try {
       },
     },
     fetch: async (request) => {
-      networkCalls++;
       const url = String(request.url || request);
+      if (url.includes('/backend-activation.json')) {
+        activationNetworkCalls++;
+        if (!context.self.navigator.onLine) throw new Error('offline');
+        return new Response(activationDocument, {
+          headers: { 'content-type': 'application/json' },
+        });
+      }
+      networkCalls++;
       if (url.includes('/festapp-version.json')) {
         return new Response(JSON.stringify({ version: serverVersion }), {
           headers: { 'content-type': 'application/json' },
@@ -287,6 +303,27 @@ try {
   );
   assert.equal(versionResponse.type, 'error');
   assert.equal(networkCalls, 0);
+
+  const activationRequest = new Request(
+    'https://app.test/backend-activation.json?t=first',
+  );
+  await assert.rejects(
+    dispatchFetch(activationRequest),
+    /offline/,
+    'offline activation must fail without a cached document fallback',
+  );
+  assert.equal(activationNetworkCalls, 1);
+  context.self.navigator.onLine = true;
+  const legacyActivationResponse = await dispatchFetch(activationRequest);
+  assert.match(await legacyActivationResponse.text(), /"backend":"legacy"/);
+  activationDocument = '{"schemaVersion":1,"tenantId":"test","generation":1,"backend":"canonical"}\n';
+  const canonicalActivationResponse = await dispatchFetch(new Request(
+    'https://app.test/backend-activation.json?t=second',
+  ));
+  assert.match(await canonicalActivationResponse.text(), /"backend":"canonical"/);
+  assert.equal(activationNetworkCalls, 3);
+  assert.ok(!cachedPuts.some((url) => url.includes('backend-activation.json')),
+    'the activation document must never enter Cache Storage');
 
   // An incomplete/stale app-shell must never fill an executable Flutter chunk
   // from a newer deployment. Mixing main.dart.js generations leaves the app
@@ -424,6 +461,7 @@ try {
   );
   assert.match(ciBuild, /build_web_bundle\.sh" static/);
   assert.match(cloudflareBuild, /build_web_bundle\.sh" cloudflare/);
+  assert.match(cloudflareBuild, /path === "\/backend-activation\.json"[\s\S]*?"no-store, max-age=0"/);
   assert.match(sharedBuild, /cd web_client && npm ci && npm run build/);
   assert.match(sharedBuild, /apply_config\.sh/);
   assert.match(sharedBuild, /emit_version_manifest\.sh/);

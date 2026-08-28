@@ -15,12 +15,14 @@ test('worker and budget share normalized resource sets and raw bytes', async () 
     await writeFile(path.join(root, 'main.dart.js'), 'main');
     await writeFile(path.join(root, 'main.dart.1.0.0-1.js'), 'diagnostic-copy');
     await writeFile(path.join(root, 'asset.bin'), 'asset');
+    await writeFile(path.join(root, 'backend-activation.json'), 'activation');
     await writeFile(path.join(root, 'privacy/index.html'), 'privacy');
     const manifest = await collectPwaShellManifest(root);
     assert.deepEqual(manifest.knownResources, [
       '/asset.bin', '/flutter?pwa-cache=1', '/main.dart.js', '/privacy/',
       '/webclient?pwa-cache=1',
     ]);
+    assert.ok(!manifest.knownResources.includes('/backend-activation.json'));
     assert.deepEqual(manifest.coreResources, [
       '/flutter?pwa-cache=1', '/main.dart.js', '/privacy/', '/webclient?pwa-cache=1',
     ]);

@@ -135,6 +135,20 @@ if node "$PROJECT_ROOT/automation/verify_web_build.mjs" "$BUILD_DIR" "1.2.3+456"
 else
     echo "  FAIL: coherent web release was rejected by the build gate"; fail=1
 fi
+mkdir -p "$TMP_ROOT/partial/automation"
+cp "$PROJECT_ROOT/automation/project.conf" "$TMP_ROOT/partial/automation/project.conf"
+sed -i.bak 's/^BACKEND_ACTIVATION_PHASE=.*/BACKEND_ACTIVATION_PHASE=legacy/' \
+  "$TMP_ROOT/partial/automation/project.conf"
+if node "$PROJECT_ROOT/automation/verify_web_build.mjs" "$BUILD_DIR" "1.2.3+456" \
+    "$TMP_ROOT/partial/automation/project.conf" cloudflare \
+    > "$TMP_ROOT/partial-activation.log" 2>&1; then
+    echo "  FAIL: build gate accepted partial backend activation configuration"; fail=1
+elif grep -Fq 'backend activation configuration must be complete' \
+    "$TMP_ROOT/partial-activation.log"; then
+    echo "  ok: build gate rejects partial backend activation configuration"
+else
+    echo "  FAIL: build gate rejected partial activation for the wrong reason"; fail=1
+fi
 printf '// mismatched bundle\n' > "$BUILD_DIR/main.dart.1.2.3-456.js"
 if node "$PROJECT_ROOT/automation/verify_web_build.mjs" "$BUILD_DIR" "1.2.3+456" > /dev/null 2>&1; then
     echo "  FAIL: build gate accepted mismatched main bundles"; fail=1

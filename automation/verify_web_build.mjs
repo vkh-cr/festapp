@@ -3,7 +3,14 @@
 import assert from 'node:assert/strict';
 import { readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
-import { resolvedAuthStorageKey } from './lib/supabase_client_config.mjs';
+import {
+  parseSupabaseOrigin,
+  resolvedAuthStorageKey,
+} from './lib/supabase_client_config.mjs';
+import {
+  backendActivationDocument,
+  canonicalBackendActivationSha256,
+} from './lib/backend_activation_manifest.mjs';
 
 const buildDir = path.resolve(process.argv[2] || 'build/web');
 const expectedVersion = process.argv[3];
@@ -95,6 +102,22 @@ assert.equal(parsedSupabaseUrl.protocol, 'https:', 'project.conf SUPABASE_URL mu
 assert.equal(parsedSupabaseUrl.origin + '/', parsedSupabaseUrl.href.replace(/\/?$/, '/'),
   'project.conf SUPABASE_URL must be an origin without a path, query, or fragment');
 const expectedProjectRef = parsedSupabaseUrl.hostname.match(/^([a-z0-9]+)\.supabase\.co$/)?.[1];
+const activationTenantId = configValue('BACKEND_ACTIVATION_TENANT_ID');
+const activationPhase = configValue('BACKEND_ACTIVATION_PHASE');
+const activationCanonicalUrl = configValue('BACKEND_ACTIVATION_CANONICAL_SUPABASE_URL');
+const activationCanonicalKey = configValue('BACKEND_ACTIVATION_CANONICAL_SUPABASE_ANON_KEY');
+const activationValues = [
+  activationTenantId,
+  activationPhase,
+  activationCanonicalUrl,
+  activationCanonicalKey,
+];
+const activationEnabled = activationValues.some(Boolean);
+assert.equal(
+  activationValues.every(Boolean),
+  activationEnabled,
+  'backend activation configuration must be complete or entirely disabled',
+);
 assert.ok(expectedAnonKey, 'project.conf is missing SUPABASE_ANON_KEY');
 const anonPayload = JSON.parse(
   Buffer.from(expectedAnonKey.split('.')[1] || '', 'base64url').toString('utf8'),
@@ -112,6 +135,34 @@ assert.ok(
   main.includes(Buffer.from(expectedAnonKey)),
   'compiled Flutter bundle does not contain the configured Supabase anon key',
 );
+if (activationEnabled) {
+  assert.match(activationTenantId, /^[a-z0-9][a-z0-9-]*$/,
+    'backend activation tenant must be a lowercase slug');
+  assert.ok(['legacy', 'canonical'].includes(activationPhase),
+    'backend activation phase must be legacy or canonical');
+  assert.equal(parseSupabaseOrigin(activationCanonicalUrl), 'https://api.festapp.net',
+    'canonical activation origin must be https://api.festapp.net');
+  assert.notEqual(activationCanonicalUrl, supabaseUrl,
+    'legacy and canonical activation origins must be distinct');
+  const canonicalAnonPayload = JSON.parse(
+    Buffer.from(activationCanonicalKey.split('.')[1] || '', 'base64url').toString('utf8'),
+  );
+  assert.equal(canonicalAnonPayload.role, 'anon',
+    'canonical activation JWT must use the anon role');
+  assert.equal(canonicalAnonPayload.iss, 'supabase',
+    'canonical activation JWT must be issued by Supabase');
+  assert.ok(main.includes(Buffer.from(activationCanonicalUrl)),
+    'compiled Flutter bundle lacks the canonical activation origin');
+  assert.ok(main.includes(Buffer.from(activationCanonicalKey)),
+    'compiled Flutter bundle lacks the canonical activation key');
+  assert.equal(
+    await readFile(path.join(buildDir, 'backend-activation.json'), 'utf8'),
+    backendActivationDocument(activationTenantId, activationPhase),
+    'built activation manifest differs from project.conf',
+  );
+  assert.ok(main.includes(Buffer.from(canonicalBackendActivationSha256(activationTenantId))),
+    'compiled Flutter bundle lacks the pinned activation digest');
+}
 const loadingLogo = configValue('WEB_LOADING_LOGO_ASSET');
 assert.ok(loadingLogo, 'project.conf is missing WEB_LOADING_LOGO_ASSET');
 assert.match(
@@ -195,6 +246,12 @@ assert.ok(
   webAssetBytes.includes(Buffer.from(expectedAnonKey)),
   'vanilla web bundle does not contain the configured Supabase anon key',
 );
+if (activationEnabled) {
+  assert.ok(webAssetBytes.includes(Buffer.from(activationCanonicalUrl)),
+    'vanilla web bundle lacks the canonical activation origin');
+  assert.ok(webAssetBytes.includes(Buffer.from(activationCanonicalKey)),
+    'vanilla web bundle lacks the canonical activation key');
+}
 const bundledCloudOrigins = new Set(
   webAssetSources.flatMap((source) =>
     [...source.matchAll(/https:\/\/[a-z0-9]+\.supabase\.co/g)].map((match) => match[0]),
@@ -202,7 +259,11 @@ const bundledCloudOrigins = new Set(
 );
 assert.deepEqual(
   [...bundledCloudOrigins],
-  expectedProjectRef ? [supabaseUrl] : [],
+  [
+    ...(expectedProjectRef ? [supabaseUrl] : []),
+    ...(activationCanonicalUrl?.match(/^https:\/\/[a-z0-9]+\.supabase\.co$/)
+      ? [activationCanonicalUrl] : []),
+  ],
   'vanilla web bundle contains a stale Supabase Cloud origin',
 );
 const bundledAuthKeys = new Set(

@@ -11,6 +11,11 @@ and bank callbacks, e-mail/image workers and manual scripts. For each entry,
 record its deployed version, canonical endpoint capability, write path, owner
 and rollback behavior.
 
+The authoritative client inventory and per-lane evidence contract is
+[`client-cutover-release-matrix-2026-08-28.md`](client-cutover-release-matrix-2026-08-28.md).
+Cutover is blocked until every row is closed; an unlisted active writer is a
+failed inventory, not an implicit exception.
+
 Before cutover:
 
 - approved iOS and Android builds must be published with canonical endpoint
@@ -29,10 +34,15 @@ Before cutover:
 Auth continuity is a separate hard gate. Every imported user UUID and
 `encrypted_password` value must match the fresh source snapshot exactly; hashes
 must never be re-created or replaced with temporary passwords. Provider
-identities, MFA records, sessions and refresh tokens must also reconcile with
-zero missing or changed rows. Exercise password, OAuth and refresh-token login
-canaries against the target before routing users. A mismatch for one account is
-a no-go. Existing access-JWT continuity must be tested independently because a
+identities, MFA records, sessions and refresh tokens belonging to retained UUIDs
+must reconcile with zero unexplained missing or changed rows. An explicitly
+approved identity merge may discard the superseded source session only when its
+exact count is recorded and ordinary reauthentication is accepted. The current
+known exception is the five approved Slunovrat identity merges; their source
+sessions were intentionally not imported. Exercise password, OAuth and
+refresh-token login canaries against the target before routing users. Any other
+mismatch for one account is a no-go. Existing access-JWT continuity must be
+tested independently because a
 JWT signing-key change can invalidate an already-issued access token even when
 the password hash and refresh token are preserved perfectly.
 
@@ -82,9 +92,73 @@ valid HTTP 200 with the wrong organization or a 404.
 This applies independently to every tenant overlay. In the 2026-08-28
 Slunovrat rehearsal, source organization `1` mapped to canonical organization
 `19`; the legacy value must not be copied into web, iOS, or Android config.
+
+### Store release before the write cutover
+
+A tenant that must publish mobile binaries before the production freeze uses
+the one-way backend activation contract instead of shipping a dual writer. Its
+pre-cutover `project.conf` keeps `SUPABASE_URL` and `SUPABASE_ANON_KEY` on the
+legacy cloud and adds:
+
+```text
+BACKEND_ACTIVATION_TENANT_ID=<tenant-slug>
+BACKEND_ACTIVATION_PHASE=legacy
+BACKEND_ACTIVATION_CANONICAL_SUPABASE_URL=https://api.festapp.net
+BACKEND_ACTIVATION_CANONICAL_SUPABASE_ANON_KEY=<canonical-public-anon-key>
+```
+
+`apply_config.sh` emits `backend-activation.json` and bakes the SHA-256 of the
+exact future canonical document into Flutter and the vanilla web client. A
+client can therefore select only its compiled legacy backend or its compiled
+canonical backend; the remote document cannot supply an origin or key. Missing,
+modified and legacy documents select legacy. Once the exact canonical document
+is observed, a local monotonic marker prevents rollback to the old writer.
+Every process resolves this choice before constructing Supabase, and Flutter
+uses the explicit legacy `SUPABASE_AUTH_STORAGE_KEY` on both origins.
+
+The corresponding private release manifest must record
+`backend.activation.strategy: "pinned-one-way-manifest"`, the tenant, current
+phase, manifest URL, canonical document and anon-key SHA-256 values, stable auth
+storage key, canonical origin, and `finalRefreshTokenDeltaRequired: true`.
+The common release preflight compares this object with configuration, generated
+clients and both emitted public manifest copies.
+
+At the operational cutover, do not activate while the legacy source still
+accepts uncontrolled writes. In one guarded sequence:
+
+1. freeze legacy writes and prove the DML/write-authority gate;
+2. export and import the final business, Auth session/refresh-token, and Storage
+   delta, then pass the canonical refresh-session canary;
+3. open canonical write authority;
+4. keep the transition release's compiled `SUPABASE_URL`/key on legacy, change
+   only `BACKEND_ACTIVATION_PHASE=canonical`, rerun `apply_config.sh`, and
+   atomically deploy the web output containing the exact canonical activation
+   document; the pinned resolver, not a second compiled default, owns this switch;
+5. verify web/iOS/Android cold starts, writes and session refresh against only
+   the canonical endpoint.
+
+An already running native process cannot safely replace its Supabase singleton.
+Once the legacy source is frozen its late write must fail, never be silently
+lost. Backgrounding and foregrounding alone do not switch an existing process;
+the app must be fully restarted, and only the next cold start resolves the
+canonical activation. Normal installations retain their session because refresh
+tokens and the storage namespace migrate unchanged. Only a token already
+expired, revoked, terminally consumed, or belonging to an approved merged
+identity follows ordinary reauthentication/local-sign-out policy.
+
+The resolver remains a permanent architectural boundary, but not an arbitrary
+remote multi-backend switch. This release permits only its compiled legacy
+backend and one cryptographically pinned, monotonic canonical activation. After
+decommission evidence passes, remove the legacy URL/key and rollback branch,
+while retaining the resolver interface for a future versioned migration. Any
+future endpoint generation requires a new client release that pins the new
+origin, public-key digest, session policy and activation-document digest; a
+remote document is never allowed to introduce an uncompiled endpoint or key.
+
 Set `FESTAPP_CANONICAL_CUTOVER_RELEASE=1` for the web, Android and iOS release
-builders. That flag rejects a syntactically valid legacy-cloud manifest. The
-same preflight runs before compilation in all three builders. The completed web
+builders. That flag accepts either a direct self-hosted manifest or the complete
+pinned one-way transition contract; it rejects a plain legacy-cloud manifest.
+The same preflight runs before compilation in all three builders. The completed web
 bundle verifier additionally proves that the vanilla client, Flutter bundle,
 and auth bridge contain the exact configured origin/key/namespace and no stale
 Supabase Cloud origin.

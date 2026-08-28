@@ -40,8 +40,15 @@ done
 
 grep -qE 'fixturecsm' "$TMP_ROOT/csmostrava2026/lib/app_config.dart"
 grep -qE 'fixturehm' "$TMP_ROOT/hvezdamorska/lib/app_config.dart"
-grep -qE 'fixtureslunovrat' "$TMP_ROOT/festivalslunovrat/lib/app_config.dart"
+grep -qF "supabaseUrl = 'https://fixtureslunovrat.supabase.co'" "$TMP_ROOT/festivalslunovrat/lib/app_config.dart"
 grep -qE 'organization = 5' "$TMP_ROOT/festivalslunovrat/web_client/src/app_config.js"
+grep -qF "backendActivationTenantId = 'festivalslunovrat'" "$TMP_ROOT/festivalslunovrat/lib/app_config.dart"
+grep -qF "backendActivationCanonicalSupabaseUrl = 'https://api.festapp.net'" "$TMP_ROOT/festivalslunovrat/web_client/src/app_config.js"
+! grep -qF "backendActivationCanonicalSupabaseUrl = 'https://fixtureslunovrat.supabase.co'" "$TMP_ROOT/festivalslunovrat/web_client/src/app_config.js"
+cmp "$TMP_ROOT/festivalslunovrat/web/backend-activation.json" \
+  "$TMP_ROOT/festivalslunovrat/web_client/public/backend-activation.json"
+grep -qF '"generation":0,"backend":"legacy"' \
+  "$TMP_ROOT/festivalslunovrat/web/backend-activation.json"
 grep -qE "supportedLanguages = \['cs', 'en', 'pl'\]" "$TMP_ROOT/festivalslunovrat/web_client/src/app_config.js"
 grep -qE 'organization = 4' "$TMP_ROOT/hvezdamorska/web_client/src/app_config.js"
 grep -qE 'static const bool isAllUnit = true;' "$TMP_ROOT/hvezdamorska/lib/app_config.dart"

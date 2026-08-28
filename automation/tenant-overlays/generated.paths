@@ -12,6 +12,7 @@ lib/theme_config.dart
 pubspec.yaml
 web/.well-known/apple-app-site-association
 web/apple-app-site-association
+web/backend-activation.json
 web/index.html
 web/delete-account/index.html
 web/privacy/index.html
@@ -23,6 +24,7 @@ web_client/index.html
 web_client/package.json
 web_client/public/CNAME
 web_client/public/auth_bridge.html
+web_client/public/backend-activation.json
 web_client/public/site.webmanifest
 web_client/src/app_config.js
 web_client/src/theme_config.css

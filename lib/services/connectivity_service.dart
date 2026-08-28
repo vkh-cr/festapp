@@ -42,8 +42,18 @@ class ConnectivityService {
 
   /// Public health endpoint that answers without auth; getting *any* response
   /// from it proves the backend is reachable again.
-  static final Uri _healthUri =
+  static Uri _healthUri =
       Uri.parse('${AppConfig.effectiveSupabaseUrl}/auth/v1/health');
+
+  /// Must be called before [initialize] when startup selected a transition
+  /// backend. Supabase and the reachability probe then observe one origin.
+  static void configureBackendOrigin(String origin) {
+    if (_subscription != null) {
+      throw StateError(
+          'Backend origin cannot change after connectivity startup');
+    }
+    _healthUri = Uri.parse('$origin/auth/v1/health');
+  }
 
   /// Starts the connectivity listener and seeds the interface state. Idempotent.
   static Future<void> initialize() async {
@@ -178,6 +188,7 @@ class ConnectivityService {
     _subscription = null;
     _probeInFlight = null;
     _debugProbe = null;
+    _healthUri = Uri.parse('${AppConfig.effectiveSupabaseUrl}/auth/v1/health');
     _interfaceOffline = false;
     _backendUnreachable = false;
     _consecutiveFailures = 0;

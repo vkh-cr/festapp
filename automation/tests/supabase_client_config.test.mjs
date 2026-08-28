@@ -13,6 +13,10 @@ import {
   parseSupabaseOrigin,
   resolvedAuthStorageKey,
 } from '../lib/supabase_client_config.mjs';
+import {
+  backendActivationDocument,
+  canonicalBackendActivationSha256,
+} from '../lib/backend_activation_manifest.mjs';
 
 const root = path.resolve(import.meta.dirname, '../..');
 
@@ -63,7 +67,8 @@ const jwt = (payload) => [
   'test-signature',
 ].join('.');
 
-function makePreflightFixture({ origin, key, generation, authStorageKey, backend }) {
+function makePreflightFixture({ origin, key, generation, authStorageKey, backend,
+  activation = null }) {
   const fixture = fs.mkdtempSync(path.join(os.tmpdir(), 'festapp-cutover-preflight-'));
   for (const relative of ['automation/release', 'automation/lib', 'lib', 'web_client/src']) {
     fs.mkdirSync(path.join(fixture, relative), { recursive: true });
@@ -76,10 +81,25 @@ function makePreflightFixture({ origin, key, generation, authStorageKey, backend
     path.join(root, 'automation/lib/supabase_client_config.mjs'),
     path.join(fixture, 'automation/lib/supabase_client_config.mjs'),
   );
+  fs.copyFileSync(
+    path.join(root, 'automation/lib/backend_activation_manifest.mjs'),
+    path.join(fixture, 'automation/lib/backend_activation_manifest.mjs'),
+  );
+  if (activation) {
+    fs.mkdirSync(path.join(fixture, 'web'), { recursive: true });
+    fs.mkdirSync(path.join(fixture, 'web_client/public'), { recursive: true });
+    const document = backendActivationDocument(activation.tenantId, activation.phase);
+    fs.writeFileSync(path.join(fixture, 'web/backend-activation.json'), document);
+    fs.writeFileSync(path.join(fixture, 'web_client/public/backend-activation.json'), document);
+  }
   fs.writeFileSync(path.join(fixture, 'automation/project.conf'), [
     `SUPABASE_URL=${origin}`,
     `SUPABASE_ANON_KEY=${key}`,
     `SUPABASE_AUTH_STORAGE_KEY=${authStorageKey}`,
+    `BACKEND_ACTIVATION_TENANT_ID=${activation?.tenantId ?? ''}`,
+    `BACKEND_ACTIVATION_PHASE=${activation?.phase ?? ''}`,
+    `BACKEND_ACTIVATION_CANONICAL_SUPABASE_URL=${activation?.canonicalOrigin ?? ''}`,
+    `BACKEND_ACTIVATION_CANONICAL_SUPABASE_ANON_KEY=${activation?.canonicalKey ?? ''}`,
     `PUSH_APP_GENERATION=${generation}`,
     'ORGANIZATION_ID=12',
     'WEB_LINK=https://app.example.test',
@@ -88,10 +108,21 @@ function makePreflightFixture({ origin, key, generation, authStorageKey, backend
     `static const String supabaseUrl = '${origin}';`,
     `static const String anonKey = '${key}';`,
     `static const String pushAppGeneration = '${generation}';`,
+    `static const String supabaseAuthStorageKey = '${authStorageKey}';`,
+    `static const String backendActivationTenantId = '${activation?.tenantId ?? ''}';`,
+    `static const String backendActivationManifestUrl = '${activation ? 'https://app.example.test/backend-activation.json' : ''}';`,
+    `static const String backendActivationCanonicalManifestSha256 = '${activation ? canonicalBackendActivationSha256(activation.tenantId) : ''}';`,
+    `static const String backendActivationCanonicalSupabaseUrl = '${activation?.canonicalOrigin ?? ''}';`,
+    `static const String backendActivationCanonicalAnonKey = '${activation?.canonicalKey ?? ''}';`,
   ].join('\n'));
   fs.writeFileSync(path.join(fixture, 'web_client/src/app_config.js'), [
     `static supabaseUrl = '${origin}';`,
     `static anonKey = '${key}';`,
+    `static backendActivationTenantId = '${activation?.tenantId ?? ''}';`,
+    `static backendActivationManifestUrl = '${activation ? 'https://app.example.test/backend-activation.json' : ''}';`,
+    `static backendActivationCanonicalManifestSha256 = '${activation ? canonicalBackendActivationSha256(activation.tenantId) : ''}';`,
+    `static backendActivationCanonicalSupabaseUrl = '${activation?.canonicalOrigin ?? ''}';`,
+    `static backendActivationCanonicalAnonKey = '${activation?.canonicalKey ?? ''}';`,
     `auth: '${authStorageKey}'`,
   ].join('\n'));
   const manifest = path.join(fixture, 'release.json');
@@ -209,6 +240,90 @@ test('self-hosted canonical cutover preflight binds manifest, key, generation an
   }
 });
 
+test('transition release binds a pinned one-way activation and stable session namespace', () => {
+  const legacyRef = 'legacyslunovratref';
+  const origin = `https://${legacyRef}.supabase.co`;
+  const key = jwt({ iss: 'supabase', role: 'anon', ref: legacyRef });
+  const canonicalKey = jwt({ iss: 'supabase', role: 'anon' });
+  const authStorageKey = `sb-${legacyRef}-auth-token`;
+  const activation = {
+    tenantId: 'festivalslunovrat',
+    phase: 'legacy',
+    canonicalOrigin: 'https://api.festapp.net',
+    canonicalKey,
+  };
+  const backend = {
+    mode: 'supabase-cloud',
+    releaseIntent: 'canonical-cutover',
+    supabaseOrigin: origin,
+    anonKeySha256: crypto.createHash('sha256').update(key).digest('hex'),
+    installationGeneration: 'slunovrat_transition_v1',
+    authStorageKey,
+    organizationId: 12,
+    authSiteUrl: 'https://app.example.test',
+    authRedirectUrls: [
+      'https://app.example.test/reset-password',
+      'https://app.example.test/resetPassword',
+    ],
+    allowedWebOrigins: ['https://app.example.test'],
+    activation: {
+      tenantId: activation.tenantId,
+      phase: activation.phase,
+      strategy: 'pinned-one-way-manifest',
+      manifestUrl: 'https://app.example.test/backend-activation.json',
+      canonicalManifestSha256: canonicalBackendActivationSha256(activation.tenantId),
+      canonicalSupabaseOrigin: activation.canonicalOrigin,
+      canonicalAnonKeySha256: crypto.createHash('sha256').update(canonicalKey).digest('hex'),
+      authStorageKey,
+      finalRefreshTokenDeltaRequired: true,
+    },
+    sessionTransition: {
+      strategy: 'refresh-or-reauth',
+      legacyAccessTokenPolicy: 'reject-after-cutover',
+      terminalRefreshPolicy: 'local-sign-out',
+      sourceAReauthenticationAllowed: true,
+      refreshCanaryEvidenceSha256: 'a'.repeat(64),
+    },
+  };
+  const { fixture, manifest } = makePreflightFixture({
+    origin, key, generation: 'slunovrat_transition_v1', authStorageKey,
+    backend, activation,
+  });
+  try {
+    const passed = runPreflight(fixture, manifest, '--require-canonical-cutover');
+    assert.equal(passed.status, 0, passed.stderr);
+
+    const configPath = path.join(fixture, 'automation/project.conf');
+    fs.writeFileSync(configPath, fs.readFileSync(configPath, 'utf8').replace(
+      /^BACKEND_ACTIVATION_PHASE=.*$/m,
+      'BACKEND_ACTIVATION_PHASE=canonical',
+    ));
+    for (const relative of [
+      'web/backend-activation.json',
+      'web_client/public/backend-activation.json',
+    ]) {
+      fs.writeFileSync(
+        path.join(fixture, relative),
+        backendActivationDocument(activation.tenantId, 'canonical'),
+      );
+    }
+    backend.activation.phase = 'canonical';
+    fs.writeFileSync(manifest, JSON.stringify({ backend }));
+    const canonicalPhase = runPreflight(fixture, manifest, '--require-canonical-cutover');
+    assert.equal(canonicalPhase.status, 0, canonicalPhase.stderr);
+
+    fs.writeFileSync(
+      path.join(fixture, 'web/backend-activation.json'),
+      backendActivationDocument(activation.tenantId, 'legacy'),
+    );
+    const mismatchedPhase = runPreflight(fixture, manifest);
+    assert.notEqual(mismatchedPhase.status, 0);
+    assert.match(mismatchedPhase.stderr, /differs from the configured activation phase/);
+  } finally {
+    fs.rmSync(fixture, { recursive: true, force: true });
+  }
+});
+
 test('canonical cutover mode refuses an otherwise valid Supabase Cloud manifest', () => {
   const ref = 'abcdefghijklmnopqrst';
   const origin = `https://${ref}.supabase.co`;
@@ -236,7 +351,7 @@ test('canonical cutover mode refuses an otherwise valid Supabase Cloud manifest'
   try {
     const result = runPreflight(fixture, manifest, '--require-canonical-cutover');
     assert.notEqual(result.status, 0);
-    assert.match(result.stderr, /refuses a Supabase Cloud backend/);
+    assert.match(result.stderr, /requires a self-hosted backend or pinned activation transition/);
   } finally {
     fs.rmSync(fixture, { recursive: true, force: true });
   }

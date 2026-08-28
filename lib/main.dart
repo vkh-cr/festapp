@@ -33,6 +33,7 @@ import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/services/web_styles_helper.dart';
 import 'package:fstapp/services/web_bootstrap_bridge.dart';
 import 'package:fstapp/services/app_logger.dart';
+import 'package:fstapp/services/backend_activation_service.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/time_travel_widget.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -157,6 +158,12 @@ Future<void> initializeEverything() async {
     AppLogger.error('Installation cutover failed: $e');
   }
 
+  final resolvedBackend = await BackendActivationService().resolve();
+  ConnectivityService.configureBackendOrigin(resolvedBackend.supabaseUrl);
+  AppLogger.debug(
+    'Backend selected: ${resolvedBackend.isCanonical ? 'canonical' : 'legacy'}',
+  );
+
   SynchroService.configure(
     isLoggedIn: AuthService.isLoggedIn,
     getFullUserInfo: AuthService.getFullUserInfo,
@@ -197,8 +204,13 @@ Future<void> initializeEverything() async {
   var supabaseInitialized = false;
   try {
     await Supabase.initialize(
-      url: AppConfig.effectiveSupabaseUrl,
-      anonKey: AppConfig.effectiveSupabaseAnonKey,
+      url: resolvedBackend.supabaseUrl,
+      publishableKey: resolvedBackend.anonKey,
+      authOptions: FlutterAuthClientOptions(
+        localStorage: SharedPreferencesLocalStorage(
+          persistSessionKey: AppConfig.supabaseAuthStorageKey,
+        ),
+      ),
       // Observe every backend request's outcome so ConnectivityService can tell
       // when the server is unreachable (weak signal / outage), not just when the
       // network interface is down.

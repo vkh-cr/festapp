@@ -1,6 +1,7 @@
 import './theme_config.css';
 import { AppConfig } from './app_config.js';
 import { SupabaseService } from './services/supabase_service.js';
+import { RightsService } from './services/rights_service.js';
 import { RouterService } from './services/router_service.js';
 import { LocalizationService } from './services/localization_service.js';
 import { ThemeService } from './services/theme_service.js';
@@ -14,6 +15,7 @@ class Main {
         try {
             // 1. Init Core Services
             await SupabaseService.initialize();
+            if (!AppConfig.isAppSupported) await RightsService.updateAppData();
             await LocalizationService.init();
             ThemeService.init();
             ImageLoader.init(); // Initialize Image Loader

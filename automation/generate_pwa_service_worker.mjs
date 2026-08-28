@@ -416,6 +416,15 @@ self.addEventListener('fetch', (event) => {
   }
   if (url.origin !== self.location.origin) return;
 
+  // A transition release must observe this document from the deployment, not
+  // from an app-shell generation. It is deliberately absent from PRECACHE_URLS
+  // and has no offline fallback: the client itself keeps legacy until it sees
+  // the exact pinned canonical bytes, then persists a monotonic local marker.
+  if (url.pathname === '/backend-activation.json') {
+    event.respondWith(fetch(request, { cache: 'no-store' }));
+    return;
+  }
+
   // This is the network truth used to discover a newer completed deployment.
   if (url.pathname === '/festapp-version.json') {
     if (self.navigator.onLine === false) {

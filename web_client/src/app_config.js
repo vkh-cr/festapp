@@ -4,6 +4,11 @@ export class AppConfig {
     static version = APP_VERSION;
     static supabaseUrl = 'https://kjdpmixlnhntmxjedpxh.supabase.co';
     static anonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqZHBtaXhsbmhudG14amVkcHhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDE5NDI5NzEsImV4cCI6MjAxNzUxODk3MX0.06nTXCL-i1GxLckfEyCNlVVwt62QTzKUezqmsYSR_MI';
+    static backendActivationTenantId = '';
+    static backendActivationManifestUrl = '';
+    static backendActivationCanonicalManifestSha256 = '';
+    static backendActivationCanonicalSupabaseUrl = '';
+    static backendActivationCanonicalAnonKey = '';
     static organization = 1;
     static forceOccasionLink = null;
     static isAllUnit = false;

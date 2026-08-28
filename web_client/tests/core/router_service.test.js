@@ -218,6 +218,12 @@ test('RouterService.handleInitialLoad', async (t) => {
     const { RouterService } = await import('../../src/services/router_service.js');
     const { AppConfig } = await import('../../src/app_config.js');
     const { RightsService } = await import('../../src/services/rights_service.js');
+    const { SupabaseService } = await import('../../src/services/supabase_service.js');
+    const originalGetClient = SupabaseService.getClient;
+    SupabaseService.getClient = () => ({
+        auth: { getSession: async () => ({ data: { session: null }, error: null }) },
+    });
+    t.after(() => { SupabaseService.getClient = originalGetClient; });
 
     // SETUP CONFIG FOR ALL TESTS
     AppConfig.webLink = "https://vstupenky.online";

@@ -29,10 +29,9 @@ export class UserHeader extends HTMLElement {
         
         window.addEventListener('scroll', this._onScroll, { passive: true });
         
-        // Trigger initial data fetch
-        RightsService.updateAppData().then(() => {
-             // Listener handles update
-        }); 
+        // Main owns backend activation and the initial rights fetch. Starting a
+        // request from custom-element upgrade would race Supabase initialization
+        // and could pin this process to the legacy writer during cutover.
     }
 
     disconnectedCallback() {

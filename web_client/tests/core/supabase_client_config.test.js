@@ -1,8 +1,19 @@
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
 import { AppConfig } from '../../src/app_config.js';
 import { SupabaseService } from '../../src/services/supabase_service.js';
+
+test('unsupported-app header data loads only after Supabase initialization', async () => {
+  const mainSource = await readFile(new URL('../../src/main.js', import.meta.url), 'utf8');
+  const initializeAt = mainSource.indexOf('await SupabaseService.initialize()');
+  const rightsAt = mainSource.indexOf(
+    'if (!AppConfig.isAppSupported) await RightsService.updateAppData()',
+  );
+  assert.ok(initializeAt >= 0, 'main must initialize Supabase');
+  assert.ok(rightsAt > initializeAt, 'rights fetch must happen after Supabase initialization');
+});
 
 test('Supabase JS persists sessions under the key shared with the auth bridge', () => {
   assert.equal(SupabaseService.tokenKey, AppConfig.Keys.auth);

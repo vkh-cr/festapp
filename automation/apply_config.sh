@@ -85,6 +85,39 @@ CONFIGURED_AUTH_STORAGE_KEY="${CONFIGURED_AUTH_STORAGE_KEY#\'}"
 CONFIGURED_AUTH_STORAGE_KEY="${CONFIGURED_AUTH_STORAGE_KEY%\'}"
 SUPABASE_AUTH_STORAGE_KEY="$(node "$PROJECT_ROOT/automation/lib/supabase_client_config.mjs" auth-key \
     "$SUPABASE_ORIGIN" "$CONFIGURED_AUTH_STORAGE_KEY")" || exit 1
+BACKEND_ACTIVATION_TENANT_ID="${BACKEND_ACTIVATION_TENANT_ID:-}"
+BACKEND_ACTIVATION_PHASE="${BACKEND_ACTIVATION_PHASE:-}"
+BACKEND_ACTIVATION_CANONICAL_SUPABASE_URL="${BACKEND_ACTIVATION_CANONICAL_SUPABASE_URL:-}"
+BACKEND_ACTIVATION_CANONICAL_SUPABASE_ANON_KEY="${BACKEND_ACTIVATION_CANONICAL_SUPABASE_ANON_KEY:-}"
+if [ -n "$BACKEND_ACTIVATION_TENANT_ID$BACKEND_ACTIVATION_PHASE$BACKEND_ACTIVATION_CANONICAL_SUPABASE_URL$BACKEND_ACTIVATION_CANONICAL_SUPABASE_ANON_KEY" ]; then
+    [ -n "$BACKEND_ACTIVATION_TENANT_ID" ] && [ -n "$BACKEND_ACTIVATION_PHASE" ] && \
+        [ -n "$BACKEND_ACTIVATION_CANONICAL_SUPABASE_URL" ] && \
+        [ -n "$BACKEND_ACTIVATION_CANONICAL_SUPABASE_ANON_KEY" ] || {
+        echo "Error: backend activation configuration must be complete"; exit 1;
+    }
+    [[ "$BACKEND_ACTIVATION_TENANT_ID" =~ ^[a-z0-9][a-z0-9-]*$ ]] || {
+        echo "Error: BACKEND_ACTIVATION_TENANT_ID must be a lowercase slug"; exit 1;
+    }
+    case "$BACKEND_ACTIVATION_PHASE" in legacy|canonical) ;; *)
+        echo "Error: BACKEND_ACTIVATION_PHASE must be legacy or canonical"; exit 1 ;;
+    esac
+    BACKEND_ACTIVATION_CANONICAL_SUPABASE_URL="$(node \
+        "$PROJECT_ROOT/automation/lib/supabase_client_config.mjs" origin \
+        "$BACKEND_ACTIVATION_CANONICAL_SUPABASE_URL")" || exit 1
+    [ "$BACKEND_ACTIVATION_CANONICAL_SUPABASE_URL" != "$SUPABASE_ORIGIN" ] || {
+        echo "Error: backend activation canonical origin must differ from the legacy origin"; exit 1;
+    }
+fi
+BACKEND_ACTIVATION_MANIFEST_URL="${WEB_LINK%/}/backend-activation.json"
+BACKEND_ACTIVATION_CANONICAL_MANIFEST_SHA256="$(node \
+    "$PROJECT_ROOT/automation/release/generate_backend_activation_manifest.mjs" \
+    "$BACKEND_ACTIVATION_TENANT_ID" "$BACKEND_ACTIVATION_PHASE" \
+    "$PROJECT_ROOT/web/backend-activation.json" \
+    "$PROJECT_ROOT/web_client/public/backend-activation.json")"
+if [ "$BACKEND_ACTIVATION_CANONICAL_MANIFEST_SHA256" = disabled ]; then
+    BACKEND_ACTIVATION_CANONICAL_MANIFEST_SHA256=""
+    BACKEND_ACTIVATION_MANIFEST_URL=""
+fi
 [[ "$WEB_LINK" =~ ^https?://[^[:space:]]+$ ]] || {
     echo "Error: WEB_LINK must be an absolute HTTP(S) URL"; exit 1;
 }
@@ -246,6 +279,31 @@ if [ -f "$APP_CONFIG" ]; then
         sed_inplace "s|static anonKey = '.*';|static anonKey = '$SUPABASE_ANON_KEY';|g" "$APP_CONFIG"
     fi
 
+    python3 - "$APP_CONFIG" "$BACKEND_ACTIVATION_TENANT_ID" \
+        "$BACKEND_ACTIVATION_MANIFEST_URL" \
+        "$BACKEND_ACTIVATION_CANONICAL_MANIFEST_SHA256" \
+        "$BACKEND_ACTIVATION_CANONICAL_SUPABASE_URL" \
+        "$BACKEND_ACTIVATION_CANONICAL_SUPABASE_ANON_KEY" <<'PY'
+import pathlib
+import re
+import sys
+
+path = pathlib.Path(sys.argv[1])
+names = [
+    "backendActivationTenantId", "backendActivationManifestUrl",
+    "backendActivationCanonicalManifestSha256",
+    "backendActivationCanonicalSupabaseUrl", "backendActivationCanonicalAnonKey",
+]
+source = path.read_text(encoding="utf-8")
+for name, value in zip(names, sys.argv[2:]):
+    source, count = re.subn(
+        rf"static {name} = '[^']*';", f"static {name} = '{value}';", source, count=1
+    )
+    if count != 1:
+        raise SystemExit(f"Could not update web {name}")
+path.write_text(source, encoding="utf-8")
+PY
+
     # Update Organization
     if [ ! -z "$ORGANIZATION_ID" ]; then
         sed_inplace "s|static organization = .*;|static organization = $ORGANIZATION_ID;|g" "$APP_CONFIG"
@@ -337,6 +395,32 @@ if count != 1:
 pathlib.Path(path).write_text(source, encoding="utf-8")
 PY
     fi
+
+    python3 - "$FLUTTER_CONFIG" "$SUPABASE_AUTH_STORAGE_KEY" \
+        "$BACKEND_ACTIVATION_TENANT_ID" "$BACKEND_ACTIVATION_MANIFEST_URL" \
+        "$BACKEND_ACTIVATION_CANONICAL_MANIFEST_SHA256" \
+        "$BACKEND_ACTIVATION_CANONICAL_SUPABASE_URL" \
+        "$BACKEND_ACTIVATION_CANONICAL_SUPABASE_ANON_KEY" <<'PY'
+import pathlib
+import re
+import sys
+
+path = pathlib.Path(sys.argv[1])
+names = [
+    "supabaseAuthStorageKey", "backendActivationTenantId",
+    "backendActivationManifestUrl", "backendActivationCanonicalManifestSha256",
+    "backendActivationCanonicalSupabaseUrl", "backendActivationCanonicalAnonKey",
+]
+source = path.read_text(encoding="utf-8")
+for name, value in zip(names, sys.argv[2:]):
+    source, count = re.subn(
+        rf"static const String {name}\s*=\s*'[^']*';",
+        f"static const String {name} = '{value}';", source, count=1,
+    )
+    if count != 1:
+        raise SystemExit(f"Could not update Flutter {name}")
+path.write_text(source, encoding="utf-8")
+PY
 
     # Update App Name (used as the app title / OccasionHomePage.homePageTitle)
     if [ ! -z "$APP_NAME" ]; then
