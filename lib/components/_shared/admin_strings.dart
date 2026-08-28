@@ -14,6 +14,8 @@ class AdministrationStrings {
   static String get viewApp => 'Administration.viewApp'.tr(); // "View App"
   static String get reservations =>
       'Administration.reservations'.tr(); // "Reservations"
+  static String get oneSignalSecretManagedServerSide =>
+      'Administration.oneSignalSecretManagedServerSide'.tr();
 
   // New Strings for Occasion Creation
   static String get myFestival =>

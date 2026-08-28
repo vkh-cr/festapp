@@ -385,7 +385,8 @@
     "notificationSettings": "Benachrichtigungseinstellungen",
     "androidInstallHint": "Öffne diese Webseite auf deinem Android-Telefon in einem Browser wie Chrome oder Edge und klicke auf die Schaltfläche Jetzt installieren.",
     "appAlreadyInstalled": "Die App ist bereits installiert.",
-    "pwaPromptNotSupported": "Diese Plattform oder der Browser unterstützt die Installation von PWA nicht oder die App ist bereits installiert."
+    "pwaPromptNotSupported": "Diese Plattform oder der Browser unterstützt die Installation von PWA nicht oder die App ist bereits installiert.",
+    "oneSignalSecretManagedServerSide": "Der OneSignal-REST-API-Schlüssel wird im serverseitigen Geheimnisspeicher für Benachrichtigungen verwaltet."
   },
   "FeatureNews": {
     "createNews": "Nachricht erstellen",

@@ -109,4 +109,11 @@ const corsHeaders = {
 
 `request-account-deletion` accepts only authenticated `POST {}` requests, derives the identity from the JWT, stores a SHA-256 token hash and sends `ACCOUNT_DELETION_CONFIRM` through the shared template/wrapper delivery boundary. `confirm-account-deletion` permits side-effect-free `GET` inspection and performs deletion only on explicit `POST {token}`. It owns Supabase Admin hard-delete and OneSignal Delete User by `external_id`; transient vendor failures stay in the durable `processing` state.
 
-Required secrets/config: the existing Supabase URL/anon/service-role and SMTP values, `ACCOUNT_DELETION_ORGANIZATION_ID=9`, optional `ACCOUNT_DELETION_CONFIRMATION_URL`, and organization-held `ONESIGNAL_APP_ID` / `ONESIGNAL_REST_API_KEY`. Never log tokens, UUIDs or email addresses.
+Required secrets/config: the existing Supabase URL/anon/service-role and SMTP
+values, `ACCOUNT_DELETION_ORGANIZATION_ID` matching the reviewed backend
+manifest `organizationId` (currently target organization `12`; `9` is only the
+pre-merge source ID), and optional `ACCOUNT_DELETION_CONFIRMATION_URL`.
+`ONESIGNAL_APP_ID` remains non-secret organization configuration, while the REST
+credential lives only in `organization_notification_secrets` and is readable
+through the service-role-only delivery-config RPC. Never log tokens, UUIDs,
+email addresses, or delivery credentials.

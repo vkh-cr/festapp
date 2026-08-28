@@ -8,6 +8,7 @@ import {
 } from "../_shared/accountDeletion.ts";
 import { supabaseAdmin } from "../_shared/supabaseUtil.ts";
 import { parseOrganizationBranding } from "../_shared/organizationBranding.ts";
+import { loadOrganizationNotificationConfig } from "../_shared/organizationNotificationConfig.ts";
 import { sendCompletionNotification } from "./completionNotification.ts";
 
 async function inspect(token: string) {
@@ -130,24 +131,20 @@ Deno.serve(async (request) => {
   }
 
   if (!job.onesignalDeleted) {
-    const { data: organizationRow } = await supabaseAdmin.from("organizations")
-      .select("data").eq("id", organization).single();
-    const config = organizationRow?.data as Record<string, string> | undefined;
     try {
       const localVendorMock =
         Deno.env.get("ACCOUNT_DELETION_LOCAL_VENDOR_MOCK") === "true" &&
         /^(http:\/\/(127\.0\.0\.1|localhost|kong)(:|\/))/.test(
           Deno.env.get("SUPABASE_URL") || "",
         );
-      if (
-        !localVendorMock &&
-        (!config?.ONESIGNAL_APP_ID || !config?.ONESIGNAL_REST_API_KEY)
-      ) {
-        throw new Error("onesignal_configuration");
-      } else if (!localVendorMock) {
+      if (!localVendorMock) {
+        const config = await loadOrganizationNotificationConfig(
+          supabaseAdmin,
+          organization,
+        );
         await deleteOneSignalUser(
-          config.ONESIGNAL_APP_ID,
-          config.ONESIGNAL_REST_API_KEY,
+          config.appId,
+          config.restApiKey,
           userId,
         );
       }

@@ -32,6 +32,7 @@ echo "Temp project root: $TMP_ROOT"
 # 1. Stage the files apply_config.sh writes to. Use the real ones in the repo
 #    as the starting state — that way we test against actual templates.
 mkdir -p "$TMP_ROOT/automation" \
+         "$TMP_ROOT/automation/lib" \
          "$TMP_ROOT/automation/release/legal" \
          "$TMP_ROOT/automation/templates/web/delete-account" \
          "$TMP_ROOT/android/app/src/main/kotlin/fstapp/example" \
@@ -48,6 +49,7 @@ mkdir -p "$TMP_ROOT/automation" \
          "$TMP_ROOT/assets/icons"
 
 cp "$PROJECT_ROOT/automation/apply_config.sh" "$TMP_ROOT/automation/apply_config.sh"
+cp "$PROJECT_ROOT/automation/lib/supabase_client_config.mjs" "$TMP_ROOT/automation/lib/supabase_client_config.mjs"
 cp "$PROJECT_ROOT/automation/release/render_legal_pages.mjs" "$TMP_ROOT/automation/release/render_legal_pages.mjs"
 cp "$PROJECT_ROOT"/automation/release/legal/*.md "$TMP_ROOT/automation/release/legal/"
 cp "$PROJECT_ROOT/automation/templates/web/delete-account/index.html" "$TMP_ROOT/automation/templates/web/delete-account/index.html"
@@ -245,6 +247,53 @@ assert_contains "$TMP_ROOT/lib/theme_config.dart" "static Color seed4 = const Co
 echo
 echo "--- web_client/public/CNAME ---"
 assert_contains "$TMP_ROOT/web_client/public/CNAME" "test.example.com"
+
+echo
+echo "--- self-hosted Supabase origin ---"
+node - "$TMP_ROOT/automation/project.conf" <<'NODE'
+const fs = require('fs');
+const configPath = process.argv[2];
+const source = fs.readFileSync(configPath, 'utf8');
+fs.writeFileSync(
+  configPath,
+  source.replace(/^SUPABASE_URL=.*$/m, 'SUPABASE_URL=https://api.example.com'),
+);
+NODE
+./automation/apply_config.sh > apply_config-self-hosted.log 2>&1 || {
+    echo "apply_config.sh rejected a self-hosted HTTPS origin. Log:"
+    cat apply_config-self-hosted.log
+    exit 1
+}
+assert_contains "$TMP_ROOT/web_client/src/app_config.js" "static supabaseUrl = 'https://api.example.com';"
+assert_contains "$TMP_ROOT/web_client/src/app_config.js" "auth: 'sb-selfhost-d0c43d3885064d9a-auth-token'"
+assert_contains "$TMP_ROOT/web_client/public/auth_bridge.html" "const SUPABASE_KEY = 'sb-selfhost-d0c43d3885064d9a-auth-token';"
+assert_contains "$TMP_ROOT/lib/app_config.dart" "static const String supabaseUrl = 'https://api.example.com';"
+
+printf '\nSUPABASE_AUTH_STORAGE_KEY=sb-previous-cloud-auth-token\n' >> "$TMP_ROOT/automation/project.conf"
+./automation/apply_config.sh > apply_config-stable-auth-key.log 2>&1 || {
+    echo "apply_config.sh rejected an explicit stable auth namespace. Log:"
+    cat apply_config-stable-auth-key.log
+    exit 1
+}
+assert_contains "$TMP_ROOT/web_client/src/app_config.js" "auth: 'sb-previous-cloud-auth-token'"
+assert_contains "$TMP_ROOT/web_client/public/auth_bridge.html" "const SUPABASE_KEY = 'sb-previous-cloud-auth-token';"
+
+for invalid_url in \
+    'https://user:pass@api.example.com' \
+    'https://api.example.com/rest/v1' \
+    'https://api.example.com?tenant=a' \
+    'https://api.example.com#fragment'; do
+    node - "$TMP_ROOT/automation/project.conf" "$invalid_url" <<'NODE'
+const fs = require('fs');
+const [configPath, invalidUrl] = process.argv.slice(2);
+const source = fs.readFileSync(configPath, 'utf8');
+fs.writeFileSync(configPath, source.replace(/^SUPABASE_URL=.*$/m, `SUPABASE_URL=${invalidUrl}`));
+NODE
+    if ./automation/apply_config.sh > apply_config-invalid-origin.log 2>&1; then
+        echo "apply_config.sh accepted invalid Supabase origin: $invalid_url" >&2
+        exit 1
+    fi
+done
 
 # 4. Verify the seed Color() change happens in upper-case as the script writes
 #    it. We assert lowercase is NOT present because BSD sed and GNU sed differ

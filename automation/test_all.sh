@@ -260,7 +260,7 @@ if [ "$RUN_AUTOMATION" = true ]; then
     echo ""
     echo ">>> Automation Scripts Tests..."
 
-    for t in "$SCRIPT_DIR/tests/apply_config.test.sh" "$SCRIPT_DIR/tests/legal_config.test.sh" "$SCRIPT_DIR/tests/deploy_direct.test.sh" "$SCRIPT_DIR/tests/migration_layout.test.sh" "$SCRIPT_DIR/tests/update_prompt.test.sh" "$SCRIPT_DIR/tests/update_prompt_behavior.test.mjs" "$SCRIPT_DIR/tests/client_sync_cutover.test.mjs" "$SCRIPT_DIR/tests/pwa_offline.test.mjs" "$SCRIPT_DIR/tests/project_version.test.mjs"; do
+    for t in "$SCRIPT_DIR/tests/apply_config.test.sh" "$SCRIPT_DIR/tests/legal_config.test.sh" "$SCRIPT_DIR/tests/deploy_direct.test.sh" "$SCRIPT_DIR/tests/migration_layout.test.sh" "$SCRIPT_DIR/tests/hetzner_supabase_rehearsal_schema.test.sh" "$SCRIPT_DIR/tests/update_prompt.test.sh" "$SCRIPT_DIR/tests/update_prompt_behavior.test.mjs" "$SCRIPT_DIR/tests/client_sync_cutover.test.mjs" "$SCRIPT_DIR/tests/pwa_offline.test.mjs" "$SCRIPT_DIR/tests/project_version.test.mjs"; do
         if [ -x "$t" ]; then
             echo "Running $(basename "$t")..."
             set +e
@@ -281,6 +281,11 @@ if [ "$RUN_AUTOMATION" = true ]; then
       "$SCRIPT_DIR/tests/pwa_manifest.test.mjs" \
       "$SCRIPT_DIR/tests/pwa_reconcile.test.mjs" \
       "$SCRIPT_DIR/tests/pwa_storage_bridge.test.mjs" \
+      "$SCRIPT_DIR/tests/hetzner_supabase_infrastructure.test.mjs" \
+      "$SCRIPT_DIR/tests/hetzner_supabase_inventory.test.mjs" \
+      "$SCRIPT_DIR/tests/hetzner_supabase_cutover_mode_gate.test.mjs" \
+      "$SCRIPT_DIR/tests/supabase_client_config.test.mjs" \
+      "$SCRIPT_DIR/hetzner-supabase/runtime/verify-pins.mjs" \
       "$SCRIPT_DIR/tests/private_inputs_schema.test.mjs" \
       "$SCRIPT_DIR/tests/recovery_readiness.test.mjs" \
       "$WEB_CLIENT_DIR/tests/core/pwa_client_adapter.test.js"

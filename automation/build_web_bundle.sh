@@ -42,15 +42,22 @@ if [ "${#FLUTTER_CMD[@]}" -eq 0 ]; then
     FLUTTER_CMD=("$FESTAPP_FLUTTER_INSTALL_DIR/bin/flutter")
 fi
 
-ACTUAL_FLUTTER_VERSION="$("${FLUTTER_CMD[@]}" --version --machine | node -e 'let input="";process.stdin.on("data",c=>input+=c);process.stdin.on("end",()=>process.stdout.write(JSON.parse(input).frameworkVersion));')"
+# FVM 4 prefixes spawned command output with a human-readable status line.
+# Parse from the JSON object so direct Flutter and FVM output share one path.
+ACTUAL_FLUTTER_VERSION="$("${FLUTTER_CMD[@]}" --version --machine | node -e 'let input="";process.stdin.on("data",c=>input+=c);process.stdin.on("end",()=>{const start=input.indexOf("{");process.stdout.write(JSON.parse(input.slice(start)).frameworkVersion);});')"
 if [ "$ACTUAL_FLUTTER_VERSION" != "$FLUTTER_VERSION" ]; then
-    echo "Flutter ${FLUTTER_VERSION} required by .fvmrc, found ${ACTUAL_FLUTTER_VERSION}." >&2
+    echo "Flutter ${FLUTTER_VERSION} required by automation/project.conf, found ${ACTUAL_FLUTTER_VERSION}." >&2
     exit 1
 fi
 
 # project.conf is the sole tenant-identity owner. Apply it immediately before
 # compilation so stale generated files can never leak between production apps.
 bash automation/apply_config.sh
+if [ "${FESTAPP_CANONICAL_CUTOVER_RELEASE:-0}" = 1 ]; then
+    node automation/release/client_cutover_preflight.mjs --require-canonical-cutover
+else
+    node automation/release/client_cutover_preflight.mjs
+fi
 
 "${FLUTTER_CMD[@]}" precache --web
 "${FLUTTER_CMD[@]}" build web --release --base-href / --no-web-resources-cdn --no-wasm-dry-run
@@ -62,7 +69,7 @@ else
     mv build/web/index.html build/web/flutter.html
 fi
 
-(cd web_client && npm install && npm run build)
+(cd web_client && npm ci && npm run build)
 cp -R web_client/dist/. build/web/
 
 if [ "$TARGET" = cloudflare ]; then

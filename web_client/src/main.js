@@ -13,7 +13,7 @@ class Main {
     static async init() {
         try {
             // 1. Init Core Services
-            // SupabaseService is now eager loaded
+            await SupabaseService.initialize();
             await LocalizationService.init();
             ThemeService.init();
             ImageLoader.init(); // Initialize Image Loader

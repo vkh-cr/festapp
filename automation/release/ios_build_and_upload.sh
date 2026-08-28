@@ -28,6 +28,11 @@ fi
 
 cd "$PROJECT_ROOT"
 node automation/release/store_preflight.mjs --local --read-only
+if [ "${FESTAPP_CANONICAL_CUTOVER_RELEASE:-0}" = 1 ]; then
+  node automation/release/client_cutover_preflight.mjs --require-canonical-cutover
+else
+  node automation/release/client_cutover_preflight.mjs
+fi
 release_manifest="$FESTAPP_RELEASE_MANIFEST"
 if [ ! -f "$release_manifest" ]; then
   echo "Release manifest not found: $release_manifest"

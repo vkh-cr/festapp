@@ -1,41 +1,19 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.58.0";
 import { buildNotificationPayload } from "./notificationPayload.ts";
-
-const supabaseAdmin = createClient(
-  Deno.env.get("SUPABASE_URL")!,
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-);
+import { supabaseAdmin } from "../_shared/supabaseUtil.ts";
+import { loadOrganizationNotificationConfig } from "../_shared/organizationNotificationConfig.ts";
 
 Deno.serve(async (req) => {
   const { record } = await req.json();
   const organizationId = record.organization; // assuming `organization` is passed in `record`
   const url = "https://onesignal.com/api/v1/notifications";
 
-  // Fetch organization data to get ONESIGNAL_APP_ID, ONESIGNAL_REST_API_KEY, and DEFAULT_URL
-  const orgData = await supabaseAdmin
-    .from("organizations")
-    .select("data")
-    .eq("id", organizationId)
-    .single();
-
-  if (orgData.error || !orgData.data) {
-    console.error("Organization data not found.");
-    return new Response(
-      JSON.stringify({ error: "Organization data not found" }),
-      {
-        headers: { "Content-Type": "application/json" },
-        status: 404,
-      },
+  let notificationConfig;
+  try {
+    notificationConfig = await loadOrganizationNotificationConfig(
+      supabaseAdmin,
+      organizationId,
     );
-  }
-
-  const orgConfig = orgData.data.data;
-  const onesignalAppId = orgConfig.ONESIGNAL_APP_ID;
-  const onesignalRestApiKey = orgConfig.ONESIGNAL_REST_API_KEY;
-  const defaultUrl = orgConfig.DEFAULT_URL;
-
-  // Check if any required config values are missing
-  if (!onesignalAppId || !onesignalRestApiKey || !defaultUrl) {
+  } catch {
     console.error("Required organization configuration is missing.");
     return new Response(
       JSON.stringify({ error: "Missing required organization configuration" }),
@@ -43,6 +21,15 @@ Deno.serve(async (req) => {
         headers: { "Content-Type": "application/json" },
         status: 400,
       },
+    );
+  }
+  const { appId: onesignalAppId, restApiKey: onesignalRestApiKey, defaultUrl } =
+    notificationConfig;
+  if (!defaultUrl) {
+    console.error("Required organization configuration is missing.");
+    return new Response(
+      JSON.stringify({ error: "Missing required organization configuration" }),
+      { headers: { "Content-Type": "application/json" }, status: 400 },
     );
   }
 

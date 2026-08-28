@@ -15,7 +15,7 @@ DECLARE
     v_org_id bigint;
 BEGIN
     INSERT INTO public.organizations (title, data)
-    VALUES ('Test Org', '{"APP_NAME": "Original"}'::jsonb)
+    VALUES ('Test Org', '{"APP_NAME": "Original", "ONESIGNAL_REST_API_KEY": "legacy-secret"}'::jsonb)
     RETURNING id INTO v_org_id;
 
     -- Pass org_id forward via session var (SET LOCAL would not survive role switches)
@@ -66,6 +66,8 @@ BEGIN
     SELECT * INTO org_record FROM get_organization_admin(current_setting('test.aa_org_id')::bigint);
     PERFORM assert_eq(org_record.title, 'Test Org', 'Admin should be able to fetch org details');
     PERFORM assert_jsonb_contains(org_record.data, '{"APP_NAME": "Original"}', 'Admin should retrieve correct data');
+    PERFORM assert_false(org_record.data ? 'ONESIGNAL_REST_API_KEY',
+      'Admin response must not contain the server-only OneSignal credential');
 END $$;
 
 SET ROLE postgres;
@@ -92,7 +94,8 @@ SET LOCAL ROLE authenticated;
 SELECT * FROM update_organization_admin(
     current_setting('test.aa_org_id')::bigint,
     'Updated Title',
-    '{"APP_NAME": "New Name", "NEW_FIELD": 1}'::jsonb
+    '{"APP_NAME": "New Name", "NEW_FIELD": 1}'::jsonb,
+    ARRAY['+420']::text[]
 );
 
 DO $$
@@ -103,6 +106,19 @@ BEGIN
     PERFORM assert_eq(updated_org.title, 'Updated Title', 'Title should be updated');
     PERFORM assert_jsonb_contains(updated_org.data, '{"APP_NAME": "New Name"}', 'Data should be merged/updated');
     PERFORM assert_jsonb_contains(updated_org.data, '{"NEW_FIELD": 1}', 'New fields should be added');
+END $$;
+
+DO $$
+BEGIN
+  PERFORM update_organization_admin(
+    current_setting('test.aa_org_id')::bigint,
+    NULL,
+    '{"ONESIGNAL_REST_API_KEY": "must-be-rejected"}'::jsonb,
+    NULL
+  );
+  PERFORM assert_fail('Admin update must reject server-only credentials');
+EXCEPTION WHEN invalid_parameter_value THEN
+  NULL;
 END $$;
 
 ROLLBACK;

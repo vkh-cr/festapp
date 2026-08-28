@@ -75,9 +75,16 @@ esac
 [[ "$IOS_BUNDLE_ID" =~ ^[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)+$ ]] || {
     echo "Error: invalid IOS_BUNDLE_ID"; exit 1;
 }
-[[ "$SUPABASE_URL" =~ ^https://[a-z0-9]+\.supabase\.co/?$ ]] || {
-    echo "Error: SUPABASE_URL must use https://<project-ref>.supabase.co"; exit 1;
+SUPABASE_ORIGIN="$(node "$PROJECT_ROOT/automation/lib/supabase_client_config.mjs" origin "$SUPABASE_URL")" || {
+    echo "Error: SUPABASE_URL must be an HTTPS origin without credentials, path, query, or fragment"; exit 1;
 }
+CONFIGURED_AUTH_STORAGE_KEY="$(sed -n 's/^SUPABASE_AUTH_STORAGE_KEY=//p' "$CONFIG_FILE" | tail -1 | tr -d '\r')"
+CONFIGURED_AUTH_STORAGE_KEY="${CONFIGURED_AUTH_STORAGE_KEY#\"}"
+CONFIGURED_AUTH_STORAGE_KEY="${CONFIGURED_AUTH_STORAGE_KEY%\"}"
+CONFIGURED_AUTH_STORAGE_KEY="${CONFIGURED_AUTH_STORAGE_KEY#\'}"
+CONFIGURED_AUTH_STORAGE_KEY="${CONFIGURED_AUTH_STORAGE_KEY%\'}"
+SUPABASE_AUTH_STORAGE_KEY="$(node "$PROJECT_ROOT/automation/lib/supabase_client_config.mjs" auth-key \
+    "$SUPABASE_ORIGIN" "$CONFIGURED_AUTH_STORAGE_KEY")" || exit 1
 [[ "$WEB_LINK" =~ ^https?://[^[:space:]]+$ ]] || {
     echo "Error: WEB_LINK must be an absolute HTTP(S) URL"; exit 1;
 }
@@ -225,12 +232,6 @@ if [ -f "$APP_CONFIG" ]; then
     if [ ! -z "$SUPABASE_URL" ]; then
         sed_inplace "s|static supabaseUrl = '.*';|static supabaseUrl = '$SUPABASE_URL';|g" "$APP_CONFIG"
 
-        SUPABASE_PROJECT_REF="$(printf '%s' "$SUPABASE_URL" | sed -E 's|^https://([a-z0-9]+)\.supabase\.co/?$|\1|')"
-        if [ -z "$SUPABASE_PROJECT_REF" ] || [ "$SUPABASE_PROJECT_REF" = "$SUPABASE_URL" ]; then
-            echo "Error: SUPABASE_URL must use https://<project-ref>.supabase.co"
-            exit 1
-        fi
-        SUPABASE_AUTH_STORAGE_KEY="sb-$SUPABASE_PROJECT_REF-auth-token"
         sed_inplace "s|auth: 'sb-[^']*-auth-token'|auth: '$SUPABASE_AUTH_STORAGE_KEY'|g" "$APP_CONFIG"
 
         AUTH_BRIDGE="$PROJECT_ROOT/web_client/public/auth_bridge.html"

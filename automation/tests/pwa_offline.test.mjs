@@ -424,6 +424,7 @@ try {
   );
   assert.match(ciBuild, /build_web_bundle\.sh" static/);
   assert.match(cloudflareBuild, /build_web_bundle\.sh" cloudflare/);
+  assert.match(sharedBuild, /cd web_client && npm ci && npm run build/);
   assert.match(sharedBuild, /apply_config\.sh/);
   assert.match(sharedBuild, /emit_version_manifest\.sh/);
   assert.match(sharedBuild, /verify_web_build\.mjs/);

@@ -994,6 +994,14 @@ create table if not exists public.user_reset_token (
   CONSTRAINT user_token_pkey PRIMARY KEY ("user")
 ) TABLESPACE pg_default;
 
+create table if not exists public.password_reset_rate_limits (
+  key_hash TEXT PRIMARY KEY CHECK (key_hash ~ '^[0-9a-f]{64}$'),
+  window_started_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+  attempts INTEGER NOT NULL DEFAULT 1 CHECK (attempts > 0)
+) TABLESPACE pg_default;
+create index if not exists password_reset_rate_limits_window_idx
+  on public.password_reset_rate_limits(window_started_at);
+
 -----------------------------------------------
 -- 10. Public Tables with cross-schema dependencies
 -----------------------------------------------

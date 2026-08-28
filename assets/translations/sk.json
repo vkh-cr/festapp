@@ -385,7 +385,8 @@
     "notificationSettings": "Nastavenia oznámení",
     "androidInstallHint": "Otvor túto webovú stránku na svojom telefóne s Androidom v prehliadači, ako je Chrome alebo Edge, a klikni na tlačidlo Nainštalovať teraz.",
     "appAlreadyInstalled": "Aplikácia je už nainštalovaná.",
-    "pwaPromptNotSupported": "Táto platforma alebo prehliadač nepodporuje inštaláciu PWA alebo je aplikácia už nainštalovaná."
+    "pwaPromptNotSupported": "Táto platforma alebo prehliadač nepodporuje inštaláciu PWA alebo je aplikácia už nainštalovaná.",
+    "oneSignalSecretManagedServerSide": "Kľúč OneSignal REST API sa spravuje v serverovom úložisku tajných údajov pre oznámenia."
   },
   "FeatureNews": {
     "createNews": "Vytvoriť novinku",

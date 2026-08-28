@@ -15,6 +15,7 @@ import 'package:fstapp/data_services/synchro_service.dart';
 import 'package:fstapp/data_services/client_sync/client_sync_runtime.dart';
 import 'package:fstapp/data_services/client_sync/client_sync_protocol.dart';
 import 'package:fstapp/data_services/client_sync/client_sync_projection.dart';
+import 'package:fstapp/data_services/auth_refresh_recovery.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/services/notification_helper.dart';
@@ -179,9 +180,17 @@ class AuthService {
   }
 
   static Future<bool> refreshSession() async {
-    var response = await _supabase.auth.refreshSession();
-    if (response.session != null) {
-      return true;
+    try {
+      final response = await _supabase.auth.refreshSession();
+      if (response.session != null) {
+        await _secureStorage.write(
+          key: REFRESH_TOKEN_KEY,
+          value: response.session!.refreshToken,
+        );
+        return true;
+      }
+    } catch (error) {
+      if (!isTerminalAuthRefreshError(error)) rethrow;
     }
     if (await tryAuthUser()) {
       return true;
@@ -204,10 +213,23 @@ class AuthService {
       } else {
         await NotificationHelper.logoutCurrentUser();
       }
-    } catch (e) {
-      //invalid refresh token
+    } catch (error) {
+      if (isTerminalAuthRefreshError(error)) {
+        await _clearTerminalSession();
+      }
     }
     return false;
+  }
+
+  static Future<void> _clearTerminalSession() async {
+    try {
+      await logout();
+    } catch (error) {
+      AppLogger.error('Terminal migrated session cleanup failed: $error');
+      await _supabase.auth.signOut(scope: SignOutScope.local);
+      await _secureStorage.delete(key: REFRESH_TOKEN_KEY);
+      await OfflineDataService.clearUserData();
+    }
   }
 
   /// Rejects a recovered identity that belongs to a different Festapp tenant.

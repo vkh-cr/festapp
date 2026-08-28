@@ -8,6 +8,7 @@ all apps, but this repository wrapper remains locked to the manifest package.
 
 ```powershell
 $env:FESTAPP_RELEASE_MANIFEST = 'C:\path\to\private-release-listing\config.json'
+$env:FESTAPP_CANONICAL_CUTOVER_RELEASE = '1' # required for the self-hosted cutover build
 .\automation\release\android_release.ps1 -Preflight
 .\automation\release\android_release.ps1 -Build
 .\automation\release\android_release.ps1 -PlayCheck

@@ -2,7 +2,11 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
-SIGNING_DIR="$SCRIPT_DIR/signing"
+SIGNING_DIR="${FESTAPP_IOS_SIGNING_DIR:-$SCRIPT_DIR/signing}"
+case "$SIGNING_DIR" in
+  /*) ;;
+  *) echo "FESTAPP_IOS_SIGNING_DIR must be an absolute path."; exit 1 ;;
+esac
 KEYCHAIN_PATH="$SIGNING_DIR/festapp-release.keychain-db"
 PASSWORD_FILE="$SIGNING_DIR/keychain-password"
 
