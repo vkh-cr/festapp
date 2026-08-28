@@ -29,8 +29,8 @@ chmod +x "$TMP_ROOT/checker.sh"
 (cd "$REPO" && CANONICAL_MAIN_REF=main "$TMP_ROOT/checker.sh" "$BASE_SHA" csmostrava2026 "$VALID_TIP" >/dev/null)
 
 expect_failure() {
-  local label=$1 tip=$2
-  if (cd "$REPO" && CANONICAL_MAIN_REF=main "$TMP_ROOT/checker.sh" "$BASE_SHA" csmostrava2026 "$tip" >"$TMP_ROOT/$label.log" 2>&1); then
+  local label=$1 tip=$2 tenant=${3:-csmostrava2026}
+  if (cd "$REPO" && CANONICAL_MAIN_REF=main "$TMP_ROOT/checker.sh" "$BASE_SHA" "$tenant" "$tip" >"$TMP_ROOT/$label.log" 2>&1); then
     echo "Expected drift rejection: $label" >&2
     exit 1
   fi
@@ -65,5 +65,20 @@ node -e 'const fs=require("fs"),p=process.argv[1],v=JSON.parse(fs.readFileSync(p
 git -C "$REPO" add automation/tenant-overlay.json
 git -C "$REPO" -c user.name=cutover-test -c user.email=cutover@example.invalid commit -qm tamper-schema
 expect_failure schema "$(git -C "$REPO" rev-parse HEAD)"
+
+git -C "$REPO" switch -qc prod/festivalslunovrat "$BASE_SHA"
+cp "$REPO/automation/tests/fixtures/tenants/festivalslunovrat.conf" "$REPO/automation/project.conf"
+(cd "$REPO" && bash automation/apply_config.sh automation/project.conf >/dev/null)
+node -e 'const fs=require("fs");fs.writeFileSync(process.argv[1],JSON.stringify({schemaVersion:1,tenantId:"festivalslunovrat",baseMainSha:process.argv[2]},null,2)+"\n")' "$REPO/automation/tenant-overlay.json" "$BASE_SHA"
+git -C "$REPO" add -A
+git -C "$REPO" -c user.name=cutover-test -c user.email=cutover@example.invalid commit -qm valid-slunovrat-overlay
+SLUNOVRAT_TIP=$(git -C "$REPO" rev-parse HEAD)
+(cd "$REPO" && CANONICAL_MAIN_REF=main "$TMP_ROOT/checker.sh" "$BASE_SHA" festivalslunovrat "$SLUNOVRAT_TIP" >/dev/null)
+
+git -C "$REPO" switch -qc tamper-slunovrat-shared "$SLUNOVRAT_TIP"
+printf '\n// Slunovrat shared drift fixture\n' >> "$REPO/lib/main.dart"
+git -C "$REPO" add lib/main.dart
+git -C "$REPO" -c user.name=cutover-test -c user.email=cutover@example.invalid commit -qm tamper-slunovrat-shared
+expect_failure slunovrat-shared "$(git -C "$REPO" rev-parse HEAD)" festivalslunovrat
 
 echo "Tenant branch drift tests passed"

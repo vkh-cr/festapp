@@ -4,6 +4,7 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import {
   REPOSITORY_ROOT,
+  SOURCE_ALIASES,
   SOURCES,
   accessToken,
   assertCanonicalDefaultTarget,
@@ -73,19 +74,29 @@ function sourceComparison(history, repository) {
 }
 
 export function buildMigrationHistoryReport({ repository, sources }) {
-  const compared = {
-    default: sourceComparison(sources.default, repository),
-    a: sourceComparison(sources.a, repository),
-  };
+  const missingSources = SOURCE_ALIASES.filter((alias) =>
+    !Array.isArray(sources[alias]) && !Array.isArray(sources[alias]?.history));
+  if (missingSources.length > 0) {
+    throw new Error(`migration histories are missing approved sources: ${missingSources.join(', ')}`);
+  }
+  const compared = Object.fromEntries(SOURCE_ALIASES.map((alias) => {
+    const source = Array.isArray(sources[alias])
+      ? { available: true, history: sources[alias] }
+      : sources[alias];
+    return [alias, {
+      migration_history_available: source.available,
+      ...sourceComparison(source.history, repository),
+    }];
+  }));
   const blockers = [];
-  if (!compared.default.client_sync_expansion_recorded) {
-    blockers.push('default does not record the client-sync expansion migration');
-  }
-  if (!compared.a.client_sync_expansion_recorded) {
-    blockers.push('source a does not record the client-sync expansion migration');
-  }
-  for (const alias of ['default', 'a']) {
+  for (const alias of SOURCE_ALIASES) {
     const source = compared[alias];
+    if (!source.migration_history_available) {
+      blockers.push(`${alias} has no Supabase migration history table; catalog rehearsal is authoritative`);
+    }
+    if (!source.client_sync_expansion_recorded) {
+      blockers.push(`${alias} does not record the client-sync expansion migration`);
+    }
     if (source.recorded_versions_not_in_repository.length > 0) {
       blockers.push(`${alias} records migrations absent from the repository`);
     }
@@ -124,16 +135,19 @@ async function inspectSourceHistory({ alias, token }) {
     query: `SELECT to_regclass('supabase_migrations.schema_migrations')::text AS table_name`,
   });
   if (table[0]?.table_name !== 'supabase_migrations.schema_migrations') {
-    throw new Error(`${alias}: supabase migration history table is unavailable`);
+    return { available: false, history: [] };
   }
-  return managementQuery({
+  return {
+    available: true,
+    history: await managementQuery({
     projectRef,
     token,
     query: `SELECT version::text AS version,
         NULLIF(to_jsonb(m)->>'name', '') AS name
       FROM supabase_migrations.schema_migrations AS m
       ORDER BY version::text`,
-  });
+    }),
+  };
 }
 
 async function main() {
@@ -145,13 +159,13 @@ async function main() {
   assertNewEvidencePaths([output]);
   const token = accessToken();
   const repository = repositoryMigrationInventory();
-  const [defaultHistory, aHistory] = await Promise.all([
-    inspectSourceHistory({ alias: 'default', token }),
-    inspectSourceHistory({ alias: 'a', token }),
-  ]);
+  const histories = Object.fromEntries(await Promise.all(SOURCE_ALIASES.map(async (alias) => [
+    alias,
+    await inspectSourceHistory({ alias, token }),
+  ])));
   const report = buildMigrationHistoryReport({
     repository,
-    sources: { default: defaultHistory, a: aHistory },
+    sources: histories,
   });
   report.generated_at = new Date().toISOString();
   report.source_projects = SOURCES;
@@ -160,7 +174,7 @@ async function main() {
   fs.writeFileSync(output, `${JSON.stringify(report, null, 2)}\n`, { mode: 0o600, flag: 'wx' });
   process.stdout.write(
     `migration history: status=${report.validation.status}, repository=${repository.length}, ` +
-    `default_recorded=${defaultHistory.length}, a_recorded=${aHistory.length}, ` +
+    `${SOURCE_ALIASES.map((alias) => `${alias}_recorded=${histories[alias].history.length}`).join(', ')}, ` +
     `sha256=${report.report_sha256}\n`,
   );
 }

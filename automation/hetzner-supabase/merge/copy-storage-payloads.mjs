@@ -5,14 +5,18 @@ import path from 'node:path';
 import readline from 'node:readline';
 import { Readable, Transform } from 'node:stream';
 import { spawn } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import {
   SOURCES,
   accessToken,
   assertPrivateOutput,
+  sourceAliasUsage,
 } from './lib.mjs';
 
 const CONCURRENCY = 4;
 const RECEIVER = '/tmp/festapp-storage-file-receiver.cjs';
+const RECEIVER_SOURCE = fileURLToPath(new URL('../rehearsal/storage-file-receiver.cjs', import.meta.url));
+const EXPECTED_TARGET = 'root@46.224.187.4';
 
 function fail(message) { throw new Error(message); }
 
@@ -75,7 +79,9 @@ function validateObject(row) {
   if (![row.bucket_id, row.name, row.version].every((value) => typeof value === 'string' && value)) {
     fail('Storage object is missing bucket, name or version');
   }
-  if (row.name.includes('\\') || row.name.includes('\0') ||
+  if (!/^[A-Za-z0-9][A-Za-z0-9._-]{0,99}$/.test(row.bucket_id) ||
+      !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(row.version) ||
+      row.name.includes('\\') || row.name.includes('\0') ||
       row.name.split('/').some((part) => !part || part === '.' || part === '..')) {
     fail('Storage snapshot contains an unsafe object path');
   }
@@ -90,6 +96,26 @@ function validateObject(row) {
     expectedMd5: /^"?[0-9a-f]{32}"?$/i.test(metadata.eTag ?? '')
       ? metadata.eTag.replaceAll('"', '').toLowerCase() : null,
   };
+}
+
+async function installAndVerifyReceiver(target) {
+  const expected = await sha256File(RECEIVER_SOURCE);
+  const child = spawn('ssh', ['-o', 'BatchMode=yes', target,
+    `docker exec -i supabase-storage sh -c 'umask 077; dd of=${RECEIVER} status=none; sha256sum ${RECEIVER}'`],
+  { stdio: ['pipe', 'pipe', 'pipe'] });
+  child.stdin.end(fs.readFileSync(RECEIVER_SOURCE));
+  let stdout = '';
+  let stderr = '';
+  child.stdout.on('data', (chunk) => { stdout += chunk; });
+  child.stderr.on('data', (chunk) => { stderr += chunk; });
+  const code = await new Promise((resolve, reject) => {
+    child.on('error', reject);
+    child.on('close', resolve);
+  });
+  if (code !== 0 || stdout.trim().split(/\s+/)[0] !== expected) {
+    fail(`target Storage receiver installation/hash failed: ${stderr.slice(0, 800)}`);
+  }
+  return expected;
 }
 
 async function serviceRoleKey(projectRef, token) {
@@ -166,11 +192,11 @@ async function mapLimit(values, limit, fn) {
 }
 
 async function main() {
-  const [alias, requestedArtifact, identity, target = 'root@46.224.187.4', requestedEvidence] = process.argv.slice(2);
+  const [alias, requestedArtifact, identity, target = EXPECTED_TARGET, requestedEvidence] = process.argv.slice(2);
   if (!Object.hasOwn(SOURCES, alias) || !requestedArtifact || !identity || !requestedEvidence) {
-    fail('usage: copy-storage-payloads.mjs default|a ARTIFACT.age SSH_IDENTITY [root@host] PRIVATE_EVIDENCE.json');
+    fail(`usage: copy-storage-payloads.mjs ${sourceAliasUsage()} ARTIFACT.age SSH_IDENTITY [${EXPECTED_TARGET}] PRIVATE_EVIDENCE.json`);
   }
-  if (!/^root@[A-Za-z0-9.-]+$/.test(target)) fail('invalid target SSH identity');
+  if (target !== EXPECTED_TARGET) fail('target must be the approved rehearsal host');
   const artifact = path.resolve(requestedArtifact);
   const evidence = assertPrivateOutput(requestedEvidence);
   const manifestPath = `${artifact}.manifest.json`;
@@ -182,10 +208,12 @@ async function main() {
   const artifactSha256 = await sha256File(artifact);
   const manifestFileSha256 = await sha256File(manifestPath);
   if (artifactSha256 !== manifest.artifact?.sha256) fail('Storage artifact checksum mismatch');
-  await run('ssh', ['-o', 'BatchMode=yes', target, `docker exec supabase-storage test -r ${RECEIVER}`]);
+  const receiverSha256 = await installAndVerifyReceiver(target);
 
   const rows = await readSnapshot(artifact, identity, alias, manifest);
   const objects = rows.map(validateObject);
+  const descriptorKeys = new Set(objects.map((object) => `${object.bucket}\0${object.name}\0${object.version}`));
+  if (descriptorKeys.size !== objects.length) fail('managed Storage artifact contains duplicate object descriptors');
   const descriptorAggregate = crypto.createHash('sha256');
   for (const object of objects) descriptorAggregate.update(`${JSON.stringify(object)}\n`);
   const token = accessToken();
@@ -216,6 +244,7 @@ async function main() {
     source_artifact_sha256: artifactSha256,
     source_manifest_file_sha256: manifestFileSha256,
     source_manifest_sha256: manifest.manifest_sha256,
+    receiver_sha256: receiverSha256,
     cloud_source_mutated: false,
     cloudflare_in_path: false,
   };

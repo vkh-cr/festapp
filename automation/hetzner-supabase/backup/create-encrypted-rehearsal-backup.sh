@@ -100,14 +100,24 @@ readonly SECURITY_STATE="$(ssh -o BatchMode=yes "$SSH_TARGET" "cd $COMPOSE_DIR &
         FROM pg_auth_members member JOIN pg_roles member_role ON member_role.oid=member.member
         JOIN pg_roles parent_role ON parent_role.oid=member.roleid) role_entries),''),'sha256'),'hex'),
     encode(extensions.digest(coalesce((SELECT string_agg(entry,E'\\n' ORDER BY entry) FROM (
-      SELECT concat_ws('|','schema',n.nspname,pg_get_userbyid(n.nspowner),coalesce(n.nspacl::text,'')) entry
+      SELECT concat_ws('|','schema',n.nspname,pg_get_userbyid(n.nspowner),coalesce((
+        SELECT string_agg(concat_ws(':',grantor::regrole::text,grantee::regrole::text,privilege_type,is_grantable),','
+          ORDER BY grantor,grantee,privilege_type,is_grantable) FROM aclexplode(n.nspacl)
+          WHERE grantee<>n.nspowner),'')) entry
         FROM pg_namespace n WHERE n.nspname IN ('public','eshop','auth','storage','realtime','_realtime','supabase_functions','graphql','graphql_public','extensions','vault')
-      UNION ALL SELECT concat_ws('|','relation',n.nspname,c.relname,c.relkind,pg_get_userbyid(c.relowner),coalesce(c.relacl::text,''))
+      UNION ALL SELECT concat_ws('|','relation',n.nspname,c.relname,c.relkind,pg_get_userbyid(c.relowner),coalesce((
+        SELECT string_agg(concat_ws(':',grantor::regrole::text,grantee::regrole::text,privilege_type,is_grantable),','
+          ORDER BY grantor,grantee,privilege_type,is_grantable) FROM aclexplode(c.relacl)
+          WHERE grantee<>c.relowner),''))
         FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
         WHERE n.nspname IN ('public','eshop','auth','storage','realtime','_realtime','supabase_functions','graphql','graphql_public','extensions','vault')
-      UNION ALL SELECT concat_ws('|','function',n.nspname,p.proname,pg_get_function_identity_arguments(p.oid),p.prokind,pg_get_userbyid(p.proowner),coalesce(p.proacl::text,''))
+      UNION ALL SELECT concat_ws('|','function',n.nspname,p.proname,pg_get_function_identity_arguments(p.oid),p.prokind,pg_get_userbyid(p.proowner),coalesce((
+        SELECT string_agg(concat_ws(':',grantor::regrole::text,grantee::regrole::text,privilege_type,is_grantable),','
+          ORDER BY grantor,grantee,privilege_type,is_grantable) FROM aclexplode(p.proacl)
+          WHERE grantee<>p.proowner),''))
         FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
-        WHERE n.nspname IN ('public','eshop','auth','storage','realtime','_realtime','supabase_functions','graphql','graphql_public','extensions','vault')) object_entries),''),'sha256'),'hex'))\"")"
+        WHERE n.nspname IN ('public','eshop','auth','storage','realtime','_realtime','supabase_functions','graphql','graphql_public','extensions','vault')
+          AND NOT (n.nspname='extensions' AND p.proname='grant_pg_cron_access')) object_entries),''),'sha256'),'hex'))\"")"
 readonly ROLE_SECURITY_SHA256="${SECURITY_STATE%%|*}"
 readonly OBJECT_SECURITY_SHA256="${SECURITY_STATE#*|}"
 [[ "$ROLE_SECURITY_SHA256" =~ ^[0-9a-f]{64}$ && "$OBJECT_SECURITY_SHA256" =~ ^[0-9a-f]{64}$ ]] ||

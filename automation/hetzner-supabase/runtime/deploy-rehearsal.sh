@@ -23,6 +23,7 @@ install -d -o root -g root -m 0755 caddy
 install -o root -g root -m 0644 "$SCRIPT_DIR/Caddyfile" caddy/Caddyfile
 install -o root -g root -m 0700 "$SCRIPT_DIR/configure-rehearsal-env.py" configure-rehearsal-env.py
 install -o root -g root -m 0700 "$SCRIPT_DIR/switch-rehearsal-runtime-database.sh" switch-rehearsal-runtime-database.sh
+install -o root -g root -m 0644 "$SCRIPT_DIR/../merge/source-registry.json" festapp-source-registry.json
 install -o root -g root -m 0700 "$SCRIPT_DIR/rotate-rehearsal-runtime-credentials.sh" rotate-rehearsal-runtime-credentials.sh
 ./configure-rehearsal-env.py
 

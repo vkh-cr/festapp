@@ -6,6 +6,14 @@ readonly COMPOSE_DIR="${FESTAPP_REHEARSAL_COMPOSE_DIR:-/opt/festapp-supabase/doc
 readonly EVIDENCE_ROOT="${FESTAPP_REHEARSAL_EVIDENCE_ROOT:-/var/lib/festapp-rehearsal-evidence}"
 readonly TARGET_DATABASE="${FESTAPP_RUNTIME_DATABASE:-}"
 readonly SERVICES=(auth rest realtime storage meta functions studio)
+readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly REPOSITORY_SOURCE_REGISTRY="$SCRIPT_DIR/../merge/source-registry.json"
+readonly INSTALLED_SOURCE_REGISTRY="$SCRIPT_DIR/festapp-source-registry.json"
+if [[ -f "$REPOSITORY_SOURCE_REGISTRY" ]]; then
+  readonly SOURCE_REGISTRY="$REPOSITORY_SOURCE_REGISTRY"
+else
+  readonly SOURCE_REGISTRY="$INSTALLED_SOURCE_REGISTRY"
+fi
 
 fail() { echo "ERROR: $*" >&2; exit 1; }
 [[ "${FESTAPP_RUNTIME_SWITCH_ACK:-}" == "switch-validated-rehearsal-runtime-database" ]] ||
@@ -18,6 +26,7 @@ fail() { echo "ERROR: $*" >&2; exit 1; }
 cd "$COMPOSE_DIR"
 [[ -f .env && "$(stat -c '%a' .env)" == "600" ]] || fail ".env must exist with mode 0600"
 [[ -f docker-compose.database-target.yml ]] || fail "database target Compose override is missing"
+[[ -f "$SOURCE_REGISTRY" ]] || fail "migration source registry is missing"
 docker compose config -q
 
 readonly CURRENT_DATABASE="$(sed -n 's/^FESTAPP_RUNTIME_DATABASE=//p' .env)"
@@ -29,14 +38,20 @@ psql_target() {
   docker compose exec -T db psql -X -v ON_ERROR_STOP=1 -U postgres -d "$TARGET_DATABASE" "$@"
 }
 if [[ "$TARGET_DATABASE" =~ ^festapp_rehearsal_ ]]; then
+  mapfile -t SOURCE_ALIASES < <(jq -er '.sources[].alias' "$SOURCE_REGISTRY")
+  [[ "${#SOURCE_ALIASES[@]}" -gt 0 ]] || fail "migration source registry is empty"
+  for alias in "${SOURCE_ALIASES[@]}"; do
+    [[ "$alias" =~ ^[a-z][a-z0-9_-]*$ ]] || fail "invalid migration source alias"
+    [[ "$(psql_target -Atqc "SELECT count(*) FROM festapp_merge.import_runs WHERE source_alias='$alias' AND status='validated'")" == "1" ]] ||
+      fail "target database does not contain exactly one validated $alias import"
+  done
+  readonly APPROVED_ALIASES_CSV="$(IFS=,; echo "${SOURCE_ALIASES[*]}")"
   readonly TARGET_STATE="$(psql_target -Atqc "SELECT concat_ws('|',
-    (SELECT count(*) FROM festapp_merge.import_runs WHERE source_alias='default' AND status='validated'),
-    (SELECT count(*) FROM festapp_merge.import_runs WHERE source_alias='a' AND status='validated'),
-    (SELECT count(*) FROM festapp_merge.import_runs WHERE source_alias NOT IN ('default','a')),
+    (SELECT count(*) FROM festapp_merge.import_runs WHERE NOT (source_alias = ANY (string_to_array('$APPROVED_ALIASES_CSV', ',')))),
     (SELECT count(*) FROM festapp_merge.validation_results WHERE status<>'pass'),
     (SELECT count(*)>0 FROM auth.users),(SELECT count(*)>0 FROM storage.objects),
     (SELECT count(*) FROM realtime.schema_migrations)>0)")"
-  [[ "$TARGET_STATE" == "1|1|0|0|t|t|t" ]] || fail "target database is not fully validated ($TARGET_STATE)"
+  [[ "$TARGET_STATE" == "0|0|t|t|t" ]] || fail "target database is not fully validated ($TARGET_STATE)"
 fi
 
 install -d -o root -g root -m 0700 "$EVIDENCE_ROOT"

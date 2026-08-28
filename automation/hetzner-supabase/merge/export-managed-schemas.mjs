@@ -131,7 +131,14 @@ async function main() {
   }
   const recipient = validateRecipient(fs.readFileSync(publicKeyPath, 'utf8').trim());
   const token = accessToken();
-  for (const [alias, projectRef] of Object.entries(SOURCES)) {
+  const requestedAliases = (process.env.FESTAPP_EXPORT_SOURCES ?? Object.keys(SOURCES).join(','))
+    .split(',').filter(Boolean);
+  if (requestedAliases.length === 0 || new Set(requestedAliases).size !== requestedAliases.length ||
+      requestedAliases.some((alias) => !SOURCES[alias])) {
+    throw new Error('FESTAPP_EXPORT_SOURCES must be a unique comma-separated subset of approved aliases');
+  }
+  for (const alias of requestedAliases) {
+    const projectRef = SOURCES[alias];
     await exportSource({
       alias, projectRef, token, recipient,
       output: path.join(runDir, `${alias}.managed.jsonl.age`),

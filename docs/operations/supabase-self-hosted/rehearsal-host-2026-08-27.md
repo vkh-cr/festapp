@@ -23,9 +23,9 @@ on `aarch64`. The separate authenticated Docker Hub registry recheck was blocked
 by the anonymous pull limit and therefore remains an explicit pre-production
 gate; it is not recorded as passed.
 
-No DNS or production write owner was changed, and neither existing Supabase
-cloud source was mutated or deleted. An isolated rehearsal copy of both clouds
-is now imported and validated on this host. Storage remains in the Supabase
+No DNS or production write owner was changed, and none of the three existing
+Supabase cloud sources was mutated or deleted. Isolated rehearsal copies of all
+three sources are now imported and validated on this host. Storage remains in the Supabase
 architecture; the existing R2 image-delivery path stays separate.
 
 ## Monthly operating price
@@ -75,8 +75,8 @@ exact CSM Ostrava fallback counts (26 information, 47 news, 128 places and 969
 events). A fresh encrypted recovery point then restored exactly into another
 isolated database and Storage path: 7,198 Auth users, 1,199 Storage metadata
 rows, 762 public scopes, two validated imports and 1,463 files / 606,950,851
-bytes. All prior artifacts and failed drill databases remain preserved; no path
-was deleted. With every retained drill the host still has about 17 GB free.
+bytes. All prior artifacts and failed drill databases remained preserved; no
+path was deleted.
 
 On 2026-08-28 the isolated `rehearsal-api.festapp.net` origin was activated
 through Cloudflare, Caddy and the loopback gateway. Strict origin TLS, Auth,
@@ -91,3 +91,12 @@ Android command `1030` is queued while its paired Windows builder is offline;
 superseded command `1029` is invalid. The remaining operational gate is that AAB plus the final
 full-freeze snapshot/marker. Production `api.festapp.net`, cloud credentials,
 stores and write ownership remain unchanged.
+
+The additive Slunovrat rehearsal then increased the canonical target to 9,648
+Auth users, 1,453 Storage metadata objects and three validated imports. Its
+coordinated encrypted backup and clean-cluster restore passed with 1,717 files /
+1,296,547,327 bytes, RPO 0 and RTO 790 seconds. Because every older successful
+and failed restore target is still retained, the 40 GB filesystem now has only
+about 304 MB free. A retention cleanup or disk expansion is mandatory before
+another rehearsal or production cutover; this capacity gate does not permit
+deleting off-host backups or evidence ledgers.

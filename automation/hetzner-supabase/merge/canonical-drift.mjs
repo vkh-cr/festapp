@@ -79,19 +79,29 @@ function classificationCounts(differences) {
 }
 
 export function buildCanonicalDriftReport({ defaultInventory, aInventory, targetCatalog }) {
-  if (defaultInventory.source?.project_ref !== SOURCES.default || defaultInventory.source?.alias !== 'default') {
-    throw new Error('invalid default source identity');
-  }
-  if (aInventory.source?.project_ref !== SOURCES.a || aInventory.source?.alias !== 'a') {
-    throw new Error('invalid a source identity');
+  return buildCanonicalDriftReportForSources({
+    inventories: { default: defaultInventory, a: aInventory },
+    targetCatalog,
+  });
+}
+
+export function buildCanonicalDriftReportForSources({ inventories, targetCatalog }) {
+  const aliases = Object.keys(inventories).sort((left, right) =>
+    Object.keys(SOURCES).indexOf(left) - Object.keys(SOURCES).indexOf(right));
+  if (aliases.length === 0) throw new Error('at least one source inventory is required');
+  for (const alias of aliases) {
+    const inventory = inventories[alias];
+    if (inventory?.source?.project_ref !== SOURCES[alias] || inventory?.source?.alias !== alias) {
+      throw new Error(`invalid ${alias} source identity`);
+    }
   }
   if (!Array.isArray(targetCatalog.relations) || !String(targetCatalog.postgres_version ?? '').startsWith('17.')) {
     throw new Error('invalid canonical PG17 target catalog');
   }
 
   const comparisons = {};
-  for (const source of ['default', 'a']) {
-    const inventory = source === 'default' ? defaultInventory : aInventory;
+  for (const source of aliases) {
+    const inventory = inventories[source];
     const differences = Object.fromEntries(Object.keys(dimensions).map((dimension) => [
       dimension,
       compareDimension(dimension, inventory.catalog[dimension], targetCatalog[dimension]),
@@ -132,19 +142,31 @@ export function buildCanonicalDriftReport({ defaultInventory, aInventory, target
 }
 
 function main() {
-  const [defaultPath, aPath, targetPath, outputPath] = process.argv.slice(2);
-  if (!defaultPath || !aPath || !targetPath || !outputPath) {
-    throw new Error('usage: canonical-drift.mjs DEFAULT.json A.json TARGET-CATALOG.json OUTPUT.json');
+  const args = process.argv.slice(2);
+  if (args.length !== 4 && args.length !== 5) {
+    throw new Error('usage: canonical-drift.mjs DEFAULT.json A.json [SLUNOVRAT.json] TARGET-CATALOG.json OUTPUT.json');
   }
+  const [defaultPath, aPath] = args;
+  const slunovratPath = args.length === 5 ? args[2] : null;
+  const targetPath = args.at(-2);
+  const outputPath = args.at(-1);
   const output = assertPrivateOutput(outputPath);
   assertNewEvidencePaths([output]);
-  const report = buildCanonicalDriftReport({
-    defaultInventory: JSON.parse(fs.readFileSync(defaultPath, 'utf8')),
-    aInventory: JSON.parse(fs.readFileSync(aPath, 'utf8')),
+  const inventories = {
+    default: JSON.parse(fs.readFileSync(defaultPath, 'utf8')),
+    a: JSON.parse(fs.readFileSync(aPath, 'utf8')),
+  };
+  if (slunovratPath) {
+    inventories.slunovrat = JSON.parse(fs.readFileSync(slunovratPath, 'utf8'));
+  }
+  const report = buildCanonicalDriftReportForSources({
+    inventories,
     targetCatalog: JSON.parse(fs.readFileSync(targetPath, 'utf8')),
   });
   fs.writeFileSync(output, `${JSON.stringify(report, null, 2)}\n`, { mode: 0o600, flag: 'wx' });
-  process.stdout.write(`canonical drift: default=${report.comparisons.default.unresolved_catalog_differences} a=${report.comparisons.a.unresolved_catalog_differences} target=${report.target.schema_fingerprint_sha256}\n`);
+  process.stdout.write(`canonical drift: ${Object.entries(report.comparisons)
+    .map(([alias, value]) => `${alias}=${value.unresolved_catalog_differences}`).join(' ')} ` +
+    `target=${report.target.schema_fingerprint_sha256}\n`);
 }
 
 if (process.argv[1] === new URL(import.meta.url).pathname) {

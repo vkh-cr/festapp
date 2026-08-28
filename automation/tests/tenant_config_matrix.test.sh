@@ -27,7 +27,7 @@ hash_generated() {
   done < "$PROJECT_ROOT/automation/tenant-overlays/generated.paths"
 }
 
-for tenant in festapp csmostrava2026 hvezdamorska; do
+for tenant in festapp csmostrava2026 festivalslunovrat hvezdamorska; do
   root="$TMP_ROOT/$tenant"
   copy_worktree "$root"
   config="$PROJECT_ROOT/automation/tests/fixtures/tenants/$tenant.conf"
@@ -40,6 +40,9 @@ done
 
 grep -qE 'fixturecsm' "$TMP_ROOT/csmostrava2026/lib/app_config.dart"
 grep -qE 'fixturehm' "$TMP_ROOT/hvezdamorska/lib/app_config.dart"
+grep -qE 'fixtureslunovrat' "$TMP_ROOT/festivalslunovrat/lib/app_config.dart"
+grep -qE 'organization = 5' "$TMP_ROOT/festivalslunovrat/web_client/src/app_config.js"
+grep -qE "supportedLanguages = \['cs', 'en', 'pl'\]" "$TMP_ROOT/festivalslunovrat/web_client/src/app_config.js"
 grep -qE 'organization = 4' "$TMP_ROOT/hvezdamorska/web_client/src/app_config.js"
 grep -qE 'static const bool isAllUnit = true;' "$TMP_ROOT/hvezdamorska/lib/app_config.dart"
 grep -qE "supportedLanguages = \['cs', 'en'\]" "$TMP_ROOT/hvezdamorska/web_client/src/app_config.js"
@@ -49,5 +52,6 @@ grep -qE 'HM Fixture' "$TMP_ROOT/hvezdamorska/web/delete-account/index.html"
 grep -qE 'fixturehm.supabase.co/functions/v1/confirm-account-deletion' "$TMP_ROOT/hvezdamorska/web/delete-account/index.html"
 ! grep -qE 'fixturecsm|csmostrava2026|fixture_csm|CSM Fixture' "$TMP_ROOT/hvezdamorska/lib/app_config.dart" "$TMP_ROOT/hvezdamorska/web_client/src/app_config.js" "$TMP_ROOT/hvezdamorska/web/index.html" "$TMP_ROOT/hvezdamorska/web/delete-account/index.html"
 ! grep -qE 'fixturehm|fixture_hm|HM Fixture' "$TMP_ROOT/csmostrava2026/lib/app_config.dart" "$TMP_ROOT/csmostrava2026/web_client/src/app_config.js" "$TMP_ROOT/csmostrava2026/web/index.html" "$TMP_ROOT/csmostrava2026/web/delete-account/index.html"
+! grep -qE 'fixturecsm|fixturehm|fixture_csm|fixture_hm|CSM Fixture|HM Fixture' "$TMP_ROOT/festivalslunovrat/lib/app_config.dart" "$TMP_ROOT/festivalslunovrat/web_client/src/app_config.js" "$TMP_ROOT/festivalslunovrat/web/index.html" "$TMP_ROOT/festivalslunovrat/web/delete-account/index.html"
 
 echo "Tenant config matrix passed"

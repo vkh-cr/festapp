@@ -31,7 +31,9 @@ async function main() {
     fail('invalid storage descriptor fields');
   }
   if (!Number.isSafeInteger(expectedSize) || expectedSize < 0) fail('invalid expected size');
-  if (!bucket || !name || !version || name.includes('\\') || name.includes('\0') ||
+  if (!/^[A-Za-z0-9][A-Za-z0-9._-]{0,99}$/.test(bucket) ||
+      !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(version) ||
+      !name || name.includes('\\') || name.includes('\0') ||
       name.split('/').some((part) => !part || part === '.' || part === '..')) {
     fail('unsafe storage object path');
   }

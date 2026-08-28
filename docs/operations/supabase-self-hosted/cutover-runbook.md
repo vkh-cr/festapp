@@ -79,6 +79,9 @@ session; network failures remain retryable and preserve offline identity.
 The organization ID is equally mandatory because deterministic merge allocation
 can remap it; carrying the cloud ID into a target client returns a semantically
 valid HTTP 200 with the wrong organization or a 404.
+This applies independently to every tenant overlay. In the 2026-08-28
+Slunovrat rehearsal, source organization `1` mapped to canonical organization
+`19`; the legacy value must not be copied into web, iOS, or Android config.
 Set `FESTAPP_CANONICAL_CUTOVER_RELEASE=1` for the web, Android and iOS release
 builders. That flag rejects a syntactically valid legacy-cloud manifest. The
 same preflight runs before compilation in all three builders. The completed web

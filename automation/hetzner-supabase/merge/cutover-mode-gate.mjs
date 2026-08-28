@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import {
+  SOURCE_ALIASES,
   SOURCES,
   assertNewEvidencePaths,
   assertPrivateOutput,
@@ -34,10 +35,12 @@ function timestamp(value, name) {
 }
 
 function exactSources(evidence) {
-  invariant(evidence.source_projects?.default === SOURCES.default,
-    'default source project mismatch');
-  invariant(evidence.source_projects?.a === SOURCES.a,
-    'source a project mismatch');
+  invariant(Object.keys(evidence.source_projects ?? {}).sort().join('|') ===
+    [...SOURCE_ALIASES].sort().join('|'), 'cutover evidence source set mismatch');
+  for (const alias of SOURCE_ALIASES) {
+    invariant(evidence.source_projects[alias] === SOURCES[alias],
+      `${alias} source project mismatch`);
+  }
 }
 
 function commonGate(evidence, now) {
@@ -74,7 +77,7 @@ function fullFreezeGate({ evidence, phase, now }) {
       JSON.stringify([...REQUIRED_FREEZE_LANES]),
     'full freeze does not cover every required writer lane',
   );
-  for (const alias of ['default', 'a']) {
+  for (const alias of SOURCE_ALIASES) {
     invariant(evidence.sources?.[alias]?.active_mutating_sessions === 0,
       `${alias} still has active mutating sessions`);
   }
@@ -86,7 +89,7 @@ function fullFreezeGate({ evidence, phase, now }) {
     const snapshotStartedAt = timestamp(evidence.snapshot?.started_at, 'snapshot.started_at');
     invariant(snapshotStartedAt >= activatedAt && snapshotStartedAt >= authActivatedAt,
       'snapshot started before write/Auth refresh freeze');
-    for (const alias of ['default', 'a']) {
+    for (const alias of SOURCE_ALIASES) {
       invariant(typeof evidence.sources?.[alias]?.final_marker === 'string' &&
         evidence.sources[alias].final_marker.length > 0,
       `${alias} final marker is missing`);

@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "sources": [
+    {
+      "alias": "default",
+      "project_ref": "kjdpmixlnhntmxjedpxh",
+      "role": "canonical-base",
+      "tenant_ids": ["festapp"]
+    },
+    {
+      "alias": "a",
+      "project_ref": "lwfpdjxsdmkfyrzqbrlk",
+      "role": "merge-source",
+      "tenant_ids": ["csmostrava2026", "hvezdamorska"]
+    },
+    {
+      "alias": "slunovrat",
+      "project_ref": "hvtsoseaywurkmhywdbd",
+      "role": "merge-source",
+      "tenant_ids": ["festivalslunovrat"]
+    }
+  ]
+}

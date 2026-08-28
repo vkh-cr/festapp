@@ -22,6 +22,7 @@ export function buildIdentityDecisions(report) {
   if (!claimedChecksum || actualChecksum !== claimedChecksum) {
     throw new Error('collision report checksum mismatch');
   }
+  if (report.report_version === 3) return buildMultiSourceIdentityDecisions(report);
   if (report.report_version !== 2 ||
       !Array.isArray(report.auth?.same_provider_identity_different_uuid) ||
       !Array.isArray(report.auth?.same_verified_phone_different_uuid)) {
@@ -68,6 +69,67 @@ export function buildIdentityDecisions(report) {
     validation: {
       status: 'pass',
       input_collisions: report.auth.same_email_different_uuid.length,
+      resolved: decisions.length,
+      unresolved: 0,
+    },
+  };
+}
+
+function buildMultiSourceIdentityDecisions(report) {
+  const expectedSources = Object.fromEntries(Object.entries(SOURCES));
+  if (stableJson(report.sources) !== stableJson(expectedSources) ||
+      !SOURCES[report.source_alias] || !Array.isArray(report.compared_against) ||
+      !report.compared_against.every((alias) => alias === 'canonical' || SOURCES[alias])) {
+    throw new Error('multi-source collision report identity mismatch');
+  }
+  const decisions = [];
+  const sourceUsers = new Set();
+  for (const canonicalSource of report.compared_against) {
+    const auth = report.comparisons?.[canonicalSource]?.auth;
+    if (!auth || auth.same_uuid_different_email.length !== 0 ||
+        auth.same_provider_identity_different_uuid.length !== 0 ||
+        auth.same_verified_phone_different_uuid.length !== 0 ||
+        auth.same_identity.length !== 0) {
+      throw new Error(`${canonicalSource} has a non-email or UUID identity collision requiring manual review`);
+    }
+    for (const collision of auth.same_email_different_uuid) {
+      if (collision.status !== 'manual-merge-required' ||
+          !collision.canonical_verified || !collision.source_verified ||
+          !isSimpleEmailIdentity(collision.canonical_auth_state) ||
+          !isSimpleEmailIdentity(collision.source_auth_state)) {
+        throw new Error('ambiguous or complex identity cannot use the canonical verified-email rule');
+      }
+      if (sourceUsers.has(collision.source_user_id)) {
+        throw new Error('one source identity collides with multiple canonical sources');
+      }
+      sourceUsers.add(collision.source_user_id);
+      decisions.push({
+        source_project: report.source_alias,
+        canonical_source: canonicalSource,
+        source_user_id: collision.source_user_id,
+        target_user_id: collision.canonical_user_id,
+        email_hmac: collision.email_hmac,
+        rule: 'verified-email-prefer-existing-canonical-v1',
+        canonical_password: 'preserve-existing-canonical-hash',
+        source_password: 'require-reset',
+        memberships: 'merge-after-user-id-remap',
+        providers: 'reconcile-without-duplicate-email-identity',
+        provider_evidence: 'email-only-on-both-sources',
+        mfa_evidence: 'none-on-both-sources',
+        pending_token_evidence: 'none-on-both-sources',
+        status: 'approved-by-execution-rule',
+      });
+    }
+  }
+  return {
+    decision_version: '2026-08-28.1',
+    sources: report.sources,
+    source_alias: report.source_alias,
+    source_collision_report_sha256: report.report_sha256,
+    decisions,
+    validation: {
+      status: 'pass',
+      input_collisions: decisions.length,
       resolved: decisions.length,
       unresolved: 0,
     },

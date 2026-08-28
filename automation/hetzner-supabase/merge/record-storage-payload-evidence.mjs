@@ -5,10 +5,12 @@ import { spawn } from 'node:child_process';
 import { once } from 'node:events';
 import path from 'node:path';
 import readline from 'node:readline';
-import { SOURCES, accessToken, assertPrivateOutput } from './lib.mjs';
+import { fileURLToPath } from 'node:url';
+import { SOURCE_REGISTRY, SOURCES, accessToken, assertPrivateOutput, sourceAliasUsage } from './lib.mjs';
 
 const EXPECTED_TARGET = 'root@46.224.187.4';
 const RECEIVER = '/tmp/festapp-storage-file-receiver.cjs';
+const RECEIVER_SOURCE = fileURLToPath(new URL('../rehearsal/storage-file-receiver.cjs', import.meta.url));
 const TARGET_VERIFY_CONCURRENCY = 8;
 
 function fail(message) { throw new Error(message); }
@@ -23,6 +25,10 @@ function storageDescriptor(row) {
   const metadata = row.metadata ?? {};
   const expectedSize = Number(metadata.size ?? metadata.contentLength);
   if (![row.bucket_id, row.name, row.version].every((value) => typeof value === 'string' && value) ||
+      !/^[A-Za-z0-9][A-Za-z0-9._-]{0,99}$/.test(row.bucket_id) ||
+      !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(row.version) ||
+      row.name.includes('\\') || row.name.includes('\0') ||
+      row.name.split('/').some((part) => !part || part === '.' || part === '..') ||
       !Number.isSafeInteger(expectedSize) || expectedSize < 0) {
     fail('managed Storage descriptor is invalid');
   }
@@ -71,6 +77,10 @@ async function readManagedDescriptors(alias, artifact, identity, manifest) {
   const expectedObjects = manifest.tables.find((table) =>
     table.schema_name === 'storage' && table.table_name === 'objects')?.rows;
   if (objects !== expectedObjects) fail('managed Storage descriptor count differs from manifest');
+  if (new Set(descriptors.map((descriptor) =>
+    `${descriptor.bucket}\0${descriptor.name}\0${descriptor.version}`)).size !== descriptors.length) {
+    fail('managed Storage artifact contains duplicate object descriptors');
+  }
   return { objects, bytes, descriptors, orderedDescriptorSha256: aggregate.digest('hex') };
 }
 
@@ -171,7 +181,8 @@ async function readEvidence(alias, requestedPath, requestedArtifact, identity, t
       !Number.isSafeInteger(value.resumed_objects) || value.resumed_objects < 0 ||
       value.resumed_objects > value.objects ||
       !/^[0-9a-f]{64}$/.test(value.ordered_payload_sha256 ?? '') ||
-      !/^[0-9a-f]{64}$/.test(value.ordered_descriptor_sha256 ?? '')) {
+      !/^[0-9a-f]{64}$/.test(value.ordered_descriptor_sha256 ?? '') ||
+      !/^[0-9a-f]{64}$/.test(value.receiver_sha256 ?? '')) {
     fail(`${alias} Storage evidence cardinality or digest is invalid`);
   }
   if (manifest.source?.alias !== alias || manifest.source?.project_ref !== SOURCES[alias] ||
@@ -198,81 +209,90 @@ async function readEvidence(alias, requestedPath, requestedArtifact, identity, t
   return { ...value, evidence_sha256: await sha256File(file), artifact: path.resolve(artifact) };
 }
 
+async function verifyReceiver(target, expectedSha256) {
+  const localSha256 = await sha256File(RECEIVER_SOURCE);
+  if (localSha256 !== expectedSha256) fail('copy evidence receiver hash differs from repository receiver');
+  const child = spawn('ssh', ['-o', 'BatchMode=yes', target,
+    `docker exec supabase-storage sha256sum ${RECEIVER}`], { stdio: ['ignore', 'pipe', 'pipe'] });
+  let stdout = '';
+  let stderr = '';
+  child.stdout.on('data', (chunk) => { stdout += chunk; });
+  child.stderr.on('data', (chunk) => { stderr += chunk; });
+  const [code] = await once(child, 'close');
+  if (code !== 0 || stdout.trim().split(/\s+/)[0] !== expectedSha256) {
+    fail(`target Storage receiver hash mismatch: ${stderr.slice(0, 800)}`);
+  }
+}
+
 function sqlString(value) {
   if (!/^[0-9a-f]{64}$/.test(value)) fail('unsafe SQL digest value');
   return `'${value}'`;
 }
 
 async function main() {
-  const [defaultPath, aPath, defaultArtifact, aArtifact, identity, database,
-    target = EXPECTED_TARGET] = process.argv.slice(2);
-  if (!defaultPath || !aPath || !defaultArtifact || !aArtifact || !identity || !database) {
-    fail('usage: record-storage-payload-evidence.mjs DEFAULT.json A.json DEFAULT.age A.age IDENTITY TARGET_DATABASE [root@host]');
+  const [alias, evidencePath, artifact, identity, database, target = EXPECTED_TARGET] = process.argv.slice(2);
+  const sourceIndex = SOURCE_REGISTRY.findIndex((source) => source.alias === alias && source.role === 'merge-source');
+  if (sourceIndex < 1 || !evidencePath || !artifact || !identity || !database) {
+    fail(`usage: record-storage-payload-evidence.mjs ${sourceAliasUsage()} EVIDENCE.json MANAGED.age IDENTITY TARGET_DATABASE [${EXPECTED_TARGET}]`);
   }
   if (target !== EXPECTED_TARGET || !/^festapp_rehearsal_[0-9]{14}$/.test(database)) {
     fail('target must be the approved host and a timestamped isolated rehearsal database');
   }
   const token = accessToken();
-  const [defaultEvidence, aEvidence] = await Promise.all([
-    readEvidence('default', defaultPath, defaultArtifact, identity, target, token),
-    readEvidence('a', aPath, aArtifact, identity, target, token),
-  ]);
+  const evidence = await readEvidence(alias, evidencePath, artifact, identity, target, token);
+  await verifyReceiver(target, evidence.receiver_sha256);
+  const predecessors = SOURCE_REGISTRY.slice(0, sourceIndex).map((source) => source.alias);
+  const predecessorSql = predecessors.map((source) => `'${source}'`).join(',');
+  const stageManaged = `festapp_stage_${alias}_managed`;
 
   const sql = `BEGIN;
 DO $validate$
-DECLARE default_run uuid; a_run uuid; precondition text; changed bigint;
+DECLARE import_run uuid; precondition text; changed bigint;
 BEGIN
-  SELECT run_id INTO STRICT default_run FROM festapp_merge.import_runs WHERE source_alias='default' AND status='blocked';
-  SELECT run_id INTO STRICT a_run FROM festapp_merge.import_runs WHERE source_alias='a' AND status='blocked';
+  IF (SELECT count(*) FROM festapp_merge.import_runs WHERE source_alias IN (${predecessorSql}) AND status='validated')<>${predecessors.length}
+    OR EXISTS (SELECT 1 FROM festapp_merge.validation_results v JOIN festapp_merge.import_runs r USING(run_id) WHERE r.source_alias IN (${predecessorSql}) AND v.status<>'pass') THEN
+    RAISE EXCEPTION 'a predecessor source is not fully validated';
+  END IF;
+  SELECT run_id INTO STRICT import_run FROM festapp_merge.import_runs WHERE source_alias='${alias}' AND source_project_ref='${SOURCES[alias]}' AND status='blocked';
   SELECT concat_ws('|',
-    (SELECT status FROM festapp_merge.validation_results WHERE run_id=default_run AND check_name='default-storage-object-payloads'),
-    (SELECT status FROM festapp_merge.validation_results WHERE run_id=a_run AND check_name='a-storage-object-payloads'),
-    (SELECT count(*) FROM festapp_stage_default_managed.rows WHERE source_schema='storage' AND source_table='objects'),
-    (SELECT coalesce(sum((row_data->'metadata'->>'size')::bigint),0) FROM festapp_stage_default_managed.rows WHERE source_schema='storage' AND source_table='objects'),
-    (SELECT count(*) FROM festapp_stage_a_managed.rows WHERE source_schema='storage' AND source_table='objects'),
-    (SELECT coalesce(sum((row_data->'metadata'->>'size')::bigint),0) FROM festapp_stage_a_managed.rows WHERE source_schema='storage' AND source_table='objects'),
-    (SELECT count(*) FROM storage.objects),
-    (SELECT managed_artifact_sha256 FROM festapp_stage_default_managed.provenance),
-    (SELECT managed_artifact_sha256 FROM festapp_stage_a_managed.provenance)
+    (SELECT status FROM festapp_merge.validation_results WHERE run_id=import_run AND check_name='${alias}-storage-metadata-import'),
+    (SELECT status FROM festapp_merge.validation_results WHERE run_id=import_run AND check_name='${alias}-storage-object-payloads'),
+    (SELECT status FROM festapp_merge.validation_results WHERE run_id=import_run AND check_name='${alias}-auth-and-storage-import'),
+    (SELECT count(*) FROM ${stageManaged}.rows WHERE source_schema='storage' AND source_table='objects'),
+    (SELECT coalesce(sum((row_data->'metadata'->>'size')::bigint),0) FROM ${stageManaged}.rows WHERE source_schema='storage' AND source_table='objects'),
+    (SELECT count(*) FROM ${stageManaged}.rows s JOIN storage.objects t ON t.id=(s.row_data->>'id')::uuid WHERE s.source_schema='storage' AND s.source_table='objects'),
+    (SELECT managed_artifact_sha256 FROM ${stageManaged}.provenance WHERE source_alias='${alias}' AND source_project_ref='${SOURCES[alias]}'),
+    (SELECT observed->'source_provenance'->>'managed_artifact_sha256' FROM festapp_merge.validation_results WHERE run_id=import_run AND check_name='${alias}-storage-metadata-import')
   ) INTO precondition;
-  IF precondition <> 'blocked|blocked|${defaultEvidence.objects}|${defaultEvidence.bytes}|${aEvidence.objects}|${aEvidence.bytes}|${defaultEvidence.objects + aEvidence.objects}|${defaultEvidence.source_artifact_sha256}|${aEvidence.source_artifact_sha256}' THEN
+  IF precondition <> 'pass|blocked|blocked|${evidence.objects}|${evidence.bytes}|${evidence.objects}|${evidence.source_artifact_sha256}|${evidence.source_artifact_sha256}' THEN
     RAISE EXCEPTION 'Storage payload evidence does not match staged/canonical metadata: %',precondition;
   END IF;
 
   UPDATE festapp_merge.validation_results SET status='pass',observed=jsonb_build_object(
-    'metadata_rows',${defaultEvidence.objects},'copied_payloads',${defaultEvidence.objects},
-    'payload_bytes',${defaultEvidence.bytes},'resumed_verified_payloads',${defaultEvidence.resumed_objects},
-    'ordered_payload_sha256',${sqlString(defaultEvidence.ordered_payload_sha256)},
-    'ordered_descriptor_sha256',${sqlString(defaultEvidence.ordered_descriptor_sha256)},
-    'source_artifact_sha256',${sqlString(defaultEvidence.source_artifact_sha256)},
-    'evidence_sha256',${sqlString(defaultEvidence.evidence_sha256)},'deleted_payloads',0)
-  WHERE run_id=default_run AND check_name='default-storage-object-payloads';
+    'metadata_rows',${evidence.objects},'copied_payloads',${evidence.objects},
+    'payload_bytes',${evidence.bytes},'resumed_verified_payloads',${evidence.resumed_objects},
+    'ordered_payload_sha256',${sqlString(evidence.ordered_payload_sha256)},
+    'ordered_descriptor_sha256',${sqlString(evidence.ordered_descriptor_sha256)},
+    'source_artifact_sha256',${sqlString(evidence.source_artifact_sha256)},
+    'receiver_sha256',${sqlString(evidence.receiver_sha256)},
+    'evidence_sha256',${sqlString(evidence.evidence_sha256)},
+    'source_and_target_rehashed_at_recorder_time',true,
+    'snapshot_time_content_proof_requires_final_source_freeze',true,
+    'cloud_source_mutated',false,'cloudflare_in_path',false,'deleted_payloads',0)
+  WHERE run_id=import_run AND check_name='${alias}-storage-object-payloads' AND status='blocked';
   GET DIAGNOSTICS changed=ROW_COUNT;
-  IF changed<>1 THEN RAISE EXCEPTION 'default Storage payload gate update count was %',changed; END IF;
-  UPDATE festapp_merge.validation_results SET status='pass',observed=jsonb_build_object(
-    'metadata_rows',${aEvidence.objects},'copied_payloads',${aEvidence.objects},
-    'payload_bytes',${aEvidence.bytes},'resumed_verified_payloads',${aEvidence.resumed_objects},
-    'ordered_payload_sha256',${sqlString(aEvidence.ordered_payload_sha256)},
-    'ordered_descriptor_sha256',${sqlString(aEvidence.ordered_descriptor_sha256)},
-    'source_artifact_sha256',${sqlString(aEvidence.source_artifact_sha256)},
-    'evidence_sha256',${sqlString(aEvidence.evidence_sha256)},'deleted_payloads',0)
-  WHERE run_id=a_run AND check_name='a-storage-object-payloads';
-  GET DIAGNOSTICS changed=ROW_COUNT;
-  IF changed<>1 THEN RAISE EXCEPTION 'source-a Storage payload gate update count was %',changed; END IF;
-  UPDATE festapp_merge.validation_results SET observed=observed||jsonb_build_object('object_payloads_copied',true)
-  WHERE run_id=default_run AND check_name='auth-and-storage-import';
-  GET DIAGNOSTICS changed=ROW_COUNT;
-  IF changed<>1 THEN RAISE EXCEPTION 'default aggregate Storage gate update count was %',changed; END IF;
+  IF changed<>1 THEN RAISE EXCEPTION 'merge-source Storage payload gate update count was %',changed; END IF;
   UPDATE festapp_merge.validation_results SET status='pass',observed=observed||jsonb_build_object('storage_payloads_imported',true)
-  WHERE run_id=a_run AND check_name='a-auth-and-storage-import';
+  WHERE run_id=import_run AND check_name='${alias}-auth-and-storage-import' AND status='blocked';
   GET DIAGNOSTICS changed=ROW_COUNT;
-  IF changed<>1 THEN RAISE EXCEPTION 'source-a aggregate Storage gate update count was %',changed; END IF;
+  IF changed<>1 THEN RAISE EXCEPTION 'merge-source aggregate Storage gate update count was %',changed; END IF;
 END
 $validate$;
 COMMIT;
 SELECT jsonb_build_object(
   'storage_objects',(SELECT count(*) FROM storage.objects),
-  'payload_gates',(SELECT jsonb_object_agg(r.source_alias,v.status) FROM festapp_merge.validation_results v JOIN festapp_merge.import_runs r USING(run_id) WHERE v.check_name IN ('default-storage-object-payloads','a-storage-object-payloads'))
+  'source_alias','${alias}',
+  'payload_gate',(SELECT status FROM festapp_merge.validation_results WHERE run_id=(SELECT run_id FROM festapp_merge.import_runs WHERE source_alias='${alias}') AND check_name='${alias}-storage-object-payloads')
 );
 `;
   const child = spawn('ssh', ['-o', 'BatchMode=yes', target,

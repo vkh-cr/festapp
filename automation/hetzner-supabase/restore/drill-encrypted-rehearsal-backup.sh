@@ -59,7 +59,7 @@ ssh -o BatchMode=yes "$SSH_TARGET" "docker run -d --name '$CLEAN_CONTAINER' --ne
 stop_clean_cluster() { ssh -o BatchMode=yes "$SSH_TARGET" "docker stop '$CLEAN_CONTAINER' >/dev/null" || true; }
 trap stop_clean_cluster EXIT
 readonly CLEAN_READY="$(ssh -o BatchMode=yes "$SSH_TARGET" "for attempt in \$(seq 1 60); do
-  docker exec '$CLEAN_CONTAINER' pg_isready -U postgres -d postgres >/dev/null 2>&1 && { printf ready; exit; }; sleep 1; done; printf failed")"
+  docker exec '$CLEAN_CONTAINER' psql -X -U supabase_admin -d postgres -Atqc 'SELECT 1' >/dev/null 2>&1 && { printf ready; exit; }; sleep 1; done; printf failed")"
 [[ "$CLEAN_READY" == "ready" ]] || fail "clean PostgreSQL restore cluster did not become ready"
 
 # The image foundation can already contain standard Supabase roles. pg_dumpall
@@ -108,14 +108,24 @@ readonly OBSERVED_SECURITY="$(ssh -o BatchMode=yes "$SSH_TARGET" "docker exec '$
         FROM pg_auth_members member JOIN pg_roles member_role ON member_role.oid=member.member
         JOIN pg_roles parent_role ON parent_role.oid=member.roleid) role_entries),''),'sha256'),'hex'),
     encode(extensions.digest(coalesce((SELECT string_agg(entry,E'\\n' ORDER BY entry) FROM (
-      SELECT concat_ws('|','schema',n.nspname,pg_get_userbyid(n.nspowner),coalesce(n.nspacl::text,'')) entry
+      SELECT concat_ws('|','schema',n.nspname,pg_get_userbyid(n.nspowner),coalesce((
+        SELECT string_agg(concat_ws(':',grantor::regrole::text,grantee::regrole::text,privilege_type,is_grantable),','
+          ORDER BY grantor,grantee,privilege_type,is_grantable) FROM aclexplode(n.nspacl)
+          WHERE grantee<>n.nspowner),'')) entry
         FROM pg_namespace n WHERE n.nspname IN ('public','eshop','auth','storage','realtime','_realtime','supabase_functions','graphql','graphql_public','extensions','vault')
-      UNION ALL SELECT concat_ws('|','relation',n.nspname,c.relname,c.relkind,pg_get_userbyid(c.relowner),coalesce(c.relacl::text,''))
+      UNION ALL SELECT concat_ws('|','relation',n.nspname,c.relname,c.relkind,pg_get_userbyid(c.relowner),coalesce((
+        SELECT string_agg(concat_ws(':',grantor::regrole::text,grantee::regrole::text,privilege_type,is_grantable),','
+          ORDER BY grantor,grantee,privilege_type,is_grantable) FROM aclexplode(c.relacl)
+          WHERE grantee<>c.relowner),''))
         FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
         WHERE n.nspname IN ('public','eshop','auth','storage','realtime','_realtime','supabase_functions','graphql','graphql_public','extensions','vault')
-      UNION ALL SELECT concat_ws('|','function',n.nspname,p.proname,pg_get_function_identity_arguments(p.oid),p.prokind,pg_get_userbyid(p.proowner),coalesce(p.proacl::text,''))
+      UNION ALL SELECT concat_ws('|','function',n.nspname,p.proname,pg_get_function_identity_arguments(p.oid),p.prokind,pg_get_userbyid(p.proowner),coalesce((
+        SELECT string_agg(concat_ws(':',grantor::regrole::text,grantee::regrole::text,privilege_type,is_grantable),','
+          ORDER BY grantor,grantee,privilege_type,is_grantable) FROM aclexplode(p.proacl)
+          WHERE grantee<>p.proowner),''))
         FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
-        WHERE n.nspname IN ('public','eshop','auth','storage','realtime','_realtime','supabase_functions','graphql','graphql_public','extensions','vault')) object_entries),''),'sha256'),'hex'))\"")"
+        WHERE n.nspname IN ('public','eshop','auth','storage','realtime','_realtime','supabase_functions','graphql','graphql_public','extensions','vault')
+          AND NOT (n.nspname='extensions' AND p.proname='grant_pg_cron_access')) object_entries),''),'sha256'),'hex'))\"")"
 readonly OBSERVED_ROLE_SECURITY_SHA256="${OBSERVED_SECURITY%%|*}"
 readonly OBSERVED_OBJECT_SECURITY_SHA256="${OBSERVED_SECURITY#*|}"
 readonly RESTORE_DURATION_SECONDS="$(( $(date +%s) - RESTORE_STARTED_EPOCH ))"

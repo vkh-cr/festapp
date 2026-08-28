@@ -27,7 +27,7 @@
         "additionalProperties": false,
         "required": ["alias", "project_ref", "schema_fingerprint", "snapshot_at"],
         "properties": {
-          "alias": { "enum": ["default", "a", "canonical"] },
+          "alias": { "enum": ["default", "a", "slunovrat", "canonical"] },
           "project_ref": { "type": "string", "minLength": 1 },
           "schema_fingerprint": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
           "snapshot_at": { "type": "string", "format": "date-time" },

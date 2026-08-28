@@ -7,6 +7,8 @@ readonly EXPECTED_MIGRATION_COUNT="101"
 readonly COMPOSE_DIR="${FESTAPP_REHEARSAL_COMPOSE_DIR:-/opt/festapp-supabase/docker}"
 readonly EVIDENCE_ROOT="${FESTAPP_REHEARSAL_EVIDENCE_ROOT:-/var/lib/festapp-rehearsal-evidence}"
 readonly TARGET_DATABASE="${FESTAPP_REHEARSAL_DATABASE:-postgres}"
+readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly SOURCE_REGISTRY="$SCRIPT_DIR/../merge/source-registry.json"
 
 fail() {
   echo "ERROR: $*" >&2
@@ -22,6 +24,10 @@ fail() {
   fail "refusing host $(hostname -s); expected $EXPECTED_HOSTNAME"
 [[ -f "$COMPOSE_DIR/docker-compose.yml" ]] || fail "missing pinned Supabase Compose runtime"
 [[ -f "$COMPOSE_DIR/docker-compose.festapp.yml" ]] || fail "missing Festapp Compose override"
+[[ -f "$SOURCE_REGISTRY" ]] || fail "missing migration source registry"
+readonly SOURCE_ALIASES_CSV="$(jq -er '.sources | map(.alias) | join(",")' "$SOURCE_REGISTRY")"
+[[ "$SOURCE_ALIASES_CSV" =~ ^[a-z][a-z0-9_-]*(,[a-z][a-z0-9_-]*)+$ ]] ||
+  fail "invalid migration source registry aliases"
 
 cd "$COMPOSE_DIR"
 docker compose config -q
@@ -52,7 +58,7 @@ docker compose exec -T db pg_dump -U postgres -d "$TARGET_DATABASE" --schema-onl
   >"$RUN_DIR/pre-apply-schema.sql"
 chmod 0600 "$RUN_DIR/pre-apply-schema.sql"
 
-psql_rehearsal <<'SQL'
+psql_rehearsal -v source_aliases="$SOURCE_ALIASES_CSV" <<'SQL'
 BEGIN;
 
 CREATE SCHEMA festapp_merge AUTHORIZATION postgres;
@@ -60,7 +66,7 @@ REVOKE ALL ON SCHEMA festapp_merge FROM PUBLIC, anon, authenticated, service_rol
 
 CREATE TABLE festapp_merge.import_runs (
   run_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  source_alias text NOT NULL CHECK (source_alias IN ('default', 'a')),
+  source_alias text NOT NULL CHECK (source_alias = ANY (string_to_array(:'source_aliases', ','))),
   source_project_ref text NOT NULL,
   snapshot_at timestamptz NOT NULL,
   source_schema_fingerprint text NOT NULL CHECK (source_schema_fingerprint ~ '^[0-9a-f]{64}$'),

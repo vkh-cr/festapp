@@ -162,7 +162,7 @@
       <div class="flow">
         <article class="flow-panel">
           <div class="flow-title"><h3>Dnes</h3><span class="state live">běží</span></div>
-          <div class="nodes"><span class="node">Aplikace</span><span class="arrow">→</span><span class="node">Supabase default</span><span class="node">Supabase a</span></div>
+          <div class="nodes"><span class="node">Aplikace</span><span class="arrow">→</span><span class="node">Supabase default</span><span class="node">Supabase a</span><span class="node">Supabase Slunovrat</span></div>
         </article>
         <div class="flow-mid"><span>řízený cutover</span></div>
         <article class="flow-panel">
@@ -193,9 +193,10 @@
           <div class="blocker"><span class="num">3</span><div><strong>Finální marker</strong><span>Čerstvé oba exporty, nulové mutující sessions a finální source markery mohou vzniknout až v reálném produkčním freeze okně.</span></div></div>
         </article>
         <article class="card span-6">
-          <div class="blocker"><span class="num">4</span><div><strong>Finální hostname a poslední 4 Storage URL</strong><span><code>rehearsal-api.festapp.net</code> už prošel Auth/REST/Realtime/Storage i direct-origin testem. Přepis na produkční <code>api.festapp.net</code> proběhne až při finálním gate.</span></div></div>
+          <div class="blocker"><span class="num">4</span><div><strong>Finální hostname a 228 Storage URL</strong><span>Všech 228 legacy URL ze tří zdrojů má hashově ověřený lokální objekt. Přepis na produkční <code>api.festapp.net</code> proběhne až při finálním gate.</span></div></div>
           <div class="blocker"><span class="num">5</span><div><strong>Produkční klientská adopce</strong><span>CSM web i nový podepsaný iOS org-12 kandidát prošly s rotovaným anon credentialem včetně Auth/rights/write canary. Po AAB zbývá store schválení a adopce finálního <code>api.festapp.net</code> manifestu.</span></div></div>
           <div class="blocker"><span class="num">6</span><div><strong>OneSignal rotace</strong><span>REST credential je už v kódu přesunutý mimo klientský DTO/RPC do server-only úložiště. Před produkcí se musí autorizovaně nahradit, ověřit canary a starý klíč musí prokazatelně selhat.</span></div></div>
+          <div class="blocker"><span class="num">7</span><div><strong>Kapacita rehearsal hostu</strong><span>Třízdrojový clean-cluster restore prošel, ale po zachování všech starších drillů zbývá jen přibližně 304 MB. Před dalším během je nutný schválený retention cleanup nebo rozšíření disku.</span></div></div>
         </article>
       </div>
     </section>
@@ -204,8 +205,8 @@
       <div class="section-head"><div><h2>Co už je bezpečně připravené</h2></div></div>
       <div class="grid">
         <article class="card span-4"><h3>Runtime pinning</h3><p>Supabase <code>self-hosted/v0.8.0</code>, PG 17.6 a kontejnery připnuté digesty. Před provisioningem se znovu ověří nejnovější stabilní bundle.</p></article>
-        <article class="card span-4"><h3>Data a identity</h3><p>Oba zdroje jsou <code>validated</code>. U 13 stejných ověřených e-mailů zůstalo default UUID a heslo; všechny reference z <code>a</code> jsou přemapované.</p></article>
-        <article class="card span-4"><h3>Storage hranice</h3><p>1 199 objektů / 521,9 MB je v self-hosted Supabase Storage hashově ověřeno. R2 image delivery zůstává oddělené a merge do něj nic nezapisoval.</p></article>
+        <article class="card span-4"><h3>Data a identity</h3><p>Všechny tři zdroje jsou <code>validated</code>. Slunovrat byl importován jako legacy read-only zdroj bez replaye chybějících migrací; 5 kolizních identit a všechny reference jsou deterministicky přemapované.</p></article>
+        <article class="card span-4"><h3>Storage hranice</h3><p>1 453 metadata objektů / 1 211 456 042 B je ve sloučeném self-hosted Storage a 1 717 fyzických souborů / 1 296 547 327 B prošlo clean restore. R2 image delivery zůstává oddělené a merge do něj nic nezapisoval.</p></article>
       </div>
     </section>
 

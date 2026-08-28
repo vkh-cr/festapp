@@ -126,6 +126,12 @@ async function main() {
   if (!recipient.startsWith('ssh-ed25519 ')) throw new Error('snapshot recipient must be an SSH Ed25519 public key');
 
   const token = accessToken();
+  const requestedAliases = (process.env.FESTAPP_EXPORT_SOURCES ?? Object.keys(SOURCES).join(','))
+    .split(',').filter(Boolean);
+  if (requestedAliases.length === 0 || new Set(requestedAliases).size !== requestedAliases.length ||
+      requestedAliases.some((alias) => !SOURCES[alias])) {
+    throw new Error('FESTAPP_EXPORT_SOURCES must be a unique comma-separated subset of approved aliases');
+  }
   const exportSshTarget = process.env.FESTAPP_EXPORT_SSH_TARGET;
   if (exportSshTarget && exportSshTarget !== APPROVED_EXPORT_SSH_TARGET) {
     throw new Error('FESTAPP_EXPORT_SSH_TARGET is not the approved rehearsal host');
@@ -135,7 +141,8 @@ async function main() {
   const created = [];
   let primaryError;
   try {
-    for (const [alias, projectRef] of Object.entries(SOURCES)) {
+    for (const alias of requestedAliases) {
+      const projectRef = SOURCES[alias];
       const password = crypto.randomBytes(32).toString('base64url');
       await createExportRole({ projectRef, token, role, password, validUntil });
       created.push({ alias, projectRef });

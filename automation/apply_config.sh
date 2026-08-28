@@ -109,8 +109,9 @@ done
 [ -f "$PROJECT_ROOT/web/$WEB_LOADING_LOGO_ASSET" ] || {
     echo "Error: configured web loading asset does not exist: $WEB_LOADING_LOGO_ASSET"; exit 1;
 }
-if [[ "$IMAGE_PROJECT_ID" != "default" && "$IMAGE_PROJECT_ID" != "a" ]]; then
-    echo "Error: IMAGE_PROJECT_ID must be default or a"
+SOURCE_REGISTRY="$PROJECT_ROOT/automation/hetzner-supabase/merge/source-registry.json"
+if ! jq -e --arg source "$IMAGE_PROJECT_ID" '.sources | any(.alias == $source)' "$SOURCE_REGISTRY" >/dev/null; then
+    echo "Error: IMAGE_PROJECT_ID must be a registered canonical migration source alias"
     exit 1
 fi
 if ! printf '%s' "$IMAGE_API_URL" | grep -Eq '^https://[^/]+$'; then

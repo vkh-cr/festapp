@@ -5,7 +5,7 @@ import path from 'node:path';
 import readline from 'node:readline';
 import { spawn } from 'node:child_process';
 import { once } from 'node:events';
-import { SOURCES, assertPrivateOutput, stableJson } from './lib.mjs';
+import { SOURCES, assertPrivateOutput, sourceAliasUsage, stableJson } from './lib.mjs';
 
 function targetDatabase(alias) {
   const suffix = process.env.FESTAPP_STAGE_DATABASE_SUFFIX ?? '';
@@ -46,7 +46,7 @@ async function main() {
   const [alias, requestedArtifact, identityPath, requestedRawArtifact,
     sshTarget = 'root@46.224.187.4'] = process.argv.slice(2);
   if (!SOURCES[alias] || !requestedArtifact || !identityPath || !requestedRawArtifact) {
-    throw new Error('usage: stage-managed-export.mjs default|a MANAGED.age SSH-IDENTITY RAW.dump.age [root@host]');
+    throw new Error(`usage: stage-managed-export.mjs ${sourceAliasUsage()} MANAGED.age SSH-IDENTITY RAW.dump.age [root@host]`);
   }
   const artifact = assertPrivateOutput(requestedArtifact);
   const rawArtifact = assertPrivateOutput(requestedRawArtifact);
@@ -92,11 +92,26 @@ async function main() {
   }
   const expectedRows = manifest.tables.reduce((sum, table) => sum + table.rows, 0);
   const database = targetDatabase(alias);
+  const resumeAfterCopy = process.env.FESTAPP_MANAGED_STAGE_ACK ===
+    'resume-after-complete-copy-before-provenance';
 
   const state = (await run('ssh', ['-o', 'BatchMode=yes', sshTarget,
     `cd ${COMPOSE_DIR} && printf '%s|' "$(hostname -s)" && docker compose exec -T db psql -X -Atq -F '|' -U postgres -d ${database} -c "SELECT split_part(current_setting('server_version'),'.',1), to_regnamespace('festapp_managed_source') IS NULL"`,
   ])).trim();
-  if (state !== `${EXPECTED_HOST}|17|t`) throw new Error(`unapproved managed staging target state: ${state}`);
+  if (!resumeAfterCopy && state !== `${EXPECTED_HOST}|17|t`) {
+    throw new Error(`unapproved managed staging target state: ${state}`);
+  }
+  if (resumeAfterCopy) {
+    if (state !== `${EXPECTED_HOST}|17|f`) {
+      throw new Error(`unapproved managed staging resume target state: ${state}`);
+    }
+    const resumeState = (await run('ssh', ['-o', 'BatchMode=yes', sshTarget,
+      `cd ${COMPOSE_DIR} && docker compose exec -T db psql -X -Atq -F '|' -U postgres -d ${database} -c "SELECT count(*),to_regclass('festapp_managed_source.provenance') IS NULL,to_regclass('festapp_managed_source_relation_idx') IS NULL FROM festapp_managed_source.rows"`,
+    ])).trim();
+    if (resumeState !== `${expectedRows}|t|t`) {
+      throw new Error(`managed staging resume requires an exact completed-copy state: ${resumeState}`);
+    }
+  }
 
   const foundationSql = `BEGIN;
 CREATE SCHEMA festapp_managed_source AUTHORIZATION postgres;
@@ -111,44 +126,47 @@ REVOKE ALL ON ALL TABLES IN SCHEMA festapp_managed_source FROM PUBLIC, anon, aut
 REVOKE ALL ON ALL SEQUENCES IN SCHEMA festapp_managed_source FROM PUBLIC, anon, authenticated, service_role;
 COMMIT;
 `;
-  const foundation = spawn('ssh', ['-o', 'BatchMode=yes', sshTarget,
-    `cd ${COMPOSE_DIR} && docker compose exec -T db psql -X -v ON_ERROR_STOP=1 -U postgres -d ${database}`,
-  ], { stdio: ['pipe', 'pipe', 'pipe'] });
-  foundation.stdin.end(foundationSql);
-  let foundationError = '';
-  foundation.stderr.on('data', (chunk) => { foundationError += chunk; });
-  const [foundationCode] = await once(foundation, 'close');
-  if (foundationCode !== 0) throw new Error(`managed staging foundation failed: ${foundationError}`);
+  let rows = expectedRows;
+  if (!resumeAfterCopy) {
+    const foundation = spawn('ssh', ['-o', 'BatchMode=yes', sshTarget,
+      `cd ${COMPOSE_DIR} && docker compose exec -T db psql -X -v ON_ERROR_STOP=1 -U postgres -d ${database}`,
+    ], { stdio: ['pipe', 'pipe', 'pipe'] });
+    foundation.stdin.end(foundationSql);
+    let foundationError = '';
+    foundation.stderr.on('data', (chunk) => { foundationError += chunk; });
+    const [foundationCode] = await once(foundation, 'close');
+    if (foundationCode !== 0) throw new Error(`managed staging foundation failed: ${foundationError}`);
 
-  const decrypt = spawn('age', ['--decrypt', '--identity', identityPath, artifact], {
-    stdio: ['ignore', 'pipe', 'pipe'],
-  });
-  const copy = spawn('ssh', ['-o', 'BatchMode=yes', sshTarget,
-    `cd ${COMPOSE_DIR} && docker compose exec -T db psql -X -v ON_ERROR_STOP=1 -U postgres -d ${database} -c "COPY festapp_managed_source.rows(source_schema,source_table,row_data) FROM STDIN WITH (FORMAT csv, DELIMITER E'\\t')"`,
-  ], { stdio: ['pipe', 'pipe', 'pipe'] });
-  let decryptError = '';
-  let copyError = '';
-  decrypt.stderr.on('data', (chunk) => { decryptError += chunk; });
-  copy.stderr.on('data', (chunk) => { copyError += chunk; });
-  let rows = 0;
-  let completed = false;
-  const lines = readline.createInterface({ input: decrypt.stdout, crlfDelay: Infinity });
-  for await (const line of lines) {
-    const value = JSON.parse(line);
-    if (value.kind === 'row') {
-      const csv = `${csvField(value.schema_name)}\t${csvField(value.table_name)}\t${csvField(JSON.stringify(value.row))}\n`;
-      if (!copy.stdin.write(csv)) await once(copy.stdin, 'drain');
-      rows += 1;
-    } else if (value.kind === 'complete') {
-      completed = true;
+    const decrypt = spawn('age', ['--decrypt', '--identity', identityPath, artifact], {
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+    const copy = spawn('ssh', ['-o', 'BatchMode=yes', sshTarget,
+      `cd ${COMPOSE_DIR} && docker compose exec -T db psql -X -v ON_ERROR_STOP=1 -U postgres -d ${database} -c "COPY festapp_managed_source.rows(source_schema,source_table,row_data) FROM STDIN WITH (FORMAT csv, DELIMITER E'\\t')"`,
+    ], { stdio: ['pipe', 'pipe', 'pipe'] });
+    let decryptError = '';
+    let copyError = '';
+    decrypt.stderr.on('data', (chunk) => { decryptError += chunk; });
+    copy.stderr.on('data', (chunk) => { copyError += chunk; });
+    rows = 0;
+    let completed = false;
+    const lines = readline.createInterface({ input: decrypt.stdout, crlfDelay: Infinity });
+    for await (const line of lines) {
+      const value = JSON.parse(line);
+      if (value.kind === 'row') {
+        const csv = `${csvField(value.schema_name)}\t${csvField(value.table_name)}\t${csvField(JSON.stringify(value.row))}\n`;
+        if (!copy.stdin.write(csv)) await once(copy.stdin, 'drain');
+        rows += 1;
+      } else if (value.kind === 'complete') {
+        completed = true;
+      }
     }
+    copy.stdin.end();
+    const [[decryptCode], [copyCode]] = await Promise.all([once(decrypt, 'close'), once(copy, 'close')]);
+    if (decryptCode !== 0 || copyCode !== 0) {
+      throw new Error(`managed staging stream failed (age=${decryptCode}, copy=${copyCode}): ${decryptError || copyError}`);
+    }
+    if (!completed || rows !== expectedRows) throw new Error(`managed staging row mismatch: ${rows}/${expectedRows}`);
   }
-  copy.stdin.end();
-  const [[decryptCode], [copyCode]] = await Promise.all([once(decrypt, 'close'), once(copy, 'close')]);
-  if (decryptCode !== 0 || copyCode !== 0) {
-    throw new Error(`managed staging stream failed (age=${decryptCode}, copy=${copyCode}): ${decryptError || copyError}`);
-  }
-  if (!completed || rows !== expectedRows) throw new Error(`managed staging row mismatch: ${rows}/${expectedRows}`);
   const restoredSchemaSql = await run('ssh', ['-o', 'BatchMode=yes', sshTarget,
     `cd ${COMPOSE_DIR} && docker compose exec -T db pg_dump -U postgres -d ${database} --schema-only --no-owner --no-privileges --schema public --schema eshop`,
   ]);

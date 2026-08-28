@@ -84,24 +84,27 @@ export function discoverProductionTenantConfigs() {
 export function buildTenantConfigInventory(entries) {
   const unknown = entries.filter((entry) =>
     entry.status !== 'discovered' || entry.source_alias === null || entry.organization_id === null);
-  const sourceA = entries.filter((entry) => entry.source_alias === 'a');
-  const broadSourceA = sourceA.filter((entry) => entry.reachability === 'all-visible-occasions');
+  const sourceCounts = Object.fromEntries(Object.keys(SOURCES).map((alias) => [
+    alias,
+    entries.filter((entry) => entry.source_alias === alias).length,
+  ]));
+  const broadNonDefault = entries.filter((entry) => entry.source_alias !== 'default' &&
+    entry.source_alias !== null && entry.reachability === 'all-visible-occasions');
   return {
     inventory_version: 1,
     entries,
     counts: {
       production_configs: entries.length,
-      default: entries.filter((entry) => entry.source_alias === 'default').length,
-      a: sourceA.length,
+      ...sourceCounts,
       unknown: unknown.length,
-      a_broad_reachability: broadSourceA.length,
+      non_default_broad_reachability: broadNonDefault.length,
     },
     validation: {
       status: unknown.length === 0 ? 'blocked' : 'fail',
       blockers: [
         ...unknown.map((entry) => `${entry.branch}: invalid or unknown project configuration`),
-        ...broadSourceA.map((entry) =>
-          `${entry.branch}: dynamic source-a entrypoint requires all visible occasions to adopt RPC writes or be proven unreachable`),
+        ...broadNonDefault.map((entry) =>
+          `${entry.branch}: dynamic ${entry.source_alias} entrypoint requires all visible occasions to adopt RPC writes or be proven unreachable`),
       ],
       notes: [
         'branch configuration proves configured reachability, not deployed version or traffic',
@@ -123,7 +126,10 @@ async function main() {
   report.inventory_sha256 = sha256(stableJson(report));
   fs.mkdirSync(path.dirname(output), { recursive: true, mode: 0o700 });
   fs.writeFileSync(output, `${JSON.stringify(report, null, 2)}\n`, { mode: 0o600, flag: 'wx' });
-  process.stdout.write(`tenant config inventory: configs=${report.counts.production_configs}, a=${report.counts.a}, broad_a=${report.counts.a_broad_reachability}, status=${report.validation.status}, sha256=${report.inventory_sha256}\n`);
+  process.stdout.write(`tenant config inventory: configs=${report.counts.production_configs}, ` +
+    `sources=${Object.keys(SOURCES).map((alias) => `${alias}:${report.counts[alias]}`).join(',')}, ` +
+    `broad_non_default=${report.counts.non_default_broad_reachability}, ` +
+    `status=${report.validation.status}, sha256=${report.inventory_sha256}\n`);
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {

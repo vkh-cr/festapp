@@ -43,6 +43,7 @@ test('source aliases are pinned to the approved cloud projects', () => {
   assert.deepEqual(SOURCES, {
     default: 'kjdpmixlnhntmxjedpxh',
     a: 'lwfpdjxsdmkfyrzqbrlk',
+    slunovrat: 'hvtsoseaywurkmhywdbd',
   });
 });
 
@@ -57,6 +58,7 @@ test('migration history comparison blocks drift and identifies expansion prerequ
     sources: {
       default: [{ version: '20260801000000', name: 'base' }],
       a: repository.slice(0, 2).map(({ version, name }) => ({ version, name })),
+      slunovrat: [],
     },
   });
   assert.equal(report.validation.status, 'blocked');
@@ -66,6 +68,7 @@ test('migration history comparison blocks drift and identifies expansion prerequ
   ]);
   assert.equal(report.sources.a.client_sync_expansion_recorded, true);
   assert.equal(report.sources.default.client_sync_expansion_recorded, false);
+  assert.equal(report.sources.slunovrat.client_sync_expansion_recorded, false);
   assert.equal(report.validation.production_mutations_performed, false);
   assert.match(report.validation.blockers.join('\n'), /default.*client-sync expansion/i);
 });
@@ -364,6 +367,39 @@ test('identity resolver rejects older reports without global provider and phone 
   assert.throws(() => buildIdentityDecisions(report), /report v2/);
 });
 
+test('later source identity resolver prefers the already merged canonical owner', () => {
+  const report = {
+    report_version: 3,
+    source_alias: 'slunovrat',
+    sources: SOURCES,
+    compared_against: ['canonical'],
+    comparisons: {
+      canonical: {
+        auth: {
+          same_uuid_different_email: [],
+          same_provider_identity_different_uuid: [],
+          same_verified_phone_different_uuid: [],
+          same_identity: [],
+          same_email_different_uuid: [{
+            canonical_user_id: 'canonical-user', source_user_id: 'slunovrat-user',
+            email_hmac: 'e'.repeat(64), canonical_verified: true, source_verified: true,
+            canonical_auth_state: simpleEmailAuthState(), source_auth_state: simpleEmailAuthState(),
+            status: 'manual-merge-required',
+          }],
+        },
+        storage: [],
+      },
+    },
+  };
+  report.report_sha256 = sha256(stableJson(report));
+  const result = buildIdentityDecisions(report);
+  assert.equal(result.validation.resolved, 1);
+  assert.equal(result.decisions[0].source_project, 'slunovrat');
+  assert.equal(result.decisions[0].canonical_source, 'canonical');
+  assert.equal(result.decisions[0].target_user_id, 'canonical-user');
+  assert.equal(result.decisions[0].canonical_password, 'preserve-existing-canonical-hash');
+});
+
 function simpleEmailAuthState() {
   return {
     providers: ['email'], provider_links: [{ provider: 'email', provider_id_hmac: '1'.repeat(64) }],
@@ -489,7 +525,7 @@ test('every RPC overload must independently satisfy the exact security context',
   assert.match(report.live.rpc_functions_insecure[0], /p_payload jsonb/);
 });
 
-test('tenant config inventory excludes keys and exposes broad source-a reachability', () => {
+test('tenant config inventory excludes keys and exposes broad non-default reachability', () => {
   const entry = parseTenantConfig(`
     SUPABASE_URL=https://${SOURCES.a}.supabase.co
     SUPABASE_ANON_KEY=must-not-escape
@@ -503,7 +539,7 @@ test('tenant config inventory excludes keys and exposes broad source-a reachabil
   assert.equal(entry.reachability, 'all-visible-occasions');
   assert.equal(JSON.stringify(entry).includes('must-not-escape'), false);
   const report = buildTenantConfigInventory([{ ...entry, status: 'discovered' }]);
-  assert.equal(report.counts.a_broad_reachability, 1);
+  assert.equal(report.counts.non_default_broad_reachability, 1);
   assert.equal(report.validation.status, 'blocked');
   assert.match(report.validation.blockers[0], /all visible occasions/);
 });

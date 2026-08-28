@@ -25,6 +25,9 @@ readonly A_PAYLOAD_REPAIR_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/rehe
 readonly A_OPERATIONAL_REPAIR_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/rehearsal/repair-a-operational-references.sh"
 readonly A_REFERENCE_VALIDATION_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/rehearsal/validate-a-reference-registry.sh"
 readonly A_IDENTITY_VALIDATION_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/rehearsal/validate-a-identity-merge.sh"
+readonly MERGE_SOURCE_STORAGE_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/rehearsal/import-merge-source-storage-metadata.sh"
+readonly MERGE_SOURCE_INTEGRITY_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/rehearsal/validate-merge-source-integrity.sh"
+readonly MERGE_SOURCE_CLIENT_STATE_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/rehearsal/rebuild-and-validate-merge-source-client-state.sh"
 readonly ISOLATED_FOUNDATION_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/rehearsal/prepare-isolated-target-database.sh"
 readonly ENCRYPTED_BACKUP_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/backup/create-encrypted-rehearsal-backup.sh"
 readonly ENCRYPTED_RESTORE_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/restore/drill-encrypted-rehearsal-backup.sh"
@@ -59,6 +62,9 @@ readonly TERRAFORM_FIREWALL="$PROJECT_ROOT/automation/hetzner-supabase/terraform
 [[ -x "$A_OPERATIONAL_REPAIR_SCRIPT" ]] || { echo "operational reference repair must be executable" >&2; exit 1; }
 [[ -x "$A_REFERENCE_VALIDATION_SCRIPT" ]] || { echo "reference registry validator must be executable" >&2; exit 1; }
 [[ -x "$A_IDENTITY_VALIDATION_SCRIPT" ]] || { echo "identity merge validator must be executable" >&2; exit 1; }
+[[ -x "$MERGE_SOURCE_STORAGE_SCRIPT" ]] || { echo "generic merge-source Storage importer must be executable" >&2; exit 1; }
+[[ -x "$MERGE_SOURCE_INTEGRITY_SCRIPT" ]] || { echo "generic merge-source integrity validator must be executable" >&2; exit 1; }
+[[ -x "$MERGE_SOURCE_CLIENT_STATE_SCRIPT" ]] || { echo "generic merge-source client-state validator must be executable" >&2; exit 1; }
 [[ -x "$ISOLATED_FOUNDATION_SCRIPT" ]] || { echo "isolated foundation builder must be executable" >&2; exit 1; }
 [[ -x "$ENCRYPTED_BACKUP_SCRIPT" ]] || { echo "encrypted backup script must be executable" >&2; exit 1; }
 [[ -x "$ENCRYPTED_RESTORE_SCRIPT" ]] || { echo "encrypted restore drill must be executable" >&2; exit 1; }
@@ -129,15 +135,16 @@ fi
 
 for required in \
   'prepare-empty-source-staging-databases' \
-  'resume-after-vault-schema-fix' \
+  'prepare-additive-source-staging-databases' \
+  'source-registry.json' \
+  'FESTAPP_STAGE_SOURCES' \
   'festapp-supabase-rehearsal-01' \
-  'festapp_stage_default' \
-  'festapp_stage_a' \
+  'festapp_stage_${source}' \
   'CREATE DATABASE %I TEMPLATE template0' \
-  'REVOKE CONNECT ON DATABASE %I FROM PUBLIC, anon, authenticated, service_role' \
-  'CREATE SCHEMA IF NOT EXISTS vault AUTHORIZATION postgres' \
-  'FROM auth.users' \
-  'FROM storage.objects'; do
+  'REVOKE ALL ON DATABASE %I FROM PUBLIC, anon, authenticated, service_role' \
+  'CREATE SCHEMA vault AUTHORIZATION postgres' \
+  'CREATE FUNCTION auth.uid() RETURNS uuid' \
+  'existing canonical imports are not the exact validated predecessor set'; do
   rg -Fq "$required" "$SOURCE_DATABASE_SCRIPT" || { echo "missing source staging safety contract: $required" >&2; exit 1; }
 done
 
@@ -148,18 +155,18 @@ fi
 
 for required in \
   'prepare-read-only-foreign-staging-bridge' \
-  'resume-through-internal-supavisor' \
-  'festapp_stage_reader' \
+  'prepare-additive-read-only-foreign-staging-bridge' \
+  'source-registry.json' \
+  'festapp_stage_reader_${SOURCES[0]}' \
   'VALID UNTIL' \
   'NOBYPASSRLS' \
   'GRANT SELECT ON ALL TABLES IN SCHEMA public, eshop, festapp_managed_source' \
   'CREATE EXTENSION IF NOT EXISTS postgres_fdw WITH SCHEMA extensions' \
-  "OPTIONS (host 'supavisor', port '5432'" \
-  '${READER_ROLE}.your-tenant-id' \
+  "OPTIONS (host 'db',port '5432'" \
   'LIMIT TO (rows,provenance)' \
-  'IMPORT FOREIGN SCHEMA public FROM SERVER festapp_stage_default' \
-  'IMPORT FOREIGN SCHEMA public FROM SERVER festapp_stage_a' \
-  'reader_bypass_rls'; do
+  'IMPORT FOREIGN SCHEMA public FROM SERVER festapp_stage_${source}' \
+  'pre-existing FDW topology changed' \
+  'rolbypassrls'; do
   rg -Fq "$required" "$FOREIGN_BRIDGE_SCRIPT" || { echo "missing foreign bridge safety contract: $required" >&2; exit 1; }
 done
 
@@ -236,6 +243,8 @@ for required in \
   'Storage payload MD5 differs from snapshot metadata' \
   'cloud_source_mutated: false' \
   'cloudflare_in_path: false' \
+  'target must be the approved rehearsal host' \
+  'installAndVerifyReceiver' \
   'refusing to overwrite Storage evidence'; do
   rg -Fq "$required" "$STORAGE_COPY_SCRIPT" || { echo "missing Storage copy safety contract: $required" >&2; exit 1; }
 done
@@ -243,11 +252,11 @@ done
 for required in source_manifest_file_sha256 ordered_descriptor_sha256 source_artifact_sha256; do
   rg -Fq "$required" "$STORAGE_COPY_SCRIPT" || { echo "missing Storage provenance contract: $required" >&2; exit 1; }
 done
-for required in 'readManagedDescriptors' 'festapp_stage_default_managed.provenance' \
+for required in 'readManagedDescriptors' 'SOURCE_REGISTRY' 'sourceIndex' \
   'source_artifact_sha256' 'GET DIAGNOSTICS changed=ROW_COUNT' \
   'Storage evidence descriptors differ from the encrypted managed artifact' \
   'verifyTargetPayloads' 'verifySourcePayloads' 'FESTAPP_STORAGE_VERIFY_ONLY=1' \
-  'independently hashed source/target payloads'; do
+  'independently hashed source/target payloads' 'snapshot_time_content_proof_requires_final_source_freeze'; do
   rg -Fq "$required" "$STORAGE_EVIDENCE_SCRIPT" || { echo "missing Storage evidence recorder contract: $required" >&2; exit 1; }
 done
 for required in 'RAW.dump.age' 'raw_artifact_sha256' 'raw_schema_sha256' 'managed_artifact_sha256' \
@@ -256,7 +265,7 @@ for required in 'RAW.dump.age' 'raw_artifact_sha256' 'raw_schema_sha256' 'manage
   rg -Fq "$required" "$MANAGED_STAGE_SCRIPT" || { echo "missing managed provenance contract: $required" >&2; exit 1; }
 done
 
-for required in 'Operational compatibility exception' 'always-NULL' 'never exposed to API roles'; do
+for required in 'Source DDL may reference auth.uid()' 'always-NULL compatibility stub' 'API roles cannot execute it'; do
   rg -Fq "$required" "$SOURCE_DATABASE_SCRIPT" || { echo "missing isolated auth.uid exception contract: $required" >&2; exit 1; }
 done
 

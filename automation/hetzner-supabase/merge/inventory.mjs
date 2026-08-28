@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {
   SOURCES,
+  sourceAliasUsage,
   accessToken,
   assertCanonicalDefaultTarget,
   assertNewEvidencePaths,
@@ -20,12 +21,12 @@ function parseArgs(argv) {
     const name = argv[index];
     const value = argv[index + 1];
     if (!name?.startsWith('--') || value === undefined) {
-      throw new Error('usage: inventory.mjs --source default|a --output /private/path/file.json');
+      throw new Error(`usage: inventory.mjs --source ${sourceAliasUsage()} --output /private/path/file.json`);
     }
     result[name.slice(2)] = value;
   }
   if (!SOURCES[result.source] || !result.output) {
-    throw new Error('both --source default|a and --output are required');
+    throw new Error(`both --source ${sourceAliasUsage()} and --output are required`);
   }
   return result;
 }

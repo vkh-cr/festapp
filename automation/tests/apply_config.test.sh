@@ -32,6 +32,7 @@ echo "Temp project root: $TMP_ROOT"
 # 1. Stage the files apply_config.sh writes to. Use the real ones in the repo
 #    as the starting state — that way we test against actual templates.
 mkdir -p "$TMP_ROOT/automation" \
+         "$TMP_ROOT/automation/hetzner-supabase/merge" \
          "$TMP_ROOT/automation/lib" \
          "$TMP_ROOT/automation/release/legal" \
          "$TMP_ROOT/automation/templates/web/delete-account" \
@@ -49,6 +50,8 @@ mkdir -p "$TMP_ROOT/automation" \
          "$TMP_ROOT/assets/icons"
 
 cp "$PROJECT_ROOT/automation/apply_config.sh" "$TMP_ROOT/automation/apply_config.sh"
+cp "$PROJECT_ROOT/automation/hetzner-supabase/merge/source-registry.json" \
+   "$TMP_ROOT/automation/hetzner-supabase/merge/source-registry.json"
 cp "$PROJECT_ROOT/automation/lib/supabase_client_config.mjs" "$TMP_ROOT/automation/lib/supabase_client_config.mjs"
 cp "$PROJECT_ROOT/automation/release/render_legal_pages.mjs" "$TMP_ROOT/automation/release/render_legal_pages.mjs"
 cp "$PROJECT_ROOT"/automation/release/legal/*.md "$TMP_ROOT/automation/release/legal/"

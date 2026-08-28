@@ -5,6 +5,7 @@ import path from 'node:path';
 import { spawn } from 'node:child_process';
 import {
   SOURCES,
+  sourceAliasUsage,
   assertNewEvidencePaths,
   assertPrivateOutput,
   stableJson,
@@ -12,7 +13,7 @@ import {
 
 export function parseApprovedConnection(alias, rawUrl) {
   const expectedRef = SOURCES[alias];
-  if (!expectedRef) throw new Error('source alias must be default or a');
+  if (!expectedRef) throw new Error(`source alias must be ${sourceAliasUsage()}`);
   const url = new URL(rawUrl);
   if (!['postgres:', 'postgresql:'].includes(url.protocol)) {
     throw new Error('source database URL must use PostgreSQL');

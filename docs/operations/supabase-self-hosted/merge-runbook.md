@@ -101,8 +101,8 @@ FESTAPP_EXPORT_AGE_RECIPIENT='age1...' \
   default /private/evidence/default.dump.age
 ```
 
-Repeat with alias `a` and that project's URL. The exporter accepts only the two
-hard-coded approved project refs, requires TLS, keeps the password out of child
+Repeat for every alias in `merge/source-registry.json`. The exporter accepts only
+the centrally registered approved project refs, requires TLS, keeps the password out of child
 process arguments, refuses a group/world-accessible directory, never overwrites
 an artifact, and writes a sibling `0600` checksum manifest. A failed stream is
 preserved for diagnosis and must not be mistaken for a complete artifact because
@@ -121,6 +121,20 @@ owner roles merely to make `pg_dump` pass.
 ```bash
 node automation/hetzner-supabase/merge/rehearsal-export-clouds.mjs \
   /private/evidence/root ~/.ssh/id_ed25519.pub
+```
+
+For an additive rehearsal of one newly registered source against an already
+validated canonical target, restrict both application and managed exports with
+the same explicit subset. This does not weaken the final cutover gate, which
+still requires fresh evidence for every registered source:
+
+```bash
+FESTAPP_EXPORT_SOURCES=slunovrat \
+  node automation/hetzner-supabase/merge/rehearsal-export-clouds.mjs \
+  /private/evidence/root ~/.ssh/id_ed25519.pub
+FESTAPP_EXPORT_SOURCES=slunovrat \
+  node automation/hetzner-supabase/merge/export-managed-schemas.mjs \
+  /private/evidence/root/cloud-snapshots-RUN ~/.ssh/id_ed25519.pub
 ```
 
 After both application manifests exist, export managed rows into the same
@@ -218,3 +232,27 @@ old cloud → self-hosted tunnel → old cloud. Compare semantic config values a
 released-client fallback counts rather than requiring equal numeric IDs. For
 CSM Ostrava the proven baseline is 26 information rows, 47 news rows, 128
 places and 969 events.
+
+## Registered legacy merge sources without migration history
+
+`slunovrat` is an old PostgreSQL 15 source with no trustworthy
+`supabase_migrations.schema_migrations` ledger. Never attempt to make that cloud
+project current by replaying the canonical migration directory in place. It is
+a read-only export source. Restore its application and managed exports into
+private staging, transform them into the fresh PostgreSQL 17 canonical schema,
+and validate the result there.
+
+For every additive registry source, run the generic sequence with the same
+`FESTAPP_MERGE_SOURCE_ALIAS`: ID mapping, relational import, Auth import,
+Storage metadata import, payload copy/evidence, integrity validation, then the
+source-scoped client-state rebuild/final validator. The last validator is the
+only owner of the source run's `blocked -> validated` transition. Missing old
+tables are either explicitly `not applicable` when empty or preserved in the
+private quarantine ledger; they are never synthesized or silently discarded.
+
+The 2026-08-28 Slunovrat rehearsal proved five occasions, 2,455 source Auth
+users (five approved canonical identity mappings), 254 Storage objects, 91
+losslessly quarantined legacy rows and 30 public client-sync scopes. Its public
+canary returned the mapped Slunovrat 2026 occasion with 132 events. The 228
+legacy Storage URLs across all registered sources have copied objects, but
+their host rewrite remains an `api.festapp.net` cutover gate.
