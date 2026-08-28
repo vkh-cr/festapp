@@ -167,6 +167,14 @@ for branch_mapping in \
     fi
 done
 
+if grep -F -q 'cavfotofest|csmostrava2026|festapp|festivalslunovrat|hvezdamorska' \
+    "$PROJECT_ROOT/automation/check_tenant_branch_drift.sh"; then
+    echo "  ok: tenant drift checker recognizes the original Festapp tenant"
+else
+    echo "  FAIL: tenant drift checker does not recognize the original Festapp tenant"
+    fail=1
+fi
+
 echo
 if [ $fail -ne 0 ]; then
     echo "❌ deploy workflow test FAILED"

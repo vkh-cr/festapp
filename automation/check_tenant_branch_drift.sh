@@ -18,7 +18,7 @@ VALIDATOR_PATH=automation/validate_json_schema_subset.mjs
 CANONICAL_MAIN_REF=${CANONICAL_MAIN_REF:-main}
 
 case "$TENANT_ID" in
-  cavfotofest|csmostrava2026|festivalslunovrat|hvezdamorska) ;;
+  cavfotofest|csmostrava2026|festapp|festivalslunovrat|hvezdamorska) ;;
   *) echo "Error: unsupported tenant ID: $TENANT_ID" >&2; exit 65 ;;
 esac
 
