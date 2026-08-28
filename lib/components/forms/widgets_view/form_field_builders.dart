@@ -116,7 +116,7 @@ class FormFieldBuilders {
               context,
               formHolder.controller!.formKey!,
               formHolder.controller!.secret!,
-              ticket.tickets[index].seat!.item!.id!,
+              ticket.tickets[index].seat!.seat!.id!,
               false);
           setState(() {
             ticket.tickets.removeAt(index);
@@ -186,7 +186,7 @@ class FormFieldBuilders {
                           ],
                         ),
                         Text(
-                          "${ticket.tickets[i].seat!.item}",
+                          "${ticket.tickets[i].seat!.seat}",
                           style: TextStyle(
                               fontSize: 14 * FormHelper.fontSizeFactor),
                         ),
@@ -233,7 +233,7 @@ class FormFieldBuilders {
       ]),
       builder: (FormFieldState<BlueprintSeat?> field) {
         BlueprintSeat? seat = field.value;
-        textController.text = seat?.item?.toString() ?? FormHelper.metaEmpty;
+        textController.text = seat?.seat?.toString() ?? FormHelper.metaEmpty;
         return TextField(
           controller: textController,
           focusNode: focusNode,

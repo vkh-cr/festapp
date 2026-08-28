@@ -19,8 +19,8 @@ class FormTicketModel {
       identical(this, other) ||
       other is FormTicketModel &&
           runtimeType == other.runtimeType &&
-          seat!.item!.id! == other.seat!.item!.id!;
+          seat!.seat!.id! == other.seat!.seat!.id!;
 
   @override
-  int get hashCode => seat!.item!.id!.hashCode;
+  int get hashCode => seat!.seat!.id!.hashCode;
 }

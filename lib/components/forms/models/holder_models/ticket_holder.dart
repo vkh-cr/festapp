@@ -10,8 +10,7 @@ class TicketHolder extends FieldHolder {
   static const String metaFields = "fields";
   static const String metaTicket = "ticket";
   static const String metaMaxTickets = "max_tickets";
-  static const String metaShowDepositDescription =
-      "show_surcharge_description";
+  static const String metaShowDepositDescription = "show_surcharge_description";
 
   List<FormTicketModel> tickets = [];
 
@@ -43,16 +42,16 @@ class TicketHolder extends FieldHolder {
   void updateTickets(List<BlueprintSeat> seats) {
     // Create a map of existing tickets for fast lookup.
     final existingTicketsMap = {
-      for (var ticket in tickets) ticket.seat!.item!.id!: ticket
+      for (var ticket in tickets) ticket.seat!.seat!.id!: ticket
     };
 
     // Build the new list of tickets.
     final List<FormTicketModel> updatedTickets = [];
 
     for (var seat in seats) {
-      if (existingTicketsMap.containsKey(seat.item!.id!)) {
+      if (existingTicketsMap.containsKey(seat.seat!.id!)) {
         // Use the existing ticket if it matches the seat.
-        updatedTickets.add(existingTicketsMap[seat.item!.id!]!);
+        updatedTickets.add(existingTicketsMap[seat.seat!.id!]!);
       } else {
         // Create a new ticket if none exists for the seat.
         updatedTickets.add(

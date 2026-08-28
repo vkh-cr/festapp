@@ -7,10 +7,10 @@ import 'package:fstapp/components/eshop/orders_strings.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:collection/collection.dart';
 import 'blueprint_strings.dart';
+import 'blueprint_seat_state.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
-import 'package:venue_seat_picker/venue_seat_picker.dart';
 
-class BlueprintObjectModel implements SeatLayoutItem {
+class BlueprintObjectModel {
   static const String metaX = "x";
   static const String metaY = "y";
   static const String metaSpot = "spot";
@@ -27,13 +27,13 @@ class BlueprintObjectModel implements SeatLayoutItem {
   static const String blackType = "black";
   static const String availableType = "available";
 
-  static Map<SeatState, String> statesMap = {
-    SeatState.blocked: blackType,
-    SeatState.available: availableType,
-    SeatState.selected: selectedType,
-    SeatState.selectedByMe: selectedByMeType,
-    SeatState.ordered: orderedType,
-    SeatState.used: usedType,
+  static Map<BlueprintSeatState, String> statesMap = {
+    BlueprintSeatState.blocked: blackType,
+    BlueprintSeatState.available: availableType,
+    BlueprintSeatState.selected: selectedType,
+    BlueprintSeatState.selectedByMe: selectedByMeType,
+    BlueprintSeatState.ordered: orderedType,
+    BlueprintSeatState.used: usedType,
   };
 
   @override
@@ -55,32 +55,19 @@ class BlueprintObjectModel implements SeatLayoutItem {
   ProductModel? product;
   int? spotProduct;
   BlueprintGroupModel? group;
-  SeatState? stateEnum;
+  BlueprintSeatState? stateEnum;
   BlueprintModel? blueprint;
 
-  @override
-  Object? get seatId => id;
-
-  @override
   int get seatRow =>
       y ?? (throw StateError('Blueprint seat is missing its row coordinate'));
 
-  @override
   int get seatColumn =>
       x ??
       (throw StateError('Blueprint seat is missing its column coordinate'));
 
-  @override
-  SeatState get seatState => stateEnum ?? SeatState.empty;
+  BlueprintSeatState get seatState => stateEnum ?? BlueprintSeatState.empty;
 
-  @override
-  set seatState(SeatState value) => setSeatState(value);
-
-  @override
-  String? get seatLabel => title;
-
-  @override
-  Object? get seatGroupId => group?.id ?? groupId;
+  set seatState(BlueprintSeatState value) => setSeatState(value);
 
   factory BlueprintObjectModel.fromJson(Map<String, dynamic> json) {
     // Constructor will handle state/stateEnum sync
@@ -127,7 +114,7 @@ class BlueprintObjectModel implements SeatLayoutItem {
     if (state != null && stateEnum == null) {
       stateEnum = statesMap.entries
           .firstWhere((entry) => entry.value == state,
-              orElse: () => const MapEntry(SeatState.empty, ""))
+              orElse: () => const MapEntry(BlueprintSeatState.empty, ""))
           .key;
     } else if (stateEnum != null && state == null) {
       state = statesMap[stateEnum];
@@ -135,7 +122,7 @@ class BlueprintObjectModel implements SeatLayoutItem {
   }
 
   /// Updates both state and stateEnum
-  void setSeatState(SeatState newState) {
+  void setSeatState(BlueprintSeatState newState) {
     stateEnum = newState;
     state = statesMap[newState];
   }
@@ -213,14 +200,14 @@ class BlueprintObjectModel implements SeatLayoutItem {
     }
 
     switch (stateEnum) {
-      case SeatState.available:
+      case BlueprintSeatState.available:
         return BlueprintStrings.swapSummaryAvailable;
-      case SeatState.blocked:
+      case BlueprintSeatState.blocked:
         return BlueprintStrings.swapSummaryBlack;
-      case SeatState.used:
+      case BlueprintSeatState.used:
         return BlueprintStrings.swapSummaryUsed;
-      case SeatState.selected:
-      case SeatState.selectedByMe:
+      case BlueprintSeatState.selected:
+      case BlueprintSeatState.selectedByMe:
         return BlueprintStrings.swapSummarySelected;
       default:
         return BlueprintStrings.swapSummaryEmpty;

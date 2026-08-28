@@ -14,7 +14,7 @@ import '../blueprint_object_model.dart';
 
 class BlueprintControlsBar extends StatefulWidget {
   final BlueprintModel? blueprint;
-  final SeatLayoutController<BlueprintObjectModel> seatLayoutController;
+  final VenueSeatController<BlueprintObjectModel, Object> seatLayoutController;
   final bool canEdit;
 
   const BlueprintControlsBar({
@@ -232,8 +232,8 @@ class _BlueprintControlsBarState extends State<BlueprintControlsBar> {
         setState(() {
           widget.blueprint!.backgroundSvg = content;
         });
-        widget.seatLayoutController.setBackground(
-          SeatLayoutBackground.parse(content),
+        widget.seatLayoutController.setBackdrop(
+          VenueBackdrop.parse(content),
         );
         ToastHelper.Show(context, BlueprintStrings.toastSvgUploadSuccess);
       } catch (e) {
@@ -261,8 +261,8 @@ class _BlueprintControlsBarState extends State<BlueprintControlsBar> {
         setState(() {
           widget.blueprint!.backgroundSvg = publicUrl;
         });
-        widget.seatLayoutController.setBackground(
-          SeatLayoutBackground.parse(publicUrl),
+        widget.seatLayoutController.setBackdrop(
+          VenueBackdrop.parse(publicUrl),
         );
         ToastHelper.Show(context, BlueprintStrings.toastImageUploadSuccess);
       } catch (e) {
@@ -283,7 +283,7 @@ class _BlueprintControlsBarState extends State<BlueprintControlsBar> {
       setState(() {
         widget.blueprint!.backgroundSvg = null;
       });
-      widget.seatLayoutController.setBackground(null);
+      widget.seatLayoutController.setBackdrop(null);
       ToastHelper.Show(context, BlueprintStrings.toastBackgroundRemoved);
     }
   }

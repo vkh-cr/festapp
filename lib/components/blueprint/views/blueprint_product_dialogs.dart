@@ -10,7 +10,7 @@ import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:fstapp/theme_config.dart'; // Import ThemeConfig
 import 'package:collection/collection.dart';
-import 'package:venue_seat_picker/venue_seat_picker.dart';
+import '../blueprint_seat_state.dart';
 
 import '../../_shared/common_strings.dart';
 
@@ -360,10 +360,10 @@ class _GroupProductManagerDialogState extends State<GroupProductManagerDialog> {
 
   bool _isOccupied(BlueprintObjectModel obj) {
     final state = obj.stateEnum;
-    return state == SeatState.ordered ||
-        state == SeatState.used ||
-        state == SeatState.selected ||
-        state == SeatState.selectedByMe;
+    return state == BlueprintSeatState.ordered ||
+        state == BlueprintSeatState.used ||
+        state == BlueprintSeatState.selected ||
+        state == BlueprintSeatState.selectedByMe;
   }
 
   Future<void> _pickProduct({BlueprintObjectModel? seat}) async {

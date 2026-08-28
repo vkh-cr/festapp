@@ -2,9 +2,9 @@
 
 Visual seat selection/reservation interface for the Eshop.
 
-The reusable layout, editor and optimistic picker are provided by the public
+The reusable viewer, customer picker and venue editor are provided by the public
 [`venue_seat_picker`](https://github.com/festappnet/venue_seat_picker) package.
-Festapp implements its `SeatLayoutItem` seam in `BlueprintObjectModel`; SQL
+Festapp maps `BlueprintObjectModel` through a read-only `SeatAdapter`; SQL
 reservation authority and product/order behavior remain in this feature.
 
 ## Split Brain: Dart UI vs SQL Authority (CRITICAL)
@@ -19,7 +19,7 @@ Selection state is managed optimistically in Dart but authoritatively in SQL.
   4. On deselect: verifies secret matches before clearing
 
 **If RPC fails (spot taken by another user), UI must roll back** -- handled by
-the package `SeatPicker` around Festapp's `select_spot` callback.
+the package `VenueSeatPicker` around Festapp's `select_spot` callback.
 
 ## Gotchas
 

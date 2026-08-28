@@ -12,7 +12,8 @@ import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/widgets/buttons_helper.dart';
 import 'package:venue_seat_picker/venue_seat_picker.dart';
 
-/// Festapp reservation adapter around the package's optimistic [SeatPicker].
+/// Festapp reservation adapter around the package's optimistic
+/// [VenueSeatPicker].
 /// SQL remains authoritative; a rejected RPC automatically restores the UI.
 class SeatReservationWidget extends StatefulWidget {
   static const int boxSize = 15;
@@ -42,14 +43,16 @@ class SeatReservationWidget extends StatefulWidget {
 
 class _SeatReservationWidgetState extends State<SeatReservationWidget> {
   BlueprintModel? blueprint;
-  late final SeatLayoutController<BlueprintObjectModel> _controller;
+  late final VenueSeatController<BlueprintObjectModel, Object> _controller;
   late List<BlueprintSeat> _selectedSeats;
 
   @override
   void initState() {
     super.initState();
     _selectedSeats = List.of(widget.selectedSeats);
-    _controller = SeatLayoutController<BlueprintObjectModel>();
+    _controller = VenueSeatController<BlueprintObjectModel, Object>(
+      adapter: blueprintSeatAdapter,
+    );
   }
 
   @override
@@ -77,21 +80,17 @@ class _SeatReservationWidgetState extends State<SeatReservationWidget> {
                       ? const Center(child: CircularProgressIndicator())
                       : Padding(
                           padding: const EdgeInsets.fromLTRB(12, 24, 12, 0),
-                          child: SeatPicker<BlueprintObjectModel>(
+                          child: VenueSeatPicker<BlueprintObjectModel, Object>(
                             controller: _controller,
-                            maxSelection: widget.maxTickets,
-                            onLimitReached: () => ToastHelper.Show(
+                            maxSelectedSeats: widget.maxTickets,
+                            onSelectionLimitReached: () => ToastHelper.Show(
                               context,
                               BlueprintStrings.toastMaxTicketsReached,
                             ),
-                            onSelectionRequest: _requestSelection,
-                            onSelectionChanged: (seats) {
-                              _selectedSeats = seats;
-                              widget.onSelectionChanged?.call(seats);
-                              if (mounted) setState(() {});
-                            },
-                            tooltipBuilder: (context, cell) =>
-                                cell.item?.blueprintTooltip(context) ?? '',
+                            onSelectionRequested: _requestSelection,
+                            onSelectionChanged: _selectionChanged,
+                            tooltipBuilder: (context, slot) =>
+                                slot.seat?.blueprintTooltip(context) ?? '',
                           ),
                         ),
                 ),
@@ -111,13 +110,29 @@ class _SeatReservationWidgetState extends State<SeatReservationWidget> {
         ),
       );
 
-  Future<bool> _requestSelection(BlueprintSeat seat, bool selected) async {
+  Future<bool> _requestSelection(
+    SeatSelectionRequest<BlueprintObjectModel, Object> request,
+  ) async {
     final accepted = await ExceptionHandler.guard<bool>(
       context,
       futureFunction: () => DbOrders.selectSpot(
-          context, widget.formDataKey, widget.secret, seat.item!.id!, selected),
+        context,
+        widget.formDataKey,
+        widget.secret,
+        request.seat.id!,
+        request.selected,
+      ),
     );
     return accepted ?? false;
+  }
+
+  void _selectionChanged(Set<Object> selectedIds) {
+    _selectedSeats = selectedIds
+        .map(_controller.slotForId)
+        .whereType<BlueprintSeat>()
+        .toList();
+    widget.onSelectionChanged?.call(_selectedSeats);
+    if (mounted) setState(() {});
   }
 
   Future<void> _loadData() async {
@@ -129,29 +144,23 @@ class _SeatReservationWidgetState extends State<SeatReservationWidget> {
     if (loaded == null || !mounted) return;
     blueprint = loaded;
 
-    final selectedIds =
-        _selectedSeats.map((seat) => seat.item?.id).whereType<int>().toSet();
-    for (final object in loaded.objects ?? const []) {
-      if (selectedIds.contains(object.id)) {
-        object.seatState = SeatState.selectedByMe;
-      }
-    }
+    final selectedIds = _selectedSeats.map((seat) => seat.seatId).nonNulls;
 
-    _controller.loadLayout(
+    _controller.loadPlan(
       rows: loaded.configuration?.height ?? 1,
       columns: loaded.configuration?.width ?? 1,
-      items: (loaded.objects ?? const [])
+      seats: (loaded.objects ?? const [])
           .where((object) => object.x != null && object.y != null),
-      cellSize: SeatReservationWidget.boxSize.toDouble(),
-      background: switch (loaded.backgroundSvg) {
+      seatSize: SeatReservationWidget.boxSize.toDouble(),
+      backdrop: switch (loaded.backgroundSvg) {
         final String source when source.isNotEmpty =>
-          SeatLayoutBackground.parse(source),
+          VenueBackdrop.parse(source),
         _ => null,
       },
+      initiallySelected: selectedIds,
     );
-    _selectedSeats = _controller.cells
-        .where((cell) => cell.state == SeatState.selectedByMe)
-        .toList();
+    _selectedSeats =
+        _controller.slots.where((slot) => slot.isSelected).toList();
     setState(() {});
   }
 }

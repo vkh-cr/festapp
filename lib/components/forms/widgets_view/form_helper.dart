@@ -336,7 +336,7 @@ class FormHelper {
         return null;
       case fieldTypeSpot:
         if (fieldValue is BlueprintSeat) {
-          return fieldValue.item;
+          return fieldValue.seat;
         }
         return null;
       case fieldTypeTicket:
@@ -367,7 +367,7 @@ class FormHelper {
             }
           }
           if (ticket.tickets[i].seat != null) {
-            ticketData[fieldTypeSpot] = ticket.tickets[i].seat!.item;
+            ticketData[fieldTypeSpot] = ticket.tickets[i].seat!.seat;
           }
           tickets.add(ticketData);
         }

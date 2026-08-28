@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fstapp/components/blueprint/blueprint_object_model.dart';
+import 'package:fstapp/components/blueprint/blueprint_seat.dart';
 import 'package:venue_seat_picker/venue_seat_picker.dart';
 
 void main() {
@@ -12,20 +13,20 @@ void main() {
       state: BlueprintObjectModel.blackType,
     );
 
-    expect(object.seatId, 42);
-    expect(object.seatRow, 2);
-    expect(object.seatColumn, 3);
-    expect(object.seatState, SeatState.blocked);
+    expect(blueprintSeatAdapter.idOf(object), 42);
+    expect(blueprintSeatAdapter.positionOf(object), const SeatPosition(2, 3));
+    expect(blueprintSeatAdapter.statusOf(object), SeatStatus.blocked);
+    expect(object.seatState, BlueprintSeatState.blocked);
 
-    object.seatState = SeatState.selectedByMe;
-    expect(object.stateEnum, SeatState.selectedByMe);
+    object.seatState = BlueprintSeatState.selectedByMe;
+    expect(object.stateEnum, BlueprintSeatState.selectedByMe);
     expect(object.state, BlueprintObjectModel.selectedByMeType);
+    expect(blueprintSeatAdapter.statusOf(object), SeatStatus.available);
   });
 
   test('missing coordinates are rejected instead of becoming zero', () {
     final object = BlueprintObjectModel(id: 42);
 
-    expect(() => object.seatRow, throwsStateError);
-    expect(() => object.seatColumn, throwsStateError);
+    expect(() => blueprintSeatAdapter.positionOf(object), throwsStateError);
   });
 }

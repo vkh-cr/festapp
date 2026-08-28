@@ -1,8 +1,9 @@
 import 'package:collection/collection.dart';
+
+import 'blueprint_seat_state.dart';
 import 'package:fstapp/components/blueprint/blueprint_group.dart';
 import 'package:fstapp/components/blueprint/blueprint_model.dart';
 import 'package:fstapp/components/blueprint/blueprint_object_model.dart';
-import 'package:venue_seat_picker/venue_seat_picker.dart';
 import 'package:fstapp/components/eshop/models/order_model.dart';
 import 'package:fstapp/components/eshop/models/order_product_ticket_model.dart';
 import 'package:fstapp/components/eshop/models/orders_history_model.dart';
@@ -128,7 +129,7 @@ class GetOrdersHelper {
                       .firstWhereOrNull(
                           (entry) => entry.value == matchingSpot?.state)
                       ?.key ??
-                  SeatState.available,
+                  BlueprintSeatState.available,
               x: object.x,
               y: object.y,
             );
@@ -137,7 +138,7 @@ class GetOrdersHelper {
               id: object.id,
               type: object.type,
               title: object.title,
-              stateEnum: SeatState.blocked,
+              stateEnum: BlueprintSeatState.blocked,
               x: object.x,
               y: object.y,
             );

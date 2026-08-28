@@ -115,8 +115,8 @@ class FormSession extends ChangeNotifier {
         for (var s in field.tickets) {
           if (s.seat != null) {
             totalProducts++; // Should specific seats count as products? Original code did this.
-            totalPrice += s.seat!.item!.product!.price!;
-            currencyC ??= s.seat!.item!.product!.currencyCode;
+            totalPrice += s.seat!.seat!.product!.price!;
+            currencyC ??= s.seat!.seat!.product!.currencyCode;
           }
         }
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/components/blueprint/blueprint_strings.dart';
 import 'package:venue_seat_picker/venue_seat_picker.dart';
 
+import '../blueprint_seat_state.dart';
 import '../seat_reservation/widgets/seat_reservation_widget.dart';
 import 'blueprint_editor_tab.dart';
 
@@ -12,7 +13,7 @@ class BlueprintLegend extends StatelessWidget {
   // New properties for the Confirm Button
   final int selectedCount;
   final VoidCallback? onConfirmOrder;
-  final Map<SeatState, int> stateCounts;
+  final Map<BlueprintSeatState, int> stateCounts;
 
   const BlueprintLegend({
     super.key,
@@ -58,7 +59,7 @@ class BlueprintLegend extends StatelessWidget {
         _buildLegendItem(
           context: context,
           label: BlueprintStrings.legendBlackArea,
-          state: SeatState.blocked,
+          state: BlueprintSeatState.blocked,
           isActive: currentSelectionMode == BlueprintSelectionMode.addBlack,
           onTap: () => onModeSelected(BlueprintSelectionMode.addBlack),
         ),
@@ -66,16 +67,16 @@ class BlueprintLegend extends StatelessWidget {
         _buildLegendItem(
           context: context,
           label: BlueprintStrings.legendAvailable,
-          state: SeatState.available,
+          state: BlueprintSeatState.available,
           isActive: currentSelectionMode == BlueprintSelectionMode.addAvailable,
           onTap: () => onModeSelected(BlueprintSelectionMode.addAvailable),
-          count: stateCounts[SeatState.available],
+          count: stateCounts[BlueprintSeatState.available],
         ),
         const SizedBox(height: 8),
         _buildLegendItem(
           context: context,
           label: BlueprintStrings.legendEmpty,
-          state: SeatState.empty,
+          state: BlueprintSeatState.empty,
           isActive: currentSelectionMode == BlueprintSelectionMode.emptyArea,
           onTap: () => onModeSelected(BlueprintSelectionMode.emptyArea),
           drawBorder: true,
@@ -87,7 +88,7 @@ class BlueprintLegend extends StatelessWidget {
         _buildLegendItem(
           context: context,
           label: BlueprintStrings.legendSwapSeats,
-          state: SeatState.empty,
+          state: BlueprintSeatState.empty,
           isActive: currentSelectionMode == BlueprintSelectionMode.swapSeats,
           forceHighlight:
               true, // Keeps orange border for Swap to indicate "special/warning"
@@ -102,7 +103,7 @@ class BlueprintLegend extends StatelessWidget {
             _buildLegendItem(
               context: context,
               label: BlueprintStrings.legendCreateOrder,
-              state: SeatState.selectedByMe,
+              state: BlueprintSeatState.selectedByMe,
               isActive:
                   currentSelectionMode == BlueprintSelectionMode.createNewOrder,
               forceHighlight: false, // REMOVED orange border here
@@ -157,19 +158,19 @@ class BlueprintLegend extends StatelessWidget {
         _buildLegendItem(
           context: context,
           label: BlueprintStrings.legendUsed,
-          state: SeatState.used,
+          state: BlueprintSeatState.used,
           isActive: false,
           grayedOut: true,
-          count: stateCounts[SeatState.used],
+          count: stateCounts[BlueprintSeatState.used],
         ),
         const SizedBox(height: 8),
         _buildLegendItem(
           context: context,
           label: BlueprintStrings.legendOccupied,
-          state: SeatState.ordered,
+          state: BlueprintSeatState.ordered,
           isActive: false,
           grayedOut: true,
-          count: stateCounts[SeatState.ordered],
+          count: stateCounts[BlueprintSeatState.ordered],
         )
       ],
     );
@@ -178,7 +179,7 @@ class BlueprintLegend extends StatelessWidget {
   Widget _buildLegendItem({
     required BuildContext context,
     required String label,
-    required SeatState state,
+    required BlueprintSeatState state,
     bool isActive = false,
     VoidCallback? onTap,
     bool grayedOut = false,
@@ -217,8 +218,18 @@ class BlueprintLegend extends StatelessWidget {
                           borderRadius: BorderRadius.circular(4),
                         )
                       : null,
-                  child: SeatTile(
-                    state: state,
+                  child: VenueSeatMarker(
+                    status: switch (state) {
+                      BlueprintSeatState.empty => null,
+                      BlueprintSeatState.available ||
+                      BlueprintSeatState.selectedByMe =>
+                        SeatStatus.available,
+                      BlueprintSeatState.selected => SeatStatus.held,
+                      BlueprintSeatState.ordered => SeatStatus.booked,
+                      BlueprintSeatState.used => SeatStatus.checkedIn,
+                      BlueprintSeatState.blocked => SeatStatus.blocked,
+                    },
+                    selected: state == BlueprintSeatState.selectedByMe,
                     isSwapHighlighted: forceHighlight,
                     size: SeatReservationWidget.boxSize.toDouble() *
                         (drawBorder ? 0.7 : 1.0),

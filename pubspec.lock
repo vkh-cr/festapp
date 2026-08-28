@@ -2261,8 +2261,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "403748ebc15e19a0fb172e002b3b4dd774899778"
-      resolved-ref: "403748ebc15e19a0fb172e002b3b4dd774899778"
+      ref: "62bfaa6e878d979521d55b2825c0775e31332019"
+      resolved-ref: "62bfaa6e878d979521d55b2825c0775e31332019"
       url: "https://github.com/festappnet/venue_seat_picker.git"
     source: git
     version: "0.1.0"

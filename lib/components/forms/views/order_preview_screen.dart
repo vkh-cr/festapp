@@ -65,7 +65,6 @@ class _OrderPreviewScreenState extends State<OrderPreviewScreen> {
     });
   }
 
-
   @override
   void dispose() {
     _scrollController.dispose();
@@ -135,7 +134,9 @@ class _OrderPreviewScreenState extends State<OrderPreviewScreen> {
                         const SizedBox(height: 16),
 
                         // Payment type choice (deposit vs full), only for on-site deposit
-                        if (_hasDepositProducts() && FeatureService.isDepositChoiceAvailable()) _buildDepositSection(context),
+                        if (_hasDepositProducts() &&
+                            FeatureService.isDepositChoiceAvailable())
+                          _buildDepositSection(context),
 
                         // Total Price
                         _buildTotalPrice(context),
@@ -240,7 +241,7 @@ class _OrderPreviewScreenState extends State<OrderPreviewScreen> {
           ticketInfoRows.add(_buildInfoRow(
             context,
             FormHelper.spotLabel(),
-            ticket.seat!.item.toString(),
+            ticket.seat!.seat.toString(),
           ));
         } else if (ticket.seat == null && ticketHolder.hasSpot) {
           // Add warning if no seat selected but spots are enabled/required
@@ -274,7 +275,8 @@ class _OrderPreviewScreenState extends State<OrderPreviewScreen> {
               sectionPrice +=
                   products.fold(0, (sum, product) => sum + product.price);
               s = value.toString();
-              priceText = '+ ${Utilities.formatPrice(context, sectionPrice, currencyCode: widget.formHolder.controller!.currencyCode)}';
+              priceText =
+                  '+ ${Utilities.formatPrice(context, sectionPrice, currencyCode: widget.formHolder.controller!.currencyCode)}';
               final metaTexts = products
                   .map((p) =>
                       OptionFieldHelper.buildMetaSurchargeText(context, p))
@@ -289,7 +291,8 @@ class _OrderPreviewScreenState extends State<OrderPreviewScreen> {
               s = value.toString();
             }
           }
-          return _buildInfoRow(context, entry.title!, s, entry.fieldType, priceText);
+          return _buildInfoRow(
+              context, entry.title!, s, entry.fieldType, priceText);
         }).toList();
 
         // Combine all ticket info rows with dividers.
@@ -409,7 +412,8 @@ class _OrderPreviewScreenState extends State<OrderPreviewScreen> {
   }
 
   bool _hasDepositProducts() {
-    if (!FeatureService.isFeatureEnabled(FeatureConstants.deposit)) return false;
+    if (!FeatureService.isFeatureEnabled(FeatureConstants.deposit))
+      return false;
     final ticketHolder = widget.formHolder.fields.firstWhereOrNull(
       (field) => field.fieldType == FormHelper.fieldTypeTicket,
     ) as TicketHolder?;
@@ -462,7 +466,8 @@ class _OrderPreviewScreenState extends State<OrderPreviewScreen> {
     final isOnSite = depositFeature?.depositDeadline == "on_site";
     final infoText = isOnSite
         ? PublicOrderStrings.depositInfoOnSite
-        : PublicOrderStrings.depositInfoDaysBefore(depositFeature?.depositDeadlineDays ?? 0);
+        : PublicOrderStrings.depositInfoDaysBefore(
+            depositFeature?.depositDeadlineDays ?? 0);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
