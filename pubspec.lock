@@ -2260,11 +2260,10 @@ packages:
   venue_seat_picker:
     dependency: "direct main"
     description:
-      path: "."
-      ref: "62bfaa6e878d979521d55b2825c0775e31332019"
-      resolved-ref: "62bfaa6e878d979521d55b2825c0775e31332019"
-      url: "https://github.com/festappnet/venue_seat_picker.git"
-    source: git
+      name: venue_seat_picker
+      sha256: b59e31b76f5cb8c6490905928d5475a7c0dd2d6c8c01afad114969b9b18b7ffa
+      url: "https://pub.dev"
+    source: hosted
     version: "0.1.0"
   video_player:
     dependency: transitive
