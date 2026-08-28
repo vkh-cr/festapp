@@ -75,6 +75,15 @@ git -C "$REPO" -c user.name=cutover-test -c user.email=cutover@example.invalid c
 SLUNOVRAT_TIP=$(git -C "$REPO" rev-parse HEAD)
 (cd "$REPO" && CANONICAL_MAIN_REF=main "$TMP_ROOT/checker.sh" "$BASE_SHA" festivalslunovrat "$SLUNOVRAT_TIP" >/dev/null)
 
+git -C "$REPO" switch -qc prod/cavfotofest "$BASE_SHA"
+cp "$REPO/automation/tests/fixtures/tenants/cavfotofest.conf" "$REPO/automation/project.conf"
+(cd "$REPO" && bash automation/apply_config.sh automation/project.conf >/dev/null)
+node -e 'const fs=require("fs");fs.writeFileSync(process.argv[1],JSON.stringify({schemaVersion:1,tenantId:"cavfotofest",baseMainSha:process.argv[2]},null,2)+"\n")' "$REPO/automation/tenant-overlay.json" "$BASE_SHA"
+git -C "$REPO" add -A
+git -C "$REPO" -c user.name=cutover-test -c user.email=cutover@example.invalid commit -qm valid-cav-overlay
+CAV_TIP=$(git -C "$REPO" rev-parse HEAD)
+(cd "$REPO" && CANONICAL_MAIN_REF=main "$TMP_ROOT/checker.sh" "$BASE_SHA" cavfotofest "$CAV_TIP" >/dev/null)
+
 git -C "$REPO" switch -qc tamper-slunovrat-shared "$SLUNOVRAT_TIP"
 printf '\n// Slunovrat shared drift fixture\n' >> "$REPO/lib/main.dart"
 git -C "$REPO" add lib/main.dart

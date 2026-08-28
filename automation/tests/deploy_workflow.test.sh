@@ -144,6 +144,18 @@ for needle in 'tenant-drift:' 'check_tenant_branch_drift.sh' 'tenant-overlay.sch
     fi
 done
 
+for branch_mapping in \
+    'prod/cavfotofest) TENANT_ID=cavfotofest' \
+    'prod/csmostrava2026) TENANT_ID=csmostrava2026' \
+    'prod/hvezdamorska) TENANT_ID=hvezdamorska'; do
+    if grep -F -q "$branch_mapping" "$WORKFLOW"; then
+        echo "  ok: tenant gate routes '$branch_mapping'"
+    else
+        echo "  FAIL: tenant gate missing '$branch_mapping'"
+        fail=1
+    fi
+done
+
 echo
 if [ $fail -ne 0 ]; then
     echo "❌ deploy workflow test FAILED"

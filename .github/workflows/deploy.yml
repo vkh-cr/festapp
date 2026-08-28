@@ -25,6 +25,7 @@ jobs:
           set -euo pipefail
           BRANCH="${GITHUB_REF#refs/heads/}"
           case "$BRANCH" in
+            prod/cavfotofest) TENANT_ID=cavfotofest ;;
             prod/csmostrava2026) TENANT_ID=csmostrava2026 ;;
             prod/hvezdamorska) TENANT_ID=hvezdamorska ;;
             *) echo "No unified-overlay policy for $BRANCH"; exit 0 ;;

@@ -27,7 +27,7 @@ hash_generated() {
   done < "$PROJECT_ROOT/automation/tenant-overlays/generated.paths"
 }
 
-for tenant in festapp csmostrava2026 festivalslunovrat hvezdamorska; do
+for tenant in festapp cavfotofest csmostrava2026 festivalslunovrat hvezdamorska; do
   root="$TMP_ROOT/$tenant"
   copy_worktree "$root"
   config="$PROJECT_ROOT/automation/tests/fixtures/tenants/$tenant.conf"
@@ -39,6 +39,7 @@ for tenant in festapp csmostrava2026 festivalslunovrat hvezdamorska; do
 done
 
 grep -qE 'fixturecsm' "$TMP_ROOT/csmostrava2026/lib/app_config.dart"
+grep -qE 'fixturecav' "$TMP_ROOT/cavfotofest/lib/app_config.dart"
 grep -qE 'fixturehm' "$TMP_ROOT/hvezdamorska/lib/app_config.dart"
 grep -qF "supabaseUrl = 'https://fixtureslunovrat.supabase.co'" "$TMP_ROOT/festivalslunovrat/lib/app_config.dart"
 grep -qE 'organization = 5' "$TMP_ROOT/festivalslunovrat/web_client/src/app_config.js"
@@ -52,6 +53,9 @@ grep -qF '"generation":0,"backend":"legacy"' \
   "$TMP_ROOT/festivalslunovrat/web/backend-activation.json"
 grep -qE "supportedLanguages = \['cs', 'en', 'pl'\]" "$TMP_ROOT/festivalslunovrat/web_client/src/app_config.js"
 grep -qE 'organization = 4' "$TMP_ROOT/hvezdamorska/web_client/src/app_config.js"
+grep -qE 'organization = 3' "$TMP_ROOT/cavfotofest/web_client/src/app_config.js"
+grep -qF "backendActivationTenantId = 'cavfotofest'" "$TMP_ROOT/cavfotofest/lib/app_config.dart"
+grep -qF 'backendActivationCanonicalOrganizationId = 6' "$TMP_ROOT/cavfotofest/web_client/src/app_config.js"
 grep -qE 'static const bool isAllUnit = true;' "$TMP_ROOT/hvezdamorska/lib/app_config.dart"
 grep -qE "supportedLanguages = \['cs', 'en'\]" "$TMP_ROOT/hvezdamorska/web_client/src/app_config.js"
 grep -qE 'CSM Fixture' "$TMP_ROOT/csmostrava2026/web/delete-account/index.html"
@@ -60,6 +64,7 @@ grep -qE 'HM Fixture' "$TMP_ROOT/hvezdamorska/web/delete-account/index.html"
 grep -qE 'fixturehm.supabase.co/functions/v1/confirm-account-deletion' "$TMP_ROOT/hvezdamorska/web/delete-account/index.html"
 ! grep -qE 'fixturecsm|csmostrava2026|fixture_csm|CSM Fixture' "$TMP_ROOT/hvezdamorska/lib/app_config.dart" "$TMP_ROOT/hvezdamorska/web_client/src/app_config.js" "$TMP_ROOT/hvezdamorska/web/index.html" "$TMP_ROOT/hvezdamorska/web/delete-account/index.html"
 ! grep -qE 'fixturehm|fixture_hm|HM Fixture' "$TMP_ROOT/csmostrava2026/lib/app_config.dart" "$TMP_ROOT/csmostrava2026/web_client/src/app_config.js" "$TMP_ROOT/csmostrava2026/web/index.html" "$TMP_ROOT/csmostrava2026/web/delete-account/index.html"
+! grep -qE 'fixturecsm|fixturehm|fixture_csm|fixture_hm|CSM Fixture|HM Fixture' "$TMP_ROOT/cavfotofest/lib/app_config.dart" "$TMP_ROOT/cavfotofest/web_client/src/app_config.js" "$TMP_ROOT/cavfotofest/web/index.html" "$TMP_ROOT/cavfotofest/web/delete-account/index.html"
 ! grep -qE 'fixturecsm|fixturehm|fixture_csm|fixture_hm|CSM Fixture|HM Fixture' "$TMP_ROOT/festivalslunovrat/lib/app_config.dart" "$TMP_ROOT/festivalslunovrat/web_client/src/app_config.js" "$TMP_ROOT/festivalslunovrat/web/index.html" "$TMP_ROOT/festivalslunovrat/web/delete-account/index.html"
 
 echo "Tenant config matrix passed"
