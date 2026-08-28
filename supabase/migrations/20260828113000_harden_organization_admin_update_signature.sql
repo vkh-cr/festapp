@@ -1,10 +1,10 @@
-CREATE OR REPLACE FUNCTION update_organization_admin(
+CREATE OR REPLACE FUNCTION public.update_organization_admin(
   organization_id bigint,
   title text,
   data jsonb,
   phone_prefixes text[]
 )
-RETURNS SETOF organizations
+RETURNS SETOF public.organizations
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public, extensions
@@ -15,19 +15,15 @@ BEGIN
       USING MESSAGE = 'OneSignal REST API key is managed server-side';
   END IF;
 
-  -- Verify admin status
   IF EXISTS (
-    SELECT 1
-    FROM organization_users
+    SELECT 1 FROM public.organization_users
     WHERE "user" = auth.uid()
       AND organization = organization_id
       AND is_admin = true
   ) THEN
-    -- Update the organization record
     RETURN QUERY
-    UPDATE organizations
-    SET 
-      title = COALESCE(update_organization_admin.title, organizations.title),
+    UPDATE public.organizations
+    SET title = COALESCE(update_organization_admin.title, organizations.title),
       data = organizations.data || update_organization_admin.data,
       phone_prefixes = COALESCE(
         update_organization_admin.phone_prefixes,
@@ -43,3 +39,5 @@ BEGIN
   END IF;
 END;
 $$;
+
+DROP FUNCTION IF EXISTS public.update_organization_admin(bigint, text, jsonb);

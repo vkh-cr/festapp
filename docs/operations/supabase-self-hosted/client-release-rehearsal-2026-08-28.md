@@ -1,7 +1,7 @@
 # Self-hosted client release rehearsal — 2026-08-28
 
 The corrected client rehearsal used an isolated post-merge CSM overlay over
-shared source commit `580dbb57a77488eff1bb1e62d0b0718151b346cb`. It preserved the production
+shared source commit `521cebfd3dfbd996e0ff8e59c2198a565963e6c6`. It preserved the production
 mobile identities (`fstapp.jm2025` and `festapp.jm2025`) while pointing only to
 `https://rehearsal-api.festapp.net`. Production DNS and store state were not
 changed.
@@ -15,16 +15,17 @@ artifacts are invalid evidence.
 
 ## Web
 
-The corrected CSM web profile `0.19.92+450` was assembled at isolated overlay
-commit `d79d3f0cf6d53b9960258f9f902560c0b3745d3d` with organization `12`. It
+The corrected CSM web profile `0.19.92+450` was assembled at pushed isolated
+overlay commit `ff89230cc73f2994a8b18e97653dc8f835255157` with organization `12`. It
 passed the canonical-cutover preflight, Flutter
 release build, vanilla-client build, completed-bundle verifier and deployment
 verifier. It is deployed only to the isolated Cloudflare Pages project at
 `https://festapp-rehearsal-client.pages.dev`; the verifier passed three
-consecutive probes. A browser canary on the actual Flutter occasion route
-`/csmostrava2026` returned `get_app_config_v219` HTTP 200 and no access/not-found
-state. Its private mode-0600 HAR has SHA-256
-`e909fcb42767f4278709214dc9282b89a856d4eef930a39db863f35580ffff48`.
+consecutive probes. A clean Chromium canary on the actual Flutter occasion route
+`/csmostrava2026` reached application-ready state with zero startup errors and
+used only the Pages, rehearsal API, Festapp image and OneSignal CDN/API origins.
+Its private mode-0600 HAR has SHA-256
+`8b6967b5de6025acd6b9a7717a756b12d283cac0b7218ab1bec6f30d1e1487cc`.
 The production CSM Pages project was not changed.
 
 ## iOS
@@ -32,14 +33,14 @@ The production CSM Pages project was not changed.
 `automation/release/ios_build_candidate.sh` provides a build-only release path:
 it has no Fastlane, Transporter or App Store Connect call. The signed App Store
 organization-12 IPA for `festapp.jm2025`, version `0.19.92 (450)`, was built at
-isolated overlay commit `74de7a0b9f0ff33f2b21c4cd05b673fd15ca3f3d` and passed
+isolated overlay commit `ff89230cc73f2994a8b18e97653dc8f835255157` and passed
 bundle/version and distribution-certificate inspection. The retained private
-artifact is 43,422,527 bytes with SHA-256
-`8cb9009e3f77fb48f181d2fc620b6b249557465fb376649207581f37fc5bd325`.
+artifact is 43,420,446 bytes with SHA-256
+`2b4f5b210fad1d0e0204fc3dcf1bcb596d09c317c305a5c4fa730cc0d7d5b3ea`.
 Its mode-0600 evidence has SHA-256
-`dc70588d72c8735ec08e696322c298831b13d9a93aa4f1d70eb48db2527996e9`.
-The earlier organization-9 IPA and its SHA are superseded and must never be
-uploaded. App Store Connect was not mutated.
+`35ef0c395480b0f63c7447a0e16ecafa50fa85105a74a687ecdba36efb3810d4`.
+All earlier organization-9 and pre-credential-rotation IPA candidates are
+superseded and must never be uploaded. App Store Connect was not mutated.
 
 ## Auth, rights and idempotent write
 
@@ -59,14 +60,25 @@ no row was deleted.
 
 ## Android
 
-Control-channel command `1029` is superseded because it was prepared before the
-source organization `9` to target organization `12` correction. Any output it
-may later produce is invalid and must not be uploaded. A replacement build-only
-command will require organization `12`, the final pushed shared source and a
-deterministically regenerated pushed CSM overlay. The Mac master and stable
-tunnel are healthy, but the paired Windows builder has not polled since
-2026-08-10. No replacement signing key is generated, no unsigned artifact is
-accepted and no Google Play edit or upload is authorized.
+Control-channel command `1029` is superseded and any output it may later produce
+is invalid. Replacement command `1030` is queued against the exact pushed
+overlay `ff89230cc73f2994a8b18e97653dc8f835255157`, shared source
+`521cebfd3dfbd996e0ff8e59c2198a565963e6c6`, organization `12`, package
+`fstapp.jm2025`, version `0.19.92+450` and the rotated public-client credential
+digest. It authorizes only the existing owner-key signed AAB build and local
+readback; every Play mutation is forbidden. The Mac master and stable tunnel
+are healthy, but the paired Windows builder has not polled since 2026-08-10.
+
+## Rehearsal runtime credential rotation
+
+The rehearsal PostgreSQL password, JWT secret, anon key and service-role key
+were rotated under a Caddy maintenance gate after an encrypted recovery point.
+Seven database logins and both database JWT settings passed, all services
+returned healthy, the new anon/service-role credentials returned HTTP 200 and
+both old public tokens returned HTTP 401. Persistent Vault, Realtime, S3,
+dashboard and provider credentials were deliberately left unchanged. No
+production target or DNS record was mutated. Web, iOS and Android command `1030`
+are pinned to the new public anon-key digest.
 
 ## Notification delivery credential
 
@@ -77,7 +89,9 @@ now extracts it into a no-direct-grants, RLS-enabled server-only table. The
 admin RPC scrubs the legacy key, the admin update rejects attempts to restore
 it, Flutter no longer models or edits it, and both delivery Functions use the
 service-role-only configuration RPC. An isolated copy migrated 10/10 values,
-left zero legacy JSON keys, and passed the SQL and Edge tests.
+left zero legacy JSON keys, and passed the SQL and Edge tests. The active
+four-argument admin RPC is also hardened and the obsolete three-argument
+overload is absent, preventing a released client from bypassing the guard.
 
 The provider credential itself must still be rotated through an authorized
 OneSignal/FestappSeed session. Production activation remains blocked until the

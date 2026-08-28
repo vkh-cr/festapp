@@ -3,7 +3,8 @@ set -euo pipefail
 
 readonly REVISION=241bb11c0627f2981746d37033f57dbfa81d29b0
 readonly ROOT=/opt/festapp-supabase
-readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly SCRIPT_DIR
 
 [[ "$(id -u)" == "0" ]] || { echo "deploy-rehearsal must run as root" >&2; exit 1; }
 [[ ! -e "$ROOT" ]] || { echo "$ROOT already exists; refusing to overwrite" >&2; exit 1; }
@@ -22,6 +23,7 @@ install -d -o root -g root -m 0755 caddy
 install -o root -g root -m 0644 "$SCRIPT_DIR/Caddyfile" caddy/Caddyfile
 install -o root -g root -m 0700 "$SCRIPT_DIR/configure-rehearsal-env.py" configure-rehearsal-env.py
 install -o root -g root -m 0700 "$SCRIPT_DIR/switch-rehearsal-runtime-database.sh" switch-rehearsal-runtime-database.sh
+install -o root -g root -m 0700 "$SCRIPT_DIR/rotate-rehearsal-runtime-credentials.sh" rotate-rehearsal-runtime-credentials.sh
 ./configure-rehearsal-env.py
 
 docker compose config -q

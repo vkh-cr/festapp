@@ -94,7 +94,8 @@ SET LOCAL ROLE authenticated;
 SELECT * FROM update_organization_admin(
     current_setting('test.aa_org_id')::bigint,
     'Updated Title',
-    '{"APP_NAME": "New Name", "NEW_FIELD": 1}'::jsonb
+    '{"APP_NAME": "New Name", "NEW_FIELD": 1}'::jsonb,
+    ARRAY['+420']::text[]
 );
 
 DO $$
@@ -112,7 +113,8 @@ BEGIN
   PERFORM update_organization_admin(
     current_setting('test.aa_org_id')::bigint,
     NULL,
-    '{"ONESIGNAL_REST_API_KEY": "must-be-rejected"}'::jsonb
+    '{"ONESIGNAL_REST_API_KEY": "must-be-rejected"}'::jsonb,
+    NULL
   );
   PERFORM assert_fail('Admin update must reject server-only credentials');
 EXCEPTION WHEN invalid_parameter_value THEN

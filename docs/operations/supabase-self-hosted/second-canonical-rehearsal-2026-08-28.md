@@ -100,7 +100,9 @@ rehearsals. Because global journal coverage has not been proven, the selected
 production mode is the fail-closed full freeze; journal-hybrid remains
 unauthorized rather than becoming another implementation prerequisite. Web and
 signed iOS rehearsal candidates plus password/refresh/rights/idempotent-write
-canaries now pass. Remaining gates are the queued signed Android AAB, the final
+canaries now pass against the rotated rehearsal client credential. Build-only
+Android command `1030` is queued against the exact pushed organization-12
+overlay; command `1029` is superseded. Remaining gates are that signed Android AAB, the final
 fresh full-freeze snapshot and final markers, `api.festapp.net` activation and
 the four legacy Storage URL rewrites, followed by store adoption and the final
 single-write-authority gate. This evidence does not authorize production

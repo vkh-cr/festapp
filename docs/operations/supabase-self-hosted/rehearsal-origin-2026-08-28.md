@@ -69,12 +69,14 @@ clears only terminal `refresh_token_not_found` or
 
 ## Remaining production gates
 
-The CSM web release and signed iOS candidate now pass against this hostname.
+The rotated-credential CSM web release and signed iOS candidate now pass against
+this hostname from pushed overlay `ff89230cc73f2994a8b18e97653dc8f835255157`.
 Password, refresh-token, rights and idempotent write canaries also pass; the
 application's intentionally disabled Google provider is preserved as disabled.
 The retained details are in `client-release-rehearsal-2026-08-28.md`.
 
-1. Complete the already queued signed Android AAB on the paired Windows builder.
+1. Complete build-only control-channel command `1030` on the paired Windows
+   builder; command `1029` and every artifact from it are superseded.
 2. Prepare `api.festapp.net` with the same firewall, Caddy and strict-TLS
    contract, but do not activate it before the final freeze/journal gate.
 3. Rewrite the four retained legacy Storage URLs only when the canonical

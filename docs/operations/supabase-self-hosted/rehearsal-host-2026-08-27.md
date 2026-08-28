@@ -86,7 +86,8 @@ full evidence is in `rehearsal-origin-2026-08-28.md`.
 The second complete rehearsal from a newer cloud snapshot passed on 2026-08-28
 in a new isolated database and the rehearsal runtime now targets it. The CSM web
 release, signed iOS candidate and password/refresh/rights/idempotent-write
-canaries now pass; the signed Android command is queued while its paired Windows
-builder is offline. The remaining operational gate is that AAB plus the final
+canaries now pass against rotated rehearsal runtime credentials. Build-only
+Android command `1030` is queued while its paired Windows builder is offline;
+superseded command `1029` is invalid. The remaining operational gate is that AAB plus the final
 full-freeze snapshot/marker. Production `api.festapp.net`, cloud credentials,
 stores and write ownership remain unchanged.
