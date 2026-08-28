@@ -14,10 +14,13 @@ and verifies the custom domain before reporting success.
 ## Cloudflare Pages project setup
 
 Both `.github/workflows/deploy.yml` and `automation/deploy_direct.sh` run
-`ensure-pages-project.mjs` before upload. With a token carrying Pages Write it
+`ensure-pages-project.mjs` before upload. With a token carrying Pages Write and
+Zone DNS Write it
 idempotently creates a missing Direct Upload project, pins its production
 branch, sets the three public Worker variables, and attaches `DOMAIN` as the
-custom hostname. Existing unrelated variables and domains are retained.
+custom hostname. It also creates the exact proxied CNAME from `DOMAIN` to the
+project's `pages.dev` origin. An existing conflicting DNS record fails closed;
+unrelated variables, records, and domains are retained.
 
 The branch configuration owns:
 
@@ -36,7 +39,8 @@ The branch configuration owns:
    and both browser clients switch together.
 4. **Custom domain** from `DOMAIN` (for example `csmostrava.festapp.net`).
 5. **Release credentials**:
-   - `CLOUDFLARE_API_TOKEN` — token with `Cloudflare Pages:Edit` for the account.
+   - `CLOUDFLARE_API_TOKEN` — token with `Cloudflare Pages:Edit` and
+     `Zone DNS:Edit` for the Festapp account/zone.
    - `CLOUDFLARE_ACCOUNT_ID` (optional; the Festapp account is the default).
 
 ## How routing works (`_worker.js`)

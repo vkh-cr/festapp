@@ -8,6 +8,7 @@ import {
 const config = {
   token: 'token', accountId: 'account', project: 'hvezdamorska',
   branch: 'prod/hvezdamorska', domain: 'hvezdamorska.festapp.net',
+  zone: 'festapp.net',
   phase: 'legacy', runtimeSupabaseUrl: 'https://legacy.supabase.co',
   runtimeSupabaseAnonKey: 'public-anon', runtimeOrganizationId: '4',
 };
@@ -26,18 +27,27 @@ test('creates a missing project, configures public worker env, and adds domain',
       name: config.project, production_branch: config.branch,
     });
     if (calls.length === 4) return response(404, null, false);
-    return response(200, { name: config.domain, status: 'initializing' });
+    if (calls.length === 5) return response(200, { name: config.domain, status: 'initializing' });
+    if (calls.length === 6) return response(200, [{ id: 'zone-id', name: config.zone }]);
+    if (calls.length === 7) return response(200, []);
+    return response(200, { id: 'dns-id' });
   };
 
   const result = await ensurePagesProject(config, fetchImpl);
   assert.equal(result.created, true);
   assert.equal(result.domainAdded, true);
+  assert.equal(result.dnsAdded, true);
   assert.equal(calls[1].options.method, 'POST');
   assert.deepEqual(calls[1].body, { name: config.project, production_branch: config.branch });
   assert.equal(calls[2].body.deployment_configs.production.env_vars.SUPABASE_URL.value,
     config.runtimeSupabaseUrl);
   assert.equal(calls[2].body.deployment_configs.production.env_vars.ORGANIZATION_ID.value, '4');
   assert.equal(calls[4].body.name, config.domain);
+  assert.deepEqual(calls[7].body, {
+    type: 'CNAME', name: config.domain, content: 'hvezdamorska.pages.dev',
+    proxied: true, ttl: 1,
+    comment: 'Managed by Festapp Cloudflare Pages deployment automation',
+  });
 });
 
 test('updates only owned environment-variable keys on an existing project', async () => {
@@ -53,14 +63,37 @@ test('updates only owned environment-variable keys on an existing project', asyn
     if (calls.length === 2) return response(200, {
       name: config.project, production_branch: config.branch,
     });
-    return response(200, { name: config.domain, status: 'active' });
+    if (calls.length === 3) return response(200, { name: config.domain, status: 'active' });
+    if (calls.length === 4) return response(200, [{ id: 'zone-id', name: config.zone }]);
+    return response(200, [{
+      type: 'CNAME', name: config.domain, content: 'hvezdamorska.pages.dev', proxied: true,
+    }]);
   };
 
   const result = await ensurePagesProject(config, fetchImpl);
   assert.equal(result.created, false);
   assert.equal(result.domainAdded, false);
+  assert.equal(result.dnsAdded, false);
   assert.deepEqual(Object.keys(calls[1].body.deployment_configs.production.env_vars).sort(),
     ['ORGANIZATION_ID', 'SUPABASE_ANON_KEY', 'SUPABASE_URL']);
+});
+
+test('refuses to replace a conflicting custom-domain DNS record', async () => {
+  let call = 0;
+  const fetchImpl = async () => {
+    call += 1;
+    if (call === 1) return response(200, { name: config.project });
+    if (call === 2) return response(200, {
+      name: config.project, production_branch: config.branch,
+    });
+    if (call === 3) return response(200, { name: config.domain, status: 'active' });
+    if (call === 4) return response(200, [{ id: 'zone-id', name: config.zone }]);
+    return response(200, [{
+      type: 'A', name: config.domain, content: '192.0.2.10', proxied: true,
+    }]);
+  };
+
+  await assert.rejects(ensurePagesProject(config, fetchImpl), /refusing to overwrite conflicting DNS/);
 });
 
 test('rejects unsafe deployment configuration before network access', () => {
@@ -85,6 +118,7 @@ test('selects the complete canonical Worker profile only in canonical phase', ()
   assert.equal(resolved.runtimeSupabaseUrl, 'https://api.festapp.net');
   assert.equal(resolved.runtimeSupabaseAnonKey, 'canonical-anon');
   assert.equal(resolved.runtimeOrganizationId, '7');
+  assert.equal(resolved.zone, 'festapp.net');
 });
 
 test('a fully disabled activation profile remains a backward-compatible legacy deploy', () => {

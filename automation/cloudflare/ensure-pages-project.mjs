@@ -41,6 +41,19 @@ async function api(fetchImpl, token, accountId, path, options = {}) {
   return { response, body };
 }
 
+async function zoneApi(fetchImpl, token, path, options = {}) {
+  const response = await fetchImpl(`${API_ROOT}${path}`, {
+    ...options,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+  });
+  const body = await response.json().catch(() => ({}));
+  return { response, body };
+}
+
 function publicRuntimeEnv(config) {
   return {
     SUPABASE_URL: { type: 'plain_text', value: config.runtimeSupabaseUrl },
@@ -115,6 +128,45 @@ export async function ensurePagesProject(config, fetchImpl = fetch) {
     domain = requireSuccess('Cloudflare Pages custom-domain lookup', domainLookup);
   }
 
+  const zoneLookup = requireSuccess('Cloudflare zone lookup', await zoneApi(
+    fetchImpl,
+    config.token,
+    `/zones?name=${encodeURIComponent(config.zone)}&account.id=${encodeURIComponent(config.accountId)}`,
+  ));
+  if (!Array.isArray(zoneLookup) || zoneLookup.length !== 1 || zoneLookup[0].name !== config.zone) {
+    throw new Error(`Cloudflare zone lookup returned no unique ${config.zone} zone`);
+  }
+  const zoneId = zoneLookup[0].id;
+  const dnsLookup = requireSuccess('Cloudflare Pages DNS lookup', await zoneApi(
+    fetchImpl,
+    config.token,
+    `/zones/${encodeURIComponent(zoneId)}/dns_records?name=${encodeURIComponent(config.domain)}`,
+  ));
+  const expectedDnsTarget = `${config.project}.pages.dev`;
+  let dnsAdded = false;
+  if (dnsLookup.length === 0) {
+    requireSuccess('Cloudflare Pages DNS creation', await zoneApi(
+      fetchImpl,
+      config.token,
+      `/zones/${encodeURIComponent(zoneId)}/dns_records`,
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          type: 'CNAME',
+          name: config.domain,
+          content: expectedDnsTarget,
+          proxied: true,
+          ttl: 1,
+          comment: 'Managed by Festapp Cloudflare Pages deployment automation',
+        }),
+      },
+    ));
+    dnsAdded = true;
+  } else if (dnsLookup.length !== 1 || dnsLookup[0].type !== 'CNAME' ||
+      dnsLookup[0].content !== expectedDnsTarget || dnsLookup[0].proxied !== true) {
+    throw new Error(`refusing to overwrite conflicting DNS for ${config.domain}`);
+  }
+
   return {
     project: project.name || config.project,
     productionBranch: project.production_branch || config.branch,
@@ -122,6 +174,8 @@ export async function ensurePagesProject(config, fetchImpl = fetch) {
     domain: domain.name || config.domain,
     domainStatus: domain.status || 'initializing',
     domainAdded,
+    dnsTarget: expectedDnsTarget,
+    dnsAdded,
   };
 }
 
@@ -155,12 +209,16 @@ export function configFromEnvironment(env = process.env) {
   }
   const organizationId = required(organizationName, env[organizationName]);
   if (!/^[1-9][0-9]*$/.test(organizationId)) throw new Error('ORGANIZATION_ID must be positive');
+  const labels = assertDomain(required('DOMAIN', env.DOMAIN)).split('.');
+  if (labels.length < 3) throw new Error('DOMAIN must be a subdomain of its Cloudflare zone');
+  const domain = labels.join('.');
   return {
     token: required('CF_API_TOKEN', env.CF_API_TOKEN),
     accountId: required('CF_ACCOUNT_ID', env.CF_ACCOUNT_ID),
     project: assertSlug('CF_PROJECT', required('CF_PROJECT', env.CF_PROJECT)),
     branch: assertBranch(required('BRANCH', env.BRANCH)),
-    domain: assertDomain(required('DOMAIN', env.DOMAIN)),
+    domain,
+    zone: labels.slice(-2).join('.'),
     phase,
     runtimeSupabaseUrl: supabaseUrl.origin,
     runtimeSupabaseAnonKey: required(keyName, env[keyName]),
