@@ -123,6 +123,13 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          set -a
+          source automation/project.conf
+          set +a
+          if [ -z "${BACKEND_ACTIVATION_TENANT_ID:-}" ]; then
+            echo "Backend activation is disabled; cloud release preflight needs no private manifest."
+            exit 0
+          fi
           case "$BRANCH" in
             prod/csmostrava2026) RELEASE_MANIFEST="$CSM_MANIFEST" ;;
             prod/hvezdamorska) RELEASE_MANIFEST="$HVEZDA_MORSKA_MANIFEST" ;;
