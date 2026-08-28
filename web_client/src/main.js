@@ -9,14 +9,18 @@ import { UnitPage } from './components/unit/unit_page.js';
 import { UserHeader } from './components/users/user_header.js';
 import { FeedbackFab } from './components/feedback/feedback_fab.js';
 import { ImageLoader } from './utils/image_loader.js';
+import { initializeCoreServices } from './startup/initialize_core_services.js';
 
 class Main {
     static async init() {
         try {
             // 1. Init Core Services
-            await SupabaseService.initialize();
-            if (!AppConfig.isAppSupported) await RightsService.updateAppData();
-            await LocalizationService.init();
+            await initializeCoreServices({
+                localizationService: LocalizationService,
+                supabaseService: SupabaseService,
+                rightsService: RightsService,
+                isAppSupported: AppConfig.isAppSupported,
+            });
             ThemeService.init();
             ImageLoader.init(); // Initialize Image Loader
 

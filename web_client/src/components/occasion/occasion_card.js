@@ -7,6 +7,8 @@ import { FeatureConstants } from '../features/feature_constants.js';
 import { HtmlUtils } from '../../utils/html_utils.js';
 import { OccasionDetailDialog } from './occasion_detail_dialog.js';
 import { transformImageUrl, MEDIUM_WIDTH } from '../../utils/image_url_helper.js';
+import { AppConfig } from '../../app_config.js';
+import { OccasionCardAction, resolveOccasionCardAction } from './occasion_card_action.js';
 
 export class OccasionCard {
     static create(occasion, isPresent = false, isPast = false) {
@@ -16,7 +18,11 @@ export class OccasionCard {
         // --- Logic Dependencies ---
         const hasFormFeature = FeatureService.isFeatureEnabled(FeatureConstants.form, occasion.features);
         const isDescriptionEmpty = HtmlUtils.isHtmlEmptyOrNull(occasion.description);
-        const skipDialog = hasFormFeature && isDescriptionEmpty;
+        const action = resolveOccasionCardAction({
+            hasFormFeature,
+            isDescriptionEmpty,
+            isAppSupported: AppConfig.isAppSupported,
+        });
 
         // --- Click Handler (Exact Flutter Logic) ---
         card.onclick = async () => {
@@ -24,11 +30,11 @@ export class OccasionCard {
              // 1. If skipDialog (Has Form + No Description) -> Execute Action immediately 
              // 2. If Has Form + Description -> Show Dialog 
              // 3. If No Form -> Navigate to App
-             if (skipDialog) {
+             if (action === OccasionCardAction.reserve) {
                  await OccasionDetailDialog.handleReserveAction(occasion);
-             } else if (hasFormFeature && !isDescriptionEmpty) {
+             } else if (action === OccasionCardAction.details) {
                  OccasionDetailDialog.show(occasion);
-             } else if (!hasFormFeature) {
+             } else {
                  // Navigate to Occasion App
                  RouterService.navigateToOccasionApp(occasion.link);
              }
