@@ -69,7 +69,7 @@ else
     mv build/web/index.html build/web/flutter.html
 fi
 
-(cd web_client && npm install && npm run build)
+(cd web_client && npm ci && npm run build)
 cp -R web_client/dist/. build/web/
 
 if [ "$TARGET" = cloudflare ]; then
