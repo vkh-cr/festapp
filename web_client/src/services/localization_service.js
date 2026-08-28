@@ -3,8 +3,16 @@ import { AppConfig } from '../app_config.js';
 export class LocalizationService {
     static currentLocale = AppConfig.defaultLanguage; // Default
     static translations = {};
+    static _initialization = null;
 
-    static async init() {
+    static init() {
+        if (!LocalizationService._initialization) {
+            LocalizationService._initialization = LocalizationService._initialize();
+        }
+        return LocalizationService._initialization;
+    }
+
+    static async _initialize() {
         // 1. Load preference
         const saved = localStorage.getItem(AppConfig.Keys.locale);
         if (saved && AppConfig.supportedLanguages.includes(saved)) {

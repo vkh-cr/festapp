@@ -1,5 +1,6 @@
 import { SupabaseService } from './supabase_service.js';
 import { AppConfig } from '../app_config.js';
+import { LocalizationService } from './localization_service.js';
 
 export class RightsService {
     static _context = null;
@@ -54,6 +55,10 @@ export class RightsService {
                 return false;
             }
 
+            // Rights updates can also originate from auth and router flows, not
+            // only from Main. Never publish renderable context until the shared
+            // translation dictionary is ready.
+            await LocalizationService.init();
             this._context = data;
             this._notifyListeners();
             return true;
