@@ -7,10 +7,10 @@ import 'package:fstapp/components/eshop/orders_strings.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:collection/collection.dart';
 import 'blueprint_strings.dart';
-import 'seat_reservation/utils/seat_state.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
+import 'package:venue_seat_picker/venue_seat_picker.dart';
 
-class BlueprintObjectModel {
+class BlueprintObjectModel implements SeatLayoutItem {
   static const String metaX = "x";
   static const String metaY = "y";
   static const String metaSpot = "spot";
@@ -28,10 +28,10 @@ class BlueprintObjectModel {
   static const String availableType = "available";
 
   static Map<SeatState, String> statesMap = {
-    SeatState.black: blackType,
+    SeatState.blocked: blackType,
     SeatState.available: availableType,
     SeatState.selected: selectedType,
-    SeatState.selected_by_me: selectedByMeType,
+    SeatState.selectedByMe: selectedByMeType,
     SeatState.ordered: orderedType,
     SeatState.used: usedType,
   };
@@ -57,6 +57,30 @@ class BlueprintObjectModel {
   BlueprintGroupModel? group;
   SeatState? stateEnum;
   BlueprintModel? blueprint;
+
+  @override
+  Object? get seatId => id;
+
+  @override
+  int get seatRow =>
+      y ?? (throw StateError('Blueprint seat is missing its row coordinate'));
+
+  @override
+  int get seatColumn =>
+      x ??
+      (throw StateError('Blueprint seat is missing its column coordinate'));
+
+  @override
+  SeatState get seatState => stateEnum ?? SeatState.empty;
+
+  @override
+  set seatState(SeatState value) => setSeatState(value);
+
+  @override
+  String? get seatLabel => title;
+
+  @override
+  Object? get seatGroupId => group?.id ?? groupId;
 
   factory BlueprintObjectModel.fromJson(Map<String, dynamic> json) {
     // Constructor will handle state/stateEnum sync
@@ -191,12 +215,12 @@ class BlueprintObjectModel {
     switch (stateEnum) {
       case SeatState.available:
         return BlueprintStrings.swapSummaryAvailable;
-      case SeatState.black:
+      case SeatState.blocked:
         return BlueprintStrings.swapSummaryBlack;
       case SeatState.used:
         return BlueprintStrings.swapSummaryUsed;
       case SeatState.selected:
-      case SeatState.selected_by_me:
+      case SeatState.selectedByMe:
         return BlueprintStrings.swapSummarySelected;
       default:
         return BlueprintStrings.swapSummaryEmpty;

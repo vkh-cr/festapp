@@ -10,9 +10,9 @@ import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:fstapp/theme_config.dart'; // Import ThemeConfig
 import 'package:collection/collection.dart';
+import 'package:venue_seat_picker/venue_seat_picker.dart';
 
 import '../../_shared/common_strings.dart';
-import '../seat_reservation/utils/seat_state.dart';
 
 /// Dialog to select an existing spot product, or manage (edit/create) them.
 class SelectProductDialog extends StatefulWidget {
@@ -363,7 +363,7 @@ class _GroupProductManagerDialogState extends State<GroupProductManagerDialog> {
     return state == SeatState.ordered ||
         state == SeatState.used ||
         state == SeatState.selected ||
-        state == SeatState.selected_by_me;
+        state == SeatState.selectedByMe;
   }
 
   Future<void> _pickProduct({BlueprintObjectModel? seat}) async {

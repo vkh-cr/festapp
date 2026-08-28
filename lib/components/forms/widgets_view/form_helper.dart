@@ -1,5 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
-import 'package:fstapp/components/blueprint/seat_reservation/model/seat_model.dart';
+import 'package:fstapp/components/blueprint/blueprint_seat.dart';
 import 'package:fstapp/components/forms/models/form_option_model.dart';
 import 'package:fstapp/components/users/user_info_model.dart';
 import 'package:flutter/material.dart';
@@ -335,8 +335,8 @@ class FormHelper {
         }
         return null;
       case fieldTypeSpot:
-        if (fieldValue is SeatModel) {
-          return fieldValue.objectModel;
+        if (fieldValue is BlueprintSeat) {
+          return fieldValue.item;
         }
         return null;
       case fieldTypeTicket:
@@ -367,7 +367,7 @@ class FormHelper {
             }
           }
           if (ticket.tickets[i].seat != null) {
-            ticketData[fieldTypeSpot] = ticket.tickets[i].seat!.objectModel;
+            ticketData[fieldTypeSpot] = ticket.tickets[i].seat!.item;
           }
           tickets.add(ticketData);
         }

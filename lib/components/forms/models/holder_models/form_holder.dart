@@ -1,7 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
-import 'package:fstapp/components/blueprint/seat_reservation/model/seat_model.dart';
+import 'package:fstapp/components/blueprint/blueprint_seat.dart';
 import 'package:fstapp/components/forms/models/form_model.dart';
 import 'package:fstapp/components/forms/models/form_option_product_model.dart';
 import 'field_holder.dart';
@@ -21,8 +21,9 @@ class FormHolderController {
   final String? formKey;
   String? currencyCode;
   void Function()? updateTotalPrice;
-  Future<List<SeatModel>?> Function(List<SeatModel>)? showSeatReservation;
-  void Function(List<SeatModel>?)? onCloseSeatReservation;
+  Future<List<BlueprintSeat>?> Function(List<BlueprintSeat>)?
+      showSeatReservation;
+  void Function(List<BlueprintSeat>?)? onCloseSeatReservation;
 
   FormHolderController({
     this.secret,

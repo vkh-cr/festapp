@@ -7,13 +7,14 @@ import 'package:fstapp/components/images/db_images.dart';
 import 'package:fstapp/services/dialog_helper.dart';
 import 'package:fstapp/components/images/image_compression_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
+import 'package:venue_seat_picker/venue_seat_picker.dart';
 
 import '../../_shared/common_strings.dart';
-import '../seat_reservation/widgets/seat_layout_controller.dart';
+import '../blueprint_object_model.dart';
 
 class BlueprintControlsBar extends StatefulWidget {
   final BlueprintModel? blueprint;
-  final SeatLayoutController seatLayoutController;
+  final SeatLayoutController<BlueprintObjectModel> seatLayoutController;
   final bool canEdit;
 
   const BlueprintControlsBar({
@@ -79,12 +80,14 @@ class _BlueprintControlsBarState extends State<BlueprintControlsBar> {
           currentValue: widget.blueprint!.configuration!.width!,
           isDecreaseEnabled: _canDecreaseWidth(), // Pass the check result
           onChanged: (value) {
-            // Allow change
-            setState(() {
-              widget.blueprint!.configuration!.width = value;
-            });
-            widget.seatLayoutController.setConfiguration(
-                widget.blueprint!.configuration!.height!, value);
+            if (widget.seatLayoutController.setDimensions(
+              widget.blueprint!.configuration!.height!,
+              value,
+            )) {
+              setState(() {
+                widget.blueprint!.configuration!.width = value;
+              });
+            }
           },
         ),
         const SizedBox(width: 12),
@@ -93,12 +96,14 @@ class _BlueprintControlsBarState extends State<BlueprintControlsBar> {
           currentValue: widget.blueprint!.configuration!.height!,
           isDecreaseEnabled: _canDecreaseHeight(), // Pass the check result
           onChanged: (value) {
-            // Allow change
-            setState(() {
-              widget.blueprint!.configuration!.height = value;
-            });
-            widget.seatLayoutController.setConfiguration(
-                value, widget.blueprint!.configuration!.width!);
+            if (widget.seatLayoutController.setDimensions(
+              value,
+              widget.blueprint!.configuration!.width!,
+            )) {
+              setState(() {
+                widget.blueprint!.configuration!.height = value;
+              });
+            }
           },
         ),
         const SizedBox(width: 24),
@@ -227,7 +232,9 @@ class _BlueprintControlsBarState extends State<BlueprintControlsBar> {
         setState(() {
           widget.blueprint!.backgroundSvg = content;
         });
-        widget.seatLayoutController.setBackground(content);
+        widget.seatLayoutController.setBackground(
+          SeatLayoutBackground.parse(content),
+        );
         ToastHelper.Show(context, BlueprintStrings.toastSvgUploadSuccess);
       } catch (e) {
         ToastHelper.Show(context, BlueprintStrings.toastSvgReadFail,
@@ -254,7 +261,9 @@ class _BlueprintControlsBarState extends State<BlueprintControlsBar> {
         setState(() {
           widget.blueprint!.backgroundSvg = publicUrl;
         });
-        widget.seatLayoutController.setBackground(publicUrl);
+        widget.seatLayoutController.setBackground(
+          SeatLayoutBackground.parse(publicUrl),
+        );
         ToastHelper.Show(context, BlueprintStrings.toastImageUploadSuccess);
       } catch (e) {
         ToastHelper.Show(context, BlueprintStrings.toastImageUploadFail,

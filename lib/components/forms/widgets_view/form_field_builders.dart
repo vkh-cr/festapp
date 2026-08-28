@@ -2,7 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
-import 'package:fstapp/components/blueprint/seat_reservation/model/seat_model.dart';
+import 'package:fstapp/components/blueprint/blueprint_seat.dart';
 import 'package:fstapp/components/eshop/db_orders.dart';
 import 'package:fstapp/components/eshop/orders_strings.dart';
 import 'package:fstapp/components/forms/models/holder_models/id_document_field_holder.dart';
@@ -116,7 +116,7 @@ class FormFieldBuilders {
               context,
               formHolder.controller!.formKey!,
               formHolder.controller!.secret!,
-              ticket.tickets[index].seat!.objectModel!.id!,
+              ticket.tickets[index].seat!.item!.id!,
               false);
           setState(() {
             ticket.tickets.removeAt(index);
@@ -186,7 +186,7 @@ class FormFieldBuilders {
                           ],
                         ),
                         Text(
-                          "${ticket.tickets[i].seat!.objectModel}",
+                          "${ticket.tickets[i].seat!.item}",
                           style: TextStyle(
                               fontSize: 14 * FormHelper.fontSizeFactor),
                         ),
@@ -223,7 +223,7 @@ class FormFieldBuilders {
       FieldHolder fieldHolder) {
     FocusNode focusNode = FocusNode();
     TextEditingController textController = TextEditingController();
-    return FormBuilderField<SeatModel>(
+    return FormBuilderField<BlueprintSeat>(
       name: fieldHolder.fieldType,
       validator: FormBuilderValidators.compose([
         if (fieldHolder.isRequired)
@@ -231,10 +231,9 @@ class FormFieldBuilders {
               errorText: CommonStrings.fieldCannotBeEmpty),
         (value) => value == null ? PublicOrderStrings.selectSeat(null) : null,
       ]),
-      builder: (FormFieldState<SeatModel?> field) {
-        SeatModel? seat = field.value;
-        textController.text =
-            seat?.objectModel?.toString() ?? FormHelper.metaEmpty;
+      builder: (FormFieldState<BlueprintSeat?> field) {
+        BlueprintSeat? seat = field.value;
+        textController.text = seat?.item?.toString() ?? FormHelper.metaEmpty;
         return TextField(
           controller: textController,
           focusNode: focusNode,

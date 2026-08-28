@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
-import 'package:fstapp/components/blueprint/seat_reservation/model/seat_model.dart';
+import 'package:fstapp/components/blueprint/blueprint_seat.dart';
 import 'field_holder.dart';
 import 'form_ticket_model.dart';
 
@@ -40,19 +40,19 @@ class TicketHolder extends FieldHolder {
   String toString() => 'TicketHolder(fields: $fields)';
 
   /// Updates the tickets based on the provided list of [seats].
-  void updateTickets(List<SeatModel> seats) {
+  void updateTickets(List<BlueprintSeat> seats) {
     // Create a map of existing tickets for fast lookup.
     final existingTicketsMap = {
-      for (var ticket in tickets) ticket.seat!.objectModel!.id!: ticket
+      for (var ticket in tickets) ticket.seat!.item!.id!: ticket
     };
 
     // Build the new list of tickets.
     final List<FormTicketModel> updatedTickets = [];
 
     for (var seat in seats) {
-      if (existingTicketsMap.containsKey(seat.objectModel!.id!)) {
+      if (existingTicketsMap.containsKey(seat.item!.id!)) {
         // Use the existing ticket if it matches the seat.
-        updatedTickets.add(existingTicketsMap[seat.objectModel!.id!]!);
+        updatedTickets.add(existingTicketsMap[seat.item!.id!]!);
       } else {
         // Create a new ticket if none exists for the seat.
         updatedTickets.add(

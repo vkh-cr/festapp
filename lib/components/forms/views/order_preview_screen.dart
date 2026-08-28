@@ -240,7 +240,7 @@ class _OrderPreviewScreenState extends State<OrderPreviewScreen> {
           ticketInfoRows.add(_buildInfoRow(
             context,
             FormHelper.spotLabel(),
-            ticket.seat!.objectModel.toString(),
+            ticket.seat!.item.toString(),
           ));
         } else if (ticket.seat == null && ticketHolder.hasSpot) {
           // Add warning if no seat selected but spots are enabled/required

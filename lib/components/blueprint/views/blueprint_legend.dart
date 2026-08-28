@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/blueprint/blueprint_strings.dart';
+import 'package:venue_seat_picker/venue_seat_picker.dart';
 
-import '../seat_reservation/utils/seat_state.dart';
 import '../seat_reservation/widgets/seat_reservation_widget.dart';
-import '../seat_reservation/widgets/seat_widget.dart';
 import 'blueprint_editor_tab.dart';
 
 class BlueprintLegend extends StatelessWidget {
@@ -59,7 +58,7 @@ class BlueprintLegend extends StatelessWidget {
         _buildLegendItem(
           context: context,
           label: BlueprintStrings.legendBlackArea,
-          state: SeatState.black,
+          state: SeatState.blocked,
           isActive: currentSelectionMode == BlueprintSelectionMode.addBlack,
           onTap: () => onModeSelected(BlueprintSelectionMode.addBlack),
         ),
@@ -103,7 +102,7 @@ class BlueprintLegend extends StatelessWidget {
             _buildLegendItem(
               context: context,
               label: BlueprintStrings.legendCreateOrder,
-              state: SeatState.selected_by_me,
+              state: SeatState.selectedByMe,
               isActive:
                   currentSelectionMode == BlueprintSelectionMode.createNewOrder,
               forceHighlight: false, // REMOVED orange border here
@@ -218,10 +217,9 @@ class BlueprintLegend extends StatelessWidget {
                           borderRadius: BorderRadius.circular(4),
                         )
                       : null,
-                  child: SeatWidgetHelper.buildSeat(
-                    context: context,
+                  child: SeatTile(
                     state: state,
-                    isHighlightedForSwap: forceHighlight,
+                    isSwapHighlighted: forceHighlight,
                     size: SeatReservationWidget.boxSize.toDouble() *
                         (drawBorder ? 0.7 : 1.0),
                   ),

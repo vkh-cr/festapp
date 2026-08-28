@@ -1,30 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/_shared/common_strings.dart';
 import 'package:fstapp/components/blueprint/blueprint_model.dart';
+import 'package:fstapp/components/blueprint/blueprint_object_model.dart';
+import 'package:fstapp/components/blueprint/blueprint_seat.dart';
 import 'package:fstapp/components/blueprint/blueprint_strings.dart';
-import 'package:fstapp/components/forms/db_forms.dart';
 import 'package:fstapp/components/eshop/db_orders.dart';
+import 'package:fstapp/components/forms/db_forms.dart';
 import 'package:fstapp/services/toast_helper.dart';
+import 'package:fstapp/services/exception_handler.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/widgets/buttons_helper.dart';
+import 'package:venue_seat_picker/venue_seat_picker.dart';
 
-import '../model/seat_model.dart';
-import '../utils/seat_state.dart';
-import 'seat_layout_controller.dart';
-import 'seat_layout_widget.dart';
-
+/// Festapp reservation adapter around the package's optimistic [SeatPicker].
+/// SQL remains authoritative; a rejected RPC automatically restores the UI.
 class SeatReservationWidget extends StatefulWidget {
   static const int boxSize = 15;
 
   final int blueprintId;
   final String secret;
   final String formDataKey;
-  final void Function(List<SeatModel>)? onSelectionChanged;
-  final void Function(List<SeatModel>?)? onCloseSeatReservation;
-  List<SeatModel> selectedSeats;
+  final void Function(List<BlueprintSeat>)? onSelectionChanged;
+  final void Function(List<BlueprintSeat>?)? onCloseSeatReservation;
+  final List<BlueprintSeat> selectedSeats;
   final int? maxTickets;
 
-  SeatReservationWidget({
+  const SeatReservationWidget({
     super.key,
     required this.blueprintId,
     required this.secret,
@@ -41,174 +42,116 @@ class SeatReservationWidget extends StatefulWidget {
 
 class _SeatReservationWidgetState extends State<SeatReservationWidget> {
   BlueprintModel? blueprint;
-  late final SeatLayoutController _seatLayoutController;
+  late final SeatLayoutController<BlueprintObjectModel> _controller;
+  late List<BlueprintSeat> _selectedSeats;
 
   @override
   void initState() {
     super.initState();
-    _seatLayoutController = SeatLayoutController();
+    _selectedSeats = List.of(widget.selectedSeats);
+    _controller = SeatLayoutController<BlueprintObjectModel>();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    loadData();
+    _loadData();
   }
 
   @override
   void dispose() {
-    _seatLayoutController.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: Center(
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
-          child: Stack(
-            children: [
-              // Main Content
-              Column(
-                children: [
-                  Flexible(
-                    child: blueprint == null
-                        ? const Center(child: CircularProgressIndicator())
-                        : Padding(
-                            padding: const EdgeInsets.fromLTRB(12, 24, 12, 0),
-                            child: SeatLayoutWidget(
-                              onSeatTap: (model) async {
-                                await _handleSeatTap(model);
-                              },
-                              controller: _seatLayoutController,
-                              isEditorMode: false,
+  Widget build(BuildContext context) => SafeArea(
+        child: Center(
+          child: Container(
+            constraints:
+                const BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
+            child: Column(
+              children: [
+                Flexible(
+                  child: blueprint == null
+                      ? const Center(child: CircularProgressIndicator())
+                      : Padding(
+                          padding: const EdgeInsets.fromLTRB(12, 24, 12, 0),
+                          child: SeatPicker<BlueprintObjectModel>(
+                            controller: _controller,
+                            maxSelection: widget.maxTickets,
+                            onLimitReached: () => ToastHelper.Show(
+                              context,
+                              BlueprintStrings.toastMaxTicketsReached,
                             ),
+                            onSelectionRequest: _requestSelection,
+                            onSelectionChanged: (seats) {
+                              _selectedSeats = seats;
+                              widget.onSelectionChanged?.call(seats);
+                              if (mounted) setState(() {});
+                            },
+                            tooltipBuilder: (context, cell) =>
+                                cell.item?.blueprintTooltip(context) ?? '',
                           ),
+                        ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: ButtonsHelper.primaryButton(
+                    context: context,
+                    onPressed: () =>
+                        widget.onCloseSeatReservation?.call(_selectedSeats),
+                    label: CommonStrings.continueAction,
+                    width: 250,
                   ),
-                  // Bottom Buttons
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Center(
-                      child: ButtonsHelper.primaryButton(
-                          context: context,
-                          onPressed: () {
-                            widget.onCloseSeatReservation
-                                ?.call(widget.selectedSeats);
-                          },
-                          label: CommonStrings.continueAction,
-                          width: 250),
-                    ),
-                  ),
-                ],
-              ),
-            ],
+                ),
+              ],
+            ),
           ),
         ),
-      ),
+      );
+
+  Future<bool> _requestSelection(BlueprintSeat seat, bool selected) async {
+    final accepted = await ExceptionHandler.guard<bool>(
+      context,
+      futureFunction: () => DbOrders.selectSpot(
+          context, widget.formDataKey, widget.secret, seat.item!.id!, selected),
     );
+    return accepted ?? false;
   }
 
-  /// Handles Seat Tap Logic
-  Future<void> _handleSeatTap(SeatModel model) async {
-    if (model.seatState == SeatState.selected_by_me) {
-      // Deselect
-      model.seatState = SeatState.available; // Optimistic update
-      _seatLayoutController.updateSeat(model, SeatState.available);
-
-      // Optimistic list update
-      widget.selectedSeats.remove(model);
-      widget.onSelectionChanged?.call(widget.selectedSeats);
-      setState(() {});
-
-      bool success = false;
-      try {
-        success = await DbOrders.selectSpot(
-          context,
-          widget.formDataKey,
-          widget.secret,
-          model.objectModel!.id!,
-          false,
-        );
-      } catch (e) {
-        success = false;
-      }
-
-      if (success) {
-        model.objectModel!.stateEnum = SeatState.available;
-      } else {
-        // Revert
-        model.seatState = SeatState.selected_by_me;
-        _seatLayoutController.updateSeat(model, SeatState.selected_by_me);
-
-        // Revert list update
-        widget.selectedSeats.add(model);
-        widget.onSelectionChanged?.call(widget.selectedSeats);
-      }
-    } else if (model.seatState == SeatState.available) {
-      // Select
-      if (widget.maxTickets != null &&
-          widget.selectedSeats.length >= widget.maxTickets!) {
-        ToastHelper.Show(context, BlueprintStrings.toastMaxTicketsReached);
-        return;
-      }
-      model.seatState = SeatState.selected_by_me; // Optimistic update
-      _seatLayoutController.updateSeat(model, SeatState.selected_by_me);
-
-      // Optimistic list update
-      widget.selectedSeats.add(model);
-      widget.onSelectionChanged?.call(widget.selectedSeats);
-      setState(() {});
-
-      bool success = false;
-      try {
-        success = await DbOrders.selectSpot(
-          context,
-          widget.formDataKey,
-          widget.secret,
-          model.objectModel!.id!,
-          true,
-        );
-      } catch (e) {
-        success = false;
-      }
-
-      if (success) {
-        model.objectModel!.stateEnum = SeatState.selected_by_me;
-      } else {
-        // Revert
-        model.seatState = SeatState.available;
-        _seatLayoutController.updateSeat(model, SeatState.available);
-
-        // Revert list update
-        widget.selectedSeats.remove(model);
-        widget.onSelectionChanged?.call(widget.selectedSeats);
-      }
-    }
-    // We already called onSelectionChanged optimistically, so no need to call it here at the end unconditionally
-  }
-
-  /// Loads Blueprint Data
-  void loadData() async {
-    blueprint = await DbForms.getBlueprint(
+  Future<void> _loadData() async {
+    final loaded = await DbForms.getBlueprint(
       widget.secret,
       widget.formDataKey,
       widget.blueprintId,
     );
-    if (blueprint == null || !mounted) return;
+    if (loaded == null || !mounted) return;
+    blueprint = loaded;
 
-    // Manually set already selected seats
-    for (var object in blueprint!.objects ?? []) {
-      if (widget.selectedSeats.any((s) => s.objectModel!.id! == object.id)) {
-        object.stateEnum = SeatState.selected_by_me;
+    final selectedIds =
+        _selectedSeats.map((seat) => seat.item?.id).whereType<int>().toSet();
+    for (final object in loaded.objects ?? const []) {
+      if (selectedIds.contains(object.id)) {
+        object.seatState = SeatState.selectedByMe;
       }
     }
 
-    _seatLayoutController.loadBlueprint(
-      blueprint!,
-      newSeatSize: SeatReservationWidget.boxSize,
+    _controller.loadLayout(
+      rows: loaded.configuration?.height ?? 1,
+      columns: loaded.configuration?.width ?? 1,
+      items: (loaded.objects ?? const [])
+          .where((object) => object.x != null && object.y != null),
+      cellSize: SeatReservationWidget.boxSize.toDouble(),
+      background: switch (loaded.backgroundSvg) {
+        final String source when source.isNotEmpty =>
+          SeatLayoutBackground.parse(source),
+        _ => null,
+      },
     );
-
+    _selectedSeats = _controller.cells
+        .where((cell) => cell.state == SeatState.selectedByMe)
+        .toList();
     setState(() {});
   }
 }

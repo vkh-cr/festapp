@@ -2,7 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:fstapp/components/blueprint/blueprint_group.dart';
 import 'package:fstapp/components/blueprint/blueprint_model.dart';
 import 'package:fstapp/components/blueprint/blueprint_object_model.dart';
-import 'package:fstapp/components/blueprint/seat_reservation/utils/seat_state.dart';
+import 'package:venue_seat_picker/venue_seat_picker.dart';
 import 'package:fstapp/components/eshop/models/order_model.dart';
 import 'package:fstapp/components/eshop/models/order_product_ticket_model.dart';
 import 'package:fstapp/components/eshop/models/orders_history_model.dart';
@@ -137,7 +137,7 @@ class GetOrdersHelper {
               id: object.id,
               type: object.type,
               title: object.title,
-              stateEnum: SeatState.black,
+              stateEnum: SeatState.blocked,
               x: object.x,
               y: object.y,
             );

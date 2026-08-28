@@ -1,7 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
-import 'package:fstapp/components/blueprint/seat_reservation/model/seat_model.dart';
+import 'package:fstapp/components/blueprint/blueprint_seat.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/forms/models/form_model.dart';
@@ -36,7 +36,7 @@ class FormSession extends ChangeNotifier {
   });
 
   // Getter for UI components that need the list of currently selected seats
-  List<SeatModel> get currentSeats {
+  List<BlueprintSeat> get currentSeats {
     final ticketHolder = formHolder.getTicket();
     if (ticketHolder == null) return [];
     return ticketHolder.tickets
@@ -52,13 +52,13 @@ class FormSession extends ChangeNotifier {
       // Note: FormTicketModel objects themselves are mutable, but we are primarily concerned
       // with the list composition here. If deep copy is needed, we'd need to implement it.
       // For now, assuming replacing the list reference in TicketHolder on restore is sufficient
-      // if we don't mutate existing inner objects in a way that needs revert (SeatModel state is handled in blueprint controller possibly).
+      // Seat visual state is restored by the package controller if needed.
       // actually TicketHolder.updateTickets replaces the list.
       _ticketSnapshot = List.from(ticketHolder.tickets);
     }
   }
 
-  void updateSeats(List<SeatModel> seats) {
+  void updateSeats(List<BlueprintSeat> seats) {
     final ticketHolder = formHolder.getTicket();
     if (ticketHolder != null) {
       ticketHolder.updateTickets(seats);
@@ -115,8 +115,8 @@ class FormSession extends ChangeNotifier {
         for (var s in field.tickets) {
           if (s.seat != null) {
             totalProducts++; // Should specific seats count as products? Original code did this.
-            totalPrice += s.seat!.objectModel!.product!.price!;
-            currencyC ??= s.seat!.objectModel!.product!.currencyCode;
+            totalPrice += s.seat!.item!.product!.price!;
+            currencyC ??= s.seat!.item!.product!.currencyCode;
           }
         }
 
