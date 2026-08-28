@@ -2261,10 +2261,10 @@ packages:
     dependency: "direct main"
     description:
       name: venue_seat_picker
-      sha256: b59e31b76f5cb8c6490905928d5475a7c0dd2d6c8c01afad114969b9b18b7ffa
+      sha256: "982d4557ed1f15e5a008b9931639756b8e7c0f1a76a798746929bcb497cd3f2d"
       url: "https://pub.dev"
     source: hosted
-    version: "0.1.0"
+    version: "0.1.1"
   video_player:
     dependency: transitive
     description:
