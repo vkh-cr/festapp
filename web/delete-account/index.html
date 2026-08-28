@@ -14,7 +14,7 @@ const action = document.querySelector('#action');
 const button = document.querySelector('#confirm');
 const token = new URLSearchParams(location.search).get('token') || '';
 const endpoint = "https://rehearsal-api.festapp.net/functions/v1/confirm-account-deletion";
-const apiKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzg3ODQ5Mzg0LCJleHAiOjE5NDU1MjkzODR9.PLhlqy-tZDLNG_Tyuf46K4qxjWEHUu_2n5lfzPTML6Y";
+const apiKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzg3OTA4NjQyLCJleHAiOjE5NDU1ODg2NDJ9.uE20X1ueXZlul4F1fRfV5wXFVlGd8QKBFUHMIo1XD4M";
 async function inspect() {
   if (!token) { status.textContent = 'Odkaz není platný.'; return; }
   try {

@@ -3,7 +3,7 @@ import { APP_VERSION } from './version.js';
 export class AppConfig {
     static version = APP_VERSION;
     static supabaseUrl = 'https://rehearsal-api.festapp.net';
-    static anonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzg3ODQ5Mzg0LCJleHAiOjE5NDU1MjkzODR9.PLhlqy-tZDLNG_Tyuf46K4qxjWEHUu_2n5lfzPTML6Y';
+    static anonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzg3OTA4NjQyLCJleHAiOjE5NDU1ODg2NDJ9.uE20X1ueXZlul4F1fRfV5wXFVlGd8QKBFUHMIo1XD4M';
     static organization = 12;
     static forceOccasionLink = "csmostrava2026";
     static isAllUnit = false;
