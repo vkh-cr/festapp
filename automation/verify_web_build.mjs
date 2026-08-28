@@ -49,6 +49,14 @@ assert.match(
   new RegExp(`window\\.__FESTAPP_BUILD_VERSION__\\s*=\\s*"${escapedVersion}"`),
   'Flutter HTML has a different build version',
 );
+assert.ok(
+  flutterHtml.includes(`"mainJsPath":"${manifest.main}"`),
+  'Flutter HTML does not load its immutable versioned main bundle',
+);
+assert.ok(
+  !flutterHtml.includes('"mainJsPath":"main.dart.js"'),
+  'Flutter HTML still loads the mutable main.dart.js entrypoint',
+);
 assert.deepEqual(versionedMain, main, 'versioned and canonical main bundles differ');
 
 const projectConfig = await readFile(configPath, 'utf8');

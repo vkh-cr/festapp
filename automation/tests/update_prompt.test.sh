@@ -33,6 +33,15 @@ assert_contains() {
         fail=1
     fi
 }
+assert_not_contains() {
+    local file="$1" needle="$2"
+    if grep -F -q "$needle" "$file"; then
+        echo "  FAIL: $(basename "$file") unexpectedly contains '$needle'"
+        fail=1
+    else
+        echo "  ok: $(basename "$file") omits '$needle'"
+    fi
+}
 assert_file() {
     if [ -f "$1" ]; then
         echo "  ok: $(basename "$1") exists"
@@ -89,6 +98,10 @@ CONFIG_SUPABASE_URL="$(sed -n 's/^SUPABASE_URL=//p' "$PROJECT_ROOT/automation/pr
 CONFIG_PROJECT_REF="$(sed -n 's#^SUPABASE_URL=https://\([^.]*\)\.supabase\.co/*#\1#p' \
   "$PROJECT_ROOT/automation/project.conf")"
 printf '// fake compiled app\n%s\n' "$CONFIG_ANON_KEY" > "$BUILD_DIR/main.dart.js"
+printf '<script>window.__FESTAPP_BUILD_VERSION__ = "1.2.3+456";</script><script>_flutter.buildConfig={"builds":[{"mainJsPath":"main.dart.js"}]};</script>\n' \
+  > "$BUILD_DIR/index.html"
+printf '_flutter.buildConfig={"builds":[{"mainJsPath":"main.dart.js"}]};\n' \
+  > "$BUILD_DIR/flutter_bootstrap.js"
 printf "const SUPABASE_KEY = 'sb-%s-auth-token';\n" "$CONFIG_PROJECT_REF" \
   > "$BUILD_DIR/auth_bridge"
 printf "const supabaseUrl = '%s'; const anonKey = '%s'; const authKey = 'sb-%s-auth-token';\n" \
@@ -104,6 +117,9 @@ assert_file    "$BUILD_DIR/festapp-version.json"
 assert_file    "$BUILD_DIR/main.dart.1.2.3-456.js"   # '+' becomes '-' in the filename
 assert_contains "$BUILD_DIR/festapp-version.json" '"version":"1.2.3+456"'
 assert_contains "$BUILD_DIR/festapp-version.json" '"main":"main.dart.1.2.3-456.js"'
+assert_contains "$BUILD_DIR/index.html" '"mainJsPath":"main.dart.1.2.3-456.js"'
+assert_contains "$BUILD_DIR/flutter_bootstrap.js" '"mainJsPath":"main.dart.1.2.3-456.js"'
+assert_not_contains "$BUILD_DIR/index.html" '"mainJsPath":"main.dart.js"'
 
 # The stamped copy must be byte-identical to the entrypoint it mirrors.
 if cmp -s "$BUILD_DIR/main.dart.js" "$BUILD_DIR/main.dart.1.2.3-456.js"; then
@@ -115,7 +131,7 @@ fi
 # The release gate must accept only a self-consistent HTML/manifest/main/worker
 # set carrying the same version.
 CONFIG_LOADING_LOGO="$(sed -n 's/^WEB_LOADING_LOGO_ASSET=//p' "$PROJECT_ROOT/automation/project.conf")"
-printf '<script>window.__FESTAPP_BUILD_VERSION__ = "1.2.3+456";</script><img class="initial-logo" src="%s">\n' \
+printf '<script>window.__FESTAPP_BUILD_VERSION__ = "1.2.3+456";</script><script>_flutter.buildConfig={"builds":[{"mainJsPath":"main.dart.1.2.3-456.js"}]};</script><img class="initial-logo" src="%s">\n' \
   "$CONFIG_LOADING_LOGO" > "$BUILD_DIR/flutter"
 printf 'const BUILD_VERSION = "1.2.3+456"; const FORCED_OCCASION_PATH = "/test-occasion"; // FESTAPP_QUERY_BUILD_VERSION\n' > "$BUILD_DIR/festapp_service_worker.js"
 printf '{"start_url":"/test-occasion/"}\n' > "$BUILD_DIR/site.webmanifest"

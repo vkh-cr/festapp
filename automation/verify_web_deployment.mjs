@@ -105,6 +105,14 @@ async function verifyOnce() {
     `main.dart.${expectedVersion.replace('+', '-')}.js`,
     'manifest points to the wrong main bundle',
   );
+  assert.ok(
+    html.includes(`"mainJsPath":"${manifest.main}"`),
+    'live Flutter HTML does not load the manifest-selected immutable main bundle',
+  );
+  assert.ok(
+    !html.includes('"mainJsPath":"main.dart.js"'),
+    'live Flutter HTML still loads the service-worker-cacheable main.dart.js',
+  );
   assert.match(
     worker,
     new RegExp(`const BUILD_VERSION = "${escapedVersion}"`),
