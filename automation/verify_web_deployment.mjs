@@ -17,6 +17,7 @@ const projectConfig = await readFile(configPath, 'utf8');
 const configValue = (key) => projectConfig.match(new RegExp(`^${key}=(.*)$`, 'm'))?.[1]
   .trim()
   .replace(/^(['"])(.*)\1$/, '$2');
+const isGitHubPages = configValue('DEPLOY_TARGET') === 'gh-pages';
 const legalRoutes = [
   ['PRIVACY_URL', '/privacy/', /<nav aria-label="Právní informace">[\s\S]*<h1>[^<]+<\/h1>/],
   ['PRIVACY_CHOICES_URL', '/privacy/choices/', /<nav aria-label="Právní informace">[\s\S]*<h1>[^<]+<\/h1>/],
@@ -38,6 +39,14 @@ function versionFromHtml(html) {
 
 function assertRevalidated(response, label) {
   const value = response.headers.get('cache-control') || '';
+  if (isGitHubPages) {
+    const maxAge = Number(value.match(/(?:^|,)\s*max-age=(\d+)/i)?.[1]);
+    assert.ok(
+      Number.isInteger(maxAge) && maxAge >= 0 && maxAge <= 600,
+      `${label} has an unsafe GitHub Pages cache policy: ${value || '(empty)'}`,
+    );
+    return;
+  }
   assert.match(
     value,
     /(?:no-cache|no-store|max-age=0|must-revalidate)/i,
@@ -56,7 +65,7 @@ async function fetchFresh(pathname) {
 
 async function verifyOnce() {
   const [htmlResponse, manifestResponse, mainResponse, workerResponse, ...legalResponses] = await Promise.all([
-    fetchFresh('/admin'),
+    fetchFresh(isGitHubPages ? '/' : '/admin'),
     fetchFresh('/festapp-version.json'),
     fetchFresh('/main.dart.js'),
     fetchFresh('/festapp_service_worker.js'),
@@ -103,6 +112,18 @@ async function verifyOnce() {
     new RegExp(`const BUILD_VERSION = "${escapedVersion}"`),
     'service worker version is stale',
   );
+
+  if (isGitHubPages) {
+    const fallbackResponse = await fetchFresh('/admin');
+    assert.equal(fallbackResponse.status, 404, 'GitHub Pages SPA fallback must retain its platform 404 status');
+    assert.match(fallbackResponse.headers.get('content-type') || '', /^text\/html\b/i, 'GitHub Pages SPA fallback is not HTML');
+    assertRevalidated(fallbackResponse, 'GitHub Pages SPA fallback');
+    assert.equal(
+      versionFromHtml(await fallbackResponse.text()),
+      expectedVersion,
+      'GitHub Pages SPA fallback version is stale',
+    );
+  }
 
   const versionedResponse = await fetchFresh(`/${manifest.main}`);
   assert.equal(versionedResponse.status, 200, 'versioned main bundle is missing');

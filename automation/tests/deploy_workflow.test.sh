@@ -27,6 +27,15 @@ if ! grep -A2 -Fq 'permissions:' "$GH_PAGES_WORKFLOW" ||
     exit 1
 fi
 
+for pages_contract in "configValue('DEPLOY_TARGET') === 'gh-pages'" \
+    'GitHub Pages SPA fallback must retain its platform 404 status' \
+    'maxAge <= 600'; do
+    if ! grep -Fq "$pages_contract" "$PROJECT_ROOT/automation/verify_web_deployment.mjs"; then
+        echo "GitHub Pages deployment verifier is missing: $pages_contract"
+        exit 1
+    fi
+done
+
 fail=0
 
 # 1. YAML parse when the optional PyYAML parser is available. The structural
