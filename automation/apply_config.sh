@@ -56,8 +56,8 @@ if [ ! -f "$LEGAL_RENDERER" ]; then
 fi
 node "$LEGAL_RENDERER" --config "$CONFIG_FILE" --validate
 
-case "${DEPLOY_TARGET:-skip}" in cloudflare|netlify|gh-pages|skip|'') ;; *)
-    echo "Error: DEPLOY_TARGET must be cloudflare, netlify, gh-pages, or skip"; exit 1 ;;
+case "${DEPLOY_TARGET:-skip}" in cloudflare|skip|'') ;; *)
+    echo "Error: DEPLOY_TARGET must be cloudflare or skip"; exit 1 ;;
 esac
 case "$WEB_IS_ALL_UNIT:$IS_APP_SUPPORTED" in
     true:true|true:false|false:true|false:false) ;;

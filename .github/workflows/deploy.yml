@@ -1,10 +1,9 @@
 name: Deploy
 
 # Conf-driven router. Each prod/* branch declares its target in
-# automation/project.conf (DEPLOY_TARGET=cloudflare | netlify | gh-pages).
-# Branches without DEPLOY_TARGET (or with DEPLOY_TARGET=skip) are ignored, so
-# branches routed to gh-pages keep their hosting adapter in web.yml while the
-# same overlay, legal and release checks remain mandatory here.
+# automation/project.conf (DEPLOY_TARGET=cloudflare | skip). Cloudflare Pages
+# is the only production build owner. Legacy Netlify origins may redirect to
+# the canonical domain, but neither Netlify nor GitHub Pages builds are valid.
 
 on:
   push:
@@ -89,6 +88,10 @@ jobs:
           set +a
 
           TARGET="${DEPLOY_TARGET:-skip}"
+          case "$TARGET" in
+            cloudflare|skip|'') ;;
+            *) echo "::error::Unsupported DEPLOY_TARGET=${TARGET}; production hosting is Cloudflare-only."; exit 1 ;;
+          esac
           echo "target=${TARGET}" >> "$GITHUB_OUTPUT"
           echo "cf_project=${CLOUDFLARE_PROJECT_NAME:-}" >> "$GITHUB_OUTPUT"
 
@@ -180,64 +183,6 @@ jobs:
           set -e
           source automation/project.conf
           node automation/verify_web_deployment.mjs "https://${DOMAIN}" "${VERSION}"
-
-  netlify:
-    needs: detect
-    if: needs.detect.outputs.target == 'netlify'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      # Netlify's Git integration starts the production build directly from the
-      # same prod/* push. Keep this workflow pending until that deployment is
-      # actually live instead of reporting success while the old build remains.
-      - name: Wait for Git-triggered Netlify production deploy
-        shell: bash
-        run: |
-          set -euo pipefail
-          source automation/project.conf
-          for attempt in $(seq 1 120); do
-            MANIFEST=$(curl -fsS \
-              "https://${DOMAIN}/festapp-version.json?deploy-sha=${GITHUB_SHA}-${attempt}" \
-              2>/dev/null || true)
-            if MANIFEST="$MANIFEST" EXPECTED_VERSION="$VERSION" node -e '
-              try {
-                const manifest = JSON.parse(process.env.MANIFEST || "{}");
-                process.exit(manifest.version === process.env.EXPECTED_VERSION ? 0 : 1);
-              } catch (_) {
-                process.exit(1);
-              }
-            '; then
-              echo "Netlify is serving ${VERSION} on ${DOMAIN}."
-              exit 0
-            fi
-            sleep 5
-          done
-          echo "::error::Netlify did not publish ${VERSION} on ${DOMAIN} within 10 minutes."
-          exit 1
-
-      - name: Verify coherent release on the production domain
-        shell: bash
-        run: |
-          set -euo pipefail
-          source automation/project.conf
-          node automation/verify_web_deployment.mjs "https://${DOMAIN}" "${VERSION}"
-
-  gh-pages:
-    needs: detect
-    if: needs.detect.outputs.target == 'gh-pages'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - name: Not implemented in deploy.yml
-        run: |
-          echo "::notice::prod/festapp deployment is owned by .github/workflows/web.yml."
-          echo "That workflow uses the canonical build_web_bundle.sh builder."
-          exit 0
 
   skipped:
     needs: detect

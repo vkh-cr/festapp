@@ -436,10 +436,6 @@ try {
     path.join(projectRoot, 'automation/flutter_version.mjs'),
     'utf8',
   );
-  const githubPagesWorkflow = await readFile(
-    path.join(projectRoot, '.github/workflows/web.yml'),
-    'utf8',
-  );
   const appConfig = await readFile(path.join(projectRoot, 'lib/app_config.dart'), 'utf8');
   const oneSignalWorker = await readFile(
     path.join(projectRoot, 'web/push/OneSignalSDKWorker.js'),
@@ -482,8 +478,6 @@ try {
   assert.match(sharedBuild, /fvm install "\$FLUTTER_VERSION"/);
   assert.match(sharedBuild, /flutter-\$\{FLUTTER_VERSION\}/);
   assert.match(sharedBuild, /--strip-components=1/);
-  assert.match(githubPagesWorkflow, /build_web_bundle\.sh static/);
-  assert.doesNotMatch(githubPagesWorkflow, /flutter build web/);
   assert.match(flutterIndex, /serviceWorkerParam: \{ scope: "\/push\/" \}/);
   assert.match(
     flutterIndex,

@@ -17,7 +17,6 @@ const projectConfig = await readFile(configPath, 'utf8');
 const configValue = (key) => projectConfig.match(new RegExp(`^${key}=(.*)$`, 'm'))?.[1]
   .trim()
   .replace(/^(['"])(.*)\1$/, '$2');
-const isGitHubPages = configValue('DEPLOY_TARGET') === 'gh-pages';
 const legalRoutes = [
   ['PRIVACY_URL', '/privacy/', /<nav aria-label="Právní informace">[\s\S]*<h1>[^<]+<\/h1>/],
   ['PRIVACY_CHOICES_URL', '/privacy/choices/', /<nav aria-label="Právní informace">[\s\S]*<h1>[^<]+<\/h1>/],
@@ -39,16 +38,6 @@ function versionFromHtml(html) {
 
 function assertRevalidated(response, label) {
   const value = response.headers.get('cache-control') || '';
-  if (isGitHubPages) {
-    if (label === 'GitHub Pages SPA fallback' && value === '') return;
-    const maxAge = Number(value.match(/(?:^|,)\s*max-age=(\d+)/i)?.[1]);
-    const maxAllowed = label === 'main.dart.js' || label === 'service worker' ? 14400 : 600;
-    assert.ok(
-      Number.isInteger(maxAge) && maxAge >= 0 && maxAge <= maxAllowed,
-      `${label} has an unsafe GitHub Pages cache policy: ${value || '(empty)'}`,
-    );
-    return;
-  }
   assert.match(
     value,
     /(?:no-cache|no-store|max-age=0|must-revalidate)/i,
@@ -67,7 +56,7 @@ async function fetchFresh(pathname) {
 
 async function verifyOnce() {
   const [htmlResponse, manifestResponse, mainResponse, workerResponse, ...legalResponses] = await Promise.all([
-    fetchFresh(isGitHubPages ? '/flutter.html' : '/admin'),
+    fetchFresh('/admin'),
     fetchFresh('/festapp-version.json'),
     fetchFresh('/main.dart.js'),
     fetchFresh('/festapp_service_worker.js'),
@@ -121,21 +110,6 @@ async function verifyOnce() {
     new RegExp(`const BUILD_VERSION = "${escapedVersion}"`),
     'service worker version is stale',
   );
-
-  if (isGitHubPages) {
-    const [rootResponse, fallbackResponse] = await Promise.all([fetchFresh('/'), fetchFresh('/admin')]);
-    assert.equal(rootResponse.status, 200, 'GitHub Pages web-client root is unavailable');
-    assert.equal(fallbackResponse.status, 404, 'GitHub Pages SPA fallback must retain its platform 404 status');
-    assert.match(rootResponse.headers.get('content-type') || '', /^text\/html\b/i, 'GitHub Pages web-client root is not HTML');
-    assert.match(fallbackResponse.headers.get('content-type') || '', /^text\/html\b/i, 'GitHub Pages SPA fallback is not HTML');
-    assertRevalidated(rootResponse, 'GitHub Pages web-client root');
-    assertRevalidated(fallbackResponse, 'GitHub Pages SPA fallback');
-    assert.equal(
-      await fallbackResponse.text(),
-      await rootResponse.text(),
-      'GitHub Pages SPA fallback differs from the web-client root',
-    );
-  }
 
   const versionedResponse = await fetchFresh(`/${manifest.main}`);
   assert.equal(versionedResponse.status, 200, 'versioned main bundle is missing');

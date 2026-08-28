@@ -14,29 +14,16 @@ set -e
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 WORKFLOW="$PROJECT_ROOT/.github/workflows/deploy.yml"
-GH_PAGES_WORKFLOW="$PROJECT_ROOT/.github/workflows/web.yml"
 
 if [ ! -f "$WORKFLOW" ]; then
     echo "Workflow not found: $WORKFLOW"
     exit 1
 fi
 
-if ! grep -A2 -Fq 'permissions:' "$GH_PAGES_WORKFLOW" ||
-    ! grep -Fq 'contents: write' "$GH_PAGES_WORKFLOW"; then
-    echo "Gh-Pages workflow must explicitly grant contents: write"
+if [ -e "$PROJECT_ROOT/.github/workflows/web.yml" ]; then
+    echo "Legacy GitHub Pages workflow must not exist"
     exit 1
 fi
-
-for pages_contract in "configValue('DEPLOY_TARGET') === 'gh-pages'" \
-    'GitHub Pages SPA fallback must retain its platform 404 status' \
-    'GitHub Pages SPA fallback differs from the web-client root' \
-    "label === 'GitHub Pages SPA fallback' && value === ''" \
-    "maxAllowed = label === 'main.dart.js' || label === 'service worker' ? 14400 : 600"; do
-    if ! grep -Fq "$pages_contract" "$PROJECT_ROOT/automation/verify_web_deployment.mjs"; then
-        echo "GitHub Pages deployment verifier is missing: $pages_contract"
-        exit 1
-    fi
-done
 
 fail=0
 
@@ -55,7 +42,7 @@ else
 fi
 
 # 2. Required top-level keys.
-for needle in 'on:' 'jobs:' 'tenant-drift:' 'legal-contract:' 'detect:' 'cloudflare:' 'netlify:' 'gh-pages:' 'skipped:'; do
+for needle in 'on:' 'jobs:' 'tenant-drift:' 'legal-contract:' 'detect:' 'cloudflare:' 'skipped:'; do
     if grep -F -q "$needle" "$WORKFLOW"; then
         echo "  ok: workflow has '$needle'"
     else
@@ -76,7 +63,7 @@ for needle in 'needs: [tenant-drift, legal-contract]' 'render_legal_pages.mjs --
 done
 
 # 3. Each target job has if:.
-for job in cloudflare netlify gh-pages skipped; do
+for job in cloudflare skipped; do
     # Match `<job>:` block start and look for `if:` within ~10 lines.
     if awk -v job="$job:" '$0 ~ "^  "job {found=1; n=0} found {n++; if($0 ~ "if:") {print "ok"; exit} if(n>15){exit}}' "$WORKFLOW" | grep -q ok; then
         echo "  ok: $job job has if:"
@@ -124,21 +111,12 @@ else
     fail=1
 fi
 
-# Netlify production branches deploy through their Git integration. CI must
-# remain pending until the configured release is actually served and verified.
-for needle in 'Wait for Git-triggered Netlify production deploy' 'festapp-version.json?deploy-sha=' 'Netlify did not publish'; do
-    if grep -F -q "$needle" "$WORKFLOW"; then
-        echo "  ok: netlify job contains '$needle'"
-    else
-        echo "  FAIL: netlify job missing '$needle'"
-        fail=1
-    fi
-done
-if grep -F -q 'Not implemented in CI' "$WORKFLOW"; then
-    echo "  FAIL: netlify job is still a no-op placeholder"
+# Removed hosting targets must stay unreachable from CI and configuration.
+if grep -Eq '^  (netlify|gh-pages):|DEPLOY_TARGET=.*(netlify|gh-pages)|web\.yml' "$WORKFLOW"; then
+    echo "  FAIL: a removed Netlify/GitHub Pages build path is still reachable"
     fail=1
 else
-    echo "  ok: netlify job is not a no-op placeholder"
+    echo "  ok: Cloudflare is the only production build target"
 fi
 
 # 7. _worker.js heredoc covers sitemap + form OG inject + extension-less entries.
