@@ -11,8 +11,8 @@ Future<dynamic> loadAppConfigWithLegacyFallback({
 }) async {
   try {
     return await invoke('get_app_config_v219');
-  } on PostgrestException catch (error) {
-    if (error.code != 'PGRST202') rethrow;
+  } catch (error) {
+    if (!_isMissingV219(error)) rethrow;
 
     final legacy = await invoke('get_app_config_v218');
     if (legacy is! Map) {
@@ -23,4 +23,11 @@ Future<dynamic> loadAppConfigWithLegacyFallback({
       'client_sync_v1': false,
     };
   }
+}
+
+bool _isMissingV219(Object error) {
+  if (error is PostgrestException && error.code == 'PGRST202') return true;
+  final description = error.toString();
+  return description.contains('PGRST202') &&
+      description.contains('get_app_config_v219');
 }

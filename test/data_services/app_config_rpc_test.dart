@@ -51,4 +51,22 @@ void main() {
       throwsA(isA<PostgrestException>()),
     );
   });
+
+  test('accepts the web runtime wrapper for the exact missing v219 error', () async {
+    final calls = <String>[];
+    final result = await loadAppConfigWithLegacyFallback(
+      invoke: (name) async {
+        calls.add(name);
+        if (name == 'get_app_config_v219') {
+          throw Exception(
+            'PostgrestException(code: PGRST202, function: get_app_config_v219)',
+          );
+        }
+        return <String, dynamic>{'code': 'ok'};
+      },
+    );
+
+    expect(calls, <String>['get_app_config_v219', 'get_app_config_v218']);
+    expect(result['client_sync_v1'], isFalse);
+  });
 }
