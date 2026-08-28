@@ -14,9 +14,16 @@ set -e
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 WORKFLOW="$PROJECT_ROOT/.github/workflows/deploy.yml"
+GH_PAGES_WORKFLOW="$PROJECT_ROOT/.github/workflows/web.yml"
 
 if [ ! -f "$WORKFLOW" ]; then
     echo "Workflow not found: $WORKFLOW"
+    exit 1
+fi
+
+if ! grep -A2 -Fq 'permissions:' "$GH_PAGES_WORKFLOW" ||
+    ! grep -Fq 'contents: write' "$GH_PAGES_WORKFLOW"; then
+    echo "Gh-Pages workflow must explicitly grant contents: write"
     exit 1
 fi
 
