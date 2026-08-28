@@ -136,7 +136,7 @@ for social_source in \
     "$BUILD_SH" \
     "$PROJECT_ROOT/netlify/edge-functions/inject-og.js" \
     "$PROJECT_ROOT/web_client/index.html"; do
-    if grep -F -q 'web-app-manifest-512x512.png' "$social_source" &&
+    if grep -F -q 'android-chrome-512x512.png' "$social_source" &&
         ! grep -F -q '/og_image.jpg' "$social_source"; then
         echo "  ok: $(basename "$social_source") uses a published social-image fallback"
     else

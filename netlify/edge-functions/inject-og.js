@@ -104,7 +104,7 @@ export default async (request, context) => {
     } else if (imagePath) {
         imageUrl = `https://img.festapp.net/${imagePath}`;
     } else {
-        imageUrl = `${url.origin}/web-app-manifest-512x512.png`;
+        imageUrl = `${url.origin}/android-chrome-512x512.png`;
     }
     
     // Title Format: Event - Unit (fallback to Org)
