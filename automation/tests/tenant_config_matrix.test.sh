@@ -27,7 +27,7 @@ hash_generated() {
   done < "$PROJECT_ROOT/automation/tenant-overlays/generated.paths"
 }
 
-for tenant in festapp cavfotofest csmostrava2026 festivalslunovrat hvezdamorska; do
+for tenant in festapp festapptickets cavfotofest csmostrava2026 festivalslunovrat hvezdamorska; do
   root="$TMP_ROOT/$tenant"
   copy_worktree "$root"
   config="$PROJECT_ROOT/automation/tests/fixtures/tenants/$tenant.conf"
@@ -54,6 +54,8 @@ grep -qF '"generation":0,"backend":"legacy"' \
 grep -qE "supportedLanguages = \['cs', 'en', 'pl'\]" "$TMP_ROOT/festivalslunovrat/web_client/src/app_config.js"
 grep -qE 'organization = 4' "$TMP_ROOT/hvezdamorska/web_client/src/app_config.js"
 grep -qE 'organization = 3' "$TMP_ROOT/cavfotofest/web_client/src/app_config.js"
+grep -qE 'organization = 3' "$TMP_ROOT/festapptickets/web_client/src/app_config.js"
+grep -qE 'static const bool isAppSupported = false;' "$TMP_ROOT/festapptickets/lib/app_config.dart"
 grep -qF "backendActivationTenantId = 'cavfotofest'" "$TMP_ROOT/cavfotofest/lib/app_config.dart"
 grep -qF 'backendActivationCanonicalOrganizationId = 6' "$TMP_ROOT/cavfotofest/web_client/src/app_config.js"
 grep -qE 'static const bool isAllUnit = true;' "$TMP_ROOT/hvezdamorska/lib/app_config.dart"
