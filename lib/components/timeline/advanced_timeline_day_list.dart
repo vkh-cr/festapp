@@ -83,8 +83,7 @@ class DayList extends StatelessWidget {
       );
     }
 
-    return ListView(
-        padding: const EdgeInsets.symmetric(vertical: 4), children: children);
+    return ListView(padding: dayListContentPadding, children: children);
   }
 
   Widget _section(String t) => Padding(
@@ -108,6 +107,12 @@ class DayList extends StatelessWidget {
 
 const double _kMinWidthForInlineButtons = 420.0;
 const bool _kUsePastelBackground = false;
+const EdgeInsets dayListContentPadding = EdgeInsets.fromLTRB(
+  0,
+  4,
+  0,
+  kBottomNavigationBarHeight + 16,
+);
 
 bool isDark(context) => Theme.of(context).brightness == Brightness.dark;
 

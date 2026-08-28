@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:fstapp/components/speakers/counseling_availability.dart';
 import 'package:fstapp/components/speakers/speaker_model.dart';
 import 'package:fstapp/components/speakers/speaker_topic_model.dart';
@@ -14,6 +15,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class DbSpeakers {
   static final _supabase = Supabase.instance.client;
   static final SpeakerCommands _commands = SupabaseSpeakerCommands(_supabase);
+  static bool _publicReadUnavailable = false;
 
   // --- Public reads ---
 
@@ -23,10 +25,21 @@ class DbSpeakers {
     if (ClientSyncRuntime.isV1Selected) {
       return ClientSyncProjection.speakers();
     }
-    final res = await _supabase.rpc('get_speakers', params: {
-      'p_occasion': occasionId,
-      'p_include_description': includeDescription,
-    });
+    if (_publicReadUnavailable) return SpeakersBundle.empty();
+    dynamic res;
+    try {
+      res = await _supabase.rpc('get_speakers', params: {
+        'p_occasion': occasionId,
+        'p_include_description': includeDescription,
+      });
+    } on PostgrestException catch (error) {
+      if (!isMissingSpeakersRpc(error)) rethrow;
+      // Some still-supported legacy tenants predate the speakers migration.
+      // Remember the capability result so event navigation does not repeat the
+      // same failed request. Canonical backends use the projection above.
+      _publicReadUnavailable = true;
+      return SpeakersBundle.empty();
+    }
     _ensureOk(res);
     return SpeakersBundle.fromJson(
         (res['data'] as Map).cast<String, dynamic>());
@@ -289,6 +302,11 @@ class DbSpeakers {
     }
   }
 }
+
+@visibleForTesting
+bool isMissingSpeakersRpc(PostgrestException error) =>
+    error.code == 'PGRST202' ||
+    (error.code == '404' && error.message.contains('get_speakers'));
 
 /// Carries the RPC error code so the UI can show a matching message.
 class SpeakersException implements Exception {

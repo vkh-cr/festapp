@@ -30,11 +30,11 @@ class LogoWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String logoAsset = programVariant
-        ? AppConfig.programLogoAsset
-        : (ThemeConfig.isDarkMode(context) || forceDark == true
-              ? AppConfig.darkLogoAsset
-              : AppConfig.logoAsset);
+    final String logoAsset = resolveLogoAsset(
+      isDarkMode: ThemeConfig.isDarkMode(context),
+      forceDark: forceDark,
+      programVariant: programVariant,
+    );
 
     // If the asset file is an SVG, use SvgPicture; otherwise, use Image.
     final Widget logo = logoAsset.toLowerCase().endsWith('.svg')
@@ -48,4 +48,18 @@ class LogoWidget extends StatelessWidget {
 
     return InkWell(onTap: onTap, child: logo);
   }
+}
+
+@visibleForTesting
+String resolveLogoAsset({
+  required bool isDarkMode,
+  required bool? forceDark,
+  required bool programVariant,
+}) {
+  // An explicit dark request is a contrast requirement and must win over the
+  // optional program variant. Schedule headers use both flags on dark app bars.
+  if (forceDark == true || (forceDark != false && isDarkMode)) {
+    return AppConfig.darkLogoAsset;
+  }
+  return programVariant ? AppConfig.programLogoAsset : AppConfig.logoAsset;
 }
