@@ -1,0 +1,4 @@
+# Source overlay for the canonical Vstupenky.online Netlify deployment.
+automation/project.conf
+netlify.toml
+web_client/public/netlify-retire-worker.js
