@@ -137,8 +137,8 @@ fvm dart run flutter_launcher_icons
 - Upload the App Bundle.
 - Complete declarations.
 - Example privacy policy links:
-  - [Privacy Policy](https://raw.githack.com/vkh-cr/festapp/prod/festapp/PrivacyPolicy.html)
-  - [Request Privacy Policy](https://raw.githack.com/vkh-cr/festapp/prod/festapp/PrivacyPolicy.html#request)
+  - [Privacy Policy](https://raw.githack.com/festappnet/festapp/prod/festapp/PrivacyPolicy.html)
+  - [Request Privacy Policy](https://raw.githack.com/festappnet/festapp/prod/festapp/PrivacyPolicy.html#request)
 - Import data types as CSV from Festapp standard csv file or fill them.
 - For participant imports, including the optional `Skupina:` column, see
   [CSV user import](csv_user_import.md).

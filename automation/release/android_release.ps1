@@ -21,7 +21,7 @@ $expectedBranch = $releaseManifest.releaseBranch
 $branch = (git branch --show-current).Trim()
 if (-not $package -or -not $expectedBranch) { throw 'Release manifest lacks androidPackage or releaseBranch' }
 if ($branch -ne $expectedBranch) { throw "Refusing branch $branch; expected $expectedBranch" }
-if ((git remote get-url origin).Trim() -ne 'https://github.com/vkh-cr/festapp.git') { throw 'Unexpected origin remote' }
+if ((git remote get-url origin).Trim() -ne 'https://github.com/festappnet/festapp.git') { throw 'Unexpected origin remote' }
 if ((Select-String -Path android/app/build.gradle -SimpleMatch "applicationId = `"$package`"").Count -ne 1) { throw 'Package identity mismatch' }
 $versionLine = (Select-String -Path pubspec.yaml -Pattern '^version:\s*(.+)$').Matches.Groups[1].Value.Trim()
 $parts = $versionLine.Split('+')

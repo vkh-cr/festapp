@@ -21,7 +21,7 @@ class _InstanceInstallPageState extends State<InstanceInstallPage> {
   late final TextEditingController _dbController;
 
   final TextEditingController _repoController =
-      TextEditingController(text: 'vkh-cr/festapp');
+      TextEditingController(text: 'festappnet/festapp');
 
   @override
   void initState() {
