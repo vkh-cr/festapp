@@ -10,7 +10,24 @@ runtime_database = os.environ.get("FESTAPP_RUNTIME_DATABASE", "postgres")
 if runtime_database != "postgres" and not re.fullmatch(r"festapp_rehearsal_[0-9]{14}", runtime_database):
     raise SystemExit("FESTAPP_RUNTIME_DATABASE must be postgres or a timestamped rehearsal database")
 
-auth_site_url = os.environ.get("FESTAPP_AUTH_SITE_URL", "https://festapp-rehearsal.invalid")
+auth_site_url = os.environ.get(
+    "FESTAPP_AUTH_SITE_URL", "https://festapp-rehearsal-client.pages.dev"
+)
+auth_additional_origins = os.environ.get(
+    "FESTAPP_AUTH_ADDITIONAL_ORIGINS",
+    ",".join((
+        "https://csmostrava.festapp.net",
+        "https://hvezdamorska.festapp.net",
+        "https://clovekavira.festapp.net",
+        "https://app.festivalslunovrat.cz",
+        "https://csmostrava2026.pages.dev",
+        "https://hvezdamorska.pages.dev",
+        "https://clovekavira.pages.dev",
+        "https://aksmcz.netlify.app",
+        "https://hvezdamorska.netlify.app",
+        "https://clovekavira.netlify.app",
+    )),
+)
 auth_redirect_urls = os.environ.get("FESTAPP_AUTH_REDIRECT_URLS", "")
 
 
@@ -23,13 +40,26 @@ def https_origin(value: str) -> str:
 
 
 auth_site_url = https_origin(auth_site_url)
+allowed_origins = [auth_site_url]
+for origin in filter(None, (item.strip() for item in auth_additional_origins.split(","))):
+    normalized = https_origin(origin)
+    if normalized not in allowed_origins:
+        allowed_origins.append(normalized)
+
+redirect_urls = [
+    f"{origin}{path}"
+    for origin in allowed_origins
+    for path in ("/reset-password", "/resetPassword", "/auth_bridge", "/auth_bridge.html")
+]
 for redirect in filter(None, (item.strip() for item in auth_redirect_urls.split(","))):
     parsed = urlsplit(redirect)
     if (parsed.scheme != "https" or not parsed.hostname or parsed.username or parsed.password
             or parsed.query or parsed.fragment or not parsed.path.startswith("/")):
         raise SystemExit("FESTAPP_AUTH_REDIRECT_URLS contains an invalid HTTPS callback URL")
-    if f"https://{parsed.netloc}" != auth_site_url:
-        raise SystemExit("Auth redirect callbacks must use FESTAPP_AUTH_SITE_URL origin")
+    if f"https://{parsed.netloc}" not in allowed_origins:
+        raise SystemExit("Auth redirect callbacks must use an approved Auth origin")
+    if redirect not in redirect_urls:
+        redirect_urls.append(redirect)
 updates = {
     "COMPOSE_FILE": "docker-compose.yml:docker-compose.festapp.yml:docker-compose.database-target.yml",
     "FESTAPP_RUNTIME_DATABASE": runtime_database,
@@ -37,8 +67,8 @@ updates = {
     "SUPABASE_PUBLIC_URL": "https://rehearsal-api.festapp.net",
     "API_EXTERNAL_URL": "https://rehearsal-api.festapp.net",
     "SITE_URL": auth_site_url,
-    "ADDITIONAL_REDIRECT_URLS": auth_redirect_urls,
-    "FESTAPP_ALLOWED_WEB_ORIGINS": auth_site_url,
+    "ADDITIONAL_REDIRECT_URLS": ",".join(redirect_urls),
+    "FESTAPP_ALLOWED_WEB_ORIGINS": ",".join(allowed_origins),
     "DISABLE_SIGNUP": "true",
     "ENABLE_PHONE_SIGNUP": "false",
     "ENABLE_PHONE_AUTOCONFIRM": "false",

@@ -22,10 +22,12 @@ set -euo pipefail
 ACCOUNT_ID_DEFAULT="84b32318ac235bf6738bdf1c8caa0795"
 ENV_FILE=""
 SKIP_BUILD=0
+BRANCH_OVERRIDE=""
 
 while [ $# -gt 0 ]; do
   case "$1" in
     --env-file) ENV_FILE="$2"; shift 2 ;;
+    --branch) BRANCH_OVERRIDE="$2"; shift 2 ;;
     --skip-build) SKIP_BUILD=1; shift ;;
     *) echo "Unknown arg: $1" >&2; exit 2 ;;
   esac
@@ -55,13 +57,29 @@ if [ -z "$PROJECT_NAME" ]; then
   exit 1
 fi
 
-BRANCH="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo prod/${PROJECT_NAME})"
-if [ "$BRANCH" = "HEAD" ]; then
-  # Detached (e.g. deploying from a worktree) — fall back to the prod branch name.
-  BRANCH="prod/${PROJECT_NAME}"
+BRANCH="${BRANCH_OVERRIDE:-$(git rev-parse --abbrev-ref HEAD 2>/dev/null || true)}"
+if [ -z "$BRANCH" ] || [ "$BRANCH" = "HEAD" ]; then
+  echo "ERROR: detached deploy requires --branch prod/<tenant>; project and branch names may differ." >&2
+  exit 1
+fi
+if [[ ! "$BRANCH" =~ ^prod/[a-z0-9][a-z0-9-]*$ ]]; then
+  echo "ERROR: deploy branch must match prod/<tenant>." >&2
+  exit 1
 fi
 
 echo "Project: ${PROJECT_NAME} | Branch tag: ${BRANCH} | Account: ${CLOUDFLARE_ACCOUNT_ID}"
+
+# Export the complete public tenant config for the Pages worker and make the
+# project/domain setup identical to the GitHub Actions path.
+set -a
+# shellcheck disable=SC1091
+source automation/project.conf
+set +a
+export CF_API_TOKEN="$CLOUDFLARE_API_TOKEN"
+export CF_ACCOUNT_ID="$CLOUDFLARE_ACCOUNT_ID"
+export CF_PROJECT="$PROJECT_NAME"
+export BRANCH
+node automation/cloudflare/ensure-pages-project.mjs
 
 if [ "$SKIP_BUILD" -eq 0 ]; then
   echo "Building (automation/cloudflare_build.sh)..."

@@ -115,7 +115,7 @@ jobs:
       - name: Build (Flutter + Web Client) via shared script
         run: ./automation/cloudflare_build.sh
 
-      - name: Ensure CF production_branch matches current branch
+      - name: Ensure Cloudflare Pages project, runtime and custom domain
         env:
           CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -123,17 +123,15 @@ jobs:
           BRANCH: ${{ needs.detect.outputs.branch }}
         shell: bash
         run: |
-          set -e
+          set -euo pipefail
           if [ -z "${CF_PROJECT}" ]; then
             echo "::error::CLOUDFLARE_PROJECT_NAME missing in automation/project.conf on branch ${BRANCH}."
             exit 1
           fi
-          RESP=$(curl -sS -X PATCH \
-            "https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/pages/projects/${CF_PROJECT}" \
-            -H "Authorization: Bearer ${CF_API_TOKEN}" \
-            -H "Content-Type: application/json" \
-            --data "{\"production_branch\":\"${BRANCH}\"}")
-          echo "$RESP" | python3 -c "import json,sys; d=json.load(sys.stdin); print('production_branch=', d.get('result',{}).get('production_branch')); sys.exit(0 if d.get('success') else 1)"
+          set -a
+          source automation/project.conf
+          set +a
+          node automation/cloudflare/ensure-pages-project.mjs
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3

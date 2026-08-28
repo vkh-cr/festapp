@@ -84,6 +84,10 @@ test('rehearsal environment remains valid when sourced by a shell', () => {
   assert.match(envText, /STUDIO_DEFAULT_ORGANIZATION='Festapp Rehearsal'/);
   assert.match(envText, /STUDIO_DEFAULT_PROJECT='Canonical Merge Rehearsal'/);
   assert.match(envText, /^FESTAPP_RUNTIME_DATABASE=postgres$/m);
+  assert.match(envText, /https:\/\/csmostrava\.festapp\.net\/reset-password/);
+  assert.match(envText, /https:\/\/hvezdamorska\.netlify\.app\/auth_bridge\.html/);
+  assert.match(envText, /https:\/\/clovekavira\.pages\.dev\/resetPassword/);
+  assert.match(envText, /https:\/\/app\.festivalslunovrat\.cz\/auth_bridge/);
 
   const sourced = spawnSync('bash', ['-c', 'set -a; source "$1"', 'bash', path.join(tempDir, '.env')], {
     encoding: 'utf8',
@@ -105,14 +109,19 @@ test('rehearsal environment remains valid when sourced by a shell', () => {
     env: {
       ...process.env,
       FESTAPP_AUTH_SITE_URL: 'https://rehearsal-web.festapp.net',
+      FESTAPP_AUTH_ADDITIONAL_ORIGINS:
+        'https://csmostrava.festapp.net,https://hvezdamorska.festapp.net,https://clovekavira.festapp.net',
       FESTAPP_AUTH_REDIRECT_URLS:
-        'https://rehearsal-web.festapp.net/auth_bridge,https://rehearsal-web.festapp.net/transfer',
+        'https://rehearsal-web.festapp.net/auth_bridge,https://clovekavira.festapp.net/transfer',
     },
   });
   assert.equal(authConfigured.status, 0, authConfigured.stderr);
   const authEnv = fs.readFileSync(path.join(tempDir, '.env'), 'utf8');
   assert.match(authEnv, /^SITE_URL=https:\/\/rehearsal-web\.festapp\.net$/m);
-  assert.match(authEnv, /^ADDITIONAL_REDIRECT_URLS=https:\/\/rehearsal-web\.festapp\.net\/auth_bridge,https:\/\/rehearsal-web\.festapp\.net\/transfer$/m);
+  assert.match(authEnv,
+    /^ADDITIONAL_REDIRECT_URLS=.*https:\/\/rehearsal-web\.festapp\.net\/reset-password.*https:\/\/clovekavira\.festapp\.net\/auth_bridge\.html.*https:\/\/clovekavira\.festapp\.net\/transfer$/m);
+  assert.match(authEnv,
+    /^FESTAPP_ALLOWED_WEB_ORIGINS=https:\/\/rehearsal-web\.festapp\.net,https:\/\/csmostrava\.festapp\.net,https:\/\/hvezdamorska\.festapp\.net,https:\/\/clovekavira\.festapp\.net$/m);
 
   const foreignRedirect = spawnSync('python3', [path.join(runtime, 'configure-rehearsal-env.py')], {
     cwd: tempDir,
@@ -120,6 +129,7 @@ test('rehearsal environment remains valid when sourced by a shell', () => {
     env: {
       ...process.env,
       FESTAPP_AUTH_SITE_URL: 'https://rehearsal-web.festapp.net',
+      FESTAPP_AUTH_ADDITIONAL_ORIGINS: 'https://csmostrava.festapp.net',
       FESTAPP_AUTH_REDIRECT_URLS: 'https://attacker.example/callback',
     },
   });

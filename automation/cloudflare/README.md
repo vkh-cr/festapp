@@ -11,24 +11,31 @@ CLOUDFLARE_PROJECT_NAME=<exact CF Pages project name>
 Run `automation/deploy_direct.sh`; it builds locally, uploads through Wrangler,
 and verifies the custom domain before reporting success.
 
-## One-time Cloudflare Pages dashboard setup
+## Cloudflare Pages project setup
 
-For each `prod/*` branch you want to deploy on Cloudflare:
+Both `.github/workflows/deploy.yml` and `automation/deploy_direct.sh` run
+`ensure-pages-project.mjs` before upload. With a token carrying Pages Write it
+idempotently creates a missing Direct Upload project, pins its production
+branch, sets the three public Worker variables, and attaches `DOMAIN` as the
+custom hostname. Existing unrelated variables and domains are retained.
 
-1. **Create project** → "Direct Upload" (no Git integration needed; the deploy
-   pushes builds via Wrangler). Project name must match
-   `CLOUDFLARE_PROJECT_NAME` in `automation/project.conf` on that branch.
-2. **Production branch** must match the `prod/<name>` branch tag used by the
-   direct deploy script.
-3. **Environment variables** (Production + Preview):
+The branch configuration owns:
+
+1. **Project name** in `CLOUDFLARE_PROJECT_NAME`.
+2. **Production branch**, resolved from the pushed `prod/<name>` branch.
+3. **Production runtime variables**:
    - `SUPABASE_URL`
    - `SUPABASE_ANON_KEY`
    - `ORGANIZATION_ID`
    These are read by `_worker.js` at runtime for the dynamic `/sitemap.xml` and
    the `/form/<slug>` OG inject. Without them the worker falls back to a
    minimal sitemap and uses default meta tags.
-4. **Custom domain**: add the production hostname (e.g. `csmostrava.festapp.net`).
-5. **Local release credentials**:
+   The values come from the legacy profile while
+   `BACKEND_ACTIVATION_PHASE=legacy` and from the complete pinned canonical
+   profile when the branch advances to `canonical`, so Worker-rendered content
+   and both browser clients switch together.
+4. **Custom domain** from `DOMAIN` (for example `csmostrava.festapp.net`).
+5. **Release credentials**:
    - `CLOUDFLARE_API_TOKEN` — token with `Cloudflare Pages:Edit` for the account.
    - `CLOUDFLARE_ACCOUNT_ID` (optional; the Festapp account is the default).
 
@@ -101,6 +108,7 @@ Why a worker (instead of `_redirects` + Pages Functions):
    FORCE_OCCASION_LINK=<slug>
    ...
    ```
-3. Create the CF Pages project in dashboard (`<name>`), set env vars + custom domain.
-4. Export `CLOUDFLARE_API_TOKEN` (or pass `--env-file`) and run
-   `./automation/deploy_direct.sh`.
+3. Export `CLOUDFLARE_API_TOKEN` (or pass `--env-file`) and run
+   `./automation/deploy_direct.sh`. From a detached release worktree, pass the
+   exact branch explicitly (for example `--branch prod/cavfotofest`); the tool
+   never guesses it from a Pages project name such as `clovekavira`.
