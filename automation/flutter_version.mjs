@@ -1,12 +1,14 @@
 import fs from 'node:fs';
 
-const config = JSON.parse(
-  fs.readFileSync(new URL('../.fvmrc', import.meta.url), 'utf8'),
-);
-const version = config.flutter;
+const source = fs.readFileSync(new URL('./project.conf', import.meta.url), 'utf8');
+const matches = [...source.matchAll(/^FLUTTER_VERSION=([^\r\n#]+)$/gm)];
+if (matches.length !== 1) {
+  throw new Error('automation/project.conf must define FLUTTER_VERSION exactly once');
+}
+const version = matches[0][1].trim().replace(/^(['"])(.*)\1$/, '$2');
 
-if (typeof version !== 'string' || !/^\d+\.\d+\.\d+$/.test(version)) {
-  throw new Error('.fvmrc must define a semantic Flutter version');
+if (!/^\d+\.\d+\.\d+$/.test(version)) {
+  throw new Error('FLUTTER_VERSION must be a semantic Flutter version');
 }
 
 process.stdout.write(version);

@@ -4,6 +4,15 @@ export default async (request, context) => {
   
   try {
     const url = new URL(request.url);
+    const legacyCanonicalOrigins = {
+      'hvezdamorska.netlify.app': 'https://hvezdamorska.festapp.net',
+      'clovekavira.netlify.app': 'https://clovekavira.festapp.net',
+      'vstupenkyonline.netlify.app': 'https://vstupenky.online',
+    };
+    const canonicalOrigin = legacyCanonicalOrigins[url.hostname];
+    if (canonicalOrigin) {
+      return Response.redirect(canonicalOrigin + url.pathname + url.search, 301);
+    }
     const parts = url.pathname.split('/');
     const slug = parts[2];
 

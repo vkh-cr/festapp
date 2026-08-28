@@ -1,4 +1,7 @@
 # Generated leaf files. This policy is owned by the recorded main SHA.
+.fvmrc
+.fvm/fvm_config.json
+.fvm/release
 android/app/build.gradle
 android/app/src/main/AndroidManifest.xml
 android/app/src/main/kotlin/fstapp/MainActivity.kt

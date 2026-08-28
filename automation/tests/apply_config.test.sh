@@ -137,6 +137,12 @@ assert_not_file() {
 }
 
 echo
+echo "--- generated Flutter SDK adapters ---"
+assert_contains "$TMP_ROOT/.fvmrc" '"flutter": "9.9.9"'
+assert_contains "$TMP_ROOT/.fvm/fvm_config.json" '"flutterSdkVersion": "9.9.9"'
+assert_contains "$TMP_ROOT/.fvm/release" '9.9.9'
+
+echo
 echo "--- web/index.html (Flutter template) ---"
 assert_contains "$TMP_ROOT/web/index.html" "<title>Test App Name</title>"
 assert_contains "$TMP_ROOT/web/index.html" '<meta name="apple-mobile-web-app-title" content="TST">'

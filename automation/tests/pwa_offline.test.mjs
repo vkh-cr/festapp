@@ -432,6 +432,10 @@ try {
     path.join(projectRoot, 'automation/build_web_bundle.sh'),
     'utf8',
   );
+  const flutterVersionScript = await readFile(
+    path.join(projectRoot, 'automation/flutter_version.mjs'),
+    'utf8',
+  );
   const githubPagesWorkflow = await readFile(
     path.join(projectRoot, '.github/workflows/web.yml'),
     'utf8',
@@ -467,6 +471,14 @@ try {
   assert.match(sharedBuild, /emit_version_manifest\.sh/);
   assert.match(sharedBuild, /verify_web_build\.mjs/);
   assert.match(sharedBuild, /flutter_version\.mjs/);
+  assert.match(
+    flutterVersionScript,
+    /project\.conf/,
+  );
+  assert.doesNotMatch(
+    flutterVersionScript,
+    /\.fvmrc/,
+  );
   assert.match(sharedBuild, /fvm install "\$FLUTTER_VERSION"/);
   assert.match(sharedBuild, /flutter-\$\{FLUTTER_VERSION\}/);
   assert.match(sharedBuild, /--strip-components=1/);

@@ -33,7 +33,7 @@ fi
 # Source the config (DOMAIN)
 source "$CONFIG_FILE"
 
-for required_key in DOMAIN APP_NAME APP_TITLE_SHORT APP_DESCRIPTION VERSION \
+for required_key in DOMAIN APP_NAME APP_TITLE_SHORT APP_DESCRIPTION VERSION FLUTTER_VERSION \
     ANDROID_APPLICATION_ID IOS_BUNDLE_ID IOS_DEVELOPMENT_TEAM \
     IOS_ONESIGNAL_APP_GROUP IOS_ASSOCIATED_DOMAIN LOGO_ASSET DARK_LOGO_ASSET \
     PROGRAM_LOGO_ASSET WEB_LOADING_LOGO_ASSET WEB_IS_ALL_UNIT \
@@ -69,6 +69,26 @@ esac
 [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+\+[0-9]+$ ]] || {
     echo "Error: VERSION must use semantic-version+build format"; exit 1;
 }
+[[ "$FLUTTER_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || {
+    echo "Error: FLUTTER_VERSION must use semantic version format"; exit 1;
+}
+
+# project.conf is the sole Flutter SDK pin. FVM files are generated adapters
+# for local tools and IDEs, never independent version owners.
+python3 - "$PROJECT_ROOT" "$FLUTTER_VERSION" <<'PY'
+import json
+from pathlib import Path
+import sys
+
+root = Path(sys.argv[1])
+version = sys.argv[2]
+(root / '.fvm').mkdir(exist_ok=True)
+(root / '.fvmrc').write_text(json.dumps({'flutter': version}, indent=2) + '\n')
+(root / '.fvm' / 'fvm_config.json').write_text(
+    json.dumps({'flutterSdkVersion': version}, indent=2) + '\n'
+)
+(root / '.fvm' / 'release').write_text(version + '\n')
+PY
 [[ "$ANDROID_APPLICATION_ID" =~ ^[A-Za-z][A-Za-z0-9_]*(\.[A-Za-z][A-Za-z0-9_]*)+$ ]] || {
     echo "Error: invalid ANDROID_APPLICATION_ID"; exit 1;
 }

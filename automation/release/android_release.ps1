@@ -73,7 +73,10 @@ if (-not (Get-Command fvm -ErrorAction SilentlyContinue) -and (Test-Path (Join-P
   $env:PATH = "$fvmFallback;$env:PATH"
 }
 Require-Command git; Require-Command fvm; Require-Command java; Require-Command node; Require-Command keytool
-$requiredFlutterVersion = (Get-Content -LiteralPath (Join-Path $root '.fvmrc') -Raw | ConvertFrom-Json).flutter
+$requiredFlutterVersion = (& node (Join-Path $root 'automation/flutter_version.mjs')).Trim()
+if ($LASTEXITCODE -ne 0 -or -not $requiredFlutterVersion) {
+  throw 'Unable to read FLUTTER_VERSION from automation/project.conf'
+}
 if ((fvm flutter --version --machine | ConvertFrom-Json).frameworkVersion -ne $requiredFlutterVersion) {
   throw "Flutter must be exactly $requiredFlutterVersion through FVM"
 }
