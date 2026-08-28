@@ -6,8 +6,7 @@ import 'package:fstapp/components/occasion/admin_page.dart';
 
 class AppConfig {
   static const String supabaseUrl = 'https://kjdpmixlnhntmxjedpxh.supabase.co';
-  static const String anonKey =
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqZHBtaXhsbmhudG14amVkcHhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDE5NDI5NzEsImV4cCI6MjAxNzUxODk3MX0.06nTXCL-i1GxLckfEyCNlVVwt62QTzKUezqmsYSR_MI';
+  static const String anonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqZHBtaXhsbmhudG14amVkcHhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDE5NDI5NzEsImV4cCI6MjAxNzUxODk3MX0.06nTXCL-i1GxLckfEyCNlVVwt62QTzKUezqmsYSR_MI';
   static const String effectiveSupabaseUrl = String.fromEnvironment(
     'FESTAPP_SUPABASE_URL',
     defaultValue: supabaseUrl,
@@ -16,8 +15,7 @@ class AppConfig {
     'FESTAPP_SUPABASE_ANON_KEY',
     defaultValue: anonKey,
   );
-  static const String supabaseAuthStorageKey =
-      'sb-kjdpmixlnhntmxjedpxh-auth-token';
+  static const String supabaseAuthStorageKey = 'sb-kjdpmixlnhntmxjedpxh-auth-token';
   static const String backendActivationTenantId = '';
   static const String backendActivationManifestUrl = '';
   static const String backendActivationCanonicalManifestSha256 = '';
@@ -55,12 +53,10 @@ class AppConfig {
 
   static const String webLink = "https://vstupenky.online";
   static const String privacyUrl = "https://vstupenky.online/privacy/";
-  static const String privacyChoicesUrl =
-      "https://vstupenky.online/privacy/choices/";
+  static const String privacyChoicesUrl = "https://vstupenky.online/privacy/choices/";
   static const String termsUrl = "https://vstupenky.online/terms/";
   static const String supportUrl = "https://vstupenky.online/support/";
-  static const String deleteAccountUrl =
-      "https://vstupenky.online/delete-account/";
+  static const String deleteAccountUrl = "https://vstupenky.online/delete-account/";
   static const String syncHeadOrigin = "";
   static const String syncAssetOrigin = "";
   static const String imageApiUrl = 'https://image-api.festapp.net';
