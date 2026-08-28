@@ -4,20 +4,30 @@ set -euo pipefail
 readonly EXPECTED_HOSTNAME="festapp-supabase-rehearsal-01"
 readonly COMPOSE_DIR="${FESTAPP_REHEARSAL_COMPOSE_DIR:-/opt/festapp-supabase/docker}"
 readonly EVIDENCE_ROOT="${FESTAPP_REHEARSAL_EVIDENCE_ROOT:-/var/lib/festapp-rehearsal-evidence}"
+readonly TARGET_DATABASE="${FESTAPP_REHEARSAL_DATABASE:-postgres}"
 readonly SOURCE_REF="kjdpmixlnhntmxjedpxh"
-readonly SOURCE_FINGERPRINT="c232048f13ca567800d896182fd49ea69bdaf357ad3eba0f75ecf4d539e4379c"
 
 fail() { echo "ERROR: $*" >&2; exit 1; }
-[[ "${FESTAPP_REHEARSAL_ACK:-}" == "import-default-with-two-quarantined-companions" ]] ||
-  fail "set FESTAPP_REHEARSAL_ACK=import-default-with-two-quarantined-companions"
+[[ "${FESTAPP_REHEARSAL_ACK:-}" == "import-default-with-quarantine-ledger" ]] ||
+  fail "set FESTAPP_REHEARSAL_ACK=import-default-with-quarantine-ledger"
+[[ "$TARGET_DATABASE" == "postgres" || "$TARGET_DATABASE" =~ ^festapp_rehearsal_[0-9]{14}$ ]] || fail "invalid isolated rehearsal database name"
 [[ "$(id -u)" == "0" ]] || fail "run as root on rehearsal host"
 [[ "$(hostname -s)" == "$EXPECTED_HOSTNAME" ]] || fail "refusing unexpected host"
 cd "$COMPOSE_DIR"
 docker compose config -q
 
-psql_main() { docker compose exec -T db psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres "$@"; }
-readonly STATE="$(psql_main -Atqc "SELECT concat_ws('|', split_part(current_setting('server_version'),'.',1), (SELECT count(*) FROM auth.users), (SELECT count(*) FROM storage.objects), (SELECT count(*) FROM festapp_merge.import_runs), (SELECT count(*) FROM festapp_merge.quarantined_rows), (SELECT count(*) FROM pg_foreign_table ft JOIN pg_class c ON c.oid=ft.ftrelid JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname LIKE 'festapp_stage_%'), (SELECT count(*) FROM public.client_sync_component_sources))")"
-[[ "$STATE" == "17|0|0|0|0|172|1" ]] || fail "canonical target is not approved empty default-import state ($STATE)"
+psql_main() { docker compose exec -T db psql -X -v ON_ERROR_STOP=1 -U postgres -d "$TARGET_DATABASE" "$@"; }
+readonly STATE="$(psql_main -Atqc "SELECT concat_ws('|', split_part(current_setting('server_version'),'.',1),
+  (SELECT count(*) FROM auth.users),(SELECT count(*) FROM storage.objects),
+  (SELECT count(*) FROM festapp_merge.import_runs),(SELECT count(*) FROM festapp_merge.quarantined_rows),
+  (SELECT count(*) FROM information_schema.foreign_tables WHERE foreign_table_schema IN
+    ('festapp_stage_default_public','festapp_stage_default_eshop','festapp_stage_a_public','festapp_stage_a_eshop')),
+  (SELECT count(*)=1 FROM festapp_stage_default_managed.provenance
+    WHERE source_alias='default' AND source_project_ref='$SOURCE_REF'),
+  (SELECT managed_rows=(SELECT count(*) FROM festapp_stage_default_managed.rows)
+    FROM festapp_stage_default_managed.provenance),
+  (SELECT count(*) FROM public.client_sync_component_sources))")"
+[[ "$STATE" == "17|0|0|0|0|170|t|t|1" ]] || fail "canonical target is not approved empty default-import state ($STATE)"
 
 readonly REQUIRED_GAPS="$(psql_main -Atqc "WITH source_columns AS (
   SELECT replace(table_schema, 'festapp_stage_default_', '') AS target_schema, table_name, column_name
@@ -48,6 +58,7 @@ DECLARE
   column_list text;
   source_rows bigint;
   target_rows bigint;
+  source_companions bigint;
   imported_companions bigint;
   quarantined_companions bigint;
   sequence_record record;
@@ -55,10 +66,12 @@ BEGIN
   INSERT INTO festapp_merge.import_runs(
     source_alias, source_project_ref, snapshot_at, source_schema_fingerprint,
     transformation_version, status
-  ) VALUES (
-    'default', '$SOURCE_REF', '2026-08-27T18:08:42.579Z', '$SOURCE_FINGERPRINT',
-    'default-import-2026-08-27.1', 'prepared'
-  ) RETURNING run_id INTO import_run;
+  ) SELECT
+    'default', source_project_ref, raw_snapshot_at, raw_schema_sha256,
+    'default-import-2026-08-27.2', 'prepared'
+  FROM festapp_stage_default_managed.provenance
+  WHERE source_alias='default' AND source_project_ref='$SOURCE_REF'
+  RETURNING run_id INTO import_run;
 
   FOR relation IN
     SELECT foreign_table_schema AS source_schema,
@@ -131,9 +144,11 @@ BEGIN
   FROM shared WHERE coalesce(cardinality(common_occasions),0) <> 1;
 
   SELECT count(*) INTO imported_companions FROM public.user_companions;
+  SELECT count(*) INTO source_companions FROM festapp_stage_default_public.user_companions;
   SELECT count(*) INTO quarantined_companions FROM festapp_merge.quarantined_rows WHERE run_id=import_run;
-  IF imported_companions <> 1 OR quarantined_companions <> 2 THEN
-    RAISE EXCEPTION 'companion disposition mismatch: imported %, quarantined %', imported_companions, quarantined_companions;
+  IF imported_companions + quarantined_companions <> source_companions THEN
+    RAISE EXCEPTION 'companion disposition mismatch: source %, imported %, quarantined %',
+      source_companions, imported_companions, quarantined_companions;
   END IF;
 
   FOR sequence_record IN
@@ -154,8 +169,18 @@ BEGIN
 
   INSERT INTO festapp_merge.validation_results(run_id, check_name, status, observed)
   VALUES
-    (import_run, 'default-table-counts', 'pass', jsonb_build_object('source_tables',70,'imported_companion_rows',1)),
-    (import_run, 'default-companion-orphans', 'blocked', jsonb_build_object('quarantined',2)),
+    (import_run, 'default-table-counts', 'pass', jsonb_build_object(
+      'source_tables',(SELECT count(*) FROM information_schema.foreign_tables
+        WHERE foreign_table_schema IN ('festapp_stage_default_public','festapp_stage_default_eshop')),
+      'raw_artifact_sha256',(SELECT raw_artifact_sha256 FROM festapp_stage_default_managed.provenance),
+      'raw_manifest_sha256',(SELECT raw_manifest_sha256 FROM festapp_stage_default_managed.provenance),
+      'managed_artifact_sha256',(SELECT managed_artifact_sha256 FROM festapp_stage_default_managed.provenance),
+      'managed_manifest_sha256',(SELECT managed_manifest_sha256 FROM festapp_stage_default_managed.provenance),
+      'source_companion_rows',source_companions,
+      'imported_companion_rows',imported_companions)),
+    (import_run, 'default-companion-orphans',
+      CASE WHEN quarantined_companions=0 THEN 'pass' ELSE 'blocked' END,
+      jsonb_build_object('quarantined',quarantined_companions)),
     (import_run, 'auth-and-storage-import', 'blocked', jsonb_build_object('auth_users',0,'storage_objects',0));
   UPDATE festapp_merge.import_runs SET status='blocked' WHERE run_id=import_run;
 END

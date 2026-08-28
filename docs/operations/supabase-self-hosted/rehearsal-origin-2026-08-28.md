@@ -52,12 +52,25 @@ refresh-token and release adoption remain explicit cutover gates.
 ## Remaining production gates
 
 1. Build and test web/Android/iOS against this rehearsal hostname and key.
-2. Complete the second full merge from a newer source snapshot.
-3. Exercise password, refresh-token, rights, Functions and write canaries.
-4. Prepare `api.festapp.net` with the same firewall, Caddy and strict-TLS
+2. Exercise password, refresh-token, rights, Functions and write canaries.
+3. Prepare `api.festapp.net` with the same firewall, Caddy and strict-TLS
    contract, but do not activate it before the final freeze/journal gate.
-5. Rewrite the four retained legacy Storage URLs only when the canonical
+4. Rewrite the four retained legacy Storage URLs only when the canonical
    production hostname is live and verified.
+
+Client release tooling now accepts a custom HTTPS Supabase origin, preserves an
+explicit browser auth-storage namespace across the hostname change, refreshes a
+stored web session before the first rights query, and requires a non-empty
+installation generation for self-hosted releases. Android and iOS builders run
+the same fail-closed client preflight. These are readiness mechanisms, not proof
+that a release has been built or adopted; the gate above remains open until the
+actual web bundle and store artifacts pass against this endpoint.
+
+The rehearsal runtime keeps Auth `SITE_URL` invalid and its redirect allowlist
+empty by default. An auth-enabled client rehearsal must explicitly provide
+`FESTAPP_AUTH_SITE_URL` and same-origin `FESTAPP_AUTH_REDIRECT_URLS` when
+configuring the runtime. Cross-origin callbacks are rejected, and the approved
+browser callback/password flow must pass before production activation.
 
 No cloud project, backup, restore database, Storage object or other retained
 artifact was deleted during this activation.

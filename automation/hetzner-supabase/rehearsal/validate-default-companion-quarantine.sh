@@ -4,16 +4,18 @@ set -euo pipefail
 readonly EXPECTED_HOSTNAME="festapp-supabase-rehearsal-01"
 readonly COMPOSE_DIR="${FESTAPP_REHEARSAL_COMPOSE_DIR:-/opt/festapp-supabase/docker}"
 readonly EVIDENCE_ROOT="${FESTAPP_REHEARSAL_EVIDENCE_ROOT:-/var/lib/festapp-rehearsal-evidence}"
+readonly TARGET_DATABASE="${FESTAPP_REHEARSAL_DATABASE:-postgres}"
 
 fail() { echo "ERROR: $*" >&2; exit 1; }
 [[ "${FESTAPP_REHEARSAL_ACK:-}" == "preserve-unclassifiable-companions-without-activation" ]] ||
   fail "set FESTAPP_REHEARSAL_ACK=preserve-unclassifiable-companions-without-activation"
+[[ "$TARGET_DATABASE" == "postgres" || "$TARGET_DATABASE" =~ ^festapp_rehearsal_[0-9]{14}$ ]] || fail "invalid isolated rehearsal database name"
 [[ "$(id -u)" == "0" ]] || fail "run as root on rehearsal host"
 [[ "$(hostname -s)" == "$EXPECTED_HOSTNAME" ]] || fail "refusing unexpected host"
 cd "$COMPOSE_DIR"
 docker compose config -q
 
-psql_main() { docker compose exec -T db psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres "$@"; }
+psql_main() { docker compose exec -T db psql -X -v ON_ERROR_STOP=1 -U postgres -d "$TARGET_DATABASE" "$@"; }
 install -d -o root -g root -m 0700 "$EVIDENCE_ROOT"
 readonly RUN_DIR="$EVIDENCE_ROOT/default-companion-quarantine-validation-$(date -u +%Y%m%dT%H%M%SZ)"
 install -d -o root -g root -m 0700 "$RUN_DIR"
@@ -46,7 +48,7 @@ BEGIN
       AND target.occasion=shared.common_occasions[1]
   )) INTO classifiable,activated_classifiable
   FROM shared WHERE cardinality(common_occasions)=1;
-  IF preserved<>2 OR source_rows<>3 OR classifiable<>1 OR activated_classifiable<>1 THEN
+  IF preserved+classifiable<>source_rows OR activated_classifiable<>classifiable THEN
     RAISE EXCEPTION 'unexpected companion preservation state: source %, target total %, classifiable %, activated %, preserved %',source_rows,canonical_rows,classifiable,activated_classifiable,preserved;
   END IF;
   IF EXISTS (

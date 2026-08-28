@@ -43,6 +43,9 @@ async function main() {
   const backendKey = `${tenantId}/${bucket}/${name}`;
   const file = backend.resolveSecurePath(withOptionalVersion(`${internalBucket}/${backendKey}`, version));
   let existed = fs.existsSync(file);
+  if (process.env.FESTAPP_STORAGE_VERIFY_ONLY === '1' && !existed) {
+    fail('verify-only target Storage payload is missing');
+  }
   if (!existed) {
     const result = await backend.uploadObject(
       internalBucket, backendKey, version, process.stdin, mimetype, cacheControl, undefined, expectedSize,

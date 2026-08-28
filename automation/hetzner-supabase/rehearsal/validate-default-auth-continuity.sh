@@ -4,22 +4,26 @@ set -euo pipefail
 readonly EXPECTED_HOSTNAME="festapp-supabase-rehearsal-01"
 readonly COMPOSE_DIR="${FESTAPP_REHEARSAL_COMPOSE_DIR:-/opt/festapp-supabase/docker}"
 readonly EVIDENCE_ROOT="${FESTAPP_REHEARSAL_EVIDENCE_ROOT:-/var/lib/festapp-rehearsal-evidence}"
+readonly TARGET_DATABASE="${FESTAPP_REHEARSAL_DATABASE:-postgres}"
 
 fail() { echo "ERROR: $*" >&2; exit 1; }
 [[ "${FESTAPP_REHEARSAL_ACK:-}" == "validate-default-auth-credential-continuity" ]] ||
   fail "set FESTAPP_REHEARSAL_ACK=validate-default-auth-credential-continuity"
+[[ "$TARGET_DATABASE" == "postgres" || "$TARGET_DATABASE" =~ ^festapp_rehearsal_[0-9]{14}$ ]] || fail "invalid isolated rehearsal database name"
 [[ "$(id -u)" == "0" ]] || fail "run as root on rehearsal host"
 [[ "$(hostname -s)" == "$EXPECTED_HOSTNAME" ]] || fail "refusing unexpected host"
 cd "$COMPOSE_DIR"
 docker compose config -q
 
-psql_main() { docker compose exec -T db psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres "$@"; }
+psql_main() { docker compose exec -T db psql -X -v ON_ERROR_STOP=1 -U postgres -d "$TARGET_DATABASE" "$@"; }
 readonly STATE="$(psql_main -Atqc "SELECT concat_ws('|',split_part(current_setting('server_version'),'.',1),
   (SELECT count(*) FROM festapp_merge.import_runs WHERE source_alias='default' AND status='blocked'),
-  (SELECT count(*) FROM auth.users),(SELECT count(*) FROM auth.identities),
-  (SELECT count(*) FROM auth.sessions),(SELECT count(*) FROM auth.refresh_tokens),
+  (SELECT (SELECT count(*) FROM auth.users)=(SELECT count(*) FROM festapp_stage_default_managed.rows WHERE source_schema='auth' AND source_table='users')
+    AND (SELECT count(*) FROM auth.identities)=(SELECT count(*) FROM festapp_stage_default_managed.rows WHERE source_schema='auth' AND source_table='identities')
+    AND (SELECT count(*) FROM auth.sessions)=(SELECT count(*) FROM festapp_stage_default_managed.rows WHERE source_schema='auth' AND source_table='sessions')
+    AND (SELECT count(*) FROM auth.refresh_tokens)=(SELECT count(*) FROM festapp_stage_default_managed.rows WHERE source_schema='auth' AND source_table='refresh_tokens')),
   (SELECT count(*) FROM festapp_merge.validation_results WHERE check_name='default-auth-credential-continuity'))")"
-[[ "$STATE" == "17|1|231|224|736|11944|0" ]] || fail "target is not approved Auth continuity state ($STATE)"
+[[ "$STATE" == "17|1|t|0" ]] || fail "target is not approved Auth continuity state ($STATE)"
 
 install -d -o root -g root -m 0700 "$EVIDENCE_ROOT"
 readonly RUN_DIR="$EVIDENCE_ROOT/default-auth-continuity-$(date -u +%Y%m%dT%H%M%SZ)"
@@ -62,12 +66,15 @@ WITH source_users AS (
   ) AS observed
   FROM password_check p CROSS JOIN identity_check i CROSS JOIN session_check se CROSS JOIN refresh_check r
 ), asserted AS (
-  SELECT observed FROM result WHERE observed @> '{
-    "source_users":231,"missing_users":0,"password_accounts":228,"passwordless_accounts":3,
-    "changed_password_hashes":0,"source_identities":224,"missing_identities":0,
-    "source_sessions":736,"missing_sessions":0,"source_refresh_tokens":11944,
-    "missing_refresh_tokens":0,"changed_refresh_tokens":0
-  }'::jsonb
+  SELECT observed FROM result
+  WHERE (observed->>'missing_users')::bigint=0
+    AND (observed->>'changed_password_hashes')::bigint=0
+    AND (observed->>'source_users')::bigint =
+      (observed->>'password_accounts')::bigint + (observed->>'passwordless_accounts')::bigint
+    AND (observed->>'missing_identities')::bigint=0
+    AND (observed->>'missing_sessions')::bigint=0
+    AND (observed->>'missing_refresh_tokens')::bigint=0
+    AND (observed->>'changed_refresh_tokens')::bigint=0
 ), recorded AS (
   INSERT INTO festapp_merge.validation_results(run_id,check_name,status,observed)
   SELECT run_id,'default-auth-credential-continuity','pass',asserted.observed

@@ -4,19 +4,22 @@ set -euo pipefail
 readonly EXPECTED_HOSTNAME="festapp-supabase-rehearsal-01"
 readonly COMPOSE_DIR="${FESTAPP_REHEARSAL_COMPOSE_DIR:-/opt/festapp-supabase/docker}"
 readonly EVIDENCE_ROOT="${FESTAPP_REHEARSAL_EVIDENCE_ROOT:-/var/lib/festapp-rehearsal-evidence}"
-readonly EXPECTED_SOURCE_ROWS="55178"
 readonly EXPECTED_AUTH_MIGRATIONS="76"
 readonly EXPECTED_STORAGE_MIGRATIONS="61"
+readonly TARGET_DATABASE="${FESTAPP_REHEARSAL_DATABASE:-postgres}"
 
 fail() { echo "ERROR: $*" >&2; exit 1; }
 [[ "${FESTAPP_REHEARSAL_ACK:-}" == "import-default-auth-and-storage-metadata" ]] ||
   fail "set FESTAPP_REHEARSAL_ACK=import-default-auth-and-storage-metadata"
+[[ "$TARGET_DATABASE" == "postgres" || "$TARGET_DATABASE" =~ ^festapp_rehearsal_[0-9]{14}$ ]] || fail "invalid isolated rehearsal database name"
 [[ "$(id -u)" == "0" ]] || fail "run as root on rehearsal host"
 [[ "$(hostname -s)" == "$EXPECTED_HOSTNAME" ]] || fail "refusing unexpected host"
 cd "$COMPOSE_DIR"
 docker compose config -q
 
-psql_main() { docker compose exec -T db psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres "$@"; }
+psql_main() { docker compose exec -T db psql -X -v ON_ERROR_STOP=1 -U postgres -d "$TARGET_DATABASE" "$@"; }
+readonly SOURCE_ROWS="$(psql_main -Atqc "SELECT count(*) FROM festapp_stage_default_managed.rows WHERE (source_schema,source_table) NOT IN (('auth','schema_migrations'),('storage','migrations'))")"
+[[ "$SOURCE_ROWS" =~ ^[1-9][0-9]*$ ]] || fail "default managed source is empty or invalid ($SOURCE_ROWS)"
 readonly STATE="$(psql_main -Atqc "SELECT concat_ws('|',
   split_part(current_setting('server_version'),'.',1),
   (SELECT count(*) FROM festapp_merge.import_runs WHERE source_alias='default' AND status='blocked'),
@@ -27,7 +30,7 @@ readonly STATE="$(psql_main -Atqc "SELECT concat_ws('|',
   (SELECT count(*) FROM storage.migrations),
   (SELECT count(*) FROM festapp_stage_default_managed.rows WHERE (source_schema,source_table) NOT IN (('auth','schema_migrations'),('storage','migrations')))
 )")"
-[[ "$STATE" == "17|1|2|0|0|$EXPECTED_AUTH_MIGRATIONS|$EXPECTED_STORAGE_MIGRATIONS|$EXPECTED_SOURCE_ROWS" ]] ||
+[[ "$STATE" == "17|1|2|0|0|$EXPECTED_AUTH_MIGRATIONS|$EXPECTED_STORAGE_MIGRATIONS|$SOURCE_ROWS" ]] ||
   fail "canonical target is not approved default-managed import state ($STATE)"
 
 readonly TARGET_BUSINESS_ROWS="$(psql_main -Atqc "DO \$\$ DECLARE r record; n bigint; total bigint:=0; BEGIN
@@ -58,7 +61,7 @@ install -d -o root -g root -m 0700 "$EVIDENCE_ROOT"
 readonly RUN_DIR="$EVIDENCE_ROOT/default-managed-import-$(date -u +%Y%m%dT%H%M%SZ)"
 install -d -o root -g root -m 0700 "$RUN_DIR"
 psql_main -Atqc "SELECT jsonb_build_object(
-  'source_business_rows',$EXPECTED_SOURCE_ROWS,
+  'source_business_rows',$SOURCE_ROWS,
   'target_auth_migration_rows',(SELECT count(*) FROM auth.schema_migrations),
   'target_storage_migration_rows',(SELECT count(*) FROM storage.migrations),
   'target_auth_users',(SELECT count(*) FROM auth.users),

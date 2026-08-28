@@ -10,6 +10,7 @@ readonly BASELINE_FILE="$PROJECT_ROOT/supabase/baseline/${BASELINE_VERSION}_prod
 readonly MIGRATIONS_DIR="$PROJECT_ROOT/supabase/migrations"
 readonly COMPOSE_DIR="${FESTAPP_REHEARSAL_COMPOSE_DIR:-/opt/festapp-supabase/docker}"
 readonly EVIDENCE_ROOT="${FESTAPP_REHEARSAL_EVIDENCE_ROOT:-/var/lib/festapp-rehearsal-evidence}"
+readonly TARGET_DATABASE="${FESTAPP_REHEARSAL_DATABASE:-postgres}"
 
 fail() {
   echo "ERROR: $*" >&2
@@ -17,6 +18,8 @@ fail() {
 }
 
 readonly ACK="${FESTAPP_REHEARSAL_ACK:-}"
+[[ "$TARGET_DATABASE" == "postgres" || "$TARGET_DATABASE" =~ ^festapp_rehearsal_[0-9]{14}$ ]] ||
+  fail "invalid isolated rehearsal database name"
 [[ "$ACK" == "canonical-schema-only" || "$ACK" == "resume-after-baseline-ledger-fix" ]] ||
   fail "set FESTAPP_REHEARSAL_ACK=canonical-schema-only"
 [[ "$(id -u)" == "0" ]] || fail "run as root on the isolated rehearsal host"
@@ -33,7 +36,7 @@ docker compose config -q
   fail "database service is not running"
 
 psql_rehearsal() {
-  docker compose exec -T db psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres "$@"
+  docker compose exec -T db psql -X -v ON_ERROR_STOP=1 -U postgres -d "$TARGET_DATABASE" "$@"
 }
 
 readonly POSTGRES_MAJOR="$(psql_rehearsal -Atqc "SHOW server_version" | cut -d. -f1)"
@@ -67,7 +70,7 @@ readonly RUN_ID="canonical-schema-$(date -u +%Y%m%dT%H%M%SZ)"
 readonly RUN_DIR="$EVIDENCE_ROOT/$RUN_ID"
 install -d -o root -g root -m 0700 "$RUN_DIR"
 
-docker compose exec -T db pg_dump -U postgres -d postgres --schema-only --no-owner \
+docker compose exec -T db pg_dump -U postgres -d "$TARGET_DATABASE" --schema-only --no-owner \
   >"$RUN_DIR/pre-apply-schema.sql"
 chmod 0600 "$RUN_DIR/pre-apply-schema.sql"
 
@@ -77,7 +80,6 @@ CREATE SCHEMA IF NOT EXISTS eshop;
 CREATE EXTENSION IF NOT EXISTS dblink WITH SCHEMA public;
 CREATE EXTENSION IF NOT EXISTS http WITH SCHEMA extensions;
 CREATE EXTENSION IF NOT EXISTS moddatetime WITH SCHEMA extensions;
-CREATE EXTENSION IF NOT EXISTS pg_cron WITH SCHEMA pg_catalog;
 CREATE EXTENSION IF NOT EXISTS pg_trgm WITH SCHEMA extensions;
 CREATE EXTENSION IF NOT EXISTS pgaudit WITH SCHEMA extensions;
 CREATE EXTENSION IF NOT EXISTS pgjwt WITH SCHEMA extensions;
@@ -90,6 +92,26 @@ ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA eshop REVOKE ALL ON TABLES 
 ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA eshop REVOKE ALL ON SEQUENCES FROM anon, authenticated, service_role;
 ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA eshop REVOKE ALL ON FUNCTIONS FROM anon, authenticated, service_role;
 SQL
+
+if [[ "$TARGET_DATABASE" == "postgres" ]]; then
+  psql_rehearsal -qc "CREATE EXTENSION IF NOT EXISTS pg_cron WITH SCHEMA pg_catalog"
+else
+  # pg_cron is configured to read jobs only from the runtime `postgres`
+  # database. An isolated same-cluster rehearsal must not schedule effects, but
+  # canonical functions in the baseline still need the extension-owned
+  # `cron.schedule`/`cron.unschedule` signatures to compile. These inert stubs
+  # are an operational compatibility exception to the application's
+  # public-schema-only function rule; no application RPC is exposed here.
+  psql_rehearsal <<'SQL'
+CREATE SCHEMA IF NOT EXISTS cron AUTHORIZATION postgres;
+CREATE OR REPLACE FUNCTION cron.schedule(text, text, text) RETURNS bigint
+LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'pg_cron is disabled in isolated rehearsal databases'; END $$;
+CREATE OR REPLACE FUNCTION cron.unschedule(text) RETURNS boolean
+LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'pg_cron is disabled in isolated rehearsal databases'; END $$;
+REVOKE ALL ON SCHEMA cron FROM PUBLIC, anon, authenticated, service_role;
+REVOKE ALL ON ALL FUNCTIONS IN SCHEMA cron FROM PUBLIC, anon, authenticated, service_role;
+SQL
+fi
 
 psql_rehearsal <"$BASELINE_FILE"
 psql_rehearsal -qc \

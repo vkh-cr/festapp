@@ -4,25 +4,36 @@ set -euo pipefail
 readonly EXPECTED_HOSTNAME="festapp-supabase-rehearsal-01"
 readonly COMPOSE_DIR="${FESTAPP_REHEARSAL_COMPOSE_DIR:-/opt/festapp-supabase/docker}"
 readonly EVIDENCE_ROOT="${FESTAPP_REHEARSAL_EVIDENCE_ROOT:-/var/lib/festapp-rehearsal-evidence}"
+readonly TARGET_DATABASE="${FESTAPP_REHEARSAL_DATABASE:-postgres}"
 
 fail() { echo "ERROR: $*" >&2; exit 1; }
 [[ "${FESTAPP_REHEARSAL_ACK:-}" == "rebuild-a-client-derived-state-forward-only" ]] ||
   fail "set FESTAPP_REHEARSAL_ACK=rebuild-a-client-derived-state-forward-only"
+[[ "$TARGET_DATABASE" == "postgres" || "$TARGET_DATABASE" =~ ^festapp_rehearsal_[0-9]{14}$ ]] || fail "invalid isolated rehearsal database name"
 [[ "$(id -u)" == "0" ]] || fail "run as root on rehearsal host"
 [[ "$(hostname -s)" == "$EXPECTED_HOSTNAME" ]] || fail "refusing unexpected host"
 cd "$COMPOSE_DIR"
 docker compose config -q
 
-psql_main() { docker compose exec -T db psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres "$@"; }
+psql_main() { docker compose exec -T db psql -X -v ON_ERROR_STOP=1 -U postgres -d "$TARGET_DATABASE" "$@"; }
 readonly STATE="$(psql_main -Atqc "SELECT concat_ws('|',split_part(current_setting('server_version'),'.',1),
   (SELECT count(*) FROM festapp_merge.import_runs WHERE source_alias='a' AND status='blocked'),
-  (SELECT count(*) FROM festapp_merge.validation_results v JOIN festapp_merge.import_runs r USING(run_id)
-    WHERE r.source_alias='a' AND v.status='pass'),
+  (SELECT NOT EXISTS (
+    WITH required(check_name) AS (VALUES
+      ('a-relational-import'),('a-identity-profile-review'),('a-semantic-reference-repair'),
+      ('a-embedded-payload-repair'),('a-operational-reference-repair'),('a-auth-import'),
+      ('a-storage-metadata-import'),('a-storage-object-payloads'),('a-auth-and-storage-import')
+    ), a_run AS (SELECT run_id FROM festapp_merge.import_runs WHERE source_alias='a')
+    SELECT 1 FROM required CROSS JOIN a_run
+    LEFT JOIN festapp_merge.validation_results v
+      ON v.run_id=a_run.run_id AND v.check_name=required.check_name
+    GROUP BY required.check_name
+    HAVING count(v.check_name)<>1 OR count(*) FILTER (WHERE v.status='pass')<>1)),
   (SELECT count(*) FROM festapp_merge.validation_results v JOIN festapp_merge.import_runs r USING(run_id)
     WHERE r.source_alias='a' AND v.check_name='a-client-derived-state-rebuild' AND v.status='blocked'),
   (SELECT count(*) FROM public.client_sync_scopes),(SELECT count(*) FROM public.client_sync_private_scopes),
   (SELECT count(*) FROM public.client_projection_dirty_keys))")"
-[[ "$STATE" == "17|1|7|1|0|0|0" ]] || fail "target is not approved derived-state rebuild state ($STATE)"
+[[ "$STATE" == "17|1|t|1|0|0|0" ]] || fail "target is not approved derived-state rebuild state ($STATE)"
 
 install -d -o root -g root -m 0700 "$EVIDENCE_ROOT"
 readonly RUN_DIR="$EVIDENCE_ROOT/a-client-derived-state-rebuild-$(date -u +%Y%m%dT%H%M%SZ)"
@@ -38,6 +49,7 @@ DECLARE
   revision_epoch bigint;
   aggregate_epoch bigint;
   release_epoch bigint;
+  excluded_source_rows bigint;
 BEGIN
   SELECT run_id INTO STRICT import_run
   FROM festapp_merge.import_runs WHERE source_alias='a' AND status='blocked';
@@ -59,6 +71,8 @@ BEGIN
     COALESCE((SELECT max(release_revision) FROM festapp_stage_a_public.client_sync_public_heads),0),
     COALESCE((SELECT max(release_revision) FROM public.client_sync_release_manifests),0)
   ) INTO release_epoch;
+  SELECT (observed->>'excluded_derived_rows')::bigint INTO STRICT excluded_source_rows
+  FROM festapp_merge.validation_results WHERE run_id=import_run AND check_name='a-relational-import' AND status='pass';
 
   CREATE TEMP TABLE repair_commits(occasion bigint PRIMARY KEY,commit_id uuid NOT NULL) ON COMMIT DROP;
   WITH inserted AS (
@@ -154,7 +168,7 @@ BEGIN
 
   UPDATE festapp_merge.validation_results SET status='pass',observed=jsonb_build_object(
     'strategy','forward-only-canonical-rebuild-v1',
-    'excluded_source_rows_preserved',549293,
+    'excluded_source_rows_preserved',excluded_source_rows,
     'revision_epoch',revision_epoch,
     'aggregate_epoch',aggregate_epoch,
     'release_sequence_floor',release_epoch,
@@ -167,10 +181,8 @@ BEGIN
     'requires_fresh_cutover_snapshot',true)
   WHERE run_id=import_run AND check_name='a-client-derived-state-rebuild';
 
-  IF EXISTS (SELECT 1 FROM festapp_merge.validation_results WHERE run_id=import_run AND status<>'pass') THEN
-    RAISE EXCEPTION 'source a still has a blocked validation gate';
-  END IF;
-  UPDATE festapp_merge.import_runs SET status='validated' WHERE run_id=import_run;
+  -- The reference-registry validator is the sole owner of the final
+  -- blocked -> validated transition after it observes this gate as passing.
 END
 $repair$;
 

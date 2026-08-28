@@ -44,7 +44,7 @@ class NotificationAudienceCoordinator {
     required this.isLoggedIn,
     required this.currentUserId,
     required this.occasionLink,
-    this.installationGeneration = AppConfig.pushAppGeneration,
+    this.installationGeneration = AppConfig.effectivePushAppGeneration,
   });
 
   final NotificationAudienceClient client;

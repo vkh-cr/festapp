@@ -8,11 +8,12 @@ readonly DECISIONS_FILE="${FESTAPP_A_IDENTITY_DECISIONS_FILE:-/var/lib/festapp-r
 readonly EXPECTED_FILE_SHA256="474795575e9d4bd585a553cc8555e16abfc639995c23fff7727fc6951924c7b3"
 readonly EXPECTED_DECISION_SHA256="df6793daa2f9d7a715668d7adfc3e40688d0d4897f53852ad97e19a8b9932275"
 readonly SOURCE_REF="lwfpdjxsdmkfyrzqbrlk"
-readonly SOURCE_FINGERPRINT="d660dd0ff521640a34034ea57acf368241a556806fbd171f0f4366f5c68a5f3e"
+readonly TARGET_DATABASE="${FESTAPP_REHEARSAL_DATABASE:-postgres}"
 
 fail() { echo "ERROR: $*" >&2; exit 1; }
 [[ "${FESTAPP_REHEARSAL_ACK:-}" == "prepare-a-deterministic-id-mappings" ]] ||
   fail "set FESTAPP_REHEARSAL_ACK=prepare-a-deterministic-id-mappings"
+[[ "$TARGET_DATABASE" == "postgres" || "$TARGET_DATABASE" =~ ^festapp_rehearsal_[0-9]{14}$ ]] || fail "invalid isolated rehearsal database name"
 [[ "$(id -u)" == "0" ]] || fail "run as root on rehearsal host"
 [[ "$(hostname -s)" == "$EXPECTED_HOSTNAME" ]] || fail "refusing unexpected host"
 [[ -f "$DECISIONS_FILE" ]] || fail "private identity decision file is unavailable"
@@ -24,14 +25,21 @@ fail() { echo "ERROR: $*" >&2; exit 1; }
 cd "$COMPOSE_DIR"
 docker compose config -q
 
-psql_main() { docker compose exec -T db psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres "$@"; }
+psql_main() { docker compose exec -T db psql -X -v ON_ERROR_STOP=1 -U postgres -d "$TARGET_DATABASE" "$@"; }
 readonly STATE="$(psql_main -Atqc "SELECT concat_ws('|',split_part(current_setting('server_version'),'.',1),
   (SELECT count(*) FROM festapp_merge.import_runs WHERE source_alias='default' AND status='blocked'),
   (SELECT count(*) FROM festapp_merge.import_runs WHERE source_alias='a'),
   (SELECT count(*) FROM information_schema.foreign_tables WHERE foreign_table_schema IN ('festapp_stage_a_public','festapp_stage_a_eshop')),
-  (SELECT count(*) FROM festapp_stage_a_managed.rows WHERE source_schema='auth' AND source_table='users'),
-  (SELECT count(*) FROM auth.users),(SELECT count(*) FROM storage.objects))")"
-[[ "$STATE" == "17|1|0|100|6980|231|264" ]] || fail "target is not approved a-mapping state ($STATE)"
+  (SELECT count(*)>0 FROM festapp_stage_a_managed.rows WHERE source_schema='auth' AND source_table='users'),
+  (SELECT (SELECT count(*) FROM auth.users)=(SELECT count(*) FROM festapp_stage_default_managed.rows
+    WHERE source_schema='auth' AND source_table='users')),
+  (SELECT (SELECT count(*) FROM storage.objects)=(SELECT count(*) FROM festapp_stage_default_managed.rows
+    WHERE source_schema='storage' AND source_table='objects')),
+  (SELECT count(*)=1 FROM festapp_stage_a_managed.provenance
+    WHERE source_alias='a' AND source_project_ref='$SOURCE_REF'),
+  (SELECT managed_rows=(SELECT count(*) FROM festapp_stage_a_managed.rows)
+    FROM festapp_stage_a_managed.provenance))")"
+[[ "$STATE" == "17|1|0|100|t|t|t|t|t" ]] || fail "target is not approved a-mapping state ($STATE)"
 
 install -d -o root -g root -m 0700 "$EVIDENCE_ROOT"
 readonly RUN_DIR="$EVIDENCE_ROOT/a-id-mappings-$(date -u +%Y%m%dT%H%M%SZ)"
@@ -43,7 +51,8 @@ readonly RUN_ID="$(psql_main -Atqc 'SELECT gen_random_uuid()')"
   printf '%s\n' "BEGIN;" \
     "SET LOCAL statement_timeout = 0;" \
     "INSERT INTO festapp_merge.import_runs(run_id,source_alias,source_project_ref,snapshot_at,source_schema_fingerprint,transformation_version,status)" \
-    "VALUES ('$RUN_ID','a','$SOURCE_REF','2026-08-27T18:31:26.639Z','$SOURCE_FINGERPRINT','a-id-map-2026-08-27.1','prepared');" \
+    "SELECT '$RUN_ID','a',source_project_ref,raw_snapshot_at,raw_schema_sha256,'a-id-map-2026-08-27.2','prepared'" \
+    "FROM festapp_stage_a_managed.provenance WHERE source_alias='a' AND source_project_ref='$SOURCE_REF';" \
     "DO \$mapping\$" \
     "DECLARE relation record; base_id bigint;" \
     "BEGIN" \
@@ -68,7 +77,7 @@ readonly RUN_ID="$(psql_main -Atqc 'SELECT gen_random_uuid()')"
     "INSERT INTO festapp_merge.id_mappings(run_id,source_table,source_id,target_id)" \
     "SELECT run_id,'public.user_info',source_id,target_id FROM festapp_merge.id_mappings WHERE run_id='$RUN_ID' AND source_table='auth.users';" \
     "DO \$validate\$" \
-    "DECLARE numeric_mappings bigint; auth_mappings bigint; profile_mappings bigint; verified_pairs bigint;" \
+    "DECLARE numeric_mappings bigint; auth_mappings bigint; profile_mappings bigint; verified_pairs bigint; collision_pairs bigint; missing_decisions bigint; stale_decisions bigint;" \
     "BEGIN" \
     " SELECT count(*) FILTER (WHERE source_table NOT IN ('auth.users','public.user_info'))," \
     "   count(*) FILTER (WHERE source_table='auth.users'),count(*) FILTER (WHERE source_table='public.user_info')" \
@@ -79,12 +88,31 @@ readonly RUN_ID="$(psql_main -Atqc 'SELECT gen_random_uuid()')"
     " ) SELECT count(*) INTO verified_pairs FROM festapp_merge.id_mappings m" \
     " JOIN source_users s ON s.source_id=m.source_id::uuid JOIN auth.users t ON t.id=m.target_id::uuid AND lower(t.email)=s.email" \
     " WHERE m.run_id='$RUN_ID' AND m.source_table='auth.users' AND m.source_id<>m.target_id;" \
-    " IF numeric_mappings=0 OR auth_mappings<>13 OR profile_mappings<>13 OR verified_pairs<>13 THEN" \
-    "  RAISE EXCEPTION 'a mapping assertion failed: numeric %, auth %, profile %, verified %',numeric_mappings,auth_mappings,profile_mappings,verified_pairs;" \
+    " WITH collisions AS MATERIALIZED (" \
+    "  SELECT s.row_data->>'id' source_id,t.id::text target_id FROM festapp_stage_a_managed.rows s" \
+    "  JOIN auth.users t ON lower(t.email)=lower(s.row_data->>'email') AND t.id::text<>s.row_data->>'id'" \
+    "  WHERE s.source_schema='auth' AND s.source_table='users'" \
+    " ) SELECT count(*),count(*) FILTER (WHERE m.source_id IS NULL) INTO collision_pairs,missing_decisions" \
+    " FROM collisions c LEFT JOIN festapp_merge.id_mappings m ON m.run_id='$RUN_ID' AND m.source_table='auth.users'" \
+    "  AND m.source_id=c.source_id AND m.target_id=c.target_id;" \
+    " SELECT count(*) INTO stale_decisions FROM festapp_merge.id_mappings m" \
+    " WHERE m.run_id='$RUN_ID' AND m.source_table='auth.users' AND NOT EXISTS (" \
+    "  SELECT 1 FROM festapp_stage_a_managed.rows s JOIN auth.users t" \
+    "    ON lower(t.email)=lower(s.row_data->>'email') AND t.id::text<>s.row_data->>'id'" \
+    "  WHERE s.source_schema='auth' AND s.source_table='users'" \
+    "    AND s.row_data->>'id'=m.source_id AND t.id::text=m.target_id);" \
+    " IF numeric_mappings=0 OR auth_mappings<>collision_pairs OR profile_mappings<>collision_pairs" \
+    "    OR verified_pairs<>collision_pairs OR missing_decisions<>0 OR stale_decisions<>0 THEN" \
+    "  RAISE EXCEPTION 'a mapping assertion failed: numeric %, collisions %, auth %, profile %, verified %, missing %, stale %',numeric_mappings,collision_pairs,auth_mappings,profile_mappings,verified_pairs,missing_decisions,stale_decisions;" \
     " END IF;" \
     " INSERT INTO festapp_merge.validation_results(run_id,check_name,status,observed) VALUES ('$RUN_ID','a-id-mapping-preparation','pass',jsonb_build_object(" \
     "  'numeric_mappings',numeric_mappings,'identity_mappings',auth_mappings,'profile_mappings',profile_mappings," \
-    "  'identity_decision_sha256','$EXPECTED_DECISION_SHA256','managed_snapshot_at','2026-08-27T19:28:28.282Z'));" \
+    "  'identity_decision_sha256','$EXPECTED_DECISION_SHA256'," \
+    "  'raw_artifact_sha256',(SELECT raw_artifact_sha256 FROM festapp_stage_a_managed.provenance)," \
+    "  'raw_manifest_sha256',(SELECT raw_manifest_sha256 FROM festapp_stage_a_managed.provenance)," \
+    "  'managed_artifact_sha256',(SELECT managed_artifact_sha256 FROM festapp_stage_a_managed.provenance)," \
+    "  'managed_manifest_sha256',(SELECT managed_manifest_sha256 FROM festapp_stage_a_managed.provenance)," \
+    "  'managed_snapshot_at',(SELECT managed_snapshot_at FROM festapp_stage_a_managed.provenance)));" \
     "END" \
     "\$validate\$;" \
     "COMMIT;"

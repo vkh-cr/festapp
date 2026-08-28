@@ -173,12 +173,12 @@
     </section>
 
     <section class="section">
-      <div class="section-head"><div><h2>Mapa celé migrace</h2><p class="section-note">První kompletní merge rehearsal je validovaný. Aktivní je provozní ověření a příprava druhého čerstvého běhu.</p></div></div>
+      <div class="section-head"><div><h2>Mapa celé migrace</h2><p class="section-note">Oba kompletní merge rehearsaly jsou validované. Aktivní je příprava klientských releasů a finálních cutover gateů.</p></div></div>
       <div class="timeline">
         <div class="step done"><span class="dot">✓</span><span class="step-name">Wave 0 · Evidence</span><span class="step-desc">Schéma, kolize, ID mapy, Auth, Storage a transformační pravidla jsou doložené.</span><span class="step-status">hotovo</span></div>
         <div class="step done"><span class="dot">✓</span><span class="step-name">Architektura</span><span class="step-desc">PG17, pinned Supabase bundle, journalované RPC, Cloudflare mimo DB write path.</span><span class="step-status">rozhodnuto</span></div>
         <div class="step done"><span class="dot">✓</span><span class="step-name">Rehearsal základ</span><span class="step-desc">Terraform, chráněný Hetzner CAX11, hardened host a pinned Supabase stack.</span><span class="step-status">online</span></div>
-        <div class="step active"><span class="dot">4</span><span class="step-name">Rehearsal ×2</span><span class="step-desc">První sloučení, semantic-reference oprava, endpoint switch canary i dva izolované restore drilly prošly. Zbývá druhý kompletní běh z čerstvého snapshotu.</span><span class="step-status">1 / 2</span></div>
+        <div class="step done"><span class="dot">✓</span><span class="step-name">Rehearsal ×2</span><span class="step-desc">Dvě sloučení z nezávislých snapshotů, reference opravy, Storage payloady, endpoint canary a izolované restore drilly prošly. Runtime běží na druhém čerstvém cíli.</span><span class="step-status">2 / 2</span></div>
         <div class="step todo"><span class="dot">5</span><span class="step-name">Cutover</span><span class="step-desc">Freeze, import, nulový lag, DNS/config přepnutí a otevření cílových zápisů.</span><span class="step-status">nezačalo</span></div>
         <div class="step todo"><span class="dot">6</span><span class="step-name">Stabilizace</span><span class="step-desc">Cloudy zůstanou read-only po retenční dobu; odstranění až po novém schválení.</span><span class="step-status">nezačalo</span></div>
       </div>
@@ -210,7 +210,7 @@
     </section>
 
     <section class="section">
-      <div class="callout"><strong>Nejbližší správný krok</strong><p>Sestavit a ověřit klienty proti hotovému rehearsal originu a zopakovat celý merge z nového snapshotu. Produkční cutover smí použít pouze nový freeze/journal snapshot s nulovým lagu.</p></div>
+      <div class="callout"><strong>Nejbližší správný krok</strong><p>Sestavit a ověřit web, Android a iOS proti hotovému rehearsal originu a provést Auth, rights, Functions a write canary. Produkční cutover smí použít pouze nový finální freeze/journal snapshot s nulovým lagu.</p></div>
     </section>
 
     <section class="section">

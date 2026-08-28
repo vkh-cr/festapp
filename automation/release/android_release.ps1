@@ -91,6 +91,10 @@ if ($env:GOOGLE_PLAY_JSON_KEY) {
 Write-Host "Package: $package"
 Write-Host "Version: $versionName ($versionCode)"
 Write-Host "Source: $((git rev-parse HEAD).Trim())"
+$cutoverPreflightArgs = @('automation/release/client_cutover_preflight.mjs')
+if ($env:FESTAPP_CANONICAL_CUTOVER_RELEASE -eq '1') { $cutoverPreflightArgs += '--require-canonical-cutover' }
+node @cutoverPreflightArgs
+if ($LASTEXITCODE) { throw 'Client cutover preflight failed' }
 
 if ($Build) {
   Assert-SigningConfig

@@ -6,6 +6,7 @@ readonly EXPECTED_POSTGRES_MAJOR="17"
 readonly EXPECTED_MIGRATION_COUNT="101"
 readonly COMPOSE_DIR="${FESTAPP_REHEARSAL_COMPOSE_DIR:-/opt/festapp-supabase/docker}"
 readonly EVIDENCE_ROOT="${FESTAPP_REHEARSAL_EVIDENCE_ROOT:-/var/lib/festapp-rehearsal-evidence}"
+readonly TARGET_DATABASE="${FESTAPP_REHEARSAL_DATABASE:-postgres}"
 
 fail() {
   echo "ERROR: $*" >&2
@@ -14,6 +15,8 @@ fail() {
 
 [[ "${FESTAPP_REHEARSAL_ACK:-}" == "prepare-empty-private-merge-staging" ]] ||
   fail "set FESTAPP_REHEARSAL_ACK=prepare-empty-private-merge-staging"
+[[ "$TARGET_DATABASE" == "postgres" || "$TARGET_DATABASE" =~ ^festapp_rehearsal_[0-9]{14}$ ]] ||
+  fail "invalid isolated rehearsal database name"
 [[ "$(id -u)" == "0" ]] || fail "run as root on the isolated rehearsal host"
 [[ "$(hostname -s)" == "$EXPECTED_HOSTNAME" ]] ||
   fail "refusing host $(hostname -s); expected $EXPECTED_HOSTNAME"
@@ -26,7 +29,7 @@ docker compose config -q
   fail "database service is not running"
 
 psql_rehearsal() {
-  docker compose exec -T db psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres "$@"
+  docker compose exec -T db psql -X -v ON_ERROR_STOP=1 -U postgres -d "$TARGET_DATABASE" "$@"
 }
 
 readonly PRECONDITION="$(psql_rehearsal -Atqc "SELECT concat_ws('|',
@@ -45,7 +48,7 @@ readonly RUN_ID="merge-staging-$(date -u +%Y%m%dT%H%M%SZ)"
 readonly RUN_DIR="$EVIDENCE_ROOT/$RUN_ID"
 install -d -o root -g root -m 0700 "$RUN_DIR"
 
-docker compose exec -T db pg_dump -U postgres -d postgres --schema-only --no-owner \
+docker compose exec -T db pg_dump -U postgres -d "$TARGET_DATABASE" --schema-only --no-owner \
   >"$RUN_DIR/pre-apply-schema.sql"
 chmod 0600 "$RUN_DIR/pre-apply-schema.sql"
 

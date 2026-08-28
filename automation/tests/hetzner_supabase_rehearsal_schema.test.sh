@@ -11,6 +11,8 @@ readonly DEFAULT_MANAGED_IMPORT_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabas
 readonly DEFAULT_AUTH_VALIDATION_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/rehearsal/validate-default-auth-continuity.sh"
 readonly STORAGE_RECEIVER_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/rehearsal/storage-file-receiver.cjs"
 readonly STORAGE_COPY_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/merge/copy-storage-payloads.mjs"
+readonly STORAGE_EVIDENCE_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/merge/record-storage-payload-evidence.mjs"
+readonly MANAGED_STAGE_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/merge/stage-managed-export.mjs"
 readonly A_MAPPING_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/rehearsal/prepare-a-id-mappings.sh"
 readonly A_IMPORT_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/rehearsal/import-a-canonical.sh"
 readonly A_AUTH_IMPORT_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/rehearsal/import-a-auth.sh"
@@ -22,11 +24,16 @@ readonly A_SEMANTIC_REPAIR_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/reh
 readonly A_PAYLOAD_REPAIR_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/rehearsal/repair-a-embedded-payloads.sh"
 readonly A_OPERATIONAL_REPAIR_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/rehearsal/repair-a-operational-references.sh"
 readonly A_REFERENCE_VALIDATION_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/rehearsal/validate-a-reference-registry.sh"
+readonly A_IDENTITY_VALIDATION_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/rehearsal/validate-a-identity-merge.sh"
+readonly ISOLATED_FOUNDATION_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/rehearsal/prepare-isolated-target-database.sh"
 readonly ENCRYPTED_BACKUP_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/backup/create-encrypted-rehearsal-backup.sh"
 readonly ENCRYPTED_RESTORE_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/restore/drill-encrypted-rehearsal-backup.sh"
 readonly RUNTIME_COMPOSE="$PROJECT_ROOT/automation/hetzner-supabase/runtime/docker-compose.festapp.yml"
 readonly RUNTIME_CADDYFILE="$PROJECT_ROOT/automation/hetzner-supabase/runtime/Caddyfile"
 readonly RUNTIME_CONFIGURATOR="$PROJECT_ROOT/automation/hetzner-supabase/runtime/configure-rehearsal-env.py"
+readonly RUNTIME_DATABASE_COMPOSE="$PROJECT_ROOT/automation/hetzner-supabase/runtime/docker-compose.database-target.yml"
+readonly RUNTIME_SWITCH_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/runtime/switch-rehearsal-runtime-database.sh"
+readonly RUNTIME_DEPLOY_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/runtime/deploy-rehearsal.sh"
 readonly TERRAFORM_FIREWALL="$PROJECT_ROOT/automation/hetzner-supabase/terraform/firewall.tf"
 
 [[ -x "$SCRIPT" ]] || { echo "rehearsal schema builder must be executable" >&2; exit 1; }
@@ -38,6 +45,8 @@ readonly TERRAFORM_FIREWALL="$PROJECT_ROOT/automation/hetzner-supabase/terraform
 [[ -x "$DEFAULT_AUTH_VALIDATION_SCRIPT" ]] || { echo "default Auth validator must be executable" >&2; exit 1; }
 [[ -r "$STORAGE_RECEIVER_SCRIPT" ]] || { echo "Storage receiver must be readable" >&2; exit 1; }
 [[ -x "$STORAGE_COPY_SCRIPT" ]] || { echo "Storage payload copier must be executable" >&2; exit 1; }
+[[ -x "$STORAGE_EVIDENCE_SCRIPT" ]] || { echo "Storage evidence recorder must be executable" >&2; exit 1; }
+[[ -x "$MANAGED_STAGE_SCRIPT" ]] || { echo "managed staging loader must be executable" >&2; exit 1; }
 [[ -x "$A_MAPPING_SCRIPT" ]] || { echo "source a mapping preparer must be executable" >&2; exit 1; }
 [[ -x "$A_IMPORT_SCRIPT" ]] || { echo "source a canonical importer must be executable" >&2; exit 1; }
 [[ -x "$A_AUTH_IMPORT_SCRIPT" ]] || { echo "source a Auth importer must be executable" >&2; exit 1; }
@@ -49,9 +58,13 @@ readonly TERRAFORM_FIREWALL="$PROJECT_ROOT/automation/hetzner-supabase/terraform
 [[ -x "$A_PAYLOAD_REPAIR_SCRIPT" ]] || { echo "embedded payload repair must be executable" >&2; exit 1; }
 [[ -x "$A_OPERATIONAL_REPAIR_SCRIPT" ]] || { echo "operational reference repair must be executable" >&2; exit 1; }
 [[ -x "$A_REFERENCE_VALIDATION_SCRIPT" ]] || { echo "reference registry validator must be executable" >&2; exit 1; }
+[[ -x "$A_IDENTITY_VALIDATION_SCRIPT" ]] || { echo "identity merge validator must be executable" >&2; exit 1; }
+[[ -x "$ISOLATED_FOUNDATION_SCRIPT" ]] || { echo "isolated foundation builder must be executable" >&2; exit 1; }
 [[ -x "$ENCRYPTED_BACKUP_SCRIPT" ]] || { echo "encrypted backup script must be executable" >&2; exit 1; }
 [[ -x "$ENCRYPTED_RESTORE_SCRIPT" ]] || { echo "encrypted restore drill must be executable" >&2; exit 1; }
 [[ -r "$RUNTIME_CADDYFILE" ]] || { echo "Caddy origin configuration must be readable" >&2; exit 1; }
+[[ -r "$RUNTIME_DATABASE_COMPOSE" ]] || { echo "database target Compose override must be readable" >&2; exit 1; }
+[[ -x "$RUNTIME_SWITCH_SCRIPT" ]] || { echo "runtime database switch must be executable" >&2; exit 1; }
 
 for required in 'caddy:' 'network_mode: host' NET_BIND_SERVICE 'read_only: true' \
   'rehearsal-api.festapp.net'; do
@@ -82,7 +95,7 @@ for required in \
   'festapp-supabase-rehearsal-01' \
   'EXPECTED_POSTGRES_MAJOR="17"' \
   'target is not an empty business-schema foundation' \
-  'pg_dump -U postgres -d postgres --schema-only' \
+  'pg_dump -U postgres -d "$TARGET_DATABASE" --schema-only' \
   'auth_users' \
   'storage_objects'; do
   rg -Fq "$required" "$SCRIPT" || { echo "missing safety contract: $required" >&2; exit 1; }
@@ -140,9 +153,10 @@ for required in \
   'VALID UNTIL' \
   'NOBYPASSRLS' \
   'GRANT SELECT ON ALL TABLES IN SCHEMA public, eshop, festapp_managed_source' \
-  'CREATE EXTENSION postgres_fdw WITH SCHEMA extensions' \
+  'CREATE EXTENSION IF NOT EXISTS postgres_fdw WITH SCHEMA extensions' \
   "OPTIONS (host 'supavisor', port '5432'" \
-  "SET user 'festapp_stage_reader.your-tenant-id'" \
+  '${READER_ROLE}.your-tenant-id' \
+  'LIMIT TO (rows,provenance)' \
   'IMPORT FOREIGN SCHEMA public FROM SERVER festapp_stage_default' \
   'IMPORT FOREIGN SCHEMA public FROM SERVER festapp_stage_a' \
   'reader_bypass_rls'; do
@@ -155,12 +169,12 @@ if rg -n 'DROP (DATABASE|SCHEMA|TABLE)|TRUNCATE|DELETE FROM' "$FOREIGN_BRIDGE_SC
 fi
 
 for required in \
-  'import-default-with-two-quarantined-companions' \
+  'import-default-with-quarantine-ledger' \
   'session_replication_role = replica' \
   'OVERRIDING SYSTEM VALUE' \
   'zero-common-occasion-legacy-orphan' \
-  'imported_companions <> 1' \
-  'quarantined_companions <> 2' \
+  'imported_companions + quarantined_companions <> source_companions' \
+  'festapp_stage_default_managed.provenance' \
   "SET status='blocked'" \
   "'auth-and-storage-import', 'blocked'"; do
   rg -Fq "$required" "$DEFAULT_IMPORT_SCRIPT" || { echo "missing default import safety contract: $required" >&2; exit 1; }
@@ -226,6 +240,26 @@ for required in \
   rg -Fq "$required" "$STORAGE_COPY_SCRIPT" || { echo "missing Storage copy safety contract: $required" >&2; exit 1; }
 done
 
+for required in source_manifest_file_sha256 ordered_descriptor_sha256 source_artifact_sha256; do
+  rg -Fq "$required" "$STORAGE_COPY_SCRIPT" || { echo "missing Storage provenance contract: $required" >&2; exit 1; }
+done
+for required in 'readManagedDescriptors' 'festapp_stage_default_managed.provenance' \
+  'source_artifact_sha256' 'GET DIAGNOSTICS changed=ROW_COUNT' \
+  'Storage evidence descriptors differ from the encrypted managed artifact' \
+  'verifyTargetPayloads' 'verifySourcePayloads' 'FESTAPP_STORAGE_VERIFY_ONLY=1' \
+  'independently hashed source/target payloads'; do
+  rg -Fq "$required" "$STORAGE_EVIDENCE_SCRIPT" || { echo "missing Storage evidence recorder contract: $required" >&2; exit 1; }
+done
+for required in 'RAW.dump.age' 'raw_artifact_sha256' 'raw_schema_sha256' 'managed_artifact_sha256' \
+  'source manifest content checksum mismatch' 'CREATE TABLE festapp_managed_source.provenance' \
+  'same private snapshot directory' 'approved bounded export window' 'raw_managed_delta_seconds'; do
+  rg -Fq "$required" "$MANAGED_STAGE_SCRIPT" || { echo "missing managed provenance contract: $required" >&2; exit 1; }
+done
+
+for required in 'Operational compatibility exception' 'always-NULL' 'never exposed to API roles'; do
+  rg -Fq "$required" "$SOURCE_DATABASE_SCRIPT" || { echo "missing isolated auth.uid exception contract: $required" >&2; exit 1; }
+done
+
 if rg -n 'DROP (DATABASE|SCHEMA|TABLE)|TRUNCATE|DELETE FROM|fs\.rm|unlinkSync' "$STORAGE_RECEIVER_SCRIPT" "$STORAGE_COPY_SCRIPT"; then
   echo "Storage payload tooling contains a destructive statement" >&2
   exit 1
@@ -239,7 +273,9 @@ for required in \
   'row_number() OVER (ORDER BY s.%I)' \
   'COPY festapp_merge.id_mappings' \
   "'public.user_info'" \
-  'verified_pairs<>13' \
+  'missing_decisions<>0' \
+  'stale_decisions<>0' \
+  'festapp_stage_a_managed.provenance' \
   "'a-id-mapping-preparation','pass'"; do
   rg -Fq "$required" "$A_MAPPING_SCRIPT" || { echo "missing source a mapping safety contract: $required" >&2; exit 1; }
 done
@@ -258,7 +294,7 @@ for required in \
   'raw_snapshot_preserved' \
   'requires_forced_full_sync' \
   'identity-merged-default-profile-preferred-review-required' \
-  'expected 13 preserved source profiles' \
+  'collision profile preservation count mismatch' \
   'a row mismatch' \
   'foreign_key_orphans' \
   "SET status='blocked'" \
@@ -275,12 +311,12 @@ for required in \
   'import-a-auth-preserve-password-hashes' \
   "'auth.refresh_tokens'" \
   'refresh-token ID mapping count mismatch' \
-  'unexpected rehearsal audit-log duplication profile' \
+  'source a audit log has conflicting duplicate IDs' \
   "DISTINCT ON (row_data->>''id'')" \
   'identical_rehearsal_audit_duplicates_deduplicated' \
   "relation.table_name='users'" \
   "relation.table_name='identities'" \
-  'source_rows-13' \
+  'source_rows-collision_users' \
   'changed_hashes<>0' \
   'Auth foreign key' \
   "'a-auth-import','pass'" \
@@ -296,9 +332,9 @@ fi
 for required in \
   'import-a-storage-metadata-preserve-runtime-ledger' \
   'Storage bucket overlap is not semantically identical' \
-  'expected one source-only Storage bucket' \
+  'source-only Storage bucket count mismatch' \
   "column_record.column_name IN ('owner','owner_id')" \
-  'expected 935 Storage object metadata rows' \
+  'source_object_rows' \
   'runtime_migration_ledger_rows' \
   "'a-storage-object-payloads','blocked'" \
   "'storage_payloads_imported',false"; do
@@ -320,6 +356,17 @@ for required in \
   "'a-client-derived-state-rebuild'" \
   "'production_r2_writes',0"; do
   rg -Fq "$required" "$A_DERIVED_REBUILD_SCRIPT" || { echo "missing derived rebuild safety contract: $required" >&2; exit 1; }
+done
+
+for required in 'validate-a-approved-identity-merges' 'changed_default_hashes' \
+  'email_mismatches' "check_name='a-identity-profile-review'" "SET status='pass'"; do
+  rg -Fq "$required" "$A_IDENTITY_VALIDATION_SCRIPT" || { echo "missing identity validation contract: $required" >&2; exit 1; }
+done
+
+for required in 'prepare-new-isolated-runtime-foundation' 'supabase_admin' \
+  'GRANT CONNECT ON DATABASE' '_realtime.schema_migrations' 'realtime.schema_migrations' \
+  'Preserve the runtime ACLs'; do
+  rg -Fq "$required" "$ISOLATED_FOUNDATION_SCRIPT" || { echo "missing isolated foundation contract: $required" >&2; exit 1; }
 done
 
 for required in \
@@ -352,18 +399,30 @@ for contract in \
   "$A_PAYLOAD_REPAIR_SCRIPT:registered-embedded-payload-repair-v1:retained_unmapped_historical_snapshot_ids:deleted_rows" \
   "$A_OPERATIONAL_REPAIR_SCRIPT:service_role_external_sync_execute:storage_url_rewrite_deferred_to_api_hostname:deleted_rows" \
   "$A_REFERENCE_VALIDATION_SCRIPT:known_reference_mismatches:api.festapp.net-cutover:deleted_rows" \
-  "$ENCRYPTED_BACKUP_SCRIPT:plaintext_artifacts_written:false:cloud_sources_mutated" \
-  "$ENCRYPTED_RESTORE_SCRIPT:restore-encrypted-backup-into-new-isolated-target:production_target_mutated:deleted_paths"; do
+  "$ENCRYPTED_BACKUP_SCRIPT:runtime-stopped-zero-client-sessions-and-before-after-state-stable:rolpassword:object_security_sha256" \
+  "$ENCRYPTED_RESTORE_SCRIPT:globals_restored:-U supabase_admin:clean_cluster_stopped"; do
   IFS=: read -r script required_a required_b required_c <<<"$contract"
   for required in "$required_a" "$required_b" "$required_c"; do
-    rg -Fq "$required" "$script" || { echo "missing repair/recovery contract $required in $script" >&2; exit 1; }
+    rg -Fq -- "$required" "$script" || { echo "missing repair/recovery contract $required in $script" >&2; exit 1; }
   done
+done
+
+
+for required in 'storage:' 'DATABASE_URL:' 'FESTAPP_RUNTIME_DATABASE:?set FESTAPP_RUNTIME_DATABASE'; do
+  rg -Fq "$required" "$RUNTIME_DATABASE_COMPOSE" || { echo "missing database target contract: $required" >&2; exit 1; }
+done
+for required in 'switch-validated-rehearsal-runtime-database' 'readonly SERVICES=(auth rest realtime storage meta functions studio)' \
+  'storage:DATABASE_URL' 'rolled back to' '200|200|200|101' 'deleted_databases:[]'; do
+  rg -Fq "$required" "$RUNTIME_SWITCH_SCRIPT" || { echo "missing runtime switch contract: $required" >&2; exit 1; }
+done
+for required in 'docker-compose.database-target.yml' 'caddy/Caddyfile' 'switch-rehearsal-runtime-database.sh'; do
+  rg -Fq "$required" "$RUNTIME_DEPLOY_SCRIPT" || { echo "missing deploy runtime contract: $required" >&2; exit 1; }
 done
 
 if rg -n 'DROP (DATABASE|SCHEMA|TABLE)|TRUNCATE|DELETE FROM|rm -|unlink' \
   "$A_SEMANTIC_REPAIR_SCRIPT" "$A_PAYLOAD_REPAIR_SCRIPT" \
   "$A_OPERATIONAL_REPAIR_SCRIPT" "$A_REFERENCE_VALIDATION_SCRIPT" \
-  "$ENCRYPTED_BACKUP_SCRIPT" "$ENCRYPTED_RESTORE_SCRIPT"; then
+  "$ENCRYPTED_BACKUP_SCRIPT" "$ENCRYPTED_RESTORE_SCRIPT" "$RUNTIME_SWITCH_SCRIPT"; then
   echo "repair/recovery tooling contains an unapproved destructive statement" >&2
   exit 1
 fi

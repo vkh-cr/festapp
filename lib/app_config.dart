@@ -25,6 +25,10 @@ class AppConfig {
   static const bool isWebNotificationsSupported = true;
   static const String oneSignalAppId = '';
   static const String pushAppGeneration = '';
+  static const String effectivePushAppGeneration = String.fromEnvironment(
+    'FESTAPP_PUSH_APP_GENERATION',
+    defaultValue: pushAppGeneration,
+  );
   static const String logoAsset = 'assets/icons/fstapplogo.svg';
   static const String darkLogoAsset = 'assets/icons/fstapplogo.dark.svg';
   static const String programLogoAsset = 'assets/icons/fstapplogo.svg';

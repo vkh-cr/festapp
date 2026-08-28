@@ -3,13 +3,67 @@ import { createClient } from '@supabase/supabase-js';
 
 export class SupabaseService {
     static _client = null;
+    static _initialization = null;
     static tokenKey = AppConfig.Keys.auth;
+    static originMarkerKey = 'festapp-supabase-auth-origin';
+    static clientOptions = Object.freeze({
+        auth: Object.freeze({ storageKey: AppConfig.Keys.auth }),
+    });
 
     static getClient() {
         if (!SupabaseService._client) {
-            SupabaseService._client = createClient(AppConfig.supabaseUrl, AppConfig.anonKey);
+            SupabaseService._client = createClient(
+                AppConfig.supabaseUrl,
+                AppConfig.anonKey,
+                SupabaseService.clientOptions,
+            );
         }
         return SupabaseService._client;
+    }
+
+    /// Refresh an existing browser session exactly when the configured backend
+    /// origin changes. The refresh token is preserved by the stable storage
+    /// namespace and exchanged for a JWT signed by the new Auth service before
+    /// any rights or business query runs.
+    static initialize() {
+        if (!SupabaseService._initialization) {
+            SupabaseService._initialization = SupabaseService._initialize();
+        }
+        return SupabaseService._initialization;
+    }
+
+    static async _initialize() {
+        const client = SupabaseService.getClient();
+        const previousOrigin = localStorage.getItem(SupabaseService.originMarkerKey);
+        const { data, error } = await client.auth.getSession();
+        if (error) throw error;
+        const session = data?.session;
+        if (session && previousOrigin !== AppConfig.supabaseUrl) {
+            const refreshToken = session.refresh_token;
+            if (!refreshToken) throw new Error('Stored Supabase session has no refresh token');
+            const { data: refreshed, error: refreshError } =
+                await client.auth.refreshSession({ refresh_token: refreshToken });
+            if (refreshError || !refreshed?.session) {
+                if (SupabaseService._isTerminalRefreshError(refreshError)) {
+                    try {
+                        await client.auth.signOut({ scope: 'local' });
+                    } catch (signOutError) {
+                        console.warn('Local Supabase session cleanup failed', signOutError);
+                    }
+                    localStorage.removeItem(SupabaseService.tokenKey);
+                    localStorage.setItem(SupabaseService.originMarkerKey, AppConfig.supabaseUrl);
+                    return client;
+                }
+                throw refreshError ?? new Error('Supabase session refresh returned no session');
+            }
+        }
+        localStorage.setItem(SupabaseService.originMarkerKey, AppConfig.supabaseUrl);
+        return client;
+    }
+
+    static _isTerminalRefreshError(error) {
+        return error?.code === 'refresh_token_not_found' ||
+            error?.code === 'refresh_token_already_used';
     }
 
     // --- Data ---

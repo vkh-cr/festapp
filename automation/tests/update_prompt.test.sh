@@ -81,12 +81,14 @@ echo "--- emit_version_manifest.sh writes festapp-version.json + stamped main --
 BUILD_DIR="$TMP_ROOT/build/web"
 mkdir -p "$BUILD_DIR/web-assets"
 CONFIG_ANON_KEY="$(sed -n 's/^SUPABASE_ANON_KEY=//p' "$PROJECT_ROOT/automation/project.conf")"
+CONFIG_SUPABASE_URL="$(sed -n 's/^SUPABASE_URL=//p' "$PROJECT_ROOT/automation/project.conf")"
 CONFIG_PROJECT_REF="$(sed -n 's#^SUPABASE_URL=https://\([^.]*\)\.supabase\.co/*#\1#p' \
   "$PROJECT_ROOT/automation/project.conf")"
 printf '// fake compiled app\n%s\n' "$CONFIG_ANON_KEY" > "$BUILD_DIR/main.dart.js"
 printf "const SUPABASE_KEY = 'sb-%s-auth-token';\n" "$CONFIG_PROJECT_REF" \
   > "$BUILD_DIR/auth_bridge"
-printf "const authKey = 'sb-%s-auth-token';\n" "$CONFIG_PROJECT_REF" \
+printf "const supabaseUrl = '%s'; const anonKey = '%s'; const authKey = 'sb-%s-auth-token';\n" \
+  "$CONFIG_SUPABASE_URL" "$CONFIG_ANON_KEY" "$CONFIG_PROJECT_REF" \
   > "$BUILD_DIR/web-assets/app.js"
 cp "$PROJECT_ROOT/automation/emit_version_manifest.sh" "$TMP_ROOT/automation/emit_version_manifest.sh"
 chmod +x "$TMP_ROOT/automation/emit_version_manifest.sh"
@@ -114,6 +116,20 @@ printf '<script>window.__FESTAPP_BUILD_VERSION__ = "1.2.3+456";</script><img cla
 printf 'const BUILD_VERSION = "1.2.3+456"; const FORCED_OCCASION_PATH = "/test-occasion"; // FESTAPP_QUERY_BUILD_VERSION\n' > "$BUILD_DIR/festapp_service_worker.js"
 printf '{"start_url":"/test-occasion/"}\n' > "$BUILD_DIR/site.webmanifest"
 printf 'const FORCED_OCCASION_PATH = "/test-occasion";\n' > "$BUILD_DIR/_worker.js"
+CONFIG_APP_NAME="$(sed -n 's/^APP_NAME=//p' "$PROJECT_ROOT/automation/project.conf")"
+CONFIG_APP_NAME="${CONFIG_APP_NAME#\"}"
+CONFIG_APP_NAME="${CONFIG_APP_NAME%\"}"
+CONFIG_APP_NAME="${CONFIG_APP_NAME#\'}"
+CONFIG_APP_NAME="${CONFIG_APP_NAME%\'}"
+LEGAL_NAV='<nav aria-label="Právní informace"><a href="/privacy/">Privacy</a><a href="/privacy/choices/">Choices</a><a href="/terms/">Terms</a><a href="/support/">Support</a></nav>'
+for page in privacy privacy/choices terms support; do
+    mkdir -p "$BUILD_DIR/$page"
+    printf '<title>%s | %s</title>%s<h1>%s</h1>\n' "$page" "$CONFIG_APP_NAME" "$LEGAL_NAV" "$page" \
+      > "$BUILD_DIR/$page/index.html"
+done
+mkdir -p "$BUILD_DIR/delete-account"
+printf '<title>Delete | %s</title>%s<h1>Smazání účtu</h1><a href="/privacy/choices/">Choices</a>\n' \
+  "$CONFIG_APP_NAME" "$LEGAL_NAV" > "$BUILD_DIR/delete-account/index.html"
 if node "$PROJECT_ROOT/automation/verify_web_build.mjs" "$BUILD_DIR" "1.2.3+456" > /dev/null; then
     echo "  ok: coherent web release passes the build gate"
 else

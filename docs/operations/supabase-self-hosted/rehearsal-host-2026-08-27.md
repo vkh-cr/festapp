@@ -83,6 +83,8 @@ through Cloudflare, Caddy and the loopback gateway. Strict origin TLS, Auth,
 REST, Realtime, a real Storage object and direct-origin denial all passed. The
 full evidence is in `rehearsal-origin-2026-08-28.md`.
 
-The next gate is a second complete rehearsal from a newer cloud snapshot and
-compatible web, Android and iOS releases. Production `api.festapp.net`, cloud
-credentials and write ownership remain unchanged.
+The second complete rehearsal from a newer cloud snapshot passed on 2026-08-28
+in a new isolated database and the rehearsal runtime now targets it. The next
+gate is compatible web, Android and iOS releases plus Auth/rights/write canaries
+and the final freeze snapshot. Production `api.festapp.net`, cloud credentials
+and write ownership remain unchanged.

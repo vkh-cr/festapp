@@ -11,14 +11,15 @@ fail() { echo "ERROR: $*" >&2; exit 1; }
   fail "set FESTAPP_REHEARSAL_ACK=repair-a-registered-semantic-references-forward-only"
 [[ "$(id -u)" == "0" ]] || fail "run as root on rehearsal host"
 [[ "$(hostname -s)" == "$EXPECTED_HOSTNAME" ]] || fail "refusing unexpected host"
-[[ "$TARGET_DATABASE" == "postgres" || "$TARGET_DATABASE" =~ ^festapp_restore_[0-9]+$ ]] ||
-  fail "target database must be postgres or an isolated festapp_restore database"
+[[ "$TARGET_DATABASE" == "postgres" || "$TARGET_DATABASE" =~ ^festapp_restore_[0-9]+$ ||
+   "$TARGET_DATABASE" =~ ^festapp_rehearsal_[0-9]{14}$ ]] ||
+  fail "target database must be postgres or an isolated timestamped rehearsal/restore database"
 cd "$COMPOSE_DIR"
 docker compose config -q
 
 psql_main() { docker compose exec -T db psql -X -v ON_ERROR_STOP=1 -U postgres -d "$TARGET_DATABASE" "$@"; }
 readonly STATE="$(psql_main -Atqc "SELECT concat_ws('|',
-  (SELECT count(*) FROM festapp_merge.import_runs WHERE source_alias='a' AND status='validated'),
+  (SELECT count(*) FROM festapp_merge.import_runs WHERE source_alias='a' AND status='blocked'),
   (SELECT count(*) FROM festapp_merge.validation_results v JOIN festapp_merge.import_runs r USING(run_id) WHERE r.source_alias='a' AND v.check_name='a-semantic-reference-repair'))")"
 [[ "$STATE" == "1|0" ]] || fail "target is not the approved pre-repair state ($STATE)"
 
@@ -35,7 +36,7 @@ DECLARE import_run uuid; changed bigint; expected bigint; row_changed bigint; so
   transformed_data jsonb; mapped_value jsonb;
 BEGIN
   SELECT run_id INTO STRICT import_run FROM festapp_merge.import_runs
-  WHERE source_alias='a' AND status='validated';
+  WHERE source_alias='a' AND status='blocked';
 
   SELECT count(*) INTO expected FROM festapp_stage_a_public.events source
   JOIN festapp_merge.id_mappings self ON self.run_id=import_run AND self.source_table='public.events' AND self.source_id=source.id::text

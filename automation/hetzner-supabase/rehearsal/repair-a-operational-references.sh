@@ -11,8 +11,9 @@ fail() { echo "ERROR: $*" >&2; exit 1; }
   fail "set FESTAPP_REHEARSAL_ACK=repair-a-operational-references-forward-only"
 [[ "$(id -u)" == "0" ]] || fail "run as root on rehearsal host"
 [[ "$(hostname -s)" == "$EXPECTED_HOSTNAME" ]] || fail "refusing unexpected host"
-[[ "$TARGET_DATABASE" == "postgres" || "$TARGET_DATABASE" =~ ^festapp_restore_[0-9]+$ ]] ||
-  fail "target database must be postgres or an isolated festapp_restore database"
+[[ "$TARGET_DATABASE" == "postgres" || "$TARGET_DATABASE" =~ ^festapp_restore_[0-9]+$ ||
+   "$TARGET_DATABASE" =~ ^festapp_rehearsal_[0-9]{14}$ ]] ||
+  fail "target database must be postgres or an isolated timestamped rehearsal/restore database"
 cd "$COMPOSE_DIR"
 docker compose config -q
 

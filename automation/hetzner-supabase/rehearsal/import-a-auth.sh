@@ -4,29 +4,35 @@ set -euo pipefail
 readonly EXPECTED_HOSTNAME="festapp-supabase-rehearsal-01"
 readonly COMPOSE_DIR="${FESTAPP_REHEARSAL_COMPOSE_DIR:-/opt/festapp-supabase/docker}"
 readonly EVIDENCE_ROOT="${FESTAPP_REHEARSAL_EVIDENCE_ROOT:-/var/lib/festapp-rehearsal-evidence}"
+readonly TARGET_DATABASE="${FESTAPP_REHEARSAL_DATABASE:-postgres}"
 
 fail() { echo "ERROR: $*" >&2; exit 1; }
 [[ "${FESTAPP_REHEARSAL_ACK:-}" == "import-a-auth-preserve-password-hashes" ]] ||
   fail "set FESTAPP_REHEARSAL_ACK=import-a-auth-preserve-password-hashes"
+[[ "$TARGET_DATABASE" == "postgres" || "$TARGET_DATABASE" =~ ^festapp_rehearsal_[0-9]{14}$ ]] || fail "invalid isolated rehearsal database name"
 [[ "$(id -u)" == "0" ]] || fail "run as root on rehearsal host"
 [[ "$(hostname -s)" == "$EXPECTED_HOSTNAME" ]] || fail "refusing unexpected host"
 cd "$COMPOSE_DIR"
 docker compose config -q
 
-psql_main() { docker compose exec -T db psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres "$@"; }
+psql_main() { docker compose exec -T db psql -X -v ON_ERROR_STOP=1 -U postgres -d "$TARGET_DATABASE" "$@"; }
 readonly STATE="$(psql_main -Atqc "SELECT concat_ws('|',split_part(current_setting('server_version'),'.',1),
   (SELECT count(*) FROM festapp_merge.import_runs WHERE source_alias='a' AND status='blocked'),
-  (SELECT count(*) FROM festapp_merge.id_mappings m JOIN festapp_merge.import_runs r USING(run_id) WHERE r.source_alias='a'),
-  (SELECT count(*) FROM auth.users),(SELECT count(*) FROM auth.identities),(SELECT count(*) FROM auth.sessions),(SELECT count(*) FROM auth.refresh_tokens),
-  (SELECT count(*) FROM auth.schema_migrations),(SELECT count(*) FROM storage.objects))")"
-[[ "$STATE" == "17|1|431457|231|224|736|11944|76|264" ]] || fail "target is not approved a-Auth import state ($STATE)"
+  (SELECT count(*)>0 FROM festapp_merge.id_mappings m JOIN festapp_merge.import_runs r USING(run_id) WHERE r.source_alias='a'),
+  (SELECT (SELECT count(*) FROM auth.users)=(SELECT count(*) FROM festapp_stage_default_managed.rows WHERE source_schema='auth' AND source_table='users')
+    AND (SELECT count(*) FROM auth.identities)=(SELECT count(*) FROM festapp_stage_default_managed.rows WHERE source_schema='auth' AND source_table='identities')
+    AND (SELECT count(*) FROM auth.sessions)=(SELECT count(*) FROM festapp_stage_default_managed.rows WHERE source_schema='auth' AND source_table='sessions')
+    AND (SELECT count(*) FROM auth.refresh_tokens)=(SELECT count(*) FROM festapp_stage_default_managed.rows WHERE source_schema='auth' AND source_table='refresh_tokens')),
+  (SELECT count(*) FROM auth.schema_migrations),
+  (SELECT (SELECT count(*) FROM storage.objects)=(SELECT count(*) FROM festapp_stage_default_managed.rows WHERE source_schema='storage' AND source_table='objects')))")"
+[[ "$STATE" == "17|1|t|t|76|t" ]] || fail "target is not approved a-Auth import state ($STATE)"
 
 readonly AUDIT_DUPLICATES="$(psql_main -Atqc "WITH duplicate_keys AS (
   SELECT row_data->>'id' id,count(*) rows,count(DISTINCT row_data) variants
   FROM festapp_stage_a_managed.rows WHERE source_schema='auth' AND source_table='audit_log_entries'
   GROUP BY row_data->>'id' HAVING count(*)>1
 ) SELECT concat_ws('|',count(*),coalesce(sum(rows-1),0),count(*) FILTER(WHERE variants>1)) FROM duplicate_keys")"
-[[ "$AUDIT_DUPLICATES" == "10|10|0" ]] || fail "unexpected rehearsal audit-log duplication profile ($AUDIT_DUPLICATES)"
+[[ "$AUDIT_DUPLICATES" =~ ^[0-9]+\|[0-9]+\|0$ ]] || fail "source a audit log has conflicting duplicate IDs ($AUDIT_DUPLICATES)"
 
 install -d -o root -g root -m 0700 "$EVIDENCE_ROOT"
 readonly RUN_DIR="$EVIDENCE_ROOT/a-auth-import-$(date -u +%Y%m%dT%H%M%SZ)"
@@ -57,14 +63,23 @@ DECLARE
   child_not_null text;
   join_expression text;
   orphan_rows bigint;
+  refresh_mapping_count bigint;
+  collision_users bigint;
+  audit_duplicate_rows bigint;
 BEGIN
   SELECT run_id INTO STRICT import_run FROM festapp_merge.import_runs WHERE source_alias='a' AND status='blocked';
+  SELECT count(*) INTO refresh_mapping_count FROM festapp_stage_a_managed.rows
+  WHERE source_schema='auth' AND source_table='refresh_tokens';
+  SELECT count(*) INTO collision_users FROM festapp_merge.id_mappings
+  WHERE run_id=import_run AND source_table='auth.users';
+  SELECT count(*)-count(DISTINCT row_data->>'id') INTO audit_duplicate_rows
+  FROM festapp_stage_a_managed.rows WHERE source_schema='auth' AND source_table='audit_log_entries';
   SELECT coalesce(max(id),0) INTO refresh_base FROM auth.refresh_tokens;
   INSERT INTO festapp_merge.id_mappings(run_id,source_table,source_id,target_id)
   SELECT import_run,'auth.refresh_tokens',row_data->>'id',
     (refresh_base+row_number() OVER (ORDER BY (row_data->>'id')::bigint))::bigint::text
   FROM festapp_stage_a_managed.rows WHERE source_schema='auth' AND source_table='refresh_tokens';
-  IF (SELECT count(*) FROM festapp_merge.id_mappings WHERE run_id=import_run AND source_table='auth.refresh_tokens')<>222292 THEN
+  IF (SELECT count(*) FROM festapp_merge.id_mappings WHERE run_id=import_run AND source_table='auth.refresh_tokens')<>refresh_mapping_count THEN
     RAISE EXCEPTION 'refresh-token ID mapping count mismatch';
   END IF;
 
@@ -75,7 +90,7 @@ BEGIN
     GROUP BY source_table ORDER BY source_table
   LOOP
     source_rows:=relation.source_rows;
-    IF relation.table_name='audit_log_entries' THEN source_rows:=source_rows-10; END IF;
+    IF relation.table_name='audit_log_entries' THEN source_rows:=source_rows-audit_duplicate_rows; END IF;
     EXECUTE format('SELECT count(*) FROM auth.%I',relation.table_name) INTO before_rows;
     column_list:=''; select_list:='';
     FOR target_column IN
@@ -100,10 +115,10 @@ BEGIN
 
     IF relation.table_name='users' THEN
       EXECUTE format('INSERT INTO auth.users (%s) OVERRIDING SYSTEM VALUE SELECT %s FROM festapp_stage_a_managed.rows s WHERE s.source_schema=''auth'' AND s.source_table=''users'' AND NOT EXISTS (SELECT 1 FROM festapp_merge.id_mappings m WHERE m.run_id=%L AND m.source_table=''auth.users'' AND m.source_id=s.row_data->>''id'')',column_list,select_list,import_run);
-      expected_rows:=source_rows-13;
+      expected_rows:=source_rows-collision_users;
     ELSIF relation.table_name='identities' THEN
       EXECUTE format('INSERT INTO auth.identities (%s) OVERRIDING SYSTEM VALUE SELECT %s FROM festapp_stage_a_managed.rows s WHERE s.source_schema=''auth'' AND s.source_table=''identities'' AND NOT EXISTS (SELECT 1 FROM festapp_merge.id_mappings m JOIN auth.identities t ON t.user_id=m.target_id::uuid AND t.provider=s.row_data->>''provider'' WHERE m.run_id=%L AND m.source_table=''auth.users'' AND m.source_id=s.row_data->>''user_id'')',column_list,select_list,import_run);
-      expected_rows:=source_rows-13;
+      expected_rows:=source_rows-collision_users;
     ELSIF relation.table_name='audit_log_entries' THEN
       EXECUTE format('INSERT INTO auth.audit_log_entries (%s) OVERRIDING SYSTEM VALUE SELECT %s FROM (SELECT DISTINCT ON (row_data->>''id'') row_data FROM festapp_stage_a_managed.rows WHERE source_schema=''auth'' AND source_table=''audit_log_entries'' ORDER BY row_data->>''id'',row_id) s',column_list,select_list);
       expected_rows:=source_rows;
@@ -148,7 +163,13 @@ BEGIN
 
   PERFORM setval(pg_get_serial_sequence('auth.refresh_tokens','id'),(SELECT max(id) FROM auth.refresh_tokens),true);
   INSERT INTO festapp_merge.validation_results(run_id,check_name,status,observed) VALUES
-    (import_run,'a-auth-import','pass',jsonb_build_object('source_users',6980,'merged_users',13,'inserted_users',6967,'changed_password_hashes',0,'foreign_key_orphans',0,'refresh_token_id_mappings',222292,'identical_rehearsal_audit_duplicates_deduplicated',10));
+    (import_run,'a-auth-import','pass',jsonb_build_object(
+      'source_users',(SELECT count(*) FROM festapp_stage_a_managed.rows WHERE source_schema='auth' AND source_table='users'),
+      'merged_users',collision_users,
+      'inserted_users',(SELECT count(*) FROM festapp_stage_a_managed.rows WHERE source_schema='auth' AND source_table='users')-collision_users,
+      'changed_password_hashes',0,'foreign_key_orphans',0,
+      'refresh_token_id_mappings',refresh_mapping_count,
+      'identical_rehearsal_audit_duplicates_deduplicated',audit_duplicate_rows));
   UPDATE festapp_merge.validation_results SET observed=jsonb_build_object('auth_imported',true,'auth_users',(SELECT count(*) FROM auth.users),'storage_imported',false,'storage_objects',(SELECT count(*) FROM storage.objects))
   WHERE run_id=import_run AND check_name='a-auth-and-storage-import';
 END

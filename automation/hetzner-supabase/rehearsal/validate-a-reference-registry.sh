@@ -11,8 +11,9 @@ fail() { echo "ERROR: $*" >&2; exit 1; }
   fail "set FESTAPP_REHEARSAL_ACK=validate-a-reference-registry"
 [[ "$(id -u)" == "0" ]] || fail "run as root on rehearsal host"
 [[ "$(hostname -s)" == "$EXPECTED_HOSTNAME" ]] || fail "refusing unexpected host"
-[[ "$TARGET_DATABASE" == "postgres" || "$TARGET_DATABASE" =~ ^festapp_restore_[0-9]+$ ]] ||
-  fail "target database must be postgres or an isolated festapp_restore database"
+[[ "$TARGET_DATABASE" == "postgres" || "$TARGET_DATABASE" =~ ^festapp_restore_[0-9]+$ ||
+   "$TARGET_DATABASE" =~ ^festapp_rehearsal_[0-9]{14}$ ]] ||
+  fail "target database must be postgres or an isolated timestamped rehearsal/restore database"
 cd "$COMPOSE_DIR"
 docker compose config -q
 
@@ -30,12 +31,19 @@ DECLARE import_run uuid; mismatch_count bigint; legacy_storage_links bigint;
 BEGIN
   SELECT run_id INTO STRICT import_run FROM festapp_merge.import_runs
   WHERE source_alias='a' AND status='blocked';
-  IF EXISTS (SELECT 1 FROM festapp_merge.validation_results
-    WHERE run_id=import_run AND check_name IN (
-      'a-semantic-reference-repair','a-embedded-payload-repair','a-operational-reference-repair',
-      'a-auth-import','a-storage-object-payloads','a-client-derived-state-rebuild'
-    ) AND status<>'pass')
-  THEN RAISE EXCEPTION 'a prerequisite reference validation is not passing'; END IF;
+  IF EXISTS (
+    WITH required(check_name) AS (VALUES
+      ('a-id-mapping-preparation'),('a-relational-import'),('a-identity-profile-review'),
+      ('a-semantic-reference-repair'),('a-embedded-payload-repair'),('a-operational-reference-repair'),
+      ('a-auth-import'),('a-storage-metadata-import'),('a-storage-object-payloads'),
+      ('a-auth-and-storage-import'),('a-client-derived-state-rebuild')
+    )
+    SELECT 1 FROM required
+    LEFT JOIN festapp_merge.validation_results v
+      ON v.run_id=import_run AND v.check_name=required.check_name
+    GROUP BY required.check_name
+    HAVING count(v.check_name)<>1 OR count(*) FILTER (WHERE v.status='pass')<>1
+  ) THEN RAISE EXCEPTION 'a required prerequisite reference validation is missing, duplicated, or not passing'; END IF;
 
   WITH checks AS (
     SELECT count(*) mismatches FROM festapp_stage_a_public.events source

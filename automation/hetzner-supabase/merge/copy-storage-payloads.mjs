@@ -179,11 +179,15 @@ async function main() {
   if (manifest.source?.alias !== alias || manifest.source?.project_ref !== SOURCES[alias]) {
     fail('Storage artifact manifest identity mismatch');
   }
-  if (await sha256File(artifact) !== manifest.artifact?.sha256) fail('Storage artifact checksum mismatch');
+  const artifactSha256 = await sha256File(artifact);
+  const manifestFileSha256 = await sha256File(manifestPath);
+  if (artifactSha256 !== manifest.artifact?.sha256) fail('Storage artifact checksum mismatch');
   await run('ssh', ['-o', 'BatchMode=yes', target, `docker exec supabase-storage test -r ${RECEIVER}`]);
 
   const rows = await readSnapshot(artifact, identity, alias, manifest);
   const objects = rows.map(validateObject);
+  const descriptorAggregate = crypto.createHash('sha256');
+  for (const object of objects) descriptorAggregate.update(`${JSON.stringify(object)}\n`);
   const token = accessToken();
   const serviceKey = await serviceRoleKey(SOURCES[alias], token);
   const startedAt = new Date().toISOString();
@@ -208,6 +212,10 @@ async function main() {
     bytes: results.reduce((sum, item) => sum + item.bytes, 0),
     resumed_objects: results.filter((item) => item.resumed).length,
     ordered_payload_sha256: aggregate.digest('hex'),
+    ordered_descriptor_sha256: descriptorAggregate.digest('hex'),
+    source_artifact_sha256: artifactSha256,
+    source_manifest_file_sha256: manifestFileSha256,
+    source_manifest_sha256: manifest.manifest_sha256,
     cloud_source_mutated: false,
     cloudflare_in_path: false,
   };

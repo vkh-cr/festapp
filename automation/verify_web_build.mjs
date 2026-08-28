@@ -3,6 +3,7 @@
 import assert from 'node:assert/strict';
 import { readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
+import { resolvedAuthStorageKey } from './lib/supabase_client_config.mjs';
 
 const buildDir = path.resolve(process.argv[2] || 'build/web');
 const expectedVersion = process.argv[3];
@@ -85,6 +86,10 @@ assert.match(deleteAccountBody, /<h1>Smazání účtu<\/h1>/, 'account deletion 
 assert.match(deleteAccountBody, /href="\/privacy\/choices/, 'account deletion page lacks the privacy choices link');
 const supabaseUrl = configValue('SUPABASE_URL');
 const expectedAnonKey = configValue('SUPABASE_ANON_KEY');
+const expectedAuthStorageKey = resolvedAuthStorageKey(
+  supabaseUrl,
+  configValue('SUPABASE_AUTH_STORAGE_KEY'),
+);
 const parsedSupabaseUrl = new URL(supabaseUrl);
 assert.equal(parsedSupabaseUrl.protocol, 'https:', 'project.conf SUPABASE_URL must use HTTPS');
 assert.equal(parsedSupabaseUrl.origin + '/', parsedSupabaseUrl.href.replace(/\/?$/, '/'),
@@ -169,17 +174,40 @@ if (target === 'cloudflare') {
 }
 
 const authStorageKey = authBridge.match(
-  /const SUPABASE_KEY = '(sb-[a-z0-9]+-auth-token)'/,
+  /const SUPABASE_KEY = '([^']+)'/,
 )?.[1];
-assert.ok(authStorageKey, 'auth bridge does not declare a Supabase storage key');
+assert.equal(
+  authStorageKey,
+  expectedAuthStorageKey,
+  'auth bridge does not use the configured Supabase storage key',
+);
 const webAssetDir = path.join(buildDir, 'web-assets');
 const webAssetFiles = (await readdir(webAssetDir)).filter((name) => name.endsWith('.js'));
 const webAssetSources = await Promise.all(
   webAssetFiles.map((name) => readFile(path.join(webAssetDir, name), 'utf8')),
 );
+const webAssetBytes = Buffer.from(webAssetSources.join('\n'));
+assert.ok(
+  webAssetBytes.includes(Buffer.from(supabaseUrl)),
+  'vanilla web bundle does not contain the configured Supabase origin',
+);
+assert.ok(
+  webAssetBytes.includes(Buffer.from(expectedAnonKey)),
+  'vanilla web bundle does not contain the configured Supabase anon key',
+);
+const bundledCloudOrigins = new Set(
+  webAssetSources.flatMap((source) =>
+    [...source.matchAll(/https:\/\/[a-z0-9]+\.supabase\.co/g)].map((match) => match[0]),
+  ),
+);
+assert.deepEqual(
+  [...bundledCloudOrigins],
+  expectedProjectRef ? [supabaseUrl] : [],
+  'vanilla web bundle contains a stale Supabase Cloud origin',
+);
 const bundledAuthKeys = new Set(
   webAssetSources.flatMap((source) =>
-    [...source.matchAll(/sb-[a-z0-9]+-auth-token/g)].map((match) => match[0]),
+    [...source.matchAll(/sb-[a-z0-9-]+-auth-token/g)].map((match) => match[0]),
   ),
 );
 assert.deepEqual(

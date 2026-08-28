@@ -1,23 +1,97 @@
-import { deliverEmail, EmailTemplateNotFoundError } from "../_shared/emailDelivery.ts";
+import {
+  deliverEmail,
+  EmailTemplateNotFoundError,
+} from "../_shared/emailDelivery.ts";
 import { translatePlatformLinks } from "../_shared/translatePlatformLinks.ts";
 import { supabaseAdmin } from "../_shared/supabaseUtil.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.58.0';
-
 const _DEFAULT_EMAIL = Deno.env.get("DEFAULT_EMAIL")!;
+const _ALLOWED_ORIGINS = new Set(
+  (Deno.env.get("FESTAPP_ALLOWED_WEB_ORIGINS") ?? "")
+    .split(",").map((value) => value.trim()).filter(Boolean),
+);
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+const corsHeaders = (origin: string | null) => ({
+  ...(origin && _ALLOWED_ORIGINS.has(origin)
+    ? { "Access-Control-Allow-Origin": origin }
+    : {}),
+  "Vary": "Origin",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
+});
+
+const json = (origin: string | null, status = 200) =>
+  new Response(
+    JSON.stringify({ accepted: true }),
+    {
+      status,
+      headers: { ...corsHeaders(origin), "Content-Type": "application/json" },
+    },
+  );
+
+async function sha256(value: string): Promise<string> {
+  const digest = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(value),
+  );
+  return [...new Uint8Array(digest)].map((byte) =>
+    byte.toString(16).padStart(2, "0")
+  ).join("");
+}
+
+async function consumeLimit(key: string, limit: number): Promise<boolean> {
+  const { data, error } = await supabaseAdmin.rpc(
+    "consume_password_reset_rate_limit_v1",
+    {
+      p_key_hash: await sha256(key),
+      p_limit: limit,
+      p_window_seconds: 900,
+    },
+  );
+  if (error || typeof data !== "boolean") {
+    throw error ?? new Error("rate_limit_unavailable");
+  }
+  return data;
+}
 
 Deno.serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
+  const origin = req.headers.get("origin");
+  if (origin && !_ALLOWED_ORIGINS.has(origin)) return json(null, 403);
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders(origin) });
   }
+  if (req.method !== "POST") return json(origin, 405);
 
-  const reqData = await req.json();
-  const userEmail = reqData.email ? reqData.email.toLowerCase() : "michael.bujnovsky@festapp.net";
-  const organizationId = reqData.organization;
+  let reqData: Record<string, unknown>;
+  try {
+    reqData = await req.json();
+  } catch {
+    return json(origin, 400);
+  }
+  const userEmail = typeof reqData.email === "string"
+    ? reqData.email.trim().toLowerCase()
+    : "";
+  const organizationId = Number(reqData.organization);
+  if (
+    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userEmail) ||
+    !Number.isSafeInteger(organizationId) || organizationId <= 0
+  ) return json(origin);
+
+  const sourceAddress = req.headers.get("cf-connecting-ip") ??
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    req.headers.get("x-real-ip") ?? "unknown";
+  try {
+    const sourceAllowed = await consumeLimit(`source:${sourceAddress}`, 20);
+    if (!sourceAllowed) return json(origin);
+    const accountAllowed = await consumeLimit(
+      `account:${organizationId}:${userEmail}`,
+      3,
+    );
+    if (!accountAllowed) return json(origin);
+  } catch (error) {
+    console.error("Password reset rate limiter unavailable", error);
+    return json(origin, 503);
+  }
 
   const orgData = await supabaseAdmin
     .from("organizations")
@@ -27,17 +101,26 @@ Deno.serve(async (req) => {
 
   if (orgData.error || !orgData.data) {
     console.error("Organization data not found.");
-    return new Response(JSON.stringify({ error: "Organization data not found" }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 404,
-    });
+    return json(origin);
   }
 
   const orgConfig = orgData.data.data;
   const appName = orgConfig.APP_NAME || "DefaultAppName";
-  const defaultUrl = orgConfig.DEFAULT_URL || "http://default.url";
+  const defaultUrl = orgConfig.DEFAULT_URL;
   const platforms = orgConfig.PLATFORMS || [];
   const defaultLang = orgConfig.DEFAULT_LANGUAGE || "en";
+  try {
+    const parsedDefaultUrl = new URL(defaultUrl);
+    if (
+      parsedDefaultUrl.protocol !== "https:" || parsedDefaultUrl.username ||
+      parsedDefaultUrl.password
+    ) {
+      throw new Error("invalid reset origin");
+    }
+  } catch (error) {
+    console.error("Organization password reset origin is invalid", error);
+    return json(origin);
+  }
 
   // Generate platform links HTML
   const platformLinksHtml = translatePlatformLinks(platforms, defaultLang);
@@ -50,34 +133,32 @@ Deno.serve(async (req) => {
     .maybeSingle();
 
   if (userData.data == null) {
-    return new Response(JSON.stringify({ "email": userEmail }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 200,
-    });
+    return json(origin);
   }
 
   const userId = userData.data.id;
-  const { data: deliveryEmail, error: deliveryEmailError } =
-    await supabaseAdmin.rpc("get_user_delivery_email", { p_user: userId });
+  const { data: deliveryEmail, error: deliveryEmailError } = await supabaseAdmin
+    .rpc("get_user_delivery_email", { p_user: userId });
   if (deliveryEmailError || !deliveryEmail) {
-    return new Response(JSON.stringify({ error: "Delivery email unavailable" }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 500,
-    });
+    console.error(
+      "Password reset delivery address unavailable",
+      deliveryEmailError,
+    );
+    return json(origin);
   }
   const token = crypto.randomUUID();
 
-  await supabaseAdmin
+  const { error: tokenError } = await supabaseAdmin
     .from("user_reset_token")
-    .delete()
-    .eq("user", userId);
-
-  await supabaseAdmin
-    .from("user_reset_token")
-    .insert({
+    .upsert({
       "user": userId,
       "token": token,
-    });
+      "created_at": new Date().toISOString(),
+    }, { onConflict: "user" });
+  if (tokenError) {
+    console.error("Password reset token could not be stored", tokenError);
+    return json(origin);
+  }
 
   const context = { organization: organizationId };
 
@@ -102,22 +183,12 @@ Deno.serve(async (req) => {
     });
   } catch (error) {
     if (error instanceof EmailTemplateNotFoundError) {
-      return new Response(JSON.stringify({ error: "Template not found" }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 404,
-      });
+      console.error("Password reset template not found");
+      return json(origin);
     }
-    return new Response(
-      JSON.stringify({ error: "Failed to send reset password email" }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500,
-      },
-    );
+    console.error("Password reset delivery failed", error);
+    return json(origin);
   }
 
-  return new Response(JSON.stringify({ "email": userEmail }), {
-    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    status: 200,
-  });
+  return json(origin);
 });

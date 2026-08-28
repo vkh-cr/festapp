@@ -4,24 +4,28 @@ set -euo pipefail
 readonly EXPECTED_HOSTNAME="festapp-supabase-rehearsal-01"
 readonly COMPOSE_DIR="${FESTAPP_REHEARSAL_COMPOSE_DIR:-/opt/festapp-supabase/docker}"
 readonly EVIDENCE_ROOT="${FESTAPP_REHEARSAL_EVIDENCE_ROOT:-/var/lib/festapp-rehearsal-evidence}"
+readonly TARGET_DATABASE="${FESTAPP_REHEARSAL_DATABASE:-postgres}"
 
 fail() { echo "ERROR: $*" >&2; exit 1; }
 [[ "${FESTAPP_REHEARSAL_ACK:-}" == "import-a-relational-data-with-derived-state-blocked" ]] ||
   fail "set FESTAPP_REHEARSAL_ACK=import-a-relational-data-with-derived-state-blocked"
+[[ "$TARGET_DATABASE" == "postgres" || "$TARGET_DATABASE" =~ ^festapp_rehearsal_[0-9]{14}$ ]] || fail "invalid isolated rehearsal database name"
 [[ "$(id -u)" == "0" ]] || fail "run as root on rehearsal host"
 [[ "$(hostname -s)" == "$EXPECTED_HOSTNAME" ]] || fail "refusing unexpected host"
 cd "$COMPOSE_DIR"
 docker compose config -q
 
-psql_main() { docker compose exec -T db psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres "$@"; }
+psql_main() { docker compose exec -T db psql -X -v ON_ERROR_STOP=1 -U postgres -d "$TARGET_DATABASE" "$@"; }
+readonly MAPPING_COUNT="$(psql_main -Atqc "SELECT count(*) FROM festapp_merge.id_mappings m JOIN festapp_merge.import_runs r USING(run_id) WHERE r.source_alias='a' AND r.status='prepared'")"
+[[ "$MAPPING_COUNT" =~ ^[1-9][0-9]*$ ]] || fail "source a mapping set is empty or invalid ($MAPPING_COUNT)"
 readonly STATE="$(psql_main -Atqc "SELECT concat_ws('|',split_part(current_setting('server_version'),'.',1),
   (SELECT count(*) FROM festapp_merge.import_runs WHERE source_alias='default' AND status='blocked'),
   (SELECT count(*) FROM festapp_merge.import_runs WHERE source_alias='a' AND status='prepared'),
-  (SELECT count(*) FROM festapp_merge.id_mappings m JOIN festapp_merge.import_runs r USING(run_id) WHERE r.source_alias='a'),
   (SELECT count(*) FROM festapp_merge.quarantined_rows q JOIN festapp_merge.import_runs r USING(run_id) WHERE r.source_alias='a'),
   (SELECT count(*) FROM information_schema.foreign_tables WHERE foreign_table_schema IN ('festapp_stage_a_public','festapp_stage_a_eshop')),
-  (SELECT count(*) FROM auth.users),(SELECT count(*) FROM storage.objects))")"
-[[ "$STATE" == "17|1|1|431457|0|100|231|264" ]] || fail "target is not approved a-import state ($STATE)"
+  (SELECT (SELECT count(*) FROM auth.users)=(SELECT count(*) FROM festapp_stage_default_managed.rows WHERE source_schema='auth' AND source_table='users')
+    AND (SELECT count(*) FROM storage.objects)=(SELECT count(*) FROM festapp_stage_default_managed.rows WHERE source_schema='storage' AND source_table='objects')))")"
+[[ "$STATE" == "17|1|1|0|100|t" ]] || fail "target is not approved a-import state ($STATE)"
 
 readonly LEDGER_DIFFERENCES="$(psql_main -Atqc "SELECT count(*) FROM festapp_stage_a_public.supabase_migrations s
 JOIN public.supabase_migrations t USING(version) WHERE to_jsonb(s)-'version'<>to_jsonb(t)-'version'")"
@@ -31,8 +35,8 @@ install -d -o root -g root -m 0700 "$EVIDENCE_ROOT"
 readonly RUN_DIR="$EVIDENCE_ROOT/a-canonical-import-$(date -u +%Y%m%dT%H%M%SZ)"
 install -d -o root -g root -m 0700 "$RUN_DIR"
 psql_main -Atqc "SELECT jsonb_build_object(
-  'source_tables',100,'id_mappings',431457,
-  'source_rows',(SELECT sum(n_live_tup) FROM pg_stat_user_tables WHERE false),
+  'source_tables',(SELECT count(*) FROM information_schema.foreign_tables WHERE foreign_table_schema IN ('festapp_stage_a_public','festapp_stage_a_eshop')),
+  'id_mappings',$MAPPING_COUNT,
   'auth_users',(SELECT count(*) FROM auth.users),'storage_objects',(SELECT count(*) FROM storage.objects)
 )" >"$RUN_DIR/preflight.json"
 chmod 0600 "$RUN_DIR/preflight.json"
@@ -102,8 +106,12 @@ DECLARE
   child_not_null text;
   join_expression text;
   orphan_rows bigint;
+  collision_profiles bigint;
 BEGIN
   SELECT run_id INTO STRICT import_run FROM festapp_merge.import_runs WHERE source_alias='a' AND status='prepared';
+  SELECT count(*) INTO collision_profiles FROM festapp_merge.id_mappings
+  WHERE run_id=import_run AND source_table='public.user_info';
+  IF collision_profiles=0 THEN RAISE EXCEPTION 'source a has no approved collision profile mappings'; END IF;
 
   IF EXISTS (SELECT 1 FROM festapp_stage_a_eshop.planned_changes
     WHERE change_type NOT LIKE 'forms.%') THEN
@@ -214,7 +222,7 @@ BEGIN
     ELSIF relation.target_schema='public' AND relation.table_name='user_info' THEN
       EXECUTE format('INSERT INTO public.user_info (%s) OVERRIDING SYSTEM VALUE SELECT %s FROM %I.%I s WHERE NOT EXISTS (SELECT 1 FROM festapp_merge.id_mappings m WHERE m.run_id=%L AND m.source_table=''public.user_info'' AND m.source_id=s.id::text)',
         column_list,select_list,relation.source_schema,relation.table_name,import_run);
-      expected_rows:=source_rows-13;
+      expected_rows:=source_rows-collision_profiles;
       GET DIAGNOSTICS inserted_rows=ROW_COUNT;
     ELSE
       EXECUTE format('INSERT INTO %I.%I (%s) OVERRIDING SYSTEM VALUE SELECT %s FROM %I.%I s',
@@ -233,8 +241,8 @@ BEGIN
     'identity-merged-default-profile-preferred-review-required'
   FROM festapp_stage_a_public.user_info s
   JOIN festapp_merge.id_mappings m ON m.run_id=import_run AND m.source_table='public.user_info' AND m.source_id=s.id::text;
-  IF (SELECT count(*) FROM festapp_merge.quarantined_rows WHERE run_id=import_run AND source_table='public.user_info')<>13 THEN
-    RAISE EXCEPTION 'expected 13 preserved source profiles';
+  IF (SELECT count(*) FROM festapp_merge.quarantined_rows WHERE run_id=import_run AND source_table='public.user_info')<>collision_profiles THEN
+    RAISE EXCEPTION 'collision profile preservation count mismatch';
   END IF;
 
   FOR foreign_key IN
@@ -268,8 +276,11 @@ BEGIN
   END LOOP;
 
   INSERT INTO festapp_merge.validation_results(run_id,check_name,status,observed) VALUES
-    (import_run,'a-relational-import','pass',jsonb_build_object('source_tables',100,'excluded_derived_tables',excluded_tables,'excluded_derived_rows',excluded_rows,'application_foreign_key_orphans',0,'auth_foreign_keys_deferred',true)),
-    (import_run,'a-identity-profile-review','blocked',jsonb_build_object('preserved_profiles',13,'canonical_rule','default-profile-preferred')),
+    (import_run,'a-relational-import','pass',jsonb_build_object(
+      'source_tables',(SELECT count(*) FROM information_schema.foreign_tables WHERE foreign_table_schema IN ('festapp_stage_a_public','festapp_stage_a_eshop')),
+      'id_mappings',(SELECT count(*) FROM festapp_merge.id_mappings WHERE run_id=import_run),
+      'excluded_derived_tables',excluded_tables,'excluded_derived_rows',excluded_rows,'application_foreign_key_orphans',0,'auth_foreign_keys_deferred',true)),
+    (import_run,'a-identity-profile-review','blocked',jsonb_build_object('preserved_profiles',collision_profiles,'canonical_rule','default-profile-preferred')),
     (import_run,'a-client-derived-state-rebuild','blocked',jsonb_build_object('tables',excluded_tables,'rows',excluded_rows,'raw_snapshot_preserved',true,'requires_forced_full_sync',true)),
     (import_run,'a-auth-and-storage-import','blocked',jsonb_build_object('auth_users',0,'storage_objects',0));
   UPDATE festapp_merge.import_runs SET status='blocked' WHERE run_id=import_run;

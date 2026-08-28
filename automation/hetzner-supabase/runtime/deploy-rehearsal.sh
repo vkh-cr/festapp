@@ -17,7 +17,11 @@ cp .env.example .env
 chmod 0600 .env
 sh utils/generate-keys.sh --update-env >/dev/null
 install -o root -g root -m 0644 "$SCRIPT_DIR/docker-compose.festapp.yml" docker-compose.festapp.yml
+install -o root -g root -m 0644 "$SCRIPT_DIR/docker-compose.database-target.yml" docker-compose.database-target.yml
+install -d -o root -g root -m 0755 caddy
+install -o root -g root -m 0644 "$SCRIPT_DIR/Caddyfile" caddy/Caddyfile
 install -o root -g root -m 0700 "$SCRIPT_DIR/configure-rehearsal-env.py" configure-rehearsal-env.py
+install -o root -g root -m 0700 "$SCRIPT_DIR/switch-rehearsal-runtime-database.sh" switch-rehearsal-runtime-database.sh
 ./configure-rehearsal-env.py
 
 docker compose config -q

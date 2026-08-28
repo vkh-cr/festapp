@@ -17,7 +17,7 @@ class InstallationCutoverService {
     CutoverRead? read,
     CutoverAtomicWrite? writeAtomic,
     CutoverRemovePrefixes? removePrefixes,
-  }) : generation = generation ?? AppConfig.pushAppGeneration,
+  }) : generation = generation ?? AppConfig.effectivePushAppGeneration,
        _read = read ?? StorageHelper.get,
        _writeAtomic = writeAtomic ?? StorageHelper.setAllAtomic,
        _removePrefixes = removePrefixes ?? StorageHelper.removeByPrefixesAtomic;
