@@ -60,6 +60,11 @@ export class LocalizationService {
             }
         }
 
+        // Some legacy translation payloads contain the internal key as their
+        // value. Treat that as untranslated so callers with a user-facing
+        // fallback never render implementation identifiers.
+        if (value === key) return fallback;
+
         
         // Simple interpolation for named arguments: {name}
         if (typeof value === 'string') {

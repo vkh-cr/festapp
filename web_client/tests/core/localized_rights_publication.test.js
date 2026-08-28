@@ -16,6 +16,16 @@ test('critical admin label never exposes its internal translation key', () => {
     }
 });
 
+test('critical admin label rejects a legacy self-valued translation', () => {
+    const originalTranslations = LocalizationService.translations;
+    LocalizationService.translations = { 'FeatureUser.admin': 'FeatureUser.admin' };
+    try {
+        assert.equal(CommonStrings.admin, 'Admin');
+    } finally {
+        LocalizationService.translations = originalTranslations;
+    }
+});
+
 test('rights context is published only after localization is ready', async () => {
     const calls = [];
     const originalGetClient = SupabaseService.getClient;
