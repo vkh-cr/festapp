@@ -15,7 +15,7 @@ version/adoption evidence or by the maintenance freeze.
 | Hvězda Mořská (`prod/hvezdamorska`) | `festapp.hvezdamorska` / `>451` | `fstapp.hvezdamorska` / `>451` | Publish and prove transition build on both stores. |
 | Festival Slunovrat (`prod/festivalslunovrat`, `prod/slunovratopava`) | `festapp.festivalslunovrat` / `>208` | `fstapp.slunovratopava` / `>208` | Publish and prove transition build on both stores. Android signed build is deliberately deferred to the independent Windows workstation. |
 | Absolventský Velehrad (`prod/absolventskyvelehrad`) | `festapp.absolventskyvelehrad` / signed candidate `467` | `fstapp.AV25` / `>243` | Canonical web is deployed and a signed, non-uploaded iOS transition candidate is preserved. Complete physical-device/store proof; Android remains deferred to the independent Windows workstation. |
-| Člověk a víra (`prod/cavfotofest`) | `festapp.cavfotofest` / `>243` | `fstapp.cav` / `>243` | **Open:** publish/prove both transition lanes, or record store/traffic evidence that the individual lane is absent or read-only. |
+| Člověk a víra (`prod/cavfotofest`) | `festapp.cavfotofest` / signed candidate `465` | `fstapp.cav` / `>243` | Canonical web is deployed and a signed, non-uploaded iOS transition candidate is preserved. Complete physical-device/store proof; Android remains deferred to the independent Windows workstation. |
 | Do O BiS Cup (`prod/doobiscup`) | `festapp.doobiscup` / `>243` | `fstapp.diecezkodoo` / `>243` | **Open:** publish/prove both transition lanes, or record store/traffic evidence that the individual lane is absent or read-only. |
 | AKSM (`prod/aksmcz`) | `festapp.aksmcz` / observed through build `270` on several legacy refs | `fstapp.csa` / `>230` | **Open:** inventory both listings. The reused iOS identity must be reconciled with Farnost Opava/Festapp legacy refs before choosing release versus retirement. |
 | Farnost Opava (`prod/farnostopava`) | `festapp.aksmcz` / `>259` (shared legacy identity) | `fstapp.fstapp` / `>259` (shared Festapp identity) | **Open:** prove this is a web-only tenant of the shared binaries, or verify the shared transition binary routes it correctly; do not create a duplicate store upload blindly. |
@@ -123,6 +123,17 @@ shared app-group, associated-domain, extension-identity and prohibited-location-
 framework checks. Physical-device/native acceptance, the App Store release and
 the Android Windows build remain gated; the informational root
 `absolventskyvelehrad.cz` remains separate from the app subdomain.
+
+Clovek a vira now has a canonical version-93 overlay on `prod/cavfotofest`
+and production web build `0.19.93+465` at `clovekavira.festapp.net`. Apple
+Developer App Group assignments were reduced from three historical groups to
+the single tenant group `group.festapp.cavfotofest`, and the notification
+extension was assigned that same group. Regenerated profiles and a signed,
+non-uploaded iOS candidate from source
+`c10a33dfd0f1e147be6e8674942b4b2d65df0754` passed production push, app-group,
+associated-domain, extension-identity and prohibited-location-framework checks.
+Physical-device/native acceptance, App Store release and Android Windows build
+remain gated.
 
 The Hvezda Morska `466` production smoke passes the all-unit catalogue root,
 occasion detail, reservation handoff to `/form/povyseni2026`, and the Flutter
