@@ -172,7 +172,14 @@ test('RouterService.Sanitization', async (t) => {
         });
 
         await RouterService.navigateToOccasionApp('my-event?source=fb');
-        assert.strictEqual(locationHref, '/my-event');
+        assert.strictEqual(locationHref, '/my-event/event');
+    });
+
+    await t.test('should canonicalize occasion app roots to program', () => {
+        assert.strictEqual(
+            RouterService.getOccasionAppPath('/my-event/'),
+            '/my-event/event',
+        );
     });
 
     await t.test('should strip query params in navigateToForm', async () => {
@@ -328,7 +335,7 @@ test('RouterService.handleInitialLoad', async (t) => {
 
         assert.strictEqual(handled, true);
         assert.ok(redirectUrl.includes('auth_bridge.html'));
-        assert.ok(redirectUrl.includes('redirect=%2Fconference2024')); 
+        assert.ok(redirectUrl.includes('redirect=%2Fconference2024%2Fevent'));
 
         // Cleanup
         if (originalCurrentLink) Object.defineProperty(RightsService, 'currentLink', originalCurrentLink);
@@ -355,7 +362,7 @@ test('RouterService.handleInitialLoad', async (t) => {
         // Occasion Link is NOT a Web Client route -> Redirect to Flutter
         assert.strictEqual(handled, true);
         assert.ok(redirectUrl.includes('auth_bridge.html'));
-        assert.ok(redirectUrl.includes('redirect=%2Fmy-occasion')); 
+        assert.ok(redirectUrl.includes('redirect=%2Fmy-occasion%2Fevent'));
 
         // Cleanup
         if (originalCurrentLink) Object.defineProperty(RightsService, 'currentLink', originalCurrentLink);

@@ -15,13 +15,14 @@ export class RouterService {
     }
 
     static async navigateToOccasionApp(link) {
-        // Navigate to the occasion app root (e.g. /kurin2026)
-        // This will likely be handled by the server returning the app index, or 
-        // if this SPA handles it, we need logic for it.
-        // For now, simple href is safest to ensure full load or external handling.
-        const cleanLink = link.split('?')[0];
-        const path = `/${cleanLink}`;
-        await RouterService.navigateToFlutterRoute(path);
+        await RouterService.navigateToFlutterRoute(
+            RouterService.getOccasionAppPath(link),
+        );
+    }
+
+    static getOccasionAppPath(link) {
+        const cleanLink = link.split('?')[0].replace(/^\/+|\/+$/g, '');
+        return `/${cleanLink}/event`;
     }
 
     static navigateToOccasion(link) {
@@ -154,7 +155,7 @@ export class RouterService {
             if (AppConfig.isAllUnit && path === '/') {
                  defaultLink = '/';
             } else if (currentLink) {
-                 defaultLink = `/${currentLink}`;
+                 defaultLink = RouterService.getOccasionAppPath(currentLink);
             } else if (currentUnit?.id) {
                  // return "/${UnitPage.ROUTE}/${RightsService.currentUnit()?.id}";
                  defaultLink = `/unit/${currentUnit.id}`;
