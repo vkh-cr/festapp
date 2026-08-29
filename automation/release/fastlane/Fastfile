@@ -265,6 +265,34 @@ platform :ios do
     UI.success("Refreshed notification-extension profile at #{profile_path}")
   end
 
+  desc 'Regenerate both App Store profiles after capability changes'
+  lane :refresh_app_store_profiles do
+    exact_gate!('REFRESH_APP_STORE_PROFILES')
+    target_app!('REFRESH_APP_STORE_PROFILES')
+    certs = Spaceship::ConnectAPI::Certificate.all.select do |cert|
+      cert.valid? && %w[DISTRIBUTION IOS_DISTRIBUTION].include?(cert.certificate_type)
+    end
+    UI.user_error!("Expected exactly one valid distribution certificate, found #{certs.size}") unless certs.one?
+
+    signing_dir = File.expand_path('../signing', __dir__)
+    FileUtils.mkdir_p(signing_dir)
+    FileUtils.chmod(0o700, signing_dir)
+    {
+      BUNDLE_ID => MANIFEST.fetch('signingProfiles').fetch('app'),
+      MANIFEST.fetch('notificationExtensionBundleId') =>
+        MANIFEST.fetch('signingProfiles').fetch('notificationExtension')
+    }.each do |identifier, profile_name|
+      profile_path = File.join(signing_dir, "#{identifier}.mobileprovision")
+      get_provisioning_profile(
+        api_key: api_key, app_identifier: identifier, cert_id: certs.first.id,
+        provisioning_name: profile_name, filename: File.basename(profile_path),
+        output_path: signing_dir, force: true
+      )
+      FileUtils.chmod(0o600, profile_path)
+    end
+    UI.success("Refreshed the app and notification-extension App Store profiles in #{signing_dir}")
+  end
+
   desc 'Create the first release certificate and exact App Store profiles'
   lane :bootstrap_signing do
     exact_gate!('BOOTSTRAP_SIGNING')
