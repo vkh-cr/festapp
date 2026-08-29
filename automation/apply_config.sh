@@ -203,15 +203,16 @@ if [ -f "$INDEX_FILE" ]; then
     # crawlers before a forced-occasion tenant hands off to Flutter. Keep its
     # title and descriptions tenant-owned instead of leaking the generic
     # vstupenky.online branding into every production application.
-    python3 - "$INDEX_FILE" "$APP_NAME" "$APP_DESCRIPTION" <<'PY'
+    python3 - "$INDEX_FILE" "$APP_NAME" "$APP_DESCRIPTION" "$DOMAIN" <<'PY'
 import html
 import re
 import sys
 
-path, app_name, app_description = sys.argv[1:]
+path, app_name, app_description, domain = sys.argv[1:]
 source = open(path, encoding="utf-8").read()
 title = html.escape(app_name, quote=True)
 description = html.escape(app_description, quote=True)
+origin = f"https://{domain}"
 source = re.sub(r"<title>.*?</title>", f"<title>{title}</title>", source, count=1, flags=re.DOTALL)
 
 def replace_meta(attribute, key, value):
@@ -226,8 +227,10 @@ def replace_meta(attribute, key, value):
 
 replace_meta("name", "description", description)
 for property_name, value in (
+    ("og:url", origin + "/"),
     ("og:title", title),
     ("og:description", description),
+    ("twitter:url", origin + "/"),
     ("twitter:title", title),
     ("twitter:description", description),
 ):
@@ -243,6 +246,31 @@ source, count = re.subn(
 )
 if count != 1:
     raise SystemExit(f"missing WebSite JSON-LD name in {path}")
+source, count = re.subn(
+    r'("url"\s*:\s*)"[^"]*"',
+    lambda match: match.group(1) + __import__("json").dumps(origin + "/"),
+    source,
+    count=1,
+)
+if count != 1:
+    raise SystemExit(f"missing WebSite JSON-LD URL in {path}")
+source, count = re.subn(
+    r'("target"\s*:\s*)"[^"]*"',
+    lambda match: match.group(1) + __import__("json").dumps(origin + "/?q={search_term_string}"),
+    source,
+    count=1,
+)
+if count != 1:
+    raise SystemExit(f"missing WebSite JSON-LD search target in {path}")
+source, count = re.subn(
+    r'(<link\s+[^>]*rel=["\']canonical["\'][^>]*href=["\'])[^"\']*(["\'][^>]*>)',
+    lambda match: match.group(1) + origin + "/" + match.group(2),
+    source,
+    count=1,
+    flags=re.IGNORECASE,
+)
+if count != 1:
+    raise SystemExit(f"missing canonical link in {path}")
 open(path, "w", encoding="utf-8").write(source)
 PY
     echo "✔ Updated meta tags"

@@ -161,6 +161,9 @@ assert_contains "$TMP_ROOT/web_client/index.html" '<meta name="description" cont
 assert_contains "$TMP_ROOT/web_client/index.html" '<meta property="og:title" content="Test App Name">'
 assert_contains "$TMP_ROOT/web_client/index.html" '<meta property="twitter:description" content="Test application description.">'
 assert_contains "$TMP_ROOT/web_client/index.html" '"name": "Test App Name"'
+assert_contains "$TMP_ROOT/web_client/index.html" '<link rel="canonical" href="https://test.example.com/">'
+assert_contains "$TMP_ROOT/web_client/index.html" '"url": "https://test.example.com/"'
+assert_contains "$TMP_ROOT/web_client/index.html" '"target": "https://test.example.com/?q={search_term_string}"'
 assert_contains "$TMP_ROOT/web_client/index.html" 'https://test.example.com/android-chrome-512x512.png'
 assert_missing "$TMP_ROOT/web_client/index.html" 'Festapp - Vstupenky.online'
 
