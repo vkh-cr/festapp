@@ -127,7 +127,8 @@ void main() {
     expect(
       scheduleBack,
       contains(
-        'context.router.replacePath(getCurrentLink() + EventPage.ROUTE)',
+        'context.router.root.replacePath('
+        'getCurrentLink() + EventPage.ROUTE)',
       ),
     );
     expect(

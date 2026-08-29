@@ -142,7 +142,7 @@ class RouterService {
     // reconstruct the canonical program path instead; AutoRoute then resolves
     // the configured basic/light/advanced schedule root consistently for both
     // in-app navigation and directly opened event URLs.
-    context.router.replacePath(getCurrentLink() + EventPage.ROUTE);
+    context.router.root.replacePath(getCurrentLink() + EventPage.ROUTE);
   }
 
   static bool canPop(BuildContext context) => context.router.canPop();
