@@ -31,6 +31,7 @@ grep -Fq '"$BUNDLE_DIR/manifest.json"' "$PREVIEW"
 grep -Fq 'preview-config.js' "$PREVIEW"
 grep -Fq '.glyphs = "http://localhost:8080/glyphs/{fontstack}/{range}.pbf"' "$PREVIEW"
 grep -Fq 'window.FESTAPP_OFFLINE_MAP_PREVIEW' "$PREVIEW_HTML"
+grep -Fq 'preview-style.json?contract=local-bundle-v2' "$PREVIEW_HTML"
 if grep -Fq '"$SCRIPT_DIR/style/' "$PREVIEW"; then
   echo "offline map preview must use the selected tenant bundle" >&2
   exit 1
