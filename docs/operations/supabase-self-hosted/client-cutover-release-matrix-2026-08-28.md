@@ -97,13 +97,15 @@ matrix as deployed.
 
 The Hvezda Morska `466` production smoke passes the all-unit catalogue root,
 occasion detail, reservation handoff to `/form/povyseni2026`, and the Flutter
-`/admin` handoff. Its OneSignal app still declares
-`https://hvezdamorska.netlify.app` as both Chrome and Safari web origin. The
-repository-held app REST key can read but cannot mutate that organization-level
-setting; an authorized OneSignal organization key or dashboard session must
-change both origins to `https://hvezdamorska.festapp.net` before this lane's web
-push gate is complete. Browser subscriptions cannot be transferred between
-origins, so users must opt in on the new origin after that change.
+`/admin` handoff. On 2026-08-29 an authorized OneSignal dashboard session
+changed the app's saved web origin from `https://hvezdamorska.netlify.app` to
+`https://hvezdamorska.festapp.net`. A cold production check then completed the
+OneSignal initialization without an origin error, and the custom
+`/push/OneSignalSDKWorker.js` returned JavaScript. The old Netlify root and a
+deep `/form/rijnovapout26` URL both return HTTP 301 to the same path on the new
+origin. This closes the Hvezda web-push origin gate. Browser subscriptions
+cannot be transferred between origins, so users must opt in on the new origin;
+that expected re-subscription does not require another bundle build.
 
 Each web row requires source SHA, generated config digest, deployed bundle
 digest, public activation document with `no-store`, cold-load legacy and
