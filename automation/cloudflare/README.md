@@ -9,7 +9,12 @@ CLOUDFLARE_PROJECT_NAME=<exact CF Pages project name>
 ```
 
 Run `automation/deploy_direct.sh`; it builds locally, uploads through Wrangler,
-and verifies the custom domain before reporting success.
+and verifies the custom domain before reporting success. For an existing
+project whose custom domain is already active, `--wrangler-oauth` uses
+Wrangler's encrypted credential-store login and first proves that the exact
+project contains both its `pages.dev` hostname and configured custom domain.
+It cannot create or attach a project/domain; first activation still requires
+the scoped API-token path.
 
 Pushing a `prod/*` branch does not start a production build. The GitHub
 `Deploy` workflow is a manual fallback and must be explicitly dispatched for

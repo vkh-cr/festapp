@@ -46,6 +46,11 @@ require_text "$DEPLOY_SH" '--branch) BRANCH_OVERRIDE="$2"' 'detached deploy acce
 require_text "$DEPLOY_SH" 'detached deploy requires --branch prod/<tenant>' 'detached deploy never guesses branch from a different project name'
 require_text "$DEPLOY_SH" '--commit-dirty=true' 'deploy supports a staged pre-commit release candidate'
 require_text "$DEPLOY_SH" 'node automation/verify_web_deployment.mjs "https://${DOMAIN}" "${VERSION}"' 'deploy verifies the expected version on the custom domain'
+require_text "$DEPLOY_SH" '--wrangler-oauth) USE_WRANGLER_OAUTH=1' 'routine deploy explicitly selects encrypted Wrangler OAuth'
+require_text "$DEPLOY_SH" 'unset CLOUDFLARE_API_TOKEN CF_API_TOKEN' 'OAuth cannot be shadowed by an unrelated plaintext token'
+require_text "$DEPLOY_SH" 'wrangler@latest pages project list --json' 'OAuth verifies the existing Pages project before upload'
+require_text "$DEPLOY_SH" 'domains.includes(`${projectName}.pages.dev`)' 'OAuth requires the canonical Pages hostname'
+require_text "$DEPLOY_SH" 'domains.includes(domain)' 'OAuth requires the configured custom domain binding'
 
 # The generated worker remains the single routing owner for every web entry point.
 for needle in '/sitemap.xml' '/form/' 'WEB_CLIENT_INDEX' 'FLUTTER_ENTRY' 'AUTH_BRIDGE' 'FORCED_OCCASION_PATH' 'FORCE_OCCASION_LINK' 'get_available_occasions' 'get_occasion_seo_data'; do
