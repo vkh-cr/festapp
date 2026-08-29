@@ -28,6 +28,40 @@ All 228 remaining legacy Supabase Storage URLs have a copied object. Rewriting
 their host, production DNS/write authority, and client release activation remain
 separate final-cutover gates.
 
+## Legacy-client compatibility audit — 2026-08-29
+
+The encrypted source snapshot contains 219 distinct public function names. The
+archived Slunovrat client referenced 56 RPC names and 55 are present in that
+snapshot; its occasion-settings writer already referenced the absent
+`update_occasion_203`, so the old cloud is not a trustworthy target for further
+schema evolution.
+
+The current shared client references 54 RPC names not present in the source
+snapshot. Most belong to disabled modules or to the newer administration
+surface (speakers/counseling, Client Sync activity, the atomic event/map
+editors, reception, cleaning, feedback and entity-level e-mail templates). The
+enabled public Slunovrat flow was exercised on the Cloudflare staging build:
+startup, program, event detail/description, browser back, map, news, information
+and login all completed against the legacy source. `get_speakers` is an
+intentional optional read for pre-speaker tenants and returns an empty bundle
+only for the exact missing-function response.
+
+`set_saved_program` was the one newly reachable public write missing from the
+legacy source. The transition client now keeps a narrow compatibility adapter:
+it attempts the RPC first and, only for PostgREST `PGRST202`, performs the old
+RLS-protected single-event join/remove followed by an authoritative readback.
+Permission, connectivity and server errors are not hidden, and non-atomic bulk
+replacement is rejected. Its removal condition is activation of the canonical
+`set_saved_program_client_sync_v1` path for every tenant.
+
+This does not certify the complete modern administration UI against the old
+cloud. That surface is a cutover gate, not a request to back-port dozens of
+canonical SQL functions into an unledgered PostgreSQL 15 source. Until the
+final delta import and canonical activation pass, the Cloudflare deployment is
+a public-client candidate and the existing production administration path must
+remain available. After activation, the canonical PostgreSQL 17 schema owns
+both public and administration contracts.
+
 Client release work must start from current canonical `main` plus a narrow
 `festivalslunovrat` tenant overlay. The old production branch is not mergeable:
 it predates the overlay policy and contains obsolete shared application code.

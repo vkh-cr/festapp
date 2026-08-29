@@ -26,6 +26,14 @@ Writes go through the occasion-scoped `set_saved_program` / Client Sync command
 and the process-wide mutation coordinator; read refreshes never replace remote
 state from a client snapshot.
 
+Transition clients retain one narrow compatibility boundary for cloud tenants
+whose schema predates `set_saved_program`. They try the RPC first and fall back
+only on PostgREST's exact missing-function response to the former RLS-protected
+single-row `event_users_saved` insert/delete, followed by an authoritative
+readback. Other failures remain visible and bulk `replace` is never emulated
+non-atomically. Remove the adapter after every tenant has activated the
+canonical `set_saved_program_client_sync_v1` path.
+
 Detail-page toggles use a latest-intent queue: the UI changes optimistically,
 backend writes stay serialized, rapid opposite clicks converge to the newest
 choice, and failed writes roll back to the last confirmed state.
