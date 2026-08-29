@@ -35,9 +35,26 @@ async function rpc(name, body) {
     },
     body: JSON.stringify(body),
   });
-  if (!response.ok) fail(`${name} failed (${response.status}): ${(await response.text()).slice(0, 800)}`);
+  if (!response.ok) {
+    const error = new Error(`${name} failed (${response.status}): ${(await response.text()).slice(0, 800)}`);
+    error.status = response.status;
+    throw error;
+  }
   const text = await response.text();
   return text ? JSON.parse(text) : null;
+}
+
+async function getOccasion(occasionLink) {
+  try {
+    return await rpc('get_occasion_by_link', { link_param: occasionLink });
+  } catch (error) {
+    if (error.status !== 404) throw error;
+    const organizationId = Number(process.env.FESTAPP_ORGANIZATION_ID);
+    if (!Number.isSafeInteger(organizationId) || organizationId <= 0) {
+      fail('legacy occasion reader requires FESTAPP_ORGANIZATION_ID');
+    }
+    return rpc('get_occasion_from_link', { org_id: organizationId, link_txt: occasionLink });
+  }
 }
 
 async function main() {
@@ -52,7 +69,7 @@ async function main() {
     fail('unsupported or unsafe offline map manifest');
   }
 
-  const before = await rpc('get_occasion_by_link', { link_param: occasionLink });
+  const before = await getOccasion(occasionLink);
   if (before?.id !== manifest.occasion.id || !Array.isArray(before.features)) {
     fail('occasion identity or feature payload does not match manifest');
   }
@@ -81,7 +98,7 @@ async function main() {
   };
 
   await rpc('update_occasion_203', { input_data: expected });
-  const after = await rpc('get_occasion_by_link', { link_param: occasionLink });
+  const after = await getOccasion(occasionLink);
   if (JSON.stringify(comparable(after)) !== JSON.stringify(comparable(expected))) {
     fail('occasion readback differs from the exact settings payload');
   }
