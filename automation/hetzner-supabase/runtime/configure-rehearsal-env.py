@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import os
 import re
+import secrets
 from pathlib import Path
 from shlex import quote
 from urllib.parse import urlsplit
@@ -29,6 +30,17 @@ auth_additional_origins = os.environ.get(
     )),
 )
 auth_redirect_urls = os.environ.get("FESTAPP_AUTH_REDIRECT_URLS", "")
+
+
+def existing_value(key: str) -> str | None:
+    prefix = f"{key}="
+    for line in path.read_text().splitlines():
+        if line.startswith(prefix):
+            value = line[len(prefix):].strip()
+            if len(value) >= 2 and value[0] == value[-1] and value[0] in "'\"":
+                value = value[1:-1]
+            return value
+    return None
 
 
 def https_origin(value: str) -> str:
@@ -64,12 +76,18 @@ updates = {
     "COMPOSE_FILE": "docker-compose.yml:docker-compose.festapp.yml:docker-compose.database-target.yml",
     "FESTAPP_RUNTIME_DATABASE": runtime_database,
     "FESTAPP_SUPABASE_HOSTNAME": "rehearsal-api.festapp.net",
-    "FESTAPP_SUPABASE_SITE_ADDRESSES": "rehearsal-api.festapp.net",
+    # Prepare the canonical hostname without changing the runtime-generated
+    # public URL or activating any client. The one-way activation manifest is
+    # still the only switch from legacy to canonical writers.
+    "FESTAPP_SUPABASE_SITE_ADDRESSES": "rehearsal-api.festapp.net, api.festapp.net",
     "SUPABASE_PUBLIC_URL": "https://rehearsal-api.festapp.net",
     "API_EXTERNAL_URL": "https://rehearsal-api.festapp.net",
     "SITE_URL": auth_site_url,
     "ADDITIONAL_REDIRECT_URLS": ",".join(redirect_urls),
     "FESTAPP_ALLOWED_WEB_ORIGINS": ",".join(allowed_origins),
+    # Stable secret used only to hash reception QR rate-limit identifiers. Keep
+    # the existing value on repeat runs and never commit it to the repository.
+    "QR_RATE_SALT": existing_value("QR_RATE_SALT") or secrets.token_urlsafe(32),
     "DISABLE_SIGNUP": "true",
     "ENABLE_PHONE_SIGNUP": "false",
     "ENABLE_PHONE_AUTOCONFIRM": "false",
