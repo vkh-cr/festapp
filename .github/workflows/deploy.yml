@@ -207,11 +207,14 @@ jobs:
           source automation/project.conf
           if [ "${CLOUDFLARE_MANAGE_DNS:-true}" = false ]; then
             VERIFY_ORIGIN="https://${CLOUDFLARE_PROJECT_NAME}.pages.dev"
+            PUBLIC_ORIGIN="https://${DOMAIN}"
             echo "External DNS remains pending; verifying the Cloudflare Pages origin ${VERIFY_ORIGIN}."
           else
             VERIFY_ORIGIN="https://${DOMAIN}"
+            PUBLIC_ORIGIN="${VERIFY_ORIGIN}"
           fi
-          node automation/verify_web_deployment.mjs "${VERIFY_ORIGIN}" "${VERSION}"
+          node automation/verify_web_deployment.mjs \
+            "${VERIFY_ORIGIN}" "${VERSION}" automation/project.conf "${PUBLIC_ORIGIN}"
 
   skipped:
     needs: detect

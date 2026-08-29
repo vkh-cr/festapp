@@ -155,6 +155,7 @@ for needle in \
     'verify_web_deployment.mjs' \
     'CLOUDFLARE_MANAGE_DNS:-true' \
     'VERIFY_ORIGIN="https://${CLOUDFLARE_PROJECT_NAME}.pages.dev"' \
+    'PUBLIC_ORIGIN="https://${DOMAIN}"' \
     'VERIFY_ORIGIN="https://${DOMAIN}"'; do
     if grep -F -q "$needle" "$WORKFLOW"; then
         echo "  ok: deploy workflow contains release gate '$needle'"

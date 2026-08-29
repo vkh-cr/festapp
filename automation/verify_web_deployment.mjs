@@ -7,6 +7,7 @@ import path from 'node:path';
 const origin = new URL(process.argv[2]).origin;
 const expectedVersion = process.argv[3];
 const configPath = path.resolve(process.argv[4] || 'automation/project.conf');
+const publicOrigin = new URL(process.argv[5] || origin).origin;
 const maxAttempts = Number(process.env.FESTAPP_VERIFY_ATTEMPTS || 30);
 const requiredConsecutive = Number(process.env.FESTAPP_VERIFY_CONSECUTIVE || 3);
 if (!expectedVersion) {
@@ -28,7 +29,7 @@ for (const [key, expectedPath] of legalRoutes) {
   const value = configValue(key);
   assert.ok(value, `project.conf is missing ${key}`);
   const url = new URL(value);
-  assert.equal(url.origin, origin, `${key} differs from the deployed origin`);
+  assert.equal(url.origin, publicOrigin, `${key} differs from the public application origin`);
   assert.equal(url.pathname, expectedPath, `${key} does not use its canonical path`);
 }
 
