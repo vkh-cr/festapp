@@ -25,6 +25,10 @@ export class RouterService {
         return `/${cleanLink}/event`;
     }
 
+    static isPublicOccasionProgramPath(path) {
+        return /^\/[^/]+\/event(?:\/.*)?$/.test(path);
+    }
+
     static navigateToOccasion(link) {
         // For backwards compatibility or default behavior
         return RouterService.navigateToForm(link);
@@ -244,6 +248,16 @@ export class RouterService {
                      
                      return true; 
                  }
+             }
+
+             // The public program shares the same origin and stable Supabase
+             // auth-storage namespace as Flutter. Sending it through the
+             // authenticated /transfer flow can replace the requested event
+             // route with a unit dashboard (or login for anonymous visitors).
+             // Navigate directly; any existing session remains available.
+             if (RouterService.isPublicOccasionProgramPath(redirectPath)) {
+                 window.location.replace(redirectPath);
+                 return true;
              }
 
              if (!path.endsWith('auth_bridge.html')) {

@@ -180,6 +180,14 @@ test('RouterService.Sanitization', async (t) => {
             RouterService.getOccasionAppPath('/my-event/'),
             '/my-event/event',
         );
+        assert.strictEqual(
+            RouterService.isPublicOccasionProgramPath('/my-event/event/42'),
+            true,
+        );
+        assert.strictEqual(
+            RouterService.isPublicOccasionProgramPath('/admin'),
+            false,
+        );
     });
 
     await t.test('should strip query params in navigateToForm', async () => {
@@ -334,8 +342,7 @@ test('RouterService.handleInitialLoad', async (t) => {
         const handled = await RouterService.handleInitialLoad();
 
         assert.strictEqual(handled, true);
-        assert.ok(redirectUrl.includes('auth_bridge.html'));
-        assert.ok(redirectUrl.includes('redirect=%2Fconference2024%2Fevent'));
+        assert.strictEqual(redirectUrl, '/conference2024/event');
 
         // Cleanup
         if (originalCurrentLink) Object.defineProperty(RightsService, 'currentLink', originalCurrentLink);
@@ -361,8 +368,7 @@ test('RouterService.handleInitialLoad', async (t) => {
 
         // Occasion Link is NOT a Web Client route -> Redirect to Flutter
         assert.strictEqual(handled, true);
-        assert.ok(redirectUrl.includes('auth_bridge.html'));
-        assert.ok(redirectUrl.includes('redirect=%2Fmy-occasion%2Fevent'));
+        assert.strictEqual(redirectUrl, '/my-occasion/event');
 
         // Cleanup
         if (originalCurrentLink) Object.defineProperty(RightsService, 'currentLink', originalCurrentLink);
