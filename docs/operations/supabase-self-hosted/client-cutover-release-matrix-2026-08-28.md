@@ -104,9 +104,10 @@ so installing this transition web build does not itself sign users out.
 Festival Slunovrat now has a canonical version-93 overlay on
 `prod/festivalslunovrat`, a successful Cloudflare candidate at
 `festivalslunovrat.pages.dev`, complete canonical client RPC/Edge/relation
-coverage and a published 28.4 MiB immutable offline-map v2 bundle. Its custom
-domain, final native offline acceptance, iOS build-only signing proof, Android
-Windows build and backend activation remain gated. The historic
+coverage, a published 28.4 MiB immutable offline-map v2 bundle and a signed,
+non-uploaded iOS build-only candidate whose production push/app-group/domain
+entitlements passed. Its custom domain, physical-device/native offline
+acceptance, Android Windows build and backend activation remain gated. The historic
 `prod/slunovratopava` ref is not a second release source and still needs an
 explicit archival/retirement disposition before cutover.
 

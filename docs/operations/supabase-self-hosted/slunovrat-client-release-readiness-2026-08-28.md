@@ -12,7 +12,8 @@ Verified configuration inputs:
 - mapped organization: `19`, not legacy source ID `1`;
 - web origin and associated domain: `app.festivalslunovrat.cz`;
 - iOS bundle ID `festapp.festivalslunovrat`, team `8WKBB6L8LT`, and app group
-  `group.festapp.festivalslunovrat` subject to renewed provisioning proof;
+  `group.festapp.festivalslunovrat`, verified in renewed App Store profiles and
+  in the signed candidate;
 - Android application ID `fstapp.slunovratopava` as configuration only; the
   signed build remains deferred to the independent Windows workstation;
 - languages `cs,en,pl`, brand colors `#53707f`, `#f8c04f`, `#de703e`,
@@ -78,14 +79,20 @@ ID additionally has Push Notifications and Associated Domains.
 The two stale local App Store profiles were replaced with uniquely named
 build-candidate profiles using the sole valid distribution certificate. Both
 new profiles expire on 2027-08-04 and remain owner-only in the private
-`festappseed` signing directory. Their entitlement audit exposed one remaining
-Apple portal mismatch: the main app profile contains
-`group.festapp.festivalslunovrat`, while the extension profile contains only
-`group.festapp.festivalslunovrat.onesignal`. The app and extension must share
-the configured group before a signed candidate is valid. The next iOS action
-is therefore to assign `group.festapp.festivalslunovrat` to the extension App
-ID in Apple Developer, refresh both profiles, and rerun the guarded build-only
-candidate. It is not an App Store submission gate.
+`festappseed` signing directory. The notification extension App ID was corrected
+in Apple Developer to share `group.festapp.festivalslunovrat` with the main app,
+and both profiles were refreshed afterward.
+
+The guarded signed build-only lane then produced
+`Slunovrat.ipa` from source `a5ec993b52d1beeef43532c69d539384f8b27d8a`,
+version `0.19.93` build `471`, with 43,481,704 bytes and SHA-256
+`a648ed3595500cf00449e13f386db430dd0f11a919f97a15181ce830042a788d`.
+The embedded Runner signature uses production push, the expected associated
+domain and `group.festapp.festivalslunovrat`; the notification extension has
+the same group. `OneSignalLocation.framework` is absent. The build used the
+private backend/session-transition contract and a dedicated private signing
+keychain. App Store Connect was not mutated and the IPA was not uploaded or
+submitted.
 
 Remaining external/final-cutover gates:
 
@@ -96,9 +103,9 @@ Remaining external/final-cutover gates:
    manifest and complete native cold-start/airplane-mode acceptance before
    setting `forceOfflineMap=true`; the manifest is published but intentionally
    not yet activated for older installed clients;
-3. create and validate a build-only iOS candidate with the existing App ID,
-   distribution certificate, provisioning profile, app group and OneSignal
-   extension; do not submit the final App Store release yet;
+3. install and smoke-test the validated signed iOS candidate on a physical
+   device against the legacy backend and the real production origin; do not
+   submit the final App Store release yet;
 4. prepare the Android configuration, but defer the signed build to the
    independent Windows workstation;
 5. perform the production write freeze, final delta import and zero-lag audit,
