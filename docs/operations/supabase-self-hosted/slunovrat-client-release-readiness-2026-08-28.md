@@ -67,6 +67,26 @@ zero rows before and after the change; four nullable columns and three
 `get_user_inventory()` verification completed without PostgreSQL `42703`.
 No occasion, user, ticket, order or Storage data was changed.
 
+An iOS build-only pass then produced an unsigned 304.4 MB Xcode archive for
+`festapp.festivalslunovrat`, version `0.19.93` build `471`, display name
+`Slunovrat 2026`, with the notification service extension embedded. No IPA was
+uploaded or submitted. App Store Connect readback matched Apple ID
+`6481703402`, app name `Festival Slunovrat`, team `8WKBB6L8LT`, the main bundle
+ID and the extension bundle ID. Both App IDs have App Groups enabled; the main
+ID additionally has Push Notifications and Associated Domains.
+
+The two stale local App Store profiles were replaced with uniquely named
+build-candidate profiles using the sole valid distribution certificate. Both
+new profiles expire on 2027-08-04 and remain owner-only in the private
+`festappseed` signing directory. Their entitlement audit exposed one remaining
+Apple portal mismatch: the main app profile contains
+`group.festapp.festivalslunovrat`, while the extension profile contains only
+`group.festapp.festivalslunovrat.onesignal`. The app and extension must share
+the configured group before a signed candidate is valid. The next iOS action
+is therefore to assign `group.festapp.festivalslunovrat` to the extension App
+ID in Apple Developer, refresh both profiles, and rerun the guarded build-only
+candidate. It is not an App Store submission gate.
+
 Remaining external/final-cutover gates:
 
 1. point `app.festivalslunovrat.cz` at the prepared Cloudflare Pages project and
