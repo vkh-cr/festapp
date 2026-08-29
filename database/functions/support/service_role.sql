@@ -8,9 +8,6 @@ DECLARE
   v_role text := NULLIF(current_setting('request.jwt.claim.role', true), '');
   v_claims text;
 BEGIN
-  IF session_user = 'postgres' THEN
-    RETURN true;
-  END IF;
   IF v_role IS NULL THEN
     v_claims := NULLIF(current_setting('request.jwt.claims', true), '');
     IF v_claims IS NOT NULL THEN
@@ -21,7 +18,10 @@ BEGIN
       END;
     END IF;
   END IF;
-  RETURN COALESCE(v_role = 'service_role', false);
+  IF v_role IS NOT NULL THEN
+    RETURN v_role = 'service_role';
+  END IF;
+  RETURN session_user = 'postgres';
 END;
 $$;
 

@@ -5,6 +5,10 @@ import {
   REQUIRED_FREEZE_LANES,
   evaluateCutoverMode,
 } from '../hetzner-supabase/merge/cutover-mode-gate.mjs';
+import {
+  SOURCE_ALIASES,
+  SOURCES,
+} from '../hetzner-supabase/merge/lib.mjs';
 
 const now = Date.parse('2026-08-28T12:00:00Z');
 
@@ -13,10 +17,7 @@ function fullFreezeEvidence() {
     version: 1,
     mode: 'full-freeze',
     observed_at: '2026-08-28T11:59:00Z',
-    source_projects: {
-      default: 'kjdpmixlnhntmxjedpxh',
-      a: 'lwfpdjxsdmkfyrzqbrlk',
-    },
+    source_projects: { ...SOURCES },
     writer_inventory: { status: 'complete', unknown_writers: 0, direct_dml_bypasses: 0 },
     freeze: {
       status: 'active',
@@ -24,10 +25,10 @@ function fullFreezeEvidence() {
       auth_refresh_activated_at: '2026-08-28T11:54:00Z',
       blocked_lanes: [...REQUIRED_FREEZE_LANES],
     },
-    sources: {
-      default: { active_mutating_sessions: 0, final_marker: 'default-final-marker' },
-      a: { active_mutating_sessions: 0, final_marker: 'a-final-marker' },
-    },
+    sources: Object.fromEntries(SOURCE_ALIASES.map((alias) => [alias, {
+      active_mutating_sessions: 0,
+      final_marker: `${alias}-final-marker`,
+    }])),
     target: { writes: 'closed', external_side_effects: 'disabled' },
     snapshot: { started_at: null },
     validation: { status: 'pass', unresolved_conflicts: 0, orphan_foreign_keys: 0 },

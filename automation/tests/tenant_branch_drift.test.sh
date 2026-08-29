@@ -14,7 +14,10 @@ done < <(git ls-files -co --exclude-standard -z)) |
   tar -xf - -C "$REPO"
 
 git -C "$REPO" init -q -b main
-git -C "$REPO" add -A
+# The real repository intentionally tracks a small set of generated FVM pins
+# below an otherwise ignored .fvm directory. Preserve that tracked baseline in
+# the synthetic repository so replay validation exercises the production tree.
+git -C "$REPO" add -Af
 git -C "$REPO" -c user.name=cutover-test -c user.email=cutover@example.invalid commit -qm base
 BASE_SHA=$(git -C "$REPO" rev-parse HEAD)
 git -C "$REPO" switch -qc prod/csmostrava2026
