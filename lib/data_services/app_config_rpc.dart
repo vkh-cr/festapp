@@ -15,7 +15,7 @@ Future<dynamic> loadAppConfigWithLegacyFallback({
   try {
     return await invoke('get_app_config_v219');
   } catch (error) {
-    if (!_isMissingV219(error)) rethrow;
+    if (!_isMissingFunction(error, 'get_app_config_v219')) rethrow;
     return _loadLegacyAppConfig(invoke);
   }
 }
@@ -23,7 +23,13 @@ Future<dynamic> loadAppConfigWithLegacyFallback({
 Future<Map<String, dynamic>> _loadLegacyAppConfig(
   AppConfigRpcInvoker invoke,
 ) async {
-  final legacy = await invoke('get_app_config_v218');
+  dynamic legacy;
+  try {
+    legacy = await invoke('get_app_config_v218');
+  } catch (error) {
+    if (!_isMissingFunction(error, 'get_app_config_v218')) rethrow;
+    legacy = await invoke('get_app_config_v2');
+  }
   if (legacy is! Map) {
     throw StateError('Legacy app-config response is not an object');
   }
@@ -33,9 +39,8 @@ Future<Map<String, dynamic>> _loadLegacyAppConfig(
   };
 }
 
-bool _isMissingV219(Object error) {
+bool _isMissingFunction(Object error, String functionName) {
   if (error is PostgrestException && error.code == 'PGRST202') return true;
   final description = error.toString();
-  return description.contains('PGRST202') &&
-      description.contains('get_app_config_v219');
+  return description.contains('PGRST202') && description.contains(functionName);
 }
