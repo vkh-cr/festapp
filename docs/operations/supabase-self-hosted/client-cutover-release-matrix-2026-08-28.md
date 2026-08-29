@@ -14,7 +14,7 @@ version/adoption evidence or by the maintenance freeze.
 | CSM and Jubileum (`prod/csmostrava2026`, `prod/jubileum2025`) | `festapp.jm2025` / `>450` | `fstapp.jm2025` / `>450` | One store identity is shared by both refs; publish/prove the newest transition artifact and verify both tenant entry paths. |
 | Hvězda Mořská (`prod/hvezdamorska`) | `festapp.hvezdamorska` / `>451` | `fstapp.hvezdamorska` / `>451` | Publish and prove transition build on both stores. |
 | Festival Slunovrat (`prod/festivalslunovrat`, `prod/slunovratopava`) | `festapp.festivalslunovrat` / `>208` | `fstapp.slunovratopava` / `>208` | Publish and prove transition build on both stores. Android signed build is deliberately deferred to the independent Windows workstation. |
-| Absolventský Velehrad (`prod/absolventskyvelehrad`) | `festapp.absolventskyvelehrad` / `>243` | `fstapp.AV25` / `>243` | **Open:** publish/prove both transition lanes, or record store/traffic evidence that the individual lane is absent or read-only. |
+| Absolventský Velehrad (`prod/absolventskyvelehrad`) | `festapp.absolventskyvelehrad` / signed candidate `467` | `fstapp.AV25` / `>243` | Canonical web is deployed and a signed, non-uploaded iOS transition candidate is preserved. Complete physical-device/store proof; Android remains deferred to the independent Windows workstation. |
 | Člověk a víra (`prod/cavfotofest`) | `festapp.cavfotofest` / `>243` | `fstapp.cav` / `>243` | **Open:** publish/prove both transition lanes, or record store/traffic evidence that the individual lane is absent or read-only. |
 | Do O BiS Cup (`prod/doobiscup`) | `festapp.doobiscup` / `>243` | `fstapp.diecezkodoo` / `>243` | **Open:** publish/prove both transition lanes, or record store/traffic evidence that the individual lane is absent or read-only. |
 | AKSM (`prod/aksmcz`) | `festapp.aksmcz` / observed through build `270` on several legacy refs | `fstapp.csa` / `>230` | **Open:** inventory both listings. The reused iOS identity must be reconciled with Farnost Opava/Festapp legacy refs before choosing release versus retirement. |
@@ -110,6 +110,19 @@ entitlements passed. Its custom domain, physical-device/native offline
 acceptance, Android Windows build and backend activation remain gated. The historic
 `prod/slunovratopava` ref is not a second release source and still needs an
 explicit archival/retirement disposition before cutover.
+
+Absolventsky Velehrad now has a canonical version-93 overlay on
+`prod/absolventskyvelehrad` and production web build `0.19.93+467` at
+`app.absolventskyvelehrad.cz`. Its cold-load production smoke reached the
+program route with no browser console errors, initialized OneSignal, and served
+the legacy-phase activation document as JSON with `no-store`. Apple Developer
+now assigns the existing `group.festapp.festapp.onesignal` group to both the
+main bundle and notification extension. A signed, non-uploaded iOS candidate
+from source `73e3706d390d7291c557cb8b0b8c56feec311068` passed production push,
+shared app-group, associated-domain, extension-identity and prohibited-location-
+framework checks. Physical-device/native acceptance, the App Store release and
+the Android Windows build remain gated; the informational root
+`absolventskyvelehrad.cz` remains separate from the app subdomain.
 
 The Hvezda Morska `466` production smoke passes the all-unit catalogue root,
 occasion detail, reservation handoff to `/form/povyseni2026`, and the Flutter
