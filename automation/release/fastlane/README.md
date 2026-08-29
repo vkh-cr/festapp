@@ -77,6 +77,14 @@ Read-only signing certificate and provisioning profile inventory
 
 Regenerate only the notification-extension App Store profile after capability changes
 
+### ios refresh_app_store_profiles
+
+```sh
+[bundle exec] fastlane ios refresh_app_store_profiles
+```
+
+Regenerate both App Store profiles after capability changes
+
 ### ios bootstrap_signing
 
 ```sh
