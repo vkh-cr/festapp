@@ -107,3 +107,28 @@ fresh full-freeze snapshot and final markers, `api.festapp.net` activation and
 the four legacy Storage URL rewrites, followed by store adoption and the final
 single-write-authority gate. This evidence does not authorize production
 cutover.
+
+## Three-target SQL parity closure — 2026-08-29
+
+Migration `20260829110000_repair_legacy_companion_reader.sql` is now applied to
+both cloud sources and the active self-hosted rehearsal database
+`festapp_rehearsal_20260828234500`. The self-hosted application was performed
+through the authenticated, same-origin Studio database API because direct SSH
+was unavailable from the operator's changed source address. No database secret
+or plaintext runtime archive was written to disk.
+
+The migration body and its `supabase_migrations.schema_migrations` ledger row
+were committed in one database transaction. The applied file SHA-256 was
+`3de1801f33191e57b77544ad7aa1ee6a80051f00571274043c0e5066f54b528d`.
+Post-transaction catalog evidence proves exactly one
+`get_user_companions_data(bigint)` function with argument `p_occasion`,
+`SECURITY DEFINER`, stable volatility and fixed `search_path=public,
+extensions`; the obsolete no-argument overload is absent. Execute remains
+revoked from `anon` and granted to `authenticated`, and the function reads the
+private canonical companion projection. A public RPC probe resolved the route
+and returned the expected authorization failure rather than `404`.
+
+This closes the database-object parity gate across default cloud, source-a
+cloud and self-hosted rehearsal. It does not replace the remaining full-freeze,
+client adoption, canonical hostname and single-write-authority gates described
+above.

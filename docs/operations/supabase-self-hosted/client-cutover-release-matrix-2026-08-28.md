@@ -1,4 +1,4 @@
-# Client cutover release matrix — 2026-08-28
+# Client cutover release matrix — updated 2026-08-29
 
 This is the authoritative client scope for the canonical Supabase cutover. It
 defines release lanes, not historic binaries: each active mobile identity needs
@@ -62,13 +62,13 @@ verified by completed-bundle inspection:
 | Production ref | Public site | Source family |
 | --- | --- | --- |
 | `prod/absolventskyvelehrad` | `app.absolventskyvelehrad.cz` | `a` |
-| `prod/cavfotofest` | `clovekavira.netlify.app` | `a`, organization `3→6` |
+| `prod/cavfotofest` | `clovekavira.festapp.net` | `a`, organization `3→6` |
 | `prod/csmostrava2026` | `csmostrava.festapp.net` | `a`, organization `9→12` |
 | `prod/doobiscup` | `biscup.netlify.app` | `a` |
 | `prod/farnostopava` | `rezervace.farnostopava.cz` | `a` |
-| `prod/festapp` | `vstupenky.online` | `default` |
-| `prod/festapptickets` | `vstupenky.online` | `default` (duplicate deployment ownership must be resolved) |
-| `prod/hvezdamorska` | `hvezdamorska.netlify.app` | `a`, organization `4→7` |
+| `prod/festapp` | `live.festapp.net` | `default` |
+| `prod/festapptickets` | `vstupenky.online` | `default`; canonical ticket-web deployment owner |
+| `prod/hvezdamorska` | `hvezdamorska.festapp.net` | `a`, organization `4→7` |
 | `prod/jubileum2025` | `jubileum2025.netlify.app` | `a` |
 
 Five legacy refs currently lack `automation/project.conf` and therefore cannot
@@ -78,6 +78,22 @@ Each must receive exactly one documented disposition before cutover: restore a
 canonical tenant overlay and deploy it, enforce read-only behavior, or prove
 from hosting/DNS/traffic/write telemetry that it is retired. Branch age is not
 retirement evidence.
+
+The active Cloudflare web lanes were regenerated from main
+`6fb7930337b5033aff6b64d6c2fc96ed0fdbf9eb` on 2026-08-29. All use Flutter
+`3.47.2` and semantic version `0.19.93`: CSM Ostrava, Hvezda Morska and Clovek
+a vira use build `465`; the ticket web uses build `464`; and
+`live.festapp.net` uses build `469`. Build numbers are monotonic within each
+release lane and are not expected to be identical across unrelated store/web
+identities. The three source-a web overlays remain deliberately in `legacy`
+activation phase while carrying their mapped canonical organization and
+`api.festapp.net` configuration, so the final activation document can switch
+them after the full-freeze gate without rebuilding the bundle.
+
+Festival Slunovrat remains an explicitly deferred lane. It must not be inferred
+as ready from the four active deployments above; its outdated schema/overlay
+requires its own migration and release round before it can enter the cutover
+matrix as deployed.
 
 Each web row requires source SHA, generated config digest, deployed bundle
 digest, public activation document with `no-store`, cold-load legacy and
