@@ -32,10 +32,11 @@ GLYPH_RANGES=(
 FONT_STACKS=("noto_sans_regular" "noto_sans_bold")
 
 usage() {
-  echo "Usage: $0 --occasion SLUG --occasion-id ID --version vN --bbox W,S,E,N --min-zoom N --max-zoom N [--source-url URL] [--resume-existing]"
+  echo "Usage: $0 --occasion SLUG [--occasion-link LINK] --occasion-id ID --version vN --bbox W,S,E,N --min-zoom N --max-zoom N [--source-url URL] [--resume-existing]"
 }
 
 OCCASION=""
+OCCASION_LINK=""
 OCCASION_ID=""
 ARTIFACT_VERSION=""
 BBOX=""
@@ -47,6 +48,7 @@ RESUME_EXISTING=false
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --occasion) OCCASION="${2:-}"; shift 2 ;;
+    --occasion-link) OCCASION_LINK="${2:-}"; shift 2 ;;
     --occasion-id) OCCASION_ID="${2:-}"; shift 2 ;;
     --version) ARTIFACT_VERSION="${2:-}"; shift 2 ;;
     --bbox) BBOX="${2:-}"; shift 2 ;;
@@ -59,12 +61,13 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+OCCASION_LINK="${OCCASION_LINK:-$OCCASION}"
 if [[ -z "$OCCASION" || -z "$OCCASION_ID" || -z "$ARTIFACT_VERSION" || -z "$BBOX" || -z "$MIN_ZOOM" || -z "$MAX_ZOOM" ]]; then
   usage >&2
   exit 2
 fi
-if [[ ! "$OCCASION" =~ ^[a-z0-9-]+$ || ! "$ARTIFACT_VERSION" =~ ^v[1-9][0-9]*$ || ! "$OCCASION_ID" =~ ^[0-9]+$ ]]; then
-  echo "occasion, occasion-id, or version has an invalid format" >&2
+if [[ ! "$OCCASION" =~ ^[a-z0-9-]+$ || ! "$OCCASION_LINK" =~ ^[a-zA-Z0-9-]+$ || ! "$ARTIFACT_VERSION" =~ ^v[1-9][0-9]*$ || ! "$OCCASION_ID" =~ ^[0-9]+$ ]]; then
+  echo "occasion, occasion-link, occasion-id, or version has an invalid format" >&2
   exit 2
 fi
 if [[ ! "$MIN_ZOOM" =~ ^[0-9]+$ || ! "$MAX_ZOOM" =~ ^[0-9]+$ || "$MIN_ZOOM" -gt "$MAX_ZOOM" ]]; then
@@ -87,9 +90,10 @@ if ! awk -v w="$BBOX_WEST" -v s="$BBOX_SOUTH" -v e="$BBOX_EAST" -v n="$BBOX_NORT
 fi
 
 OUTPUT_DIR="$SCRIPT_DIR/out/$OCCASION/$ARTIFACT_VERSION"
-MBTILES_NAME="ostrava-z${MIN_ZOOM}-${MAX_ZOOM}.mbtiles"
+MAP_NAME="map-z${MIN_ZOOM}-${MAX_ZOOM}"
+MBTILES_NAME="$MAP_NAME.mbtiles"
 MBTILES_PATH="$OUTPUT_DIR/$MBTILES_NAME"
-PMTILES_NAME="ostrava-z${MIN_ZOOM}-${MAX_ZOOM}.pmtiles"
+PMTILES_NAME="$MAP_NAME.pmtiles"
 PMTILES_PATH="$OUTPUT_DIR/$PMTILES_NAME"
 TRACKED_MANIFEST_DIR="$MANIFEST_ROOT/$OCCASION/$ARTIFACT_VERSION"
 TRACKED_MANIFEST="$TRACKED_MANIFEST_DIR/manifest.json"
@@ -138,7 +142,7 @@ fi
 
 curl -fsS "$SUPABASE_ENDPOINT/rest/v1/rpc/get_occasion_by_link" \
   -H "apikey: $SUPABASE_PUBLIC_KEY" -H 'Content-Type: application/json' \
-  --data "$(jq -cn --arg slug "$OCCASION" '{link_param:$slug}')" > "$TMP_DIR/occasion.json"
+  --data "$(jq -cn --arg link "$OCCASION_LINK" '{link_param:$link}')" > "$TMP_DIR/occasion.json"
 if [[ "$(jq -r '.id' "$TMP_DIR/occasion.json")" != "$OCCASION_ID" ]]; then
   echo "Live occasion id does not match --occasion-id" >&2
   exit 1
@@ -186,7 +190,10 @@ SOURCE_ETAG="$(awk 'BEGIN{IGNORECASE=1} /^etag:/ {sub(/^[^:]+:[[:space:]]*/,"");
 SOURCE_LAST_MODIFIED="$(awk 'BEGIN{IGNORECASE=1} /^last-modified:/ {sub(/^[^:]+:[[:space:]]*/,""); value=$0} END{print value}' <<< "$SOURCE_HEADERS")"
 
 mkdir -p "$OUTPUT_DIR/sprites" "$OUTPUT_DIR/glyphs" "$TRACKED_MANIFEST_DIR"
-cp "$STYLE_DIR/style.json" "$OUTPUT_DIR/style.json"
+jq --arg base_url "https://assets.festapp.net/$OCCASION/$ARTIFACT_VERSION/" '
+  .sprite = $base_url + "sprites/sprites" |
+  .glyphs = $base_url + "glyphs/{fontstack}/{range}.pbf"
+' "$STYLE_DIR/style.json" > "$OUTPUT_DIR/style.json"
 cp "$STYLE_DIR/sprites/"* "$OUTPUT_DIR/sprites/"
 
 if [[ "$RESUME_EXISTING" != true ]]; then

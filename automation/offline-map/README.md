@@ -32,12 +32,18 @@ Install `versatiles`, `sqlite3`, `jq`, `shasum`, and `curl`, then run:
 ```bash
 automation/offline-map/build.sh \
   --occasion csmostrava2026 \
+  --occasion-link csmostrava2026 \
   --occasion-id 643 \
   --version v1 \
   --bbox 18.13,49.76,18.36,49.89 \
   --min-zoom 0 \
   --max-zoom 14
 ```
+
+`--occasion` is the stable public asset namespace while `--occasion-link` is
+the current public application link used to resolve live content. They are
+separate because a tenant can keep an immutable asset namespace while an
+occasion is duplicated or renamed.
 
 The script fails before download unless current public occasion data has at
 least 1 km of margin inside the requested bbox. It refuses to overwrite an
@@ -77,12 +83,12 @@ The build already performs the contract checks. For an explicit probe:
 
 ```bash
 versatiles probe -ddd --sample 10 \
-  automation/offline-map/out/csmostrava2026/v1/ostrava-z0-14.mbtiles
+  automation/offline-map/out/csmostrava2026/v1/map-z0-14.mbtiles
 
 versatiles probe -ddd --sample 10 \
-  automation/offline-map/out/csmostrava2026/v2/ostrava-z0-14.pmtiles
+  automation/offline-map/out/csmostrava2026/v2/map-z0-14.pmtiles
 
-sqlite3 automation/offline-map/out/csmostrava2026/v1/ostrava-z0-14.mbtiles \
+sqlite3 automation/offline-map/out/csmostrava2026/v1/map-z0-14.mbtiles \
   'pragma integrity_check; select name,value from metadata order by name;'
 ```
 
@@ -90,7 +96,7 @@ Start the interactive local preview:
 
 ```bash
 automation/offline-map/preview.sh \
-  csmostrava2026 v1 ostrava-z0-14.mbtiles
+  csmostrava2026 v1 map-z0-14.mbtiles
 ```
 
 Open `http://localhost:8080`, inspect central Ostrava and all four bbox edges,
