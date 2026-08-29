@@ -125,6 +125,7 @@ jobs:
           HVEZDA_MORSKA_MANIFEST: ${{ secrets.FESTAPP_RELEASE_MANIFEST_HVEZDAMORSKA }}
           CAV_MANIFEST: ${{ secrets.FESTAPP_RELEASE_MANIFEST_CAVFOTOFEST }}
           AV_MANIFEST: ${{ secrets.FESTAPP_RELEASE_MANIFEST_ABSOLVENTSKYVELEHRAD }}
+          FESTAPP_MANIFEST: ${{ secrets.FESTAPP_RELEASE_MANIFEST_FESTAPP }}
         shell: bash
         run: |
           set -euo pipefail
@@ -140,6 +141,7 @@ jobs:
             prod/hvezdamorska) RELEASE_MANIFEST="$HVEZDA_MORSKA_MANIFEST" ;;
             prod/cavfotofest) RELEASE_MANIFEST="$CAV_MANIFEST" ;;
             prod/absolventskyvelehrad) RELEASE_MANIFEST="$AV_MANIFEST" ;;
+            prod/festapp) RELEASE_MANIFEST="$FESTAPP_MANIFEST" ;;
             *) echo "::error::No private release manifest mapping for $BRANCH."; exit 1 ;;
           esac
           test -n "$RELEASE_MANIFEST" || {
