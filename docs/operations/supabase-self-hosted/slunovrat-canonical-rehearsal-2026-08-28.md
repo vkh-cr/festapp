@@ -74,6 +74,23 @@ target. The private evidence is
 `slunovrat-client-rpc-contract-final-20260829.json` together with
 `slunovrat-backend-surface-postdeploy-20260829.json`.
 
+A complete distinct-name comparison also covered functions not referenced by
+the current client. Of 219 legacy names, 213 remain available under the same
+name. The six intentional retirements all have explicit canonical successors:
+
+| Retired legacy name | Canonical contract |
+| --- | --- |
+| `add_transaction_to_payment_info` | authenticated `add_transaction_to_payment_info_ws` |
+| `create_companion` | occasion-aware `create_companion_client_sync_v1` and the scoped compatibility facade |
+| `delete_form` | `delete_form_client_sync_v1` and authenticated `delete_form_ws` facade |
+| `delete_user` | separate owned-companion and occasion-membership deletion commands |
+| `get_occasion_user_email` | private service-role-only `get_user_delivery_email` |
+| `get_user_companions` | occasion-aware `get_user_companions_data` |
+
+The current client references none of the six retired names. Their removal is
+therefore a deliberate security/scope migration, not missing Slunovrat
+functionality.
+
 This establishes the intended transition contract: already released clients
 continue to use the unchanged legacy backend until activation, while the new
 Slunovrat build contains both the transition adapter and the complete modern
