@@ -81,8 +81,8 @@ retirement evidence.
 
 The active Cloudflare web lanes were regenerated from main
 `6fb7930337b5033aff6b64d6c2fc96ed0fdbf9eb` on 2026-08-29. All use Flutter
-`3.47.2` and semantic version `0.19.93`: CSM Ostrava, Hvezda Morska and Clovek
-a vira use build `465`; the ticket web uses build `464`; and
+`3.47.2` and semantic version `0.19.93`: CSM Ostrava and Clovek a vira use
+build `465`; Hvezda Morska uses build `466`; the ticket web uses build `464`; and
 `live.festapp.net` uses build `469`. Build numbers are monotonic within each
 release lane and are not expected to be identical across unrelated store/web
 identities. The three source-a web overlays remain deliberately in `legacy`
@@ -94,6 +94,16 @@ Festival Slunovrat remains an explicitly deferred lane. It must not be inferred
 as ready from the four active deployments above; its outdated schema/overlay
 requires its own migration and release round before it can enter the cutover
 matrix as deployed.
+
+The Hvezda Morska `466` production smoke passes the all-unit catalogue root,
+occasion detail, reservation handoff to `/form/povyseni2026`, and the Flutter
+`/admin` handoff. Its OneSignal app still declares
+`https://hvezdamorska.netlify.app` as both Chrome and Safari web origin. The
+repository-held app REST key can read but cannot mutate that organization-level
+setting; an authorized OneSignal organization key or dashboard session must
+change both origins to `https://hvezdamorska.festapp.net` before this lane's web
+push gate is complete. Browser subscriptions cannot be transferred between
+origins, so users must opt in on the new origin after that change.
 
 Each web row requires source SHA, generated config digest, deployed bundle
 digest, public activation document with `no-store`, cold-load legacy and
