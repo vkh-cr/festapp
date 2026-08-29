@@ -1,9 +1,9 @@
 {
-  "name": "Slunovrat 2026",
-  "short_name": "Slunovrat",
-  "description": "Mobilní aplikace pro Festival Slunovrat.",
+  "name": "Festapp",
+  "short_name": "Festapp",
+  "description": "Platforma pro správu akcí, programu a vstupenek.",
   "id": "/",
-  "start_url": "/2025-copy-98cf835a/",
+  "start_url": "/",
   "scope": "/",
   "orientation": "portrait-primary",
   "icons": [

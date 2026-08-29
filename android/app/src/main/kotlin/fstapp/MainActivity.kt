@@ -1,4 +1,4 @@
-package fstapp.slunovratopava
+package fstapp.fstapp
 
 import io.flutter.embedding.android.FlutterActivity
 
