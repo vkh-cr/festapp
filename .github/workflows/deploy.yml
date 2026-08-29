@@ -24,6 +24,7 @@ jobs:
           set -euo pipefail
           BRANCH="${GITHUB_REF#refs/heads/}"
           case "$BRANCH" in
+            prod/absolventskyvelehrad) TENANT_ID=absolventskyvelehrad ;;
             prod/cavfotofest) TENANT_ID=cavfotofest ;;
             prod/csmostrava2026) TENANT_ID=csmostrava2026 ;;
             prod/festapp) TENANT_ID=festapp ;;

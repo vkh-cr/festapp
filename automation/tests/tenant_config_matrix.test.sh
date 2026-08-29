@@ -27,7 +27,7 @@ hash_generated() {
   done < "$PROJECT_ROOT/automation/tenant-overlays/generated.paths"
 }
 
-for tenant in festapp festapptickets cavfotofest csmostrava2026 festivalslunovrat hvezdamorska; do
+for tenant in festapp festapptickets absolventskyvelehrad cavfotofest csmostrava2026 festivalslunovrat hvezdamorska; do
   root="$TMP_ROOT/$tenant"
   copy_worktree "$root"
   config="$PROJECT_ROOT/automation/tests/fixtures/tenants/$tenant.conf"
@@ -39,6 +39,10 @@ for tenant in festapp festapptickets cavfotofest csmostrava2026 festivalslunovra
 done
 
 grep -qE 'fixturecsm' "$TMP_ROOT/csmostrava2026/lib/app_config.dart"
+grep -qE 'fixtureav' "$TMP_ROOT/absolventskyvelehrad/lib/app_config.dart"
+grep -qE 'organization = 5' "$TMP_ROOT/absolventskyvelehrad/web_client/src/app_config.js"
+grep -qF "backendActivationTenantId = 'absolventskyvelehrad'" "$TMP_ROOT/absolventskyvelehrad/lib/app_config.dart"
+grep -qF 'backendActivationCanonicalOrganizationId = 8' "$TMP_ROOT/absolventskyvelehrad/web_client/src/app_config.js"
 grep -qE 'fixturecav' "$TMP_ROOT/cavfotofest/lib/app_config.dart"
 grep -qE 'fixturehm' "$TMP_ROOT/hvezdamorska/lib/app_config.dart"
 grep -qF "supabaseUrl = 'https://fixtureslunovrat.supabase.co'" "$TMP_ROOT/festivalslunovrat/lib/app_config.dart"
