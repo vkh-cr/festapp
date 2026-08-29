@@ -1,4 +1,4 @@
-# Client cutover release matrix — updated 2026-08-29
+# Client cutover release matrix — updated 2026-08-30
 
 This is the authoritative client scope for the canonical Supabase cutover. It
 defines release lanes, not historic binaries: each active mobile identity needs
@@ -16,7 +16,7 @@ version/adoption evidence or by the maintenance freeze.
 | Festival Slunovrat (`prod/festivalslunovrat`, `prod/slunovratopava`) | `festapp.festivalslunovrat` / `>208` | `fstapp.slunovratopava` / `>208` | Publish and prove transition build on both stores. Android signed build is deliberately deferred to the independent Windows workstation. |
 | Absolventský Velehrad (`prod/absolventskyvelehrad`) | `festapp.absolventskyvelehrad` / signed candidate `467` | `fstapp.AV25` / `>243` | Canonical web is deployed and a signed, non-uploaded iOS transition candidate is preserved. Complete physical-device/store proof; Android remains deferred to the independent Windows workstation. |
 | Člověk a víra (`prod/cavfotofest`) | `festapp.cavfotofest` / signed candidate `465` | `fstapp.cav` / `>243` | Canonical web is deployed and a signed, non-uploaded iOS transition candidate is preserved. Complete physical-device/store proof; Android remains deferred to the independent Windows workstation. |
-| Do O BiS Cup (`prod/doobiscup`) | `festapp.doobiscup` / `>243` | `fstapp.diecezkodoo` / `>243` | **Open:** publish/prove both transition lanes, or record store/traffic evidence that the individual lane is absent or read-only. |
+| Do O BiS Cup (`prod/doobiscup`) | `festapp.doobiscup` / signed candidate `472` | `fstapp.diecezkodoo` / `>243` | Canonical web is deployed and a signed, non-uploaded iOS transition candidate is preserved. Complete physical-device/store proof; Android remains deferred to the independent Windows workstation. |
 | AKSM (`prod/aksmcz`) | `festapp.aksmcz` / observed through build `270` on several legacy refs | `fstapp.csa` / `>230` | **Open:** inventory both listings. The reused iOS identity must be reconciled with Farnost Opava/Festapp legacy refs before choosing release versus retirement. |
 | Farnost Opava (`prod/farnostopava`) | `festapp.aksmcz` / `>259` (shared legacy identity) | `fstapp.fstapp` / `>259` (shared Festapp identity) | **Open:** prove this is a web-only tenant of the shared binaries, or verify the shared transition binary routes it correctly; do not create a duplicate store upload blindly. |
 | AVApp (`prod/avapp`) | `festapp.festapp` / `>45` (collides with current Festapp identity) | `vkhcr.avapp` / `>45` | **Open:** reconcile the iOS identity collision and classify each listing as transition release or retired/read-only. |
@@ -64,7 +64,7 @@ verified by completed-bundle inspection:
 | `prod/absolventskyvelehrad` | `app.absolventskyvelehrad.cz` | `a` |
 | `prod/cavfotofest` | `clovekavira.festapp.net` | `a`, organization `3→6` |
 | `prod/csmostrava2026` | `csmostrava.festapp.net` | `a`, organization `9→12` |
-| `prod/doobiscup` | `biscup.netlify.app` | `a` |
+| `prod/doobiscup` | `biscup.festapp.net` | `a`, organization `2→5` |
 | `prod/farnostopava` | `rezervace.farnostopava.cz` | `a` |
 | `prod/festapp` | `live.festapp.net` | `default` |
 | `prod/festapptickets` | `vstupenky.online` | `default`; canonical ticket-web deployment owner |
@@ -134,6 +134,19 @@ non-uploaded iOS candidate from source
 associated-domain, extension-identity and prohibited-location-framework checks.
 Physical-device/native acceptance, App Store release and Android Windows build
 remain gated.
+
+BISCUP now has a canonical version-93 overlay on `prod/doobiscup` and
+production web build `0.19.93+472` at `biscup.festapp.net`. The old
+`biscup.netlify.app` origin preserves deep paths through HTTP 301 and retains
+only the retirement/PWA compatibility workers. OneSignal's saved web origin was
+changed to the canonical domain; a fresh browser session then initialized it
+without an origin error. Apple Developer now assigns only
+`group.vkhcr.doobiscup.onesignal` to both bundle IDs, and the regenerated
+profiles produced a signed, non-uploaded iOS candidate from source
+`72d5a399272b7ac2dcdada1f298a9d486a0d779e`. Direct IPA inspection passed
+production push, app-group, associated-domain, extension-identity and
+prohibited-location-framework checks. Physical-device/native acceptance, App
+Store release and Android Windows build remain gated.
 
 The Hvezda Morska `466` production smoke passes the all-unit catalogue root,
 occasion detail, reservation handoff to `/form/povyseni2026`, and the Flutter
