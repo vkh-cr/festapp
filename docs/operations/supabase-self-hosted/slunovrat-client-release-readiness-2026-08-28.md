@@ -41,6 +41,13 @@ Completed after the initial readiness inventory:
 - the existing OneSignal application retained the production
   `app.festivalslunovrat.cz` web origin, and a zero-recipient provider canary
   succeeded without sending a notification;
+- compact offline-map schema 3 is implemented on canonical `main` without
+  changing the existing schema-2 dual-renderer contract. Immutable Slunovrat
+  `festivalslunovrat/v2` is publicly verified with 12 assets / 29,783,342 bytes
+  (28.4 MiB), down from 79,999,911 bytes. It contains PMTiles plus Latin,
+  Latin-Extended and General-Punctuation glyphs, no duplicate MBTiles payload,
+  and has manifest SHA-256
+  `95f8ceec864f1b2464ea4c414f9a8c3cc5c785f9de2a9ef14f22e590d556456f`;
 - encrypted canonical backup and isolated restore verification passed.
 
 Remaining external/final-cutover gates:
@@ -48,8 +55,10 @@ Remaining external/final-cutover gates:
 1. point `app.festivalslunovrat.cz` at the prepared Cloudflare Pages project and
    verify TLS, OneSignal service-worker scope and provider delivery on that real
    origin;
-2. replace the exhausted online map dependency with the approved offline map
-   generation before treating the Map screen as release-final;
+2. point the build-only Slunovrat candidate at the verified offline-map v2
+   manifest and complete native cold-start/airplane-mode acceptance before
+   setting `forceOfflineMap=true`; the manifest is published but intentionally
+   not yet activated for older installed clients;
 3. create and validate a build-only iOS candidate with the existing App ID,
    distribution certificate, provisioning profile, app group and OneSignal
    extension; do not submit the final App Store release yet;
