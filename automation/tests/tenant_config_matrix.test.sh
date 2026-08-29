@@ -27,7 +27,7 @@ hash_generated() {
   done < "$PROJECT_ROOT/automation/tenant-overlays/generated.paths"
 }
 
-for tenant in festapp festapptickets absolventskyvelehrad cavfotofest csmostrava2026 doobiscup festivalslunovrat hvezdamorska; do
+for tenant in festapp festapptickets absolventskyvelehrad cavfotofest csmostrava2026 doobiscup festivalslunovrat hvezdamorska jubileum2025; do
   root="$TMP_ROOT/$tenant"
   copy_worktree "$root"
   config="$PROJECT_ROOT/automation/tests/fixtures/tenants/$tenant.conf"
@@ -60,6 +60,11 @@ grep -qE 'fixturedoobiscup' "$TMP_ROOT/doobiscup/lib/app_config.dart"
 grep -qF "static const String appName = 'BISCUP';" "$TMP_ROOT/doobiscup/lib/app_config.dart"
 grep -qF 'backendActivationCanonicalOrganizationId = 5' "$TMP_ROOT/doobiscup/web_client/src/app_config.js"
 grep -qF 'group.vkhcr.doobiscup.onesignal' "$TMP_ROOT/doobiscup/ios/Runner/Runner.entitlements"
+grep -qE 'fixturejubileum' "$TMP_ROOT/jubileum2025/lib/app_config.dart"
+grep -qF "static const String appName = 'Jubileum mládeže 2025';" "$TMP_ROOT/jubileum2025/lib/app_config.dart"
+grep -qF 'backendActivationCanonicalOrganizationId = 9' "$TMP_ROOT/jubileum2025/web_client/src/app_config.js"
+grep -qF "forceOccasionLink = 'jm2025'" "$TMP_ROOT/jubileum2025/web_client/src/app_config.js"
+grep -qF "supportedLanguages = ['cs']" "$TMP_ROOT/jubileum2025/web_client/src/app_config.js"
 grep -qE 'fixturehm' "$TMP_ROOT/hvezdamorska/lib/app_config.dart"
 grep -qF "supabaseUrl = 'https://fixtureslunovrat.supabase.co'" "$TMP_ROOT/festivalslunovrat/lib/app_config.dart"
 grep -qE 'organization = 1' "$TMP_ROOT/festivalslunovrat/web_client/src/app_config.js"

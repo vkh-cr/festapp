@@ -92,6 +92,8 @@ test('rehearsal environment remains valid when sourced by a shell', () => {
     /^FESTAPP_SUPABASE_SITE_ADDRESSES='rehearsal-api\.festapp\.net, api\.festapp\.net'$/m);
   assert.match(envText, /https:\/\/csmostrava\.festapp\.net\/reset-password/);
   assert.match(envText, /https:\/\/hvezdamorska\.netlify\.app\/auth_bridge\.html/);
+  assert.match(envText, /https:\/\/jubileum2025\.festapp\.net\/auth_bridge\.html/);
+  assert.match(envText, /https:\/\/jubileum2025\.netlify\.app\/reset-password/);
   assert.match(envText, /https:\/\/clovekavira\.pages\.dev\/resetPassword/);
   assert.match(envText, /https:\/\/app\.festivalslunovrat\.cz\/auth_bridge/);
   const qrRateSalt = envText.match(/^QR_RATE_SALT=([^\n]+)$/m)?.[1];

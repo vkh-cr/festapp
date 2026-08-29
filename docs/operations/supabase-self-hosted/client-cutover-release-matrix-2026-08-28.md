@@ -11,7 +11,7 @@ version/adoption evidence or by the maintenance freeze.
 | Product / production refs | iOS bundle / observed lower bound | Android package / observed lower bound | Required disposition |
 | --- | --- | --- | --- |
 | Festapp (`prod/festapp`, `prod/festapptickets`) | `festapp.festapp` / `>388` | `fstapp.fstapp` / `>388` | Publish and prove the canonical transition release on both stores. Resolve the duplicate web deployment owner separately. |
-| CSM and Jubileum (`prod/csmostrava2026`, `prod/jubileum2025`) | `festapp.jm2025` / `>450` | `fstapp.jm2025` / `>450` | One store identity is shared by both refs; publish/prove the newest transition artifact and verify both tenant entry paths. |
+| CSM (`prod/csmostrava2026`) | `festapp.jm2025` / `>450` | `fstapp.jm2025` / `>450` | Publish/prove the newest transition artifact. The historical Jubilee ref shares these identifiers but is explicitly web-only and creates no second store lane. |
 | Hvězda Mořská (`prod/hvezdamorska`) | `festapp.hvezdamorska` / `>451` | `fstapp.hvezdamorska` / `>451` | Publish and prove transition build on both stores. |
 | Festival Slunovrat (`prod/festivalslunovrat`, `prod/slunovratopava`) | `festapp.festivalslunovrat` / `>208` | `fstapp.slunovratopava` / `>208` | Publish and prove transition build on both stores. Android signed build is deliberately deferred to the independent Windows workstation. |
 | Absolventský Velehrad (`prod/absolventskyvelehrad`) | `festapp.absolventskyvelehrad` / signed candidate `467` | `fstapp.AV25` / `>243` | Canonical web is deployed and a signed, non-uploaded iOS transition candidate is preserved. Complete physical-device/store proof; Android remains deferred to the independent Windows workstation. |
@@ -69,7 +69,7 @@ verified by completed-bundle inspection:
 | `prod/festapp` | `live.festapp.net` | `default` |
 | `prod/festapptickets` | `vstupenky.online` | `default`; canonical ticket-web deployment owner |
 | `prod/hvezdamorska` | `hvezdamorska.festapp.net` | `a`, organization `4→7` |
-| `prod/jubileum2025` | `jubileum2025.netlify.app` | `a` |
+| `prod/jubileum2025` | `jubileum2025.festapp.net` | `a`, organization `6→9`; web-only, with no iOS/Android release |
 
 Four legacy refs currently lack `automation/project.conf` and therefore cannot
 be assumed releasable: `prod/aksmcz`, `prod/avapp`,

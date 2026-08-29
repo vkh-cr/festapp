@@ -19,13 +19,16 @@ auth_additional_origins = os.environ.get(
     ",".join((
         "https://csmostrava.festapp.net",
         "https://hvezdamorska.festapp.net",
+        "https://jubileum2025.festapp.net",
         "https://clovekavira.festapp.net",
         "https://app.festivalslunovrat.cz",
         "https://csmostrava2026.pages.dev",
         "https://hvezdamorska.pages.dev",
+        "https://jubileum2025.pages.dev",
         "https://clovekavira.pages.dev",
         "https://aksmcz.netlify.app",
         "https://hvezdamorska.netlify.app",
+        "https://jubileum2025.netlify.app",
         "https://clovekavira.netlify.app",
     )),
 )
