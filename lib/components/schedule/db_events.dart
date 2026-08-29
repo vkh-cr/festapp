@@ -50,6 +50,12 @@ class DbEvents {
   static SavedProgramCommands get _savedProgramCommands =>
       SupabaseSavedProgramCommands(
           _supabase, RightsService.currentOccasionId()!);
+  static SavedProgramCommands get _legacySavedProgramCommands =>
+      LegacySavedProgramCommands(
+        _supabase,
+        RightsService.currentOccasionId()!,
+        AuthService.currentUserId(),
+      );
   static ExclusiveGroupCommands get _exclusiveGroupCommands =>
       SupabaseExclusiveGroupCommands(_supabase);
 
@@ -516,17 +522,13 @@ class DbEvents {
           saved ? SavedProgramMode.join : SavedProgramMode.remove,
         );
       } else {
-        final response = await _supabase.rpc('set_saved_program', params: {
-          'p_occasion': RightsService.currentOccasionId()!,
-          'p_event_ids': [id],
-          'p_mode': saved ? 'join' : 'remove',
-        });
+        final savedIds = await _legacySavedProgramCommands.update(
+          [id],
+          saved ? SavedProgramMode.join : SavedProgramMode.remove,
+        );
         if (_currentSavedProgramScope() != scope) return false;
         await OfflineDataService.saveMyScheduleDataIfCurrent(
-          (response as List)
-              .whereType<num>()
-              .map((value) => value.toInt())
-              .toList(growable: false),
+          savedIds,
           () => _currentSavedProgramScope() == scope,
         );
       }
