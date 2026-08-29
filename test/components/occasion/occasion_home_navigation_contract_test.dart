@@ -136,18 +136,23 @@ void main() {
     ).firstMatch(source)?.group(1);
 
     expect(scheduleBack, isNotNull);
+    expect(scheduleBack, contains('context.tabsRouter'));
+    expect(scheduleBack, contains('stackRouterOfIndex'));
     expect(
       scheduleBack,
-      contains('context.router.routeCollection.routes.firstWhere'),
+      contains('programRouter.routeCollection.routes.firstWhere'),
     );
     expect(scheduleBack, contains('route.path.isEmpty'));
     expect(
       scheduleBack,
-      contains('context.router.replaceAll'),
+      contains('programRouter.replaceAll'),
     );
     expect(
       scheduleBack,
-      allOf(isNot(contains('maybePop')), isNot(contains('replacePath'))),
+      allOf(
+        isNot(contains('maybePop')),
+        isNot(contains('context.router.replacePath')),
+      ),
       reason:
           'Popping the only nested EventRoute leaves the program router empty.',
     );

@@ -137,17 +137,24 @@ class RouterService {
   }
 
   static void scheduleBack(BuildContext context) {
-    // EventRoute can be this nested program router's only entry. Replacing a
-    // URL on the root router can therefore resolve back into the unchanged
-    // nested stack. Rebuild the nested stack from its configured empty-path
-    // route so basic, light and advanced schedules all return to their own
-    // canonical program root, including after a directly opened event URL.
-    final canonicalRoot = context.router.routeCollection.routes.firstWhere(
+    // EventPage sits below both AutoTabsRouter and the program's nested
+    // StackRouter. `context.router` can resolve to the outer occasion stack
+    // for a directly opened deep link, so mutating it leaves EventRoute
+    // untouched. Resolve the retained program tab exactly as the bottom-nav
+    // reselection does and reset that stack instead.
+    final tabsRouter = context.tabsRouter;
+    final programRouter = tabsRouter.stackRouterOfIndex(tabsRouter.activeIndex);
+    if (programRouter == null) {
+      unawaited(
+          context.router.root.replacePath(getCurrentLink() + EventPage.ROUTE));
+      return;
+    }
+    final canonicalRoot = programRouter.routeCollection.routes.firstWhere(
       (route) => route.path.isEmpty,
       orElse: () => throw StateError('Program router has no canonical root.'),
     );
     unawaited(
-      context.router.replaceAll([PageRouteInfo<void>(canonicalRoot.name)]),
+      programRouter.replaceAll([PageRouteInfo<void>(canonicalRoot.name)]),
     );
   }
 

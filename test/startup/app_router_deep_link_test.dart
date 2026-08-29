@@ -5,6 +5,23 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 
 void main() {
+  test('matches an occasion program deep link including its schedule root', () {
+    final matches = AppRouter().matcher.match(
+          '/2025-copy-98cf835a/event',
+          includePrefixMatches: false,
+        );
+
+    expect(matches, isNotNull);
+    expect(
+      _flatten(matches!).map((match) => match.name),
+      containsAllInOrder([
+        'OccasionHomeRoute',
+        'ScheduleNavigationRoute',
+        anyOf('ScheduleRoute', 'ScheduleLightRoute', 'ScheduleBasicRoute'),
+      ]),
+    );
+  });
+
   test('matches the password-reset route with its token query', () {
     final matches = AppRouter().matcher.match(
           '/resetPassword?token=00000000-0000-0000-0000-000000000000',
@@ -39,4 +56,11 @@ void main() {
       '00000000-0000-0000-0000-000000000000',
     );
   });
+}
+
+Iterable<RouteMatch> _flatten(List<RouteMatch> matches) sync* {
+  for (final match in matches) {
+    yield match;
+    yield* _flatten(match.children ?? const []);
+  }
 }
