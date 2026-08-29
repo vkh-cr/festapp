@@ -116,4 +116,24 @@ void main() {
       );
     }
   });
+
+  test('event back navigation reconstructs the canonical program root', () {
+    final source = File('lib/router_service.dart').readAsStringSync();
+    final scheduleBack = RegExp(
+      r'static void scheduleBack\(BuildContext context\) \{([\s\S]*?)\n  \}',
+    ).firstMatch(source)?.group(1);
+
+    expect(scheduleBack, isNotNull);
+    expect(
+      scheduleBack,
+      contains(
+        'context.router.replacePath(getCurrentLink() + EventPage.ROUTE)',
+      ),
+    );
+    expect(
+      scheduleBack,
+      isNot(contains('maybePop')),
+      reason: 'Popping the only nested EventRoute leaves the program router empty.',
+    );
+  });
 }

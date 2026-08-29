@@ -137,15 +137,12 @@ class RouterService {
   }
 
   static void scheduleBack(BuildContext context) {
-    if (context.router.canPop()) {
-      context.router.maybePop();
-    } else {
-      // No history (e.g. event page opened directly via URL): replace with
-      // the occasion schedule. Navigate by path so the router resolves the
-      // schedule variant configured for this occasion (basic/light/advanced);
-      // replace(ScheduleRoute()) throws on occasions not using "advanced".
-      context.router.replacePath(getCurrentLink() + EventPage.ROUTE);
-    }
+    // EventRoute can be the nested program router's only entry. Popping it
+    // leaves that router empty and renders a blank occasion shell. Always
+    // reconstruct the canonical program path instead; AutoRoute then resolves
+    // the configured basic/light/advanced schedule root consistently for both
+    // in-app navigation and directly opened event URLs.
+    context.router.replacePath(getCurrentLink() + EventPage.ROUTE);
   }
 
   static bool canPop(BuildContext context) => context.router.canPop();
