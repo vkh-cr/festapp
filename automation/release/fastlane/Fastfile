@@ -5,6 +5,7 @@ require 'open3'
 require 'tmpdir'
 
 default_platform(:ios)
+skip_docs
 
 manifest_value = ENV['FESTAPP_RELEASE_MANIFEST'].to_s.strip
 raise 'Set FESTAPP_RELEASE_MANIFEST to the private release config.json' if manifest_value.empty?
