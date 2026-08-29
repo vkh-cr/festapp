@@ -155,6 +155,16 @@ assert_missing "$TMP_ROOT/web/index.html" '<svg class="initial-logo"'
 assert_missing "$TMP_ROOT/web/index.html" 'CSM Ostrava 2026'
 
 echo
+echo "--- web_client/index.html (crawler metadata) ---"
+assert_contains "$TMP_ROOT/web_client/index.html" '<title>Test App Name</title>'
+assert_contains "$TMP_ROOT/web_client/index.html" '<meta name="description" content="Test application description.">'
+assert_contains "$TMP_ROOT/web_client/index.html" '<meta property="og:title" content="Test App Name">'
+assert_contains "$TMP_ROOT/web_client/index.html" '<meta property="twitter:description" content="Test application description.">'
+assert_contains "$TMP_ROOT/web_client/index.html" '"name": "Test App Name"'
+assert_contains "$TMP_ROOT/web_client/index.html" 'https://test.example.com/android-chrome-512x512.png'
+assert_missing "$TMP_ROOT/web_client/index.html" 'Festapp - Vstupenky.online'
+
+echo
 echo "--- web/delete-account/index.html ---"
 assert_contains "$TMP_ROOT/web/delete-account/index.html" "<title>Smazání účtu | Test App Name</title>"
 assert_contains "$TMP_ROOT/web/delete-account/index.html" 'const endpoint = "https://test.supabase.co/functions/v1/confirm-account-deletion";'
