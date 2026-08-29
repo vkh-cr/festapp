@@ -148,9 +148,12 @@ export class RouterService {
             // if (!AppConfig.isAppSupported) { return "/"; } // Handled by outer if
             // if (RightsService.useOfflineVersion) ... // Skipped for Web
 
-            if (currentLink) {
-                 defaultLink = `/${currentLink}`;
-            } else if (AppConfig.isAllUnit && currentLink) {
+            // An all-unit deployment owns a catalogue at `/`. Its database
+            // still has a representative/default occasion for native clients,
+            // but that occasion must not replace the web catalogue root.
+            if (AppConfig.isAllUnit && path === '/') {
+                 defaultLink = '/';
+            } else if (currentLink) {
                  defaultLink = `/${currentLink}`;
             } else if (currentUnit?.id) {
                  // return "/${UnitPage.ROUTE}/${RightsService.currentUnit()?.id}";

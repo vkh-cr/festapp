@@ -281,6 +281,31 @@ test('RouterService.handleInitialLoad', async (t) => {
 
     // --- DATA DRIVEN TESTS ---
 
+    await t.test('should keep the catalogue root for an all-unit deployment', async () => {
+        AppConfig.isAppSupported = true;
+        AppConfig.isAllUnit = true;
+        RightsService.updateAppData = async () => {};
+
+        const originalCurrentLink = Object.getOwnPropertyDescriptor(RightsService, 'currentLink');
+        const originalCurrentUnit = Object.getOwnPropertyDescriptor(RightsService, 'currentUnit');
+        Object.defineProperty(RightsService, 'currentLink', { get: () => 'default' });
+        Object.defineProperty(RightsService, 'currentUnit', { get: () => ({ id: 5 }) });
+
+        global.window.location.pathname = '/';
+        global.window.location.href = 'https://hvezdamorska.festapp.net/';
+        let redirectUrl = '';
+        global.window.location.replace = (url) => { redirectUrl = url; };
+
+        const handled = await RouterService.handleInitialLoad();
+
+        assert.strictEqual(handled, false);
+        assert.strictEqual(redirectUrl, '');
+
+        AppConfig.isAllUnit = false;
+        if (originalCurrentLink) Object.defineProperty(RightsService, 'currentLink', originalCurrentLink);
+        if (originalCurrentUnit) Object.defineProperty(RightsService, 'currentUnit', originalCurrentUnit);
+    });
+
     await t.test('should redirect Root to Occasion Link (conference2024) even if Unit ID (9) exists', async () => {
         AppConfig.isAppSupported = true;
         
