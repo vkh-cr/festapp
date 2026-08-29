@@ -51,6 +51,28 @@ for needle in 'on:' 'jobs:' 'tenant-drift:' 'legal-contract:' 'detect:' 'cloudfl
     fi
 done
 
+# Production builds are release operations, not a side effect of pushing an
+# intermediate overlay commit. Keep the GitHub workflow available as an
+# explicit fallback, while the canonical deploy_direct.sh path remains usable
+# without GitHub Actions.
+TRIGGERS=$(awk '
+    /^on:$/ { inside=1; next }
+    inside && /^[^[:space:]]/ { exit }
+    inside { print }
+' "$WORKFLOW")
+if grep -F -q 'workflow_dispatch:' <<<"$TRIGGERS"; then
+    echo "  ok: production deploy supports explicit workflow dispatch"
+else
+    echo "  FAIL: production deploy must support explicit workflow dispatch"
+    fail=1
+fi
+if grep -Eq '^[[:space:]]+push:' <<<"$TRIGGERS"; then
+    echo "  FAIL: production deploy must not run automatically on git push"
+    fail=1
+else
+    echo "  ok: git push does not trigger a production build"
+fi
+
 # The config-backed legal pages are a prerequisite of target detection, so a
 # production branch cannot silently deploy an SPA fallback at store URLs.
 for needle in 'needs: [tenant-drift, legal-contract]' 'render_legal_pages.mjs --validate' 'render_legal_pages.mjs --check'; do
