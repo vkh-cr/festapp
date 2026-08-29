@@ -50,6 +50,23 @@ Completed after the initial readiness inventory:
   `95f8ceec864f1b2464ea4c414f9a8c3cc5c785f9de2a9ef14f22e590d556456f`;
 - encrypted canonical backup and isolated restore verification passed.
 
+The version-93 Cloudflare candidate was rebuilt from canonical `main` as
+`0.19.93+471` and deployed to `festivalslunovrat.pages.dev` in legacy-backend
+mode. A clean browser profile selected organization `1`, loaded occasion
+`2025-copy-98cf835a`, and rendered the complete public program. This replaces
+the old production web client's indefinite splash-screen behavior without
+changing the externally controlled Slunovrat DNS.
+
+The legacy cloud also contained a partial inventory migration: the pool,
+context and resource tables and their RPCs were present, but `eshop.spots`
+lacked the nullable columns referenced by those RPCs. Migration
+`database/migrations_legacy/0.19.93.sql` completed that table shape
+transactionally. The affected inventory tables and `eshop.spots` contained
+zero rows before and after the change; four nullable columns and three
+`ON DELETE SET NULL` foreign keys were added, and an authenticated
+`get_user_inventory()` verification completed without PostgreSQL `42703`.
+No occasion, user, ticket, order or Storage data was changed.
+
 Remaining external/final-cutover gates:
 
 1. point `app.festivalslunovrat.cz` at the prepared Cloudflare Pages project and
