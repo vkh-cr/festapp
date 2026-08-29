@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>CSM Ostrava 2026 — offline map preview</title>
+    <title>Offline map preview</title>
     <link rel="stylesheet" href="/assets/lib/maplibre-gl/maplibre-gl.css" />
     <script src="/assets/lib/maplibre-gl/maplibre-gl.js"></script>
     <style>
@@ -23,14 +23,18 @@
     </style>
   </head>
   <body>
-    <div class="preview-label">CSM Ostrava 2026 · lokální MBTiles preview</div>
+    <div class="preview-label" id="preview-label">Offline map preview</div>
     <div id="map"></div>
+    <script src="/preview-config.js"></script>
     <script>
+      const preview = window.FESTAPP_OFFLINE_MAP_PREVIEW;
+      document.title = preview.title;
+      document.getElementById('preview-label').textContent = preview.title;
       const map = new maplibregl.Map({
         container: 'map',
         style: '/preview-style.json?contract=local-name-fallback-v1',
-        center: [18.282, 49.8346],
-        zoom: 12,
+        center: preview.center,
+        zoom: preview.zoom,
         maxZoom: 18,
       });
       map.addControl(new maplibregl.NavigationControl(), 'top-right');

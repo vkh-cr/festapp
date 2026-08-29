@@ -4,6 +4,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 BUILD="$ROOT/automation/offline-map/build.sh"
 PREVIEW="$ROOT/automation/offline-map/preview.sh"
+PREVIEW_HTML="$ROOT/automation/offline-map/preview/index.html"
 
 help="$($BUILD --help)"
 grep -Fq -- '[--occasion-link LINK]' <<<"$help"
@@ -25,8 +26,15 @@ fi
 grep -Fq 'BUNDLE_DIR="$SCRIPT_DIR/out/$1/$2"' "$PREVIEW"
 grep -Fq '"$BUNDLE_DIR/style.json"' "$PREVIEW"
 grep -Fq '"$BUNDLE_DIR/sprites/"*' "$PREVIEW"
+grep -Fq '"$BUNDLE_DIR/manifest.json"' "$PREVIEW"
+grep -Fq 'preview-config.js' "$PREVIEW"
+grep -Fq 'window.FESTAPP_OFFLINE_MAP_PREVIEW' "$PREVIEW_HTML"
 if grep -Fq '"$SCRIPT_DIR/style/' "$PREVIEW"; then
   echo "offline map preview must use the selected tenant bundle" >&2
+  exit 1
+fi
+if grep -Eqi 'CSM|Ostrava|18\.282|49\.8346' "$PREVIEW" "$PREVIEW_HTML"; then
+  echo "offline map preview must not contain tenant-specific labels or coordinates" >&2
   exit 1
 fi
 

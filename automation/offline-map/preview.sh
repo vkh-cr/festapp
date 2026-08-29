@@ -19,6 +19,7 @@ NAMED_MBTILES="$SCRIPT_DIR/out/versatiles-shortbread.mbtiles"
 PREVIEW_DIR="$SCRIPT_DIR/out/preview"
 
 if [[ ! -f "$FRONTEND" || ! -f "$MBTILES" ||
+      ! -f "$BUNDLE_DIR/manifest.json" ||
       ! -f "$BUNDLE_DIR/style.json" || ! -d "$BUNDLE_DIR/sprites" ]]; then
   echo "Run build.sh before starting the preview" >&2
   exit 1
@@ -27,6 +28,16 @@ fi
 mkdir -p "$PREVIEW_DIR/sprites"
 cp "$SCRIPT_DIR/preview/index.html" "$PREVIEW_DIR/index.html"
 cp "$BUNDLE_DIR/sprites/"* "$PREVIEW_DIR/sprites/"
+jq -r '
+  "window.FESTAPP_OFFLINE_MAP_PREVIEW = " + ({
+    title:(.occasion.slug + " · offline map preview"),
+    center:[
+      ((.live_content.bounds.west + .live_content.bounds.east) / 2),
+      ((.live_content.bounds.south + .live_content.bounds.north) / 2)
+    ],
+    zoom:12
+  } | tojson) + ";"
+' "$BUNDLE_DIR/manifest.json" > "$PREVIEW_DIR/preview-config.js"
 jq '
   .sources["versatiles-shortbread"].tiles = ["http://localhost:8080/tiles/versatiles-shortbread/{z}/{x}/{y}"] |
   .sprite = "http://localhost:8080/sprites/sprites"
