@@ -31,6 +31,7 @@ import 'package:fstapp/components/schedule/my_schedule_page.dart';
 import 'package:fstapp/components/schedule/timetable_page.dart';
 import 'package:fstapp/components/occasion/occasion_home_page.dart';
 import 'package:fstapp/router_service.dart';
+import 'package:fstapp/services/app_logger.dart';
 import 'package:fstapp/components/users/views/login_page.dart';
 import 'package:fstapp/components/users/views/user_page.dart';
 import 'package:fstapp/services/time_helper.dart';
@@ -46,6 +47,22 @@ import 'package:fstapp/components/users/companion/db_companions.dart';
 import 'package:fstapp/components/users/companion/companion_model.dart';
 
 import '../unit/views/unit_page.dart';
+
+@visibleForTesting
+Future<bool> loadOptionalCompanionOwnership({
+  required bool isLoggedIn,
+  required bool featureEnabled,
+  required Future<List<CompanionModel>> Function() loadCompanions,
+  void Function(Object error)? onError,
+}) async {
+  if (!isLoggedIn || !featureEnabled) return false;
+  try {
+    return (await loadCompanions()).isNotEmpty;
+  } catch (error) {
+    onError?.call(error);
+    return false;
+  }
+}
 
 @RoutePage()
 class SchedulePage extends StatefulWidget {
@@ -142,8 +159,13 @@ class _SchedulePageState extends State<SchedulePage>
   }
 
   Future<void> _reloadCompanionOwnership() async {
-    final hasOwnedCompanions = AuthService.isLoggedIn() &&
-        (await DbCompanions.getAllCompanions()).isNotEmpty;
+    final hasOwnedCompanions = await loadOptionalCompanionOwnership(
+      isLoggedIn: AuthService.isLoggedIn(),
+      featureEnabled: FeatureService.isCompanionsEnabled(),
+      loadCompanions: DbCompanions.getAllCompanions,
+      onError: (error) =>
+          AppLogger.error('Optional companion refresh failed: $error'),
+    );
     if (!mounted || hasOwnedCompanions == _hasOwnedCompanions) return;
     setState(() => _hasOwnedCompanions = hasOwnedCompanions);
   }
@@ -180,8 +202,13 @@ class _SchedulePageState extends State<SchedulePage>
   }
 
   Future<void> loadData() => _reloadCoordinator.run(() async {
-        _hasOwnedCompanions = AuthService.isLoggedIn() &&
-            (await DbCompanions.getAllCompanions()).isNotEmpty;
+        _hasOwnedCompanions = await loadOptionalCompanionOwnership(
+          isLoggedIn: AuthService.isLoggedIn(),
+          featureEnabled: FeatureService.isCompanionsEnabled(),
+          loadCompanions: DbCompanions.getAllCompanions,
+          onError: (error) =>
+              AppLogger.error('Optional companion load failed: $error'),
+        );
 
         if (ClientSyncRuntime.isV1Selected) {
           await _reloadProjectedEvents();
