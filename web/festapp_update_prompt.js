@@ -533,8 +533,19 @@
           ? await navigator.serviceWorker.getRegistration('/')
           : null;
         const activeVersion = await queryWorkerVersion(registration?.active);
-        if (activeVersion && activeVersion !== currentVersion &&
-            await cutOverToVersion(currentVersion)) return;
+        if (activeVersion && activeVersion !== currentVersion) {
+          // Once the app is interactive, an automatic controller cutover can
+          // race with a tap and reload the tab after navigation has begun. Keep
+          // the working page intact and let the user choose when to refresh.
+          // Startup still cuts over automatically before the first usable frame.
+          if (window.__FESTAPP_APP_READY__ === true) {
+            if (await getReadyWorkerForVersion(currentVersion)) {
+              showUpdateBanner(currentVersion, 'legacy-cache');
+            }
+            return;
+          }
+          if (await cutOverToVersion(currentVersion)) return;
+        }
         sessionStorage.removeItem(cutoverStorageKey);
         sessionStorage.removeItem(cleanRecoveryStorageKey);
         return;

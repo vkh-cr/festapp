@@ -35,6 +35,7 @@ function boot({
     waitingWorker = false,
     delayedControllerChange = false,
     activeWorkerWithoutUpdate = false,
+    activeWorkerVersion,
     appReady = false,
     cutoverVersion,
 } = {}) {
@@ -84,7 +85,7 @@ function boot({
                 const candidate = new window.EventTarget();
                 candidate.state = 'installed';
                 candidate.postMessage = (message, ports = []) => {
-                    if (message?.type === 'FESTAPP_QUERY_BUILD_VERSION') {
+                        if (message?.type === 'FESTAPP_QUERY_BUILD_VERSION') {
                         ports[0]?.postMessage({ version: latestVersion });
                         return;
                     }
@@ -104,8 +105,10 @@ function boot({
                     scriptURL: 'https://csmostrava.festapp.net/festapp_service_worker.js',
                     state: 'activated',
                     postMessage: (message, ports = []) => {
-                        if (message?.type === 'FESTAPP_QUERY_BUILD_VERSION') {
-                            ports[0]?.postMessage({ version: buildVersion });
+                    if (message?.type === 'FESTAPP_QUERY_BUILD_VERSION') {
+                            ports[0]?.postMessage({
+                                version: activeWorkerVersion || buildVersion,
+                            });
                         }
                     },
                 };
@@ -257,6 +260,23 @@ describe('festapp_update_prompt.js', () => {
 
         assert.deepStrictEqual([...window.__skipWaitingMessages], []);
         assert.ok(banner(window), 'a running app should let the user choose when to reload');
+    });
+
+    test('ready app does not reload when matching HTML is still controlled by an older worker', async () => {
+        const { window } = boot({
+            buildVersion: '1.0.0+2',
+            latestVersion: '1.0.0+2',
+            activeWorkerVersion: '1.0.0+1',
+            waitingWorker: true,
+            appReady: true,
+        });
+        window.dispatchEvent(new window.Event('focus'));
+        await flush();
+
+        assert.deepStrictEqual([...window.__skipWaitingMessages], [],
+            'a user interaction must not be interrupted by an automatic reload');
+        assert.ok(banner(window),
+            'the ready app should offer an explicit coherent-shell refresh');
     });
 
     test('Reload preserves the working shell through the mobile controller handoff', async () => {
