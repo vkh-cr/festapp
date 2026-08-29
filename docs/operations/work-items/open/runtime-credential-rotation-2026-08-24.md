@@ -1,7 +1,7 @@
 # Work item: rotate exposed runtime credentials
 
 Opened: 2026-08-24
-Updated: 2026-08-28
+Updated: 2026-08-29
 Status: blocked
 Verification: release
 
@@ -46,6 +46,12 @@ notification secret store, run notification plus account-deletion vendor
 canaries, revoke the historical credential and prove its authentication fails.
 Never put the replacement back into `organizations.data`.
 
+Do not use in-place rotation for the first replacement: OneSignal invalidates
+the old secret immediately. Create a second App API Key with an authenticated
+Organization API Key, canary it, atomically provision it to the canonical
+server-only store and the ignored FestappSeed operator env, and only then
+delete the historical key and prove denial.
+
 ## Remaining order
 
 1. Provision replacements to every active consumer.
@@ -61,7 +67,7 @@ Rotation requires authenticated external service access and destructive revocati
 
 | Action | Required authority | State |
 |---|---|---|
-| Rotate and provision each service credential | Exact service/account and affected consumer confirmation | pending |
+| Rotate and provision each service credential | Exact service/account and affected consumer confirmation | OneSignal Slunovrat app verified; Organization API login/key still pending |
 | Revoke historical credentials | Replacement health receipt and explicit revocation confirmation | pending |
 
 ## Rollback and recovery
@@ -83,3 +89,4 @@ Rotation requires authenticated external service access and destructive revocati
 |---|---|---|---|
 | 2026-08-24 | Remove tracked runtime env files | FestappSeed `4e7adbdb` | HEAD clean; historical values still require rotation |
 | 2026-08-28 | Remove OneSignal credential from client/admin JSON boundary | isolated server-only migration and SQL/Edge tests | code path complete; provider rotation and revocation still pending |
+| 2026-08-29 | Verify Slunovrat OneSignal app and current server-only credential | app `4c5b7280-510f-4628-8fb8-b4bdd4fed1b2`; provider read HTTP 200; zero-recipient send HTTP 200 | Chrome/Safari origin remains `https://app.festivalslunovrat.cz`; no subscriber notified; no provider setting changed |
