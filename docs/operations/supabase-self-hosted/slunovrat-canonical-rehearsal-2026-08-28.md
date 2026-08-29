@@ -87,9 +87,29 @@ declared cluster exception is `pg_cron`, which remains confined to the live
 restore cluster was stopped after validation; no cloud source or live target
 was mutated and no retained path was deleted.
 
-Retaining every prior successful and failed restore target has now exhausted
-the 40 GB rehearsal disk: only about 304 MB remained after this proof. This is
-an operational no-go for another rehearsal or production cutover until an
-explicit retention cleanup or disk expansion is approved. Backup archives and
-validation ledgers are off-host and must remain retained regardless of that
-decision.
+Retaining every prior successful and failed restore target initially exhausted
+the 40 GB rehearsal disk: only about 304 MB remained after this proof. On
+2026-08-29 the latest coordinated backup and all three encrypted source
+snapshots were rehashed successfully before cleanup. Ten isolated
+`festapp_restore_*` databases, 17 restore-drill paths and 12 reproducible
+staging/security/obsolete-rehearsal databases were then removed. The live
+`postgres` database, canonical `festapp_rehearsal_20260828234500`, production
+Storage and off-host encrypted archives were not changed.
+
+The cleanup is recorded under root-only evidence directories
+`capacity-cleanup-resume-20260829T140828Z` and
+`capacity-staging-cleanup-resume-20260829T140929Z`. It restored 20,038,479,872
+bytes of free space (52% of the filesystem). All 12 containers remained
+running, all 11 Supabase health checks remained healthy, and the canonical
+database still reported 9,648 Auth users, 1,453 Storage objects, three
+validated imports and zero non-passing validation gates.
+
+The same-day OneSignal audit made no provider configuration change. App
+`slunovratopava` still uses `https://app.festivalslunovrat.cz` for both Chrome
+Web Push and Safari, with site name `Festival Slunovrat`. The server-only
+credential authenticated against the app configuration endpoint and a
+zero-recipient notification canary returned HTTP 200 without notifying any
+subscription. Credential replacement remains gated on creating a parallel App
+API Key through an authenticated Organization API Key; rotating the existing
+key in place would invalidate it immediately and is therefore not an approved
+zero-downtime procedure.
