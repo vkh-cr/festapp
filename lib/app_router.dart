@@ -165,6 +165,7 @@ class AppRouter extends RootStackRouter {
               AutoRoute(
                   page: ScheduleNavigationRoute.page,
                   path: EventPage.ROUTE,
+                  initial: true,
                   children: [
                     getSchedulePage(),
                     AutoRoute(page: EventRoute.page, path: ":id")
