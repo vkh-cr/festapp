@@ -39,6 +39,14 @@ for tenant in festapp festapptickets absolventskyvelehrad cavfotofest csmostrava
 done
 
 grep -qE 'fixturecsm' "$TMP_ROOT/csmostrava2026/lib/app_config.dart"
+grep -qF "webLink = 'https://dev.example.invalid'" "$TMP_ROOT/festapp/web_client/src/app_config.js"
+grep -qF "backendActivationTenantId = 'festapp'" "$TMP_ROOT/festapp/lib/app_config.dart"
+grep -qF "backendActivationCanonicalSupabaseUrl = 'https://api.festapp.net'" "$TMP_ROOT/festapp/web_client/src/app_config.js"
+grep -qF 'backendActivationCanonicalOrganizationId = 1' "$TMP_ROOT/festapp/web_client/src/app_config.js"
+cmp "$TMP_ROOT/festapp/web/backend-activation.json" \
+  "$TMP_ROOT/festapp/web_client/public/backend-activation.json"
+grep -qF '"generation":0,"backend":"legacy"' \
+  "$TMP_ROOT/festapp/web/backend-activation.json"
 grep -qE 'fixtureav' "$TMP_ROOT/absolventskyvelehrad/lib/app_config.dart"
 grep -qE 'organization = 5' "$TMP_ROOT/absolventskyvelehrad/web_client/src/app_config.js"
 grep -qF "static const String appName = 'Absolventský Velehrad';" "$TMP_ROOT/absolventskyvelehrad/lib/app_config.dart"

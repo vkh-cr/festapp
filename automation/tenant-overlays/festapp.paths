@@ -1,6 +1,6 @@
-# Source/data overlay paths for the original Festapp / Vstupenky.online tenant.
-# The public application is deployed at live.festapp.net while WEB_LINK may
-# continue to point at the Vstupenky.online service surface.
+# Source/data overlay paths for the original Festapp tenant.
+# Its public application and every generated internal application link use the
+# canonical live.festapp.net origin. Vstupenky.online is a separate tenant.
 automation/project.conf
 automation/release/legal/**
 automation/release/ExportOptions.plist
