@@ -27,18 +27,39 @@ It must include a private canonical release manifest with the public-key digest,
 organization `19`, Auth/reset/CORS origins, session-transition evidence and
 deployment generation.
 
-Remaining external release gates:
+Completed after the initial readiness inventory:
 
-1. confirm the canonical public anon key and write only its digest to evidence;
-2. confirm the existing Apple App ID, distribution certificate, provisioning
-   profiles and OneSignal extension/app-group relationship;
-3. create a build-only iOS IPA and isolated canonical web preview, then run the
-   release/deployment probes;
-4. add the Slunovrat web/reset origin to canonical Auth and Edge Function
-   allowlists;
-5. rotate/provision notification provider credentials privately and perform the
-   delivery canary;
-6. obtain separate authorization for production web/DNS/App Store activation.
+- the canonical public-key digest is recorded in the private tenant release
+  manifest; no secret key is committed;
+- canonical Auth, reset and Edge Function allowlists include the Slunovrat
+  production origin with constrained callback paths;
+- all 259 current client RPC names, 14 invoked Edge Functions and 48 directly
+  used relations are present on the canonical target;
+- the version-93 Cloudflare candidate is deployed at
+  `festivalslunovrat.pages.dev`; Program, event detail, in-app back navigation,
+  Map and canonical REST/RPC reads were exercised successfully;
+- the existing OneSignal application retained the production
+  `app.festivalslunovrat.cz` web origin, and a zero-recipient provider canary
+  succeeded without sending a notification;
+- encrypted canonical backup and isolated restore verification passed.
 
-No production Netlify deployment, DNS mutation, App Store upload, Google Play
-upload or Android build was performed by this rehearsal.
+Remaining external/final-cutover gates:
+
+1. point `app.festivalslunovrat.cz` at the prepared Cloudflare Pages project and
+   verify TLS, OneSignal service-worker scope and provider delivery on that real
+   origin;
+2. replace the exhausted online map dependency with the approved offline map
+   generation before treating the Map screen as release-final;
+3. create and validate a build-only iOS candidate with the existing App ID,
+   distribution certificate, provisioning profile, app group and OneSignal
+   extension; do not submit the final App Store release yet;
+4. prepare the Android configuration, but defer the signed build to the
+   independent Windows workstation;
+5. perform the production write freeze, final delta import and zero-lag audit,
+   then publish the backend activation generation and verify session continuity;
+6. only after those gates, authorize custom-domain production activation and
+   later the mobile store releases.
+
+No App Store upload, Google Play upload, Android build, production freeze,
+production write-authority switch or global backend activation was performed by
+this rehearsal.

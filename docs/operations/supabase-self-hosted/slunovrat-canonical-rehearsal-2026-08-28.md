@@ -62,6 +62,34 @@ a public-client candidate and the existing production administration path must
 remain available. After activation, the canonical PostgreSQL 17 schema owns
 both public and administration contracts.
 
+The final current-client audit on 2026-08-29 expanded this check from the
+archived Slunovrat client to every literal RPC reachable from the shared
+Flutter and web-client sources. It found 259 required RPC names. The legacy
+cloud currently exposes 223 public functions and contains only 97 of those
+259 current-client names. The canonical PostgreSQL 17 target exposes 664
+public functions and contains all 259 required names; the canonical missing
+set is empty. The same backend-surface audit found all 14 invoked Edge
+Functions and all 48 directly used `public`/`eshop` relations on the canonical
+target. The private evidence is
+`slunovrat-client-rpc-contract-final-20260829.json` together with
+`slunovrat-backend-surface-postdeploy-20260829.json`.
+
+This establishes the intended transition contract: already released clients
+continue to use the unchanged legacy backend until activation, while the new
+Slunovrat build contains both the transition adapter and the complete modern
+canonical contract. Missing modern administration methods are not fabricated
+or back-ported into the unledgered legacy database. At activation the frontend
+selects the canonical backend as one generation, where public and admin RPCs,
+Edge Functions and relations have been deployed together.
+
+The Cloudflare candidate built from version 93 and the canonical tenant overlay
+was then exercised against organization `19` / occasion `1072557`. Direct event
+detail rendered its description, the in-page back control returned to the
+retained Program tab, the occasion root normalized to `/event`, and Program and
+Map reads completed against `api.festapp.net` with HTTP 200. This was a browser-
+local canonical activation canary only; it did not publish the production
+activation manifest or change the external custom-domain DNS.
+
 Client release work must start from current canonical `main` plus a narrow
 `festivalslunovrat` tenant overlay. The old production branch is not mergeable:
 it predates the overlay policy and contains obsolete shared application code.

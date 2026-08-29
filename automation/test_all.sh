@@ -286,6 +286,8 @@ if [ "$RUN_AUTOMATION" = true ]; then
       "$SCRIPT_DIR/tests/hetzner_supabase_inventory.test.mjs" \
       "$SCRIPT_DIR/tests/hetzner_supabase_cutover_mode_gate.test.mjs" \
       "$SCRIPT_DIR/tests/supabase_client_config.test.mjs" \
+      "$SCRIPT_DIR/tests/client_rpc_contract.test.mjs" \
+      "$SCRIPT_DIR/tests/client_backend_surface.test.mjs" \
       "$SCRIPT_DIR/hetzner-supabase/runtime/verify-pins.mjs" \
       "$SCRIPT_DIR/tests/private_inputs_schema.test.mjs" \
       "$SCRIPT_DIR/tests/recovery_readiness.test.mjs" \
