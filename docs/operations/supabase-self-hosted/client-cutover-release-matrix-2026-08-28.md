@@ -71,9 +71,9 @@ verified by completed-bundle inspection:
 | `prod/hvezdamorska` | `hvezdamorska.festapp.net` | `a`, organization `4→7` |
 | `prod/jubileum2025` | `jubileum2025.netlify.app` | `a` |
 
-Five legacy refs currently lack `automation/project.conf` and therefore cannot
+Four legacy refs currently lack `automation/project.conf` and therefore cannot
 be assumed releasable: `prod/aksmcz`, `prod/avapp`,
-`prod/festivalslunovrat`, `prod/slunovratopava`, and `prod/ticketonline`.
+`prod/slunovratopava`, and `prod/ticketonline`.
 Each must receive exactly one documented disposition before cutover: restore a
 canonical tenant overlay and deploy it, enforce read-only behavior, or prove
 from hosting/DNS/traffic/write telemetry that it is retired. Branch age is not
@@ -101,10 +101,14 @@ associated-domain input now use `live.festapp.net`, not the separate
 `vstupenky.online` tenant. The stable legacy Auth storage namespace is retained,
 so installing this transition web build does not itself sign users out.
 
-Festival Slunovrat remains an explicitly deferred lane. It must not be inferred
-as ready from the four active deployments above; its outdated schema/overlay
-requires its own migration and release round before it can enter the cutover
-matrix as deployed.
+Festival Slunovrat now has a canonical version-93 overlay on
+`prod/festivalslunovrat`, a successful Cloudflare candidate at
+`festivalslunovrat.pages.dev`, complete canonical client RPC/Edge/relation
+coverage and a published 28.4 MiB immutable offline-map v2 bundle. Its custom
+domain, final native offline acceptance, iOS build-only signing proof, Android
+Windows build and backend activation remain gated. The historic
+`prod/slunovratopava` ref is not a second release source and still needs an
+explicit archival/retirement disposition before cutover.
 
 The Hvezda Morska `466` production smoke passes the all-unit catalogue root,
 occasion detail, reservation handoff to `/form/povyseni2026`, and the Flutter
