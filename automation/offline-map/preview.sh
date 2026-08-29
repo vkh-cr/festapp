@@ -3,7 +3,7 @@
 set -euo pipefail
 
 if [[ $# -ne 3 ]]; then
-  echo "Usage: $0 OCCASION VERSION MBTILES_FILENAME" >&2
+  echo "Usage: $0 OCCASION VERSION TILE_CONTAINER_FILENAME" >&2
   exit 2
 fi
 if ! command -v versatiles >/dev/null 2>&1; then
@@ -14,11 +14,11 @@ fi
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 FRONTEND="$SCRIPT_DIR/out/frontend.br.tar.gz"
 BUNDLE_DIR="$SCRIPT_DIR/out/$1/$2"
-MBTILES="$BUNDLE_DIR/$3"
-NAMED_MBTILES="$SCRIPT_DIR/out/versatiles-shortbread.mbtiles"
+TILE_CONTAINER="$BUNDLE_DIR/$3"
+NAMED_TILE_CONTAINER="$SCRIPT_DIR/out/versatiles-shortbread.${3##*.}"
 PREVIEW_DIR="$SCRIPT_DIR/out/preview/$1/$2"
 
-if [[ ! -f "$FRONTEND" || ! -f "$MBTILES" ||
+if [[ ! -f "$FRONTEND" || ! -f "$TILE_CONTAINER" ||
       ! -f "$BUNDLE_DIR/manifest.json" ||
       ! -f "$BUNDLE_DIR/style.json" || ! -d "$BUNDLE_DIR/sprites" ]]; then
   echo "Run build.sh before starting the preview" >&2
@@ -45,5 +45,5 @@ jq '
   .glyphs = "http://localhost:8080/glyphs/{fontstack}/{range}.pbf"
 ' "$BUNDLE_DIR/style.json" > "$PREVIEW_DIR/preview-style.json"
 
-ln -sfn "$MBTILES" "$NAMED_MBTILES"
-exec versatiles serve -i 127.0.0.1 -s "$PREVIEW_DIR" -s "$FRONTEND" "$NAMED_MBTILES"
+ln -sfn "$TILE_CONTAINER" "$NAMED_TILE_CONTAINER"
+exec versatiles serve -i 127.0.0.1 -s "$PREVIEW_DIR" -s "$FRONTEND" "$NAMED_TILE_CONTAINER"

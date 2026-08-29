@@ -32,6 +32,8 @@ if grep -Eq 'MBTILES_NAME="ostrava-|PMTILES_NAME="ostrava-' "$BUILD"; then
 fi
 
 grep -Fq 'BUNDLE_DIR="$SCRIPT_DIR/out/$1/$2"' "$PREVIEW"
+grep -Fq 'TILE_CONTAINER="$BUNDLE_DIR/$3"' "$PREVIEW"
+grep -Fq 'versatiles-shortbread.${3##*.}' "$PREVIEW"
 grep -Fq '"$BUNDLE_DIR/style.json"' "$PREVIEW"
 grep -Fq '"$BUNDLE_DIR/sprites/"*' "$PREVIEW"
 grep -Fq '"$BUNDLE_DIR/glyphs/."' "$PREVIEW"

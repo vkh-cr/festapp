@@ -393,4 +393,8 @@ curl -fsSL "$DEFAULT_FRONTEND_URL" -o "$SCRIPT_DIR/out/frontend.br.tar.gz"
 MANIFEST_SHA="$(shasum -a 256 "$OUTPUT_DIR/manifest.json" | awk '{print $1}')"
 echo "Built $OCCASION/$ARTIFACT_VERSION: $TILE_COUNT tiles, mode $BUNDLE_MODE, bundle $BUNDLE_BYTES bytes (MBTiles intermediate $MBTILES_BYTES, PMTiles $PMTILES_BYTES)"
 echo "Manifest SHA-256: $MANIFEST_SHA"
-echo "Preview: $SCRIPT_DIR/preview.sh $OCCASION $ARTIFACT_VERSION $MBTILES_NAME"
+if [[ "$BUNDLE_MODE" == "maplibre_only" ]]; then
+  echo "Preview: $SCRIPT_DIR/preview.sh $OCCASION $ARTIFACT_VERSION $PMTILES_NAME"
+else
+  echo "Preview: $SCRIPT_DIR/preview.sh $OCCASION $ARTIFACT_VERSION $MBTILES_NAME"
+fi
