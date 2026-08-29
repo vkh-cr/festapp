@@ -19,8 +19,14 @@ fi
 
 bundle_id="$(node -e 'const m=require(process.argv[1]); if(!m.bundleId) process.exit(1); process.stdout.write(m.bundleId)' "$release_manifest")"
 team_id="$(awk -F= '$1=="IOS_DEVELOPMENT_TEAM" {gsub(/^[[:space:]\"'\'' ]+|[[:space:]\"'\'' ]+$/, "", $2); print $2}' automation/project.conf)"
+app_profile="$(awk -F= '$1=="IOS_PROVISIONING_PROFILE" {sub(/^[^=]*=/, ""); gsub(/^\"|\"$/, ""); print}' automation/project.conf)"
+extension_profile="$(awk -F= '$1=="IOS_ONESIGNAL_PROVISIONING_PROFILE" {sub(/^[^=]*=/, ""); gsub(/^\"|\"$/, ""); print}' automation/project.conf)"
 if ! [[ "$team_id" =~ ^[A-Z0-9]{10}$ ]]; then
   echo "IOS_DEVELOPMENT_TEAM must be a 10-character Apple team ID."
+  exit 1
+fi
+if [ -z "$app_profile" ] || [ -z "$extension_profile" ]; then
+  echo "Both App Store provisioning profile names are required for a build-only candidate."
   exit 1
 fi
 target_version="$(node automation/release/project_version.mjs --version)"
@@ -48,8 +54,12 @@ cat >"$export_options" <<PLIST
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict>
   <key>method</key><string>app-store-connect</string>
-  <key>signingStyle</key><string>automatic</string>
+  <key>signingStyle</key><string>manual</string>
   <key>teamID</key><string>$team_id</string>
+  <key>provisioningProfiles</key><dict>
+    <key>$bundle_id</key><string>$app_profile</string>
+    <key>$bundle_id.OneSignalNotificationServiceExtension</key><string>$extension_profile</string>
+  </dict>
   <key>uploadSymbols</key><true/>
 </dict></plist>
 PLIST
