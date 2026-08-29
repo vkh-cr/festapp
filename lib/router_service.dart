@@ -137,12 +137,18 @@ class RouterService {
   }
 
   static void scheduleBack(BuildContext context) {
-    // EventRoute can be the nested program router's only entry. Popping it
-    // leaves that router empty and renders a blank occasion shell. Always
-    // reconstruct the canonical program path instead; AutoRoute then resolves
-    // the configured basic/light/advanced schedule root consistently for both
-    // in-app navigation and directly opened event URLs.
-    context.router.root.replacePath(getCurrentLink() + EventPage.ROUTE);
+    // EventRoute can be this nested program router's only entry. Replacing a
+    // URL on the root router can therefore resolve back into the unchanged
+    // nested stack. Rebuild the nested stack from its configured empty-path
+    // route so basic, light and advanced schedules all return to their own
+    // canonical program root, including after a directly opened event URL.
+    final canonicalRoot = context.router.routeCollection.routes.firstWhere(
+      (route) => route.path.isEmpty,
+      orElse: () => throw StateError('Program router has no canonical root.'),
+    );
+    unawaited(
+      context.router.replaceAll([PageRouteInfo<void>(canonicalRoot.name)]),
+    );
   }
 
   static bool canPop(BuildContext context) => context.router.canPop();

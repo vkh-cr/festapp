@@ -126,15 +126,18 @@ void main() {
     expect(scheduleBack, isNotNull);
     expect(
       scheduleBack,
-      contains(
-        'context.router.root.replacePath('
-        'getCurrentLink() + EventPage.ROUTE)',
-      ),
+      contains('context.router.routeCollection.routes.firstWhere'),
+    );
+    expect(scheduleBack, contains('route.path.isEmpty'));
+    expect(
+      scheduleBack,
+      contains('context.router.replaceAll'),
     );
     expect(
       scheduleBack,
-      isNot(contains('maybePop')),
-      reason: 'Popping the only nested EventRoute leaves the program router empty.',
+      allOf(isNot(contains('maybePop')), isNot(contains('replacePath'))),
+      reason:
+          'Popping the only nested EventRoute leaves the program router empty.',
     );
   });
 }
