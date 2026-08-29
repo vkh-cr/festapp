@@ -183,7 +183,7 @@ for manifest in "$TMP_ROOT/web/site.webmanifest" "$TMP_ROOT/web_client/public/si
     # Preserve the historical root identity so existing installations update
     # instead of becoming a competing nested PWA after an occasion cutover.
     assert_contains "$manifest" '"id": "/"'
-    assert_contains "$manifest" '"start_url": "/test-occasion/"'
+    assert_contains "$manifest" '"start_url": "/test-occasion/event"'
     assert_contains "$manifest" '"scope": "/"'
 done
 
@@ -194,7 +194,7 @@ for manifest in "$TMP_ROOT/web/site.webmanifest" "$TMP_ROOT/web_client/public/si
     # Preserve the historical root identity so existing installations update
     # instead of becoming a competing nested PWA after an occasion cutover.
     assert_contains "$manifest" '"id": "/"'
-    assert_contains "$manifest" '"start_url": "/test-occasion/"'
+    assert_contains "$manifest" '"start_url": "/test-occasion/event"'
     assert_contains "$manifest" '"scope": "/"'
 done
 

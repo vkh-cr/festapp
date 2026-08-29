@@ -63,7 +63,7 @@ try {
   assert.match(worker, /festapp-app-shell-0\.19\.85\+418/);
   assert.match(worker, /event\.resultingClientId \|\| event\.clientId/);
   assert.match(worker, /if \(emergencyCutover\)/);
-  assert.match(worker, /const FORCED_OCCASION_PATH = "\/csmostrava2026";/);
+  assert.match(worker, /const FORCED_OCCASION_PATH = "\/csmostrava2026\/event";/);
   assert.match(worker, /cache\.put\(request, response\.clone\(\)\)/);
   const coreUrls = JSON.parse(worker.match(/const CORE_URLS = (\[[\s\S]*?\]);/)[1]);
   const precacheUrls = JSON.parse(

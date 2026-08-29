@@ -330,7 +330,7 @@ config = pathlib.Path(config_path).read_text(encoding="utf-8")
 match = re.search(r"^FORCE_OCCASION_LINK=(.*)$", config, re.MULTILINE)
 occasion_link = match.group(1).strip().strip('"').strip("'") if match else ""
 occasion_link = occasion_link.strip().strip("/")
-replacement = json.dumps(f"/{occasion_link}" if occasion_link else None)
+replacement = json.dumps(f"/{occasion_link}/event" if occasion_link else None)
 source, count = re.subn(
     r"const FORCED_OCCASION_PATH = null;",
     f"const FORCED_OCCASION_PATH = {replacement};",

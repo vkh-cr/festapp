@@ -165,7 +165,6 @@ class AppRouter extends RootStackRouter {
               AutoRoute(
                   page: ScheduleNavigationRoute.page,
                   path: EventPage.ROUTE,
-                  initial: true,
                   children: [
                     getSchedulePage(),
                     AutoRoute(page: EventRoute.page, path: ":id")
@@ -220,10 +219,10 @@ class AppRouter extends RootStackRouter {
     }
 
     if (RightsService.useOfflineVersion) {
-      return "/${RightsService.currentLink}";
+      return getOccasionLandingPath(RightsService.currentLink!);
     }
     if (RightsService.currentLink != null) {
-      return "/${RightsService.currentLink}";
+      return getOccasionLandingPath(RightsService.currentLink!);
     }
 
     if (AppConfig.isAllUnit) {
@@ -233,6 +232,9 @@ class AppRouter extends RootStackRouter {
     // This now correctly points to the /unit/:id route
     return "/${UnitPage.ROUTE}/${RightsService.currentUnit()?.id}";
   }
+
+  static String getOccasionLandingPath(String occasionLink) =>
+      "/$occasionLink/${EventPage.ROUTE}";
 
   static void Function()? regenerateRoutes;
 

@@ -5,21 +5,8 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 
 void main() {
-  test('occasion root resolves to the program schedule root', () {
-    final matches = AppRouter().matcher.match(
-          '/av2025',
-          includePrefixMatches: false,
-        );
-
-    expect(matches, isNotNull);
-    expect(
-      _flatten(matches!).map((match) => match.name),
-      containsAllInOrder([
-        'OccasionHomeRoute',
-        'ScheduleNavigationRoute',
-        anyOf('ScheduleRoute', 'ScheduleLightRoute', 'ScheduleBasicRoute'),
-      ]),
-    );
+  test('occasion landing path targets the program route', () {
+    expect(AppRouter.getOccasionLandingPath('av2025'), '/av2025/event');
   });
 
   test('matches an occasion program deep link including its schedule root', () {
