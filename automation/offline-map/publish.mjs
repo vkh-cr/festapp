@@ -55,9 +55,12 @@ async function fetchWithRetry(url, options = {}) {
 }
 
 async function main() {
-  const [manifestArg, bundleArg] = process.argv.slice(2);
+  const args = process.argv.slice(2);
+  const verifyOnly = args[0] === '--verify-only';
+  if (verifyOnly) args.shift();
+  const [manifestArg, bundleArg] = args;
   if (!manifestArg || !bundleArg) {
-    fail('usage: publish.mjs MANIFEST.json BUNDLE_DIRECTORY');
+    fail('usage: publish.mjs [--verify-only] MANIFEST.json BUNDLE_DIRECTORY');
   }
 
   const manifestPath = path.resolve(manifestArg);
@@ -95,21 +98,26 @@ async function main() {
     sha256: sha256(manifestBytes),
   };
 
-  // Fail before the first write if any immutable public key already exists.
-  await pooled([...entries, manifestEntry], async entry => {
-    const response = await fetch(entry.url, { method: 'HEAD', redirect: 'error' });
-    if (response.status !== 404) fail(`immutable target already exists (${response.status}): ${entry.url}`);
-  });
+  if (!verifyOnly) {
+    // A unique query prevents negative CDN lookups from poisoning canonical URLs.
+    const preflight = crypto.randomUUID();
+    await pooled([...entries, manifestEntry], async entry => {
+      const url = new URL(entry.url);
+      url.searchParams.set('festapp-r2-preflight', preflight);
+      const response = await fetch(url, { method: 'HEAD', redirect: 'error' });
+      if (response.status !== 404) fail(`immutable target already exists (${response.status}): ${entry.url}`);
+    });
 
-  await pooled(entries, async entry => {
+    await pooled(entries, async entry => {
+      await run('npx', ['--yes', 'wrangler@latest', 'r2', 'object', 'put',
+        `${BUCKET}/${entry.key}`, '--remote', '--file', entry.file,
+        '--content-type', entry.content_type, '--cache-control', CACHE_CONTROL]);
+    });
+    // The manifest is the publication marker and is intentionally uploaded last.
     await run('npx', ['--yes', 'wrangler@latest', 'r2', 'object', 'put',
-      `${BUCKET}/${entry.key}`, '--remote', '--file', entry.file,
-      '--content-type', entry.content_type, '--cache-control', CACHE_CONTROL]);
-  });
-  // The manifest is the publication marker and is intentionally uploaded last.
-  await run('npx', ['--yes', 'wrangler@latest', 'r2', 'object', 'put',
-    `${BUCKET}/${manifestEntry.key}`, '--remote', '--file', manifestEntry.file,
-    '--content-type', manifestEntry.content_type, '--cache-control', CACHE_CONTROL]);
+      `${BUCKET}/${manifestEntry.key}`, '--remote', '--file', manifestEntry.file,
+      '--content-type', manifestEntry.content_type, '--cache-control', CACHE_CONTROL]);
+  }
 
   await pooled([...entries, manifestEntry], async entry => {
     const response = await fetchWithRetry(entry.url);
@@ -124,7 +132,8 @@ async function main() {
   });
 
   process.stdout.write(JSON.stringify({
-    published: entries.length + 1,
+    mode: verifyOnly ? 'verify-only' : 'publish',
+    published: verifyOnly ? 0 : entries.length + 1,
     assets: entries.length,
     manifest_url: manifestEntry.url,
     manifest_sha256: manifestEntry.sha256,
