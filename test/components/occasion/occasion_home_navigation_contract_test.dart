@@ -8,13 +8,16 @@ import 'package:fstapp/components/map/public_map_session.dart';
 import 'package:fstapp/components/occasion/occasion_home_page.dart';
 
 void main() {
-  test('occasion root redirects to the program tab', () {
-    final source = File('lib/app_router.dart').readAsStringSync();
+  test('program tab initializes its nested schedule root', () {
+    final source = File(
+      'lib/components/occasion/occasion_home_page.dart',
+    ).readAsStringSync();
 
-    expect(
-      source,
-      contains("RedirectRoute(path: '', redirectTo: EventPage.ROUTE)"),
-    );
+    expect(source, contains('ScheduleNavigationRoute(children: ['));
+    expect(source, contains('_scheduleRootRoute()'));
+    expect(source, contains('return const ScheduleRoute()'));
+    expect(source, contains('return const ScheduleLightRoute()'));
+    expect(source, contains('return const ScheduleBasicRoute()'));
   });
 
   test('program tab has a canonical root distinct from event detail', () {
