@@ -84,6 +84,7 @@ automation/offline-map/build.sh \
   --bbox 17.85,49.87,17.97,49.98 \
   --min-zoom 0 \
   --max-zoom 14 \
+  --style-manifest automation/offline-map/manifests/festivalslunovrat/v1/manifest.json \
   --maplibre-only \
   --glyph-profile latin \
   --max-bundle-bytes 33554432
@@ -96,6 +97,11 @@ removed before the asset manifest is assembled, so clients do not download a
 second copy of the tiles. The explicit byte budget fails closed. Schema 2 and
 the default audited glyph profile remain unchanged for existing dual-renderer
 rollback bundles.
+
+`--style-manifest` is the reproducible bootstrap path when the large style and
+sprite inputs are not checked out locally. It accepts only `assets.festapp.net`
+URLs and verifies every downloaded style/sprite against the SHA-256 recorded in
+the tracked immutable manifest before the new bundle is built.
 
 To rebuild the same published version locally, first move the existing ignored
 output and tracked manifest aside. Never do this for an already published R2

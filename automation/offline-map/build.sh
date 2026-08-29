@@ -33,7 +33,7 @@ LATIN_GLYPH_RANGES=("0-255" "256-511" "8192-8447")
 FONT_STACKS=("noto_sans_regular" "noto_sans_bold")
 
 usage() {
-  echo "Usage: $0 --occasion SLUG [--occasion-link LINK] --occasion-id ID --version vN --bbox W,S,E,N --min-zoom N --max-zoom N [--source-url URL] [--maplibre-only --glyph-profile latin --max-bundle-bytes N] [--resume-existing]"
+  echo "Usage: $0 --occasion SLUG [--occasion-link LINK] --occasion-id ID --version vN --bbox W,S,E,N --min-zoom N --max-zoom N [--source-url URL] [--style-manifest MANIFEST.json] [--maplibre-only --glyph-profile latin --max-bundle-bytes N] [--resume-existing]"
 }
 
 OCCASION=""
@@ -44,6 +44,7 @@ BBOX=""
 MIN_ZOOM=""
 MAX_ZOOM=""
 SOURCE_URL="$DEFAULT_SOURCE_URL"
+STYLE_MANIFEST=""
 RESUME_EXISTING=false
 BUNDLE_MODE="dual_renderer"
 GLYPH_PROFILE="audited"
@@ -59,6 +60,7 @@ while [[ $# -gt 0 ]]; do
     --min-zoom) MIN_ZOOM="${2:-}"; shift 2 ;;
     --max-zoom) MAX_ZOOM="${2:-}"; shift 2 ;;
     --source-url) SOURCE_URL="${2:-}"; shift 2 ;;
+    --style-manifest) STYLE_MANIFEST="${2:-}"; shift 2 ;;
     --maplibre-only) BUNDLE_MODE="maplibre_only"; shift ;;
     --glyph-profile) GLYPH_PROFILE="${2:-}"; shift 2 ;;
     --max-bundle-bytes) MAX_BUNDLE_BYTES="${2:-}"; shift 2 ;;
@@ -139,9 +141,35 @@ if [[ "$RESUME_EXISTING" == true && ! -f "$MBTILES_PATH" ]]; then
   exit 1
 fi
 
+BUILD_STYLE_DIR="$STYLE_DIR"
+if [[ -n "$STYLE_MANIFEST" ]]; then
+  [[ -f "$STYLE_MANIFEST" ]] || { echo "Style manifest does not exist: $STYLE_MANIFEST" >&2; exit 1; }
+  BUILD_STYLE_DIR="$TMP_DIR/style"
+  mkdir -p "$BUILD_STYLE_DIR/sprites"
+  while IFS='|' read -r role destination; do
+    asset_count="$(jq --arg role "$role" '[.assets[] | select(.role == $role)] | length' "$STYLE_MANIFEST")"
+    [[ "$asset_count" == "1" ]] || { echo "Style manifest must contain exactly one $role asset" >&2; exit 1; }
+    asset_url="$(jq -r --arg role "$role" '.assets[] | select(.role == $role) | .url' "$STYLE_MANIFEST")"
+    asset_sha="$(jq -r --arg role "$role" '.assets[] | select(.role == $role) | .sha256' "$STYLE_MANIFEST")"
+    [[ "$asset_url" == https://assets.festapp.net/* && "$asset_sha" =~ ^[a-f0-9]{64}$ ]] || {
+      echo "Style manifest contains an unsafe $role asset" >&2
+      exit 1
+    }
+    curl -fsSL "$asset_url" -o "$BUILD_STYLE_DIR/$destination"
+    downloaded_sha="$(shasum -a 256 "$BUILD_STYLE_DIR/$destination" | awk '{print $1}')"
+    [[ "$downloaded_sha" == "$asset_sha" ]] || { echo "Style manifest checksum mismatch for $role" >&2; exit 1; }
+  done <<'EOF'
+style|style.json
+sprite_json_1x|sprites/sprites.json
+sprite_png_1x|sprites/sprites.png
+sprite_json_2x|sprites/sprites@2x.json
+sprite_png_2x|sprites/sprites@2x.png
+EOF
+fi
+
 for asset in style.json sprites/sprites.json sprites/sprites.png sprites/sprites@2x.json sprites/sprites@2x.png; do
-  if [[ ! -f "$STYLE_DIR/$asset" ]]; then
-    echo "Tracked style asset is missing: $STYLE_DIR/$asset" >&2
+  if [[ ! -f "$BUILD_STYLE_DIR/$asset" ]]; then
+    echo "Style asset is missing: $BUILD_STYLE_DIR/$asset (use --style-manifest for a verified immutable source)" >&2
     exit 1
   fi
 done
@@ -154,7 +182,7 @@ jq -e --argjson allowed "$ALLOWED_SOURCE_LAYERS" '
   ([.layers[] | select(.layout["text-field"]? == "{name_en}")] | length == 0) and
   ([.layers[] | select(.layout["text-field"]? == ["coalesce", ["get", "name"], ["get", "name_en"]])] | length > 0) and
   ([.layers[] | select(.source? == "versatiles-shortbread") | .["source-layer"]] - $allowed | length == 0)
-' "$STYLE_DIR/style.json" >/dev/null
+' "$BUILD_STYLE_DIR/style.json" >/dev/null
 
 SUPABASE_ENDPOINT="${SUPABASE_URL:-}"
 SUPABASE_PUBLIC_KEY="${SUPABASE_ANON_KEY:-}"
@@ -222,8 +250,8 @@ mkdir -p "$OUTPUT_DIR/sprites" "$OUTPUT_DIR/glyphs" "$TRACKED_MANIFEST_DIR"
 jq --arg base_url "https://assets.festapp.net/$OCCASION/$ARTIFACT_VERSION/" '
   .sprite = $base_url + "sprites/sprites" |
   .glyphs = $base_url + "glyphs/{fontstack}/{range}.pbf"
-' "$STYLE_DIR/style.json" > "$OUTPUT_DIR/style.json"
-cp "$STYLE_DIR/sprites/"* "$OUTPUT_DIR/sprites/"
+' "$BUILD_STYLE_DIR/style.json" > "$OUTPUT_DIR/style.json"
+cp "$BUILD_STYLE_DIR/sprites/"* "$OUTPUT_DIR/sprites/"
 
 if [[ "$RESUME_EXISTING" != true ]]; then
   versatiles convert --compress gzip --bbox-border 3 --bbox "$BBOX" --min-zoom "$MIN_ZOOM" --max-zoom "$MAX_ZOOM" \
