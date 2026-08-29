@@ -12,6 +12,7 @@ services:
     network_mode: host
     environment:
       FESTAPP_SUPABASE_HOSTNAME: ${FESTAPP_SUPABASE_HOSTNAME:-rehearsal-api.festapp.net}
+      FESTAPP_SUPABASE_SITE_ADDRESSES: ${FESTAPP_SUPABASE_SITE_ADDRESSES:-rehearsal-api.festapp.net}
     volumes:
       - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy-data:/data
