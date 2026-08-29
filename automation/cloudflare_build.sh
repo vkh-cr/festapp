@@ -81,6 +81,19 @@ function htmlResponse(body, originHeaders) {
   return new Response(body, { status: 200, headers });
 }
 
+function activationCorsHeaders(originHeaders) {
+  const headers = new Headers(originHeaders || {});
+  // The activation document is public, contains no credential, and is fetched
+  // by immutable preview builds from the tenant's production origin. Keep that
+  // cross-origin lookup explicit so previews exercise the real activation gate
+  // instead of silently falling back after a failed browser preflight.
+  headers.set("access-control-allow-origin", "*");
+  headers.set("access-control-allow-methods", "GET, HEAD, OPTIONS");
+  headers.set("access-control-allow-headers", "cache-control");
+  headers.set("access-control-max-age", "86400");
+  return headers;
+}
+
 async function serveAsset(env, request, path) {
   const url = new URL(request.url);
   url.pathname = path;
@@ -231,6 +244,13 @@ export default {
     const url = new URL(request.url);
     const path = url.pathname;
 
+    if (path === "/backend-activation.json" && request.method === "OPTIONS") {
+      return new Response(null, {
+        status: 204,
+        headers: activationCorsHeaders(),
+      });
+    }
+
     if (path === "/sitemap.xml") return handleSitemap(request, env);
 
     if (path === "/" && FORCED_OCCASION_PATH) {
@@ -273,7 +293,9 @@ export default {
       // render/paint loop. Force these runtime files to revalidate on every load
       // (index.html is already no-cache) so the whole JS/wasm graph always matches.
       if (MUTABLE_RUNTIME_ASSET.test(path)) {
-        const headers = new Headers(assetRes.headers);
+        const headers = path === "/backend-activation.json"
+          ? activationCorsHeaders(assetRes.headers)
+          : new Headers(assetRes.headers);
         headers.set(
           "cache-control",
           path === "/backend-activation.json"

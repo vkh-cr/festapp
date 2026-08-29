@@ -462,6 +462,16 @@ try {
   assert.match(ciBuild, /build_web_bundle\.sh" static/);
   assert.match(cloudflareBuild, /build_web_bundle\.sh" cloudflare/);
   assert.match(cloudflareBuild, /path === "\/backend-activation\.json"[\s\S]*?"no-store, max-age=0"/);
+  assert.match(
+    cloudflareBuild,
+    /path === "\/backend-activation\.json" && request\.method === "OPTIONS"[\s\S]*?activationCorsHeaders/,
+    'the public activation manifest must support cross-origin preview preflights',
+  );
+  assert.match(
+    cloudflareBuild,
+    /activationCorsHeaders[\s\S]*?access-control-allow-origin[\s\S]*?access-control-allow-headers/,
+    'activation responses must carry the public CORS contract',
+  );
   assert.match(sharedBuild, /cd web_client && npm ci && npm run build/);
   assert.match(sharedBuild, /apply_config\.sh/);
   assert.match(sharedBuild, /emit_version_manifest\.sh/);
