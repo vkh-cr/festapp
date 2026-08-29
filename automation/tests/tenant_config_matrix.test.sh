@@ -44,7 +44,7 @@ grep -qE 'organization = 5' "$TMP_ROOT/absolventskyvelehrad/web_client/src/app_c
 grep -qF "static const String appName = 'Absolventský Velehrad';" "$TMP_ROOT/absolventskyvelehrad/lib/app_config.dart"
 grep -qF '<meta name="apple-mobile-web-app-title" content="AV">' "$TMP_ROOT/absolventskyvelehrad/web/index.html"
 grep -qF 'Mobilní aplikace pro Absolventský Velehrad.' "$TMP_ROOT/absolventskyvelehrad/web/site.webmanifest"
-grep -qF "imageApiUrl = 'https://img.festapp.net'" "$TMP_ROOT/absolventskyvelehrad/web_client/src/app_config.js"
+grep -qF "imageApiUrl = 'https://image-api.festapp.net'" "$TMP_ROOT/absolventskyvelehrad/web_client/src/app_config.js"
 grep -qF "backendActivationTenantId = '';" "$TMP_ROOT/absolventskyvelehrad/lib/app_config.dart"
 grep -qF 'backendActivationCanonicalOrganizationId = 0' "$TMP_ROOT/absolventskyvelehrad/web_client/src/app_config.js"
 grep -qE 'fixturecav' "$TMP_ROOT/cavfotofest/lib/app_config.dart"
