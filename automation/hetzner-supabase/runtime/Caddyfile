@@ -6,7 +6,7 @@
 	}
 }
 
-{$FESTAPP_SUPABASE_HOSTNAME} {
+{$FESTAPP_SUPABASE_SITE_ADDRESSES} {
 	encode zstd gzip
 	header -Server
 	reverse_proxy 127.0.0.1:8000

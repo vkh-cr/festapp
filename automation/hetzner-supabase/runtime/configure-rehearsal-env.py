@@ -64,6 +64,7 @@ updates = {
     "COMPOSE_FILE": "docker-compose.yml:docker-compose.festapp.yml:docker-compose.database-target.yml",
     "FESTAPP_RUNTIME_DATABASE": runtime_database,
     "FESTAPP_SUPABASE_HOSTNAME": "rehearsal-api.festapp.net",
+    "FESTAPP_SUPABASE_SITE_ADDRESSES": "rehearsal-api.festapp.net",
     "SUPABASE_PUBLIC_URL": "https://rehearsal-api.festapp.net",
     "API_EXTERNAL_URL": "https://rehearsal-api.festapp.net",
     "SITE_URL": auth_site_url,
