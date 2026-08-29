@@ -16,7 +16,7 @@ FRONTEND="$SCRIPT_DIR/out/frontend.br.tar.gz"
 BUNDLE_DIR="$SCRIPT_DIR/out/$1/$2"
 MBTILES="$BUNDLE_DIR/$3"
 NAMED_MBTILES="$SCRIPT_DIR/out/versatiles-shortbread.mbtiles"
-PREVIEW_DIR="$SCRIPT_DIR/out/preview"
+PREVIEW_DIR="$SCRIPT_DIR/out/preview/$1/$2"
 
 if [[ ! -f "$FRONTEND" || ! -f "$MBTILES" ||
       ! -f "$BUNDLE_DIR/manifest.json" ||
@@ -25,9 +25,10 @@ if [[ ! -f "$FRONTEND" || ! -f "$MBTILES" ||
   exit 1
 fi
 
-mkdir -p "$PREVIEW_DIR/sprites"
+mkdir -p "$PREVIEW_DIR/sprites" "$PREVIEW_DIR/glyphs"
 cp "$SCRIPT_DIR/preview/index.html" "$PREVIEW_DIR/index.html"
 cp "$BUNDLE_DIR/sprites/"* "$PREVIEW_DIR/sprites/"
+cp -R "$BUNDLE_DIR/glyphs/." "$PREVIEW_DIR/glyphs/"
 jq -r '
   "window.FESTAPP_OFFLINE_MAP_PREVIEW = " + ({
     title:(.occasion.slug + " · offline map preview"),
@@ -40,7 +41,8 @@ jq -r '
 ' "$BUNDLE_DIR/manifest.json" > "$PREVIEW_DIR/preview-config.js"
 jq '
   .sources["versatiles-shortbread"].tiles = ["http://localhost:8080/tiles/versatiles-shortbread/{z}/{x}/{y}"] |
-  .sprite = "http://localhost:8080/sprites/sprites"
+  .sprite = "http://localhost:8080/sprites/sprites" |
+  .glyphs = "http://localhost:8080/glyphs/{fontstack}/{range}.pbf"
 ' "$BUNDLE_DIR/style.json" > "$PREVIEW_DIR/preview-style.json"
 
 ln -sfn "$MBTILES" "$NAMED_MBTILES"
