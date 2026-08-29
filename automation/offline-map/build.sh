@@ -140,10 +140,10 @@ if [[ -z "$SUPABASE_ENDPOINT" || -z "$SUPABASE_PUBLIC_KEY" ]]; then
   exit 1
 fi
 
-curl -fsS "$SUPABASE_ENDPOINT/rest/v1/rpc/get_occasion_by_link" \
-  -H "apikey: $SUPABASE_PUBLIC_KEY" -H 'Content-Type: application/json' \
-  --data "$(jq -cn --arg link "$OCCASION_LINK" '{link_param:$link}')" > "$TMP_DIR/occasion.json"
-if [[ "$(jq -r '.id' "$TMP_DIR/occasion.json")" != "$OCCASION_ID" ]]; then
+curl -fsS "$SUPABASE_ENDPOINT/rest/v1/occasions?select=id&link=eq.$OCCASION_LINK" \
+  -H "apikey: $SUPABASE_PUBLIC_KEY" > "$TMP_DIR/occasion.json"
+if [[ "$(jq 'length' "$TMP_DIR/occasion.json")" != "1" ||
+      "$(jq -r '.[0].id' "$TMP_DIR/occasion.json")" != "$OCCASION_ID" ]]; then
   echo "Live occasion id does not match --occasion-id" >&2
   exit 1
 fi
