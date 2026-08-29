@@ -146,7 +146,9 @@ echo
 echo "--- web/index.html (Flutter template) ---"
 assert_contains "$TMP_ROOT/web/index.html" "<title>Test App Name</title>"
 assert_contains "$TMP_ROOT/web/index.html" '<meta name="apple-mobile-web-app-title" content="TST">'
-assert_contains "$TMP_ROOT/web/index.html" 'appId: "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"'
+assert_contains "$TMP_ROOT/web/index.html" 'const oneSignalWebAppId = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee";'
+assert_contains "$TMP_ROOT/web/index.html" 'if (!oneSignalWebAppId) {'
+assert_contains "$TMP_ROOT/web/index.html" 'appId: oneSignalWebAppId'
 assert_contains "$TMP_ROOT/web/index.html" 'safari_web_id: "web.onesignal.auto.test"'
 assert_contains "$TMP_ROOT/web/index.html" "app_generation: 'test_generation_v1'"
 assert_contains "$TMP_ROOT/web/index.html" "occasion: 'test-occasion'"
@@ -256,6 +258,7 @@ assert_contains "$TMP_ROOT/lib/app_config.dart" "static const String imageApiUrl
 assert_contains "$TMP_ROOT/lib/app_config.dart" "static const String imageProjectId = 'a';"
 assert_contains "$TMP_ROOT/lib/app_config.dart" 'static const String? forceOccasionLink = "test-occasion";'
 assert_contains "$TMP_ROOT/lib/app_config.dart" "static const String oneSignalAppId = '11111111-2222-3333-4444-555555555555';"
+assert_contains "$TMP_ROOT/lib/app_config.dart" "static const String oneSignalWebAppId = 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee';"
 assert_contains "$TMP_ROOT/lib/app_config.dart" "static const String pushAppGeneration = 'test_generation_v1';"
 assert_contains "$TMP_ROOT/lib/app_config.dart" "static const String programLogoAsset = 'assets/icons/fstapplogo.svg';"
 

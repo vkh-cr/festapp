@@ -300,7 +300,14 @@ import sys
 
 path, app_id, safari_id, generation, occasion = sys.argv[1:]
 source = open(path, encoding="utf-8").read()
-source = re.sub(r'appId: "[^"]*"', f'appId: "{app_id}"', source)
+source, count = re.subn(
+    r'const oneSignalWebAppId = "[^"]*";',
+    f'const oneSignalWebAppId = "{app_id}";',
+    source,
+    count=1,
+)
+if count != 1:
+    raise SystemExit(f"missing OneSignal web app ID constant in {path}")
 source = re.sub(r'safari_web_id: "[^"]*"', f'safari_web_id: "{safari_id}"', source)
 source = re.sub(r"app_generation: '[^']*'", f"app_generation: '{generation}'", source)
 source = re.sub(r"occasion: '[^']*'", f"occasion: '{occasion}'", source)
@@ -540,6 +547,7 @@ PY
     fi
 
     sed_inplace "s|static const String oneSignalAppId = '.*';|static const String oneSignalAppId = '${ONESIGNAL_NATIVE_APP_ID:-}';|g" "$FLUTTER_CONFIG"
+    sed_inplace "s|static const String oneSignalWebAppId = '.*';|static const String oneSignalWebAppId = '${ONESIGNAL_WEB_APP_ID:-}';|g" "$FLUTTER_CONFIG"
     sed_inplace "s|static const String pushAppGeneration = '.*';|static const String pushAppGeneration = '${PUSH_APP_GENERATION:-}';|g" "$FLUTTER_CONFIG"
     sed_inplace "s|static const String logoAsset = '.*';|static const String logoAsset = '$LOGO_ASSET';|g" "$FLUTTER_CONFIG"
     sed_inplace "s|static const String darkLogoAsset = '.*';|static const String darkLogoAsset = '$DARK_LOGO_ASSET';|g" "$FLUTTER_CONFIG"

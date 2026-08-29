@@ -31,6 +31,7 @@ class AppConfig {
   static const bool isNotificationsSupported = true;
   static const bool isWebNotificationsSupported = true;
   static const String oneSignalAppId = '';
+  static const String oneSignalWebAppId = '';
   static const String pushAppGeneration = '';
   static const String effectivePushAppGeneration = String.fromEnvironment(
     'FESTAPP_PUSH_APP_GENERATION',
@@ -74,9 +75,11 @@ class AppConfig {
 
   static bool isNotificationsCurrentlySupported() {
     if (kIsWeb) {
-      return isNotificationsSupported && isWebNotificationsSupported;
+      return isNotificationsSupported &&
+          isWebNotificationsSupported &&
+          oneSignalWebAppId.isNotEmpty;
     }
-    return isNotificationsSupported;
+    return isNotificationsSupported && oneSignalAppId.isNotEmpty;
   }
 
   static List<LanguageModel> availableLanguages() => [
