@@ -39,7 +39,7 @@ for tenant in festapp festapptickets absolventskyvelehrad cavfotofest csmostrava
 done
 
 grep -qE 'fixturecsm' "$TMP_ROOT/csmostrava2026/lib/app_config.dart"
-grep -qF "webLink = 'https://dev.example.invalid'" "$TMP_ROOT/festapp/web_client/src/app_config.js"
+grep -qF 'static webLink = "https://dev.example.invalid";' "$TMP_ROOT/festapp/web_client/src/app_config.js"
 grep -qF "backendActivationTenantId = 'festapp'" "$TMP_ROOT/festapp/lib/app_config.dart"
 grep -qF "backendActivationCanonicalSupabaseUrl = 'https://api.festapp.net'" "$TMP_ROOT/festapp/web_client/src/app_config.js"
 grep -qF 'backendActivationCanonicalOrganizationId = 1' "$TMP_ROOT/festapp/web_client/src/app_config.js"
