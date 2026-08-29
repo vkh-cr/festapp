@@ -79,16 +79,27 @@ canonical tenant overlay and deploy it, enforce read-only behavior, or prove
 from hosting/DNS/traffic/write telemetry that it is retired. Branch age is not
 retirement evidence.
 
-The active Cloudflare web lanes were regenerated from main
-`6fb7930337b5033aff6b64d6c2fc96ed0fdbf9eb` on 2026-08-29. All use Flutter
+The active Cloudflare web lanes were regenerated from main through
+`a17e4c39d3310274526c74e247e451b74b5ac9e1` on 2026-08-29. All use Flutter
 `3.47.2` and semantic version `0.19.93`: CSM Ostrava and Clovek a vira use
 build `465`; Hvezda Morska uses build `466`; the ticket web uses build `464`; and
-`live.festapp.net` uses build `469`. Build numbers are monotonic within each
+`live.festapp.net` uses build `470`. Build numbers are monotonic within each
 release lane and are not expected to be identical across unrelated store/web
 identities. The three source-a web overlays remain deliberately in `legacy`
 activation phase while carrying their mapped canonical organization and
 `api.festapp.net` configuration, so the final activation document can switch
-them after the full-freeze gate without rebuilding the bundle.
+them after the full-freeze gate without rebuilding the bundle. Festapp `470`
+now carries the equivalent source-default transition profile for canonical
+organization `1`, while its public activation document remains in `legacy`.
+
+The Festapp `470` production smoke passes the canonical root-to-program
+redirect, both legacy `get_events` reads, a program detail with its full HTML
+description, detail back-navigation to `/conference2024/event`, the public
+login route and the Flutter admin route. `backend-activation.json` is served as
+JSON with `no-store, max-age=0`; internal application links and the iOS
+associated-domain input now use `live.festapp.net`, not the separate
+`vstupenky.online` tenant. The stable legacy Auth storage namespace is retained,
+so installing this transition web build does not itself sign users out.
 
 Festival Slunovrat remains an explicitly deferred lane. It must not be inferred
 as ready from the four active deployments above; its outdated schema/overlay
