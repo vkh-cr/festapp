@@ -24,6 +24,7 @@ jobs:
             prod/absolventskyvelehrad) TENANT_ID=absolventskyvelehrad ;;
             prod/cavfotofest) TENANT_ID=cavfotofest ;;
             prod/csmostrava2026) TENANT_ID=csmostrava2026 ;;
+            prod/doobiscup) TENANT_ID=doobiscup ;;
             prod/festapp) TENANT_ID=festapp ;;
             prod/festapptickets) TENANT_ID=festapptickets ;;
             prod/festivalslunovrat) TENANT_ID=festivalslunovrat ;;
@@ -122,6 +123,7 @@ jobs:
           CSM_MANIFEST: ${{ secrets.FESTAPP_RELEASE_MANIFEST_CSMOSTRAVA2026 }}
           HVEZDA_MORSKA_MANIFEST: ${{ secrets.FESTAPP_RELEASE_MANIFEST_HVEZDAMORSKA }}
           CAV_MANIFEST: ${{ secrets.FESTAPP_RELEASE_MANIFEST_CAVFOTOFEST }}
+          DOOBISCUP_MANIFEST: ${{ secrets.FESTAPP_RELEASE_MANIFEST_DOOBISCUP }}
           AV_MANIFEST: ${{ secrets.FESTAPP_RELEASE_MANIFEST_ABSOLVENTSKYVELEHRAD }}
           FESTAPP_MANIFEST: ${{ secrets.FESTAPP_RELEASE_MANIFEST_FESTAPP }}
           SLUNOVRAT_MANIFEST: ${{ secrets.FESTAPP_RELEASE_MANIFEST_FESTIVALSLUNOVRAT }}
@@ -139,6 +141,7 @@ jobs:
             prod/csmostrava2026) RELEASE_MANIFEST="$CSM_MANIFEST" ;;
             prod/hvezdamorska) RELEASE_MANIFEST="$HVEZDA_MORSKA_MANIFEST" ;;
             prod/cavfotofest) RELEASE_MANIFEST="$CAV_MANIFEST" ;;
+            prod/doobiscup) RELEASE_MANIFEST="$DOOBISCUP_MANIFEST" ;;
             prod/absolventskyvelehrad) RELEASE_MANIFEST="$AV_MANIFEST" ;;
             prod/festapp) RELEASE_MANIFEST="$FESTAPP_MANIFEST" ;;
             prod/festivalslunovrat) RELEASE_MANIFEST="$SLUNOVRAT_MANIFEST" ;;
