@@ -33,6 +33,51 @@ void main() {
     expect(result['client_sync_v1'], isFalse);
   });
 
+  test('falls back to v2 when a legacy backend predates v218', () async {
+    final calls = <String>[];
+
+    final result = await loadAppConfigWithLegacyFallback(
+      useLegacyContract: true,
+      invoke: (name) async {
+        calls.add(name);
+        if (name == 'get_app_config_v218') {
+          throw const PostgrestException(
+            message: 'function missing',
+            code: 'PGRST202',
+          );
+        }
+        return <String, dynamic>{
+          'code': 200,
+          'occasion': <String, dynamic>{'link': 'slunovrat'},
+        };
+      },
+    );
+
+    expect(calls, <String>['get_app_config_v218', 'get_app_config_v2']);
+    expect(result['occasion']['link'], 'slunovrat');
+    expect(result['client_sync_v1'], isFalse);
+  });
+
+  test('does not hide unrelated v218 failures on a legacy backend', () async {
+    final calls = <String>[];
+
+    await expectLater(
+      loadAppConfigWithLegacyFallback(
+        useLegacyContract: true,
+        invoke: (name) async {
+          calls.add(name);
+          throw const PostgrestException(
+            message: 'permission denied',
+            code: '42501',
+          );
+        },
+      ),
+      throwsA(isA<PostgrestException>()),
+    );
+
+    expect(calls, <String>['get_app_config_v218']);
+  });
+
   test('falls back to v218 only when v219 is absent', () async {
     final calls = <String>[];
 
