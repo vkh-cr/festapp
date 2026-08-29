@@ -125,6 +125,12 @@ tenant overlay path and must record the main SHA it overlays. Before proposing a
 production-branch commit, run the checker extracted from that recorded main SHA
 as documented in `docs/architecture/tenant_overlays.md`.
 
+Tenant releases are sequential. Push exactly one `prod/*` release, wait for its
+deployment workflow to finish, and complete the public production smoke test
+before preparing or pushing the next tenant release. Do not batch, queue, or
+run several Flutter tenant builds in parallel unless the user explicitly asks
+for that specific release batch.
+
 Follow this checklist **before** every commit:
 
 ### Step 1: Configuration Check
