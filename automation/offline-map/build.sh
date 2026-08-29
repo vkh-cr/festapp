@@ -12,7 +12,7 @@ GLYPH_BASE_URL="https://tiles.versatiles.org/assets/glyphs"
 # Audited from every string property in the CSM v2 MVT region, the style
 # literals, and the extra ranges requested by MapLibre Native during the
 # force-offline probe (variation selectors/private-use glyphs).
-GLYPH_RANGES=(
+AUDITED_GLYPH_RANGES=(
   "0-255" "256-511" "512-767" "768-1023" "1024-1279" "1280-1535"
   "1536-1791" "1792-2047" "2304-2559" "3840-4095" "4096-4351"
   "4608-4863" "4864-5119" "5120-5375" "5376-5631" "6144-6399"
@@ -29,10 +29,11 @@ GLYPH_RANGES=(
   "39936-40191" "40448-40703" "40704-40959" "64256-64511"
   "65024-65279"
 )
+LATIN_GLYPH_RANGES=("0-255" "256-511" "8192-8447")
 FONT_STACKS=("noto_sans_regular" "noto_sans_bold")
 
 usage() {
-  echo "Usage: $0 --occasion SLUG [--occasion-link LINK] --occasion-id ID --version vN --bbox W,S,E,N --min-zoom N --max-zoom N [--source-url URL] [--resume-existing]"
+  echo "Usage: $0 --occasion SLUG [--occasion-link LINK] --occasion-id ID --version vN --bbox W,S,E,N --min-zoom N --max-zoom N [--source-url URL] [--maplibre-only --glyph-profile latin --max-bundle-bytes N] [--resume-existing]"
 }
 
 OCCASION=""
@@ -44,6 +45,9 @@ MIN_ZOOM=""
 MAX_ZOOM=""
 SOURCE_URL="$DEFAULT_SOURCE_URL"
 RESUME_EXISTING=false
+BUNDLE_MODE="dual_renderer"
+GLYPH_PROFILE="audited"
+MAX_BUNDLE_BYTES=0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -55,6 +59,9 @@ while [[ $# -gt 0 ]]; do
     --min-zoom) MIN_ZOOM="${2:-}"; shift 2 ;;
     --max-zoom) MAX_ZOOM="${2:-}"; shift 2 ;;
     --source-url) SOURCE_URL="${2:-}"; shift 2 ;;
+    --maplibre-only) BUNDLE_MODE="maplibre_only"; shift ;;
+    --glyph-profile) GLYPH_PROFILE="${2:-}"; shift 2 ;;
+    --max-bundle-bytes) MAX_BUNDLE_BYTES="${2:-}"; shift 2 ;;
     --resume-existing) RESUME_EXISTING=true; shift ;;
     -h|--help) usage; exit 0 ;;
     *) echo "Unknown argument: $1" >&2; usage >&2; exit 2 ;;
@@ -73,6 +80,28 @@ fi
 if [[ ! "$MIN_ZOOM" =~ ^[0-9]+$ || ! "$MAX_ZOOM" =~ ^[0-9]+$ || "$MIN_ZOOM" -gt "$MAX_ZOOM" ]]; then
   echo "zoom range is invalid" >&2
   exit 2
+fi
+if [[ "$GLYPH_PROFILE" != "audited" && "$GLYPH_PROFILE" != "latin" ]]; then
+  echo "glyph profile must be audited or latin" >&2
+  exit 2
+fi
+if [[ "$BUNDLE_MODE" != "maplibre_only" && "$GLYPH_PROFILE" != "audited" ]]; then
+  echo "reduced glyph profiles require --maplibre-only" >&2
+  exit 2
+fi
+if [[ ! "$MAX_BUNDLE_BYTES" =~ ^[0-9]+$ ]]; then
+  echo "max bundle bytes must be a non-negative integer" >&2
+  exit 2
+fi
+if [[ "$BUNDLE_MODE" == "maplibre_only" && "$MAX_BUNDLE_BYTES" -eq 0 ]]; then
+  echo "--maplibre-only requires an explicit --max-bundle-bytes budget" >&2
+  exit 2
+fi
+
+if [[ "$GLYPH_PROFILE" == "latin" ]]; then
+  GLYPH_RANGES=("${LATIN_GLYPH_RANGES[@]}")
+else
+  GLYPH_RANGES=("${AUDITED_GLYPH_RANGES[@]}")
 fi
 
 for tool in versatiles sqlite3 jq shasum curl awk; do
@@ -255,6 +284,16 @@ SHASUM_VERSION="$(shasum --version 2>&1 | head -n 1)"
 BUILT_AT="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
 
 ASSETS_JSON='[]'
+CORE_ASSETS="pmtiles|$PMTILES_NAME|application/vnd.pmtiles
+style|style.json|application/json
+sprite_json_1x|sprites/sprites.json|application/json
+sprite_png_1x|sprites/sprites.png|image/png
+sprite_json_2x|sprites/sprites@2x.json|application/json
+sprite_png_2x|sprites/sprites@2x.png|image/png"
+if [[ "$BUNDLE_MODE" == "dual_renderer" ]]; then
+  CORE_ASSETS="mbtiles|$MBTILES_NAME|application/vnd.sqlite3
+$CORE_ASSETS"
+fi
 while IFS='|' read -r role relative_path content_type; do
   asset_path="$OUTPUT_DIR/$relative_path"
   asset_bytes="$(stat -f '%z' "$asset_path" 2>/dev/null || stat -c '%s' "$asset_path")"
@@ -262,15 +301,7 @@ while IFS='|' read -r role relative_path content_type; do
   ASSETS_JSON="$(jq -c --arg role "$role" --arg path "$relative_path" --arg type "$content_type" --argjson bytes "$asset_bytes" --arg sha "$asset_sha" \
     --arg url "https://assets.festapp.net/$OCCASION/$ARTIFACT_VERSION/$relative_path" \
     '. + [{role:$role,path:$path,url:$url,content_type:$type,bytes:$bytes,sha256:$sha}]' <<< "$ASSETS_JSON")"
-done <<EOF
-mbtiles|$MBTILES_NAME|application/vnd.sqlite3
-pmtiles|$PMTILES_NAME|application/vnd.pmtiles
-style|style.json|application/json
-sprite_json_1x|sprites/sprites.json|application/json
-sprite_png_1x|sprites/sprites.png|image/png
-sprite_json_2x|sprites/sprites@2x.json|application/json
-sprite_png_2x|sprites/sprites@2x.png|image/png
-EOF
+done <<< "$CORE_ASSETS"
 
 for font_stack in "${FONT_STACKS[@]}"; do
   for glyph_range in "${GLYPH_RANGES[@]}"; do
@@ -284,8 +315,22 @@ for font_stack in "${FONT_STACKS[@]}"; do
   done
 done
 
+BUNDLE_BYTES="$(jq '[.[].bytes] | add // 0' <<< "$ASSETS_JSON")"
+if [[ "$MAX_BUNDLE_BYTES" -gt 0 && "$BUNDLE_BYTES" -gt "$MAX_BUNDLE_BYTES" ]]; then
+  echo "Bundle exceeds the explicit budget: $BUNDLE_BYTES > $MAX_BUNDLE_BYTES bytes" >&2
+  exit 1
+fi
+
+if [[ "$BUNDLE_MODE" == "maplibre_only" ]]; then
+  rm "$MBTILES_PATH"
+  SCHEMA_VERSION=3
+else
+  SCHEMA_VERSION=2
+fi
+
 jq -n \
-  --argjson schema_version "2" --arg occasion "$OCCASION" --argjson occasion_id "$OCCASION_ID" \
+  --argjson schema_version "$SCHEMA_VERSION" --arg bundle_mode "$BUNDLE_MODE" \
+  --arg glyph_profile "$GLYPH_PROFILE" --arg occasion "$OCCASION" --argjson occasion_id "$OCCASION_ID" \
   --arg version "$ARTIFACT_VERSION" --arg built_at "$BUILT_AT" \
   --arg source_name "versatiles-shortbread" --arg base_url "https://assets.festapp.net/$OCCASION/$ARTIFACT_VERSION/" \
   --arg source_url "$SOURCE_URL" --arg source_etag "$SOURCE_ETAG" --arg source_last_modified "$SOURCE_LAST_MODIFIED" \
@@ -294,16 +339,18 @@ jq -n \
   --argjson min_zoom "$MIN_ZOOM" --argjson max_zoom "$MAX_ZOOM" \
   --argjson place_count "$PLACE_COUNT" --argjson path_group_count "$PATH_GROUP_COUNT" --argjson route_point_count "$ROUTE_POINT_COUNT" \
   --arg versatiles "$VERSATILES_VERSION" --arg sqlite "$SQLITE_VERSION" --arg jq "$JQ_VERSION" --arg shasum "$SHASUM_VERSION" \
-  --argjson tile_count "$TILE_COUNT" --argjson metadata "$METADATA_JSON" --argjson assets "$ASSETS_JSON" '
+  --argjson tile_count "$TILE_COUNT" --argjson metadata "$METADATA_JSON" --argjson assets "$ASSETS_JSON" \
+  --argjson bundle_bytes "$BUNDLE_BYTES" --argjson max_bundle_bytes "$MAX_BUNDLE_BYTES" '
   {
     schema_version:$schema_version,
+    bundle_mode:(if $schema_version == 3 then $bundle_mode else null end),
     occasion:{slug:$occasion,id:$occasion_id},
     artifact_version:$version,
     source_name:$source_name,
     base_url:$base_url,
     built_at:$built_at,
     source:{url:$source_url,etag:$source_etag,last_modified:$source_last_modified},
-    build:{requested_bounds:$requested_bounds,min_zoom:$min_zoom,max_zoom:$max_zoom,bbox_border_tiles:3,compression:"gzip"},
+    build:{requested_bounds:$requested_bounds,min_zoom:$min_zoom,max_zoom:$max_zoom,bbox_border_tiles:3,compression:"gzip",glyph_profile:$glyph_profile,bundle_bytes:$bundle_bytes,max_bundle_bytes:(if $max_bundle_bytes > 0 then $max_bundle_bytes else null end)},
     live_content:{bounds:$live_bounds,margins_km:$margins_km,places:$place_count,path_groups:$path_group_count,free_route_points:$route_point_count},
     tools:{versatiles:$versatiles,sqlite:$sqlite,jq:$jq,shasum:$shasum},
     mbtiles:{tile_count:$tile_count,metadata:$metadata},
@@ -316,6 +363,6 @@ cp "$OUTPUT_DIR/manifest.json" "$TRACKED_MANIFEST"
 curl -fsSL "$DEFAULT_FRONTEND_URL" -o "$SCRIPT_DIR/out/frontend.br.tar.gz"
 
 MANIFEST_SHA="$(shasum -a 256 "$OUTPUT_DIR/manifest.json" | awk '{print $1}')"
-echo "Built $OCCASION/$ARTIFACT_VERSION: $TILE_COUNT tiles, MBTiles $MBTILES_BYTES bytes, PMTiles $PMTILES_BYTES bytes"
+echo "Built $OCCASION/$ARTIFACT_VERSION: $TILE_COUNT tiles, mode $BUNDLE_MODE, bundle $BUNDLE_BYTES bytes (MBTiles intermediate $MBTILES_BYTES, PMTiles $PMTILES_BYTES)"
 echo "Manifest SHA-256: $MANIFEST_SHA"
 echo "Preview: $SCRIPT_DIR/preview.sh $OCCASION $ARTIFACT_VERSION $MBTILES_NAME"

@@ -22,6 +22,11 @@ enum OfflineMapAssetRole {
   glyph,
 }
 
+enum OfflineMapBundleMode {
+  dualRenderer,
+  mapLibreOnly,
+}
+
 class OfflineMapBundleAsset {
   const OfflineMapBundleAsset({
     required this.role,
@@ -40,6 +45,7 @@ class OfflineMapBundleAsset {
 
 class OfflineMapBundleManifest {
   OfflineMapBundleManifest._({
+    required this.bundleMode,
     required this.artifactVersion,
     required this.sourceName,
     required this.baseUrl,
@@ -57,25 +63,31 @@ class OfflineMapBundleManifest {
     'glyph': OfflineMapAssetRole.glyph,
   };
 
-  static const _singleRoles = <OfflineMapAssetRole>{
+  static const _mapLibreRoles = <OfflineMapAssetRole>{
     OfflineMapAssetRole.style,
     OfflineMapAssetRole.pmtiles,
-    OfflineMapAssetRole.mbtiles,
     OfflineMapAssetRole.spriteJson1x,
     OfflineMapAssetRole.spritePng1x,
     OfflineMapAssetRole.spriteJson2x,
     OfflineMapAssetRole.spritePng2x,
   };
 
+  final OfflineMapBundleMode bundleMode;
   final String artifactVersion;
   final String sourceName;
   final Uri baseUrl;
   final List<OfflineMapBundleAsset> assets;
 
   factory OfflineMapBundleManifest.parse(Map<String, dynamic> json) {
-    if (json['schema_version'] != 2) {
-      throw OfflineMapBundleException('Unsupported manifest schema version.');
-    }
+    final schemaVersion = json['schema_version'];
+    final bundleMode = switch (schemaVersion) {
+      2 when json['bundle_mode'] == null => OfflineMapBundleMode.dualRenderer,
+      3 when json['bundle_mode'] == 'maplibre_only' =>
+        OfflineMapBundleMode.mapLibreOnly,
+      _ => throw OfflineMapBundleException(
+          'Unsupported manifest schema version or bundle mode.',
+        ),
+    };
     final artifactVersion = _nonEmptyString(json, 'artifact_version');
     final sourceName = _nonEmptyString(json, 'source_name');
     if (!_isSafeDirectorySegment(artifactVersion) ||
@@ -112,7 +124,7 @@ class OfflineMapBundleManifest {
         throw OfflineMapBundleException(
             'Invalid or duplicate asset path: $path.');
       }
-      if (_singleRoles.contains(role) && !singleRoles.add(role)) {
+      if (role != OfflineMapAssetRole.glyph && !singleRoles.add(role)) {
         throw OfflineMapBundleException('Duplicate asset role: $roleName.');
       }
       final url = Uri.tryParse(_nonEmptyString(assetJson, 'url'));
@@ -136,7 +148,12 @@ class OfflineMapBundleManifest {
       ));
     }
 
-    final missing = _singleRoles.difference(singleRoles);
+    final requiredRoles = <OfflineMapAssetRole>{
+      ..._mapLibreRoles,
+      if (bundleMode == OfflineMapBundleMode.dualRenderer)
+        OfflineMapAssetRole.mbtiles,
+    };
+    final missing = requiredRoles.difference(singleRoles);
     if (missing.isNotEmpty ||
         !assets.any((asset) => asset.role == OfflineMapAssetRole.glyph)) {
       throw OfflineMapBundleException('Manifest is missing required assets.');
@@ -150,6 +167,7 @@ class OfflineMapBundleManifest {
     }
 
     return OfflineMapBundleManifest._(
+      bundleMode: bundleMode,
       artifactVersion: artifactVersion,
       sourceName: sourceName,
       baseUrl: baseUrl,

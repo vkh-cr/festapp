@@ -64,7 +64,9 @@ async function main() {
   }
   const manifestPath = path.resolve(manifestArg);
   const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
-  if (manifest.schema_version !== 2 || manifest.occasion?.id == null ||
+  const isDualRenderer = manifest.schema_version === 2 && manifest.bundle_mode == null;
+  const isMapLibreOnly = manifest.schema_version === 3 && manifest.bundle_mode === 'maplibre_only';
+  if ((!isDualRenderer && !isMapLibreOnly) || manifest.occasion?.id == null ||
       !String(manifest.base_url).startsWith('https://assets.festapp.net/')) {
     fail('unsupported or unsafe offline map manifest');
   }
@@ -77,25 +79,30 @@ async function main() {
   if (mapFeatures.length !== 1) fail(`expected exactly one map feature, found ${mapFeatures.length}`);
   const mbtilesAsset = manifest.assets?.find(asset => asset.role === 'mbtiles');
   const styleAsset = manifest.assets?.find(asset => asset.role === 'style');
-  if (!mbtilesAsset || !styleAsset) fail('manifest is missing legacy package or style assets');
+  if (!styleAsset || (isDualRenderer && !mbtilesAsset)) {
+    fail('manifest is missing required renderer assets');
+  }
 
   const expected = structuredClone(before);
   const mapFeature = expected.features.find(feature => feature?.code === 'map');
   const baseUrl = new URL(manifest.base_url);
-  mapFeature.map_layer_offline = {
+  const rendererSettings = {
     ...(mapFeature.map_layer_offline ?? {}),
     logo: null,
     text: '© OpenStreetMap contributors',
     logo_link: null,
     text_link: 'https://www.openstreetmap.org/copyright',
     layer_link: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-    offlineMapPackageURL: new URL(mbtilesAsset.path, baseUrl).href,
-    offlineMapStyleURL: new URL(styleAsset.path, baseUrl).href,
-    offlineMapLayerName: manifest.source_name,
     offlineMapRenderer: 'maplibre',
     offlineMapBundleManifestURL: new URL('manifest.json', baseUrl).href,
     forceOfflineMap: false,
   };
+  if (mbtilesAsset) {
+    rendererSettings.offlineMapPackageURL = new URL(mbtilesAsset.path, baseUrl).href;
+    rendererSettings.offlineMapStyleURL = new URL(styleAsset.path, baseUrl).href;
+    rendererSettings.offlineMapLayerName = manifest.source_name;
+  }
+  mapFeature.map_layer_offline = rendererSettings;
 
   await rpc('update_occasion_203', { input_data: expected });
   const after = await getOccasion(occasionLink);

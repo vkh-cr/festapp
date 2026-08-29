@@ -8,10 +8,15 @@ PREVIEW_HTML="$ROOT/automation/offline-map/preview/index.html"
 
 help="$($BUILD --help)"
 grep -Fq -- '[--occasion-link LINK]' <<<"$help"
+grep -Fq -- '[--maplibre-only --glyph-profile latin --max-bundle-bytes N]' <<<"$help"
 grep -Fq 'MAP_NAME="map-z${MIN_ZOOM}-${MAX_ZOOM}"' "$BUILD"
 grep -Fq '.sprite = $base_url + "sprites/sprites"' "$BUILD"
 grep -Fq '.glyphs = $base_url + "glyphs/{fontstack}/{range}.pbf"' "$BUILD"
 grep -Fq '/rest/v1/occasions?select=id&link=eq.$OCCASION_LINK' "$BUILD"
+grep -Fq 'BUNDLE_MODE="maplibre_only"' "$BUILD"
+grep -Fq 'SCHEMA_VERSION=3' "$BUILD"
+grep -Fq 'LATIN_GLYPH_RANGES=("0-255" "256-511" "8192-8447")' "$BUILD"
+grep -Fq 'Bundle exceeds the explicit budget' "$BUILD"
 
 if grep -Fq '/rpc/get_occasion_by_link' "$BUILD"; then
   echo "offline map build must not depend on a tenant-specific RPC migration" >&2

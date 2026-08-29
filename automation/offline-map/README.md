@@ -73,6 +73,30 @@ count, SHA-256 and renderer role. Its own checksum is printed by the
 build and must be copied to the rollout record because a file cannot contain
 its own stable SHA-256.
 
+For a MapLibre-only occasion, use the explicit compact contract:
+
+```bash
+automation/offline-map/build.sh \
+  --occasion festivalslunovrat \
+  --occasion-link 2025-copy-98cf835a \
+  --occasion-id 6 \
+  --version v2 \
+  --bbox 17.85,49.87,17.97,49.98 \
+  --min-zoom 0 \
+  --max-zoom 14 \
+  --maplibre-only \
+  --glyph-profile latin \
+  --max-bundle-bytes 33554432
+```
+
+This produces schema 3 with `bundle_mode: maplibre_only`: PMTiles, style,
+sprites and both font stacks for Latin, Latin Extended and General Punctuation.
+The verified MBTiles file remains a local conversion intermediate and is
+removed before the asset manifest is assembled, so clients do not download a
+second copy of the tiles. The explicit byte budget fails closed. Schema 2 and
+the default audited glyph profile remain unchanged for existing dual-renderer
+rollback bundles.
+
 To rebuild the same published version locally, first move the existing ignored
 output and tracked manifest aside. Never do this for an already published R2
 key: corrected content must use the next `vN` directory.
