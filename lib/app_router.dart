@@ -161,7 +161,6 @@ class AppRouter extends RootStackRouter {
             page: OccasionHomeRoute.page,
             path: "/:$linkFormatted",
             children: [
-              RedirectRoute(path: '', redirectTo: EventPage.ROUTE),
               AutoRoute(page: UserRoute.page, path: UserPage.ROUTE),
               AutoRoute(
                   page: ScheduleNavigationRoute.page,

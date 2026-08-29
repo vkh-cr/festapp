@@ -34,6 +34,7 @@ import 'package:fstapp/components/unit/views/unit_page.dart';
 import 'package:fstapp/components/users/views/user_page.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
+import 'package:fstapp/components/features/schedule_feature.dart';
 import 'package:fstapp/components/search/global_search_dialog.dart';
 import 'package:fstapp/components/search/search_strings.dart';
 
@@ -400,7 +401,7 @@ class OccasionTab {
           label: CommonStrings.schedule,
           icon: Icons.calendar_month_outlined,
           activeIcon: Icons.calendar_month,
-          route: ScheduleNavigationRoute(),
+          route: ScheduleNavigationRoute(children: [_scheduleRootRoute()]),
           path: EventPage.ROUTE,
         ),
         timetable: OccasionTab(
@@ -456,6 +457,20 @@ class OccasionTab {
           route: UserRoute(),
         ),
       };
+
+  static PageRouteInfo _scheduleRootRoute() {
+    final feature =
+        FeatureService.getFeatureDetails(ScheduleFeature.metaSchedule);
+    if (feature is ScheduleFeature) {
+      if (feature.scheduleType == ScheduleFeature.scheduleTypeAdvanced) {
+        return const ScheduleRoute();
+      }
+      if (feature.scheduleType == ScheduleFeature.scheduleTypeLight) {
+        return const ScheduleLightRoute();
+      }
+    }
+    return const ScheduleBasicRoute();
+  }
 
   static List<PageRouteInfo<dynamic>> getTabRoutes(List<String> tabKeys) {
     return tabKeys.map((key) => getAvailableTabs()[key]!.route).toList();
