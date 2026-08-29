@@ -44,10 +44,6 @@ It reads `CLOUDFLARE_PROJECT_NAME`, `DOMAIN`, and `VERSION` from
 with Wrangler, and verifies that the custom domain repeatedly serves one
 coherent release generation.
 
-Git pushes never start a production build. `.github/workflows/deploy.yml` is an
-explicitly dispatched fallback for running the same Cloudflare release path on
-GitHub-hosted infrastructure.
-
 See `automation/cloudflare/README.md` for the Cloudflare pipeline (worker
 routing, build steps, env vars).
 

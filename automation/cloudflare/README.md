@@ -11,15 +11,9 @@ CLOUDFLARE_PROJECT_NAME=<exact CF Pages project name>
 Run `automation/deploy_direct.sh`; it builds locally, uploads through Wrangler,
 and verifies the custom domain before reporting success.
 
-Pushing a `prod/*` branch does not start a production build. The GitHub
-`Deploy` workflow is a manual fallback and must be explicitly dispatched for
-the exact production branch; this prevents intermediate overlay commits from
-creating failed build notifications.
-
 ## Cloudflare Pages project setup
 
-Both the manually dispatched `.github/workflows/deploy.yml` fallback and
-`automation/deploy_direct.sh` run
+Both `.github/workflows/deploy.yml` and `automation/deploy_direct.sh` run
 `ensure-pages-project.mjs` before upload. The first activation uses a token
 carrying Pages Write and Zone DNS Write to
 idempotently create a missing Direct Upload project, pin its production

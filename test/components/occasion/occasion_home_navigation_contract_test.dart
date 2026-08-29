@@ -8,6 +8,15 @@ import 'package:fstapp/components/map/public_map_session.dart';
 import 'package:fstapp/components/occasion/occasion_home_page.dart';
 
 void main() {
+  test('occasion root redirects to the program tab', () {
+    final source = File('lib/app_router.dart').readAsStringSync();
+
+    expect(
+      source,
+      contains("RedirectRoute(path: '', redirectTo: EventPage.ROUTE)"),
+    );
+  });
+
   test('program tab has a canonical root distinct from event detail', () {
     final router = AppRouter();
     final occasionRoutes = router.routeCollection

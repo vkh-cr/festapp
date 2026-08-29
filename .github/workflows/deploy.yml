@@ -1,11 +1,14 @@
 name: Deploy
 
-# Manual Cloudflare deployment fallback. Production pushes may contain
-# intermediate overlay commits, so a git push must never start a build. The
-# canonical release path is automation/deploy_direct.sh; this workflow is kept
-# for an explicitly dispatched GitHub-hosted release.
+# Conf-driven router. Each prod/* branch declares its target in
+# automation/project.conf (DEPLOY_TARGET=cloudflare | skip). Cloudflare Pages
+# is the only production build owner. Legacy Netlify origins may redirect to
+# the canonical domain, but neither Netlify nor GitHub Pages builds are valid.
 
 on:
+  push:
+    branches:
+      - 'prod/*'
   workflow_dispatch:
 
 jobs:

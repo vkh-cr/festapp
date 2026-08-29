@@ -55,6 +55,9 @@ test('rehearsal runtime is immutable, loopback-only and non-destructive', () => 
   assert.doesNotMatch(deploy, /rm\s|down\s+-v|prune/);
   assert.match(compose, /127\.0\.0\.1:8000:8000/);
   assert.match(compose, /FESTAPP_SUPABASE_SITE_ADDRESSES/);
+  assert.match(compose, /QR_RATE_SALT: \$\{QR_RATE_SALT:\?configure QR_RATE_SALT/);
+  assert.match(compose, /SMTP_HOSTNAME: \$\{SMTP_HOST\}/);
+  assert.match(compose, /PROJECT_URL: http:\/\/api-gw:8000/);
   assert.doesNotMatch(compose, /5432:5432/);
   assert.equal((compose.match(/@sha256:/g) ?? []).length, 12);
   for (const service of ['auth', 'rest', 'realtime', 'storage', 'meta', 'functions', 'studio']) {
@@ -85,11 +88,22 @@ test('rehearsal environment remains valid when sourced by a shell', () => {
   assert.match(envText, /STUDIO_DEFAULT_ORGANIZATION='Festapp Rehearsal'/);
   assert.match(envText, /STUDIO_DEFAULT_PROJECT='Canonical Merge Rehearsal'/);
   assert.match(envText, /^FESTAPP_RUNTIME_DATABASE=postgres$/m);
-  assert.match(envText, /^FESTAPP_SUPABASE_SITE_ADDRESSES=rehearsal-api\.festapp\.net$/m);
+  assert.match(envText,
+    /^FESTAPP_SUPABASE_SITE_ADDRESSES='rehearsal-api\.festapp\.net, api\.festapp\.net'$/m);
   assert.match(envText, /https:\/\/csmostrava\.festapp\.net\/reset-password/);
   assert.match(envText, /https:\/\/hvezdamorska\.netlify\.app\/auth_bridge\.html/);
   assert.match(envText, /https:\/\/clovekavira\.pages\.dev\/resetPassword/);
   assert.match(envText, /https:\/\/app\.festivalslunovrat\.cz\/auth_bridge/);
+  const qrRateSalt = envText.match(/^QR_RATE_SALT=([^\n]+)$/m)?.[1];
+  assert.ok(qrRateSalt && qrRateSalt.length >= 32);
+
+  const configuredAgain = spawnSync('python3', [path.join(runtime, 'configure-rehearsal-env.py')], {
+    cwd: tempDir,
+    encoding: 'utf8',
+  });
+  assert.equal(configuredAgain.status, 0, configuredAgain.stderr);
+  assert.equal(fs.readFileSync(path.join(tempDir, '.env'), 'utf8').match(/^QR_RATE_SALT=([^\n]+)$/m)?.[1],
+    qrRateSalt);
 
   const sourced = spawnSync('bash', ['-c', 'set -a; source "$1"', 'bash', path.join(tempDir, '.env')], {
     encoding: 'utf8',
