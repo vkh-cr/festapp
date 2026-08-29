@@ -149,6 +149,7 @@ assert_contains "$TMP_ROOT/web/index.html" '<meta name="apple-mobile-web-app-tit
 assert_contains "$TMP_ROOT/web/index.html" 'const oneSignalWebAppId = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee";'
 assert_contains "$TMP_ROOT/web/index.html" 'if (!oneSignalWebAppId) {'
 assert_contains "$TMP_ROOT/web/index.html" 'appId: oneSignalWebAppId'
+assert_contains "$TMP_ROOT/web/index.html" 'if (!oneSignalWebAppId) return false;'
 assert_contains "$TMP_ROOT/web/index.html" 'safari_web_id: "web.onesignal.auto.test"'
 assert_contains "$TMP_ROOT/web/index.html" "app_generation: 'test_generation_v1'"
 assert_contains "$TMP_ROOT/web/index.html" "occasion: 'test-occasion'"
