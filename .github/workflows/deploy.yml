@@ -155,12 +155,13 @@ jobs:
       - name: Build (Flutter + Web Client) via shared script
         run: ./automation/cloudflare_build.sh
 
-      - name: Ensure Cloudflare Pages project, runtime and custom domain
+      - name: Prepare Cloudflare Pages project without changing DNS
         env:
           CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CF_PROJECT: ${{ needs.detect.outputs.cf_project }}
           BRANCH: ${{ needs.detect.outputs.branch }}
+          CLOUDFLARE_MANAGE_DNS: 'false'
         shell: bash
         run: |
           set -euo pipefail
@@ -179,6 +180,20 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy build/web --project-name=${{ needs.detect.outputs.cf_project }} --branch=${{ needs.detect.outputs.branch }}
+
+      - name: Activate and verify Cloudflare Pages custom-domain DNS
+        env:
+          CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CF_PROJECT: ${{ needs.detect.outputs.cf_project }}
+          BRANCH: ${{ needs.detect.outputs.branch }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          set -a
+          source automation/project.conf
+          set +a
+          node automation/cloudflare/ensure-pages-project.mjs
 
       - name: Verify coherent release on the production domain
         shell: bash

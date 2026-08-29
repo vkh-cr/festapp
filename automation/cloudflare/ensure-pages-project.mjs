@@ -28,6 +28,22 @@ function assertDomain(value) {
   return value;
 }
 
+function legacyDnsRecordFromEnvironment(env) {
+  const typeValue = (env.CLOUDFLARE_LEGACY_DNS_TYPE || '').trim().toUpperCase();
+  const content = (env.CLOUDFLARE_LEGACY_DNS_TARGET || '').trim();
+  if (!typeValue && !content) return null;
+  if (!typeValue || !content) {
+    throw new Error('legacy DNS takeover configuration must be complete');
+  }
+  if (!['A', 'AAAA', 'CNAME'].includes(typeValue)) {
+    throw new Error('CLOUDFLARE_LEGACY_DNS_TYPE must be A, AAAA, or CNAME');
+  }
+  if (content.length > 253 || /\s/.test(content)) {
+    throw new Error('CLOUDFLARE_LEGACY_DNS_TARGET is invalid');
+  }
+  return { type: typeValue, content };
+}
+
 async function api(fetchImpl, token, accountId, path, options = {}) {
   const response = await fetchImpl(`${API_ROOT}/accounts/${accountId}${path}`, {
     ...options,
@@ -130,14 +146,16 @@ export async function ensurePagesProject(config, fetchImpl = fetch) {
 
   const expectedDnsTarget = `${config.project}.pages.dev`;
   let dnsAdded = false;
+  let dnsReplaced = false;
   let dnsStatus = 'active-custom-domain';
   // Once Pages reports the custom domain active, Cloudflare has already
   // validated its routing. Avoid requiring Zone DNS permissions on every
   // subsequent deploy; the narrower Pages token is sufficient from then on.
   // Initializing/new domains still require an exact, fail-closed DNS check.
-  if (domain.status !== 'active' && config.manageDns === false) {
+  const inspectDns = domain.status !== 'active' || Boolean(config.legacyDnsRecord);
+  if (inspectDns && config.manageDns === false) {
     dnsStatus = 'external-dns-required';
-  } else if (domain.status !== 'active') {
+  } else if (inspectDns) {
     const zoneLookup = requireSuccess('Cloudflare zone lookup', await zoneApi(
       fetchImpl,
       config.token,
@@ -171,11 +189,32 @@ export async function ensurePagesProject(config, fetchImpl = fetch) {
       ));
       dnsAdded = true;
       dnsStatus = 'created';
-    } else if (dnsLookup.length !== 1 || dnsLookup[0].type !== 'CNAME' ||
-        dnsLookup[0].content !== expectedDnsTarget || dnsLookup[0].proxied !== true) {
-      throw new Error(`refusing to overwrite conflicting DNS for ${config.domain}`);
-    } else {
+    } else if (dnsLookup.length === 1 && dnsLookup[0].type === 'CNAME' &&
+        dnsLookup[0].content === expectedDnsTarget && dnsLookup[0].proxied === true) {
       dnsStatus = 'verified';
+    } else if (dnsLookup.length === 1 && config.legacyDnsRecord && dnsLookup[0].id &&
+        dnsLookup[0].type === config.legacyDnsRecord.type &&
+        dnsLookup[0].content === config.legacyDnsRecord.content) {
+      requireSuccess('Cloudflare approved legacy DNS replacement', await zoneApi(
+        fetchImpl,
+        config.token,
+        `/zones/${encodeURIComponent(zoneId)}/dns_records/${encodeURIComponent(dnsLookup[0].id)}`,
+        {
+          method: 'PUT',
+          body: JSON.stringify({
+            type: 'CNAME',
+            name: config.domain,
+            content: expectedDnsTarget,
+            proxied: true,
+            ttl: 1,
+            comment: 'Managed by Festapp Cloudflare Pages deployment automation',
+          }),
+        },
+      ));
+      dnsReplaced = true;
+      dnsStatus = 'replaced-approved-legacy';
+    } else {
+      throw new Error(`refusing to overwrite conflicting DNS for ${config.domain}`);
     }
   }
 
@@ -188,6 +227,7 @@ export async function ensurePagesProject(config, fetchImpl = fetch) {
     domainAdded,
     dnsTarget: expectedDnsTarget,
     dnsAdded,
+    dnsReplaced,
     dnsStatus,
   };
 }
@@ -233,6 +273,7 @@ export function configFromEnvironment(env = process.env) {
     domain,
     zone: labels.slice(-2).join('.'),
     manageDns: env.CLOUDFLARE_MANAGE_DNS !== 'false',
+    legacyDnsRecord: legacyDnsRecordFromEnvironment(env),
     phase,
     runtimeSupabaseUrl: supabaseUrl.origin,
     runtimeSupabaseAnonKey: required(keyName, env[keyName]),

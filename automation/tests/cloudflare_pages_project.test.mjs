@@ -96,6 +96,46 @@ test('refuses to replace a conflicting custom-domain DNS record', async () => {
   await assert.rejects(ensurePagesProject(config, fetchImpl), /refusing to overwrite conflicting DNS/);
 });
 
+test('replaces only an explicitly approved legacy DNS record', async () => {
+  const takeover = {
+    ...config,
+    domain: 'app.absolventskyvelehrad.cz',
+    zone: 'absolventskyvelehrad.cz',
+    project: 'absolventskyvelehrad',
+    branch: 'prod/absolventskyvelehrad',
+    legacyDnsRecord: { type: 'A', content: '75.2.60.5' },
+  };
+  const calls = [];
+  const fetchImpl = async (url, options = {}) => {
+    calls.push({ url, options, body: options.body ? JSON.parse(options.body) : undefined });
+    if (calls.length === 1) return response(200, { name: takeover.project });
+    if (calls.length === 2) return response(200, {
+      name: takeover.project, production_branch: takeover.branch,
+    });
+    if (calls.length === 3) return response(200, {
+      name: takeover.domain, status: 'initializing',
+    });
+    if (calls.length === 4) return response(200, [{ id: 'zone-id', name: takeover.zone }]);
+    if (calls.length === 5) return response(200, [{
+      id: 'legacy-record-id', type: 'A', name: takeover.domain,
+      content: '75.2.60.5', proxied: false,
+    }]);
+    return response(200, { id: 'legacy-record-id' });
+  };
+
+  const result = await ensurePagesProject(takeover, fetchImpl);
+  assert.equal(result.dnsAdded, false);
+  assert.equal(result.dnsReplaced, true);
+  assert.equal(result.dnsStatus, 'replaced-approved-legacy');
+  assert.match(calls[5].url, /dns_records\/legacy-record-id$/);
+  assert.equal(calls[5].options.method, 'PUT');
+  assert.deepEqual(calls[5].body, {
+    type: 'CNAME', name: takeover.domain, content: 'absolventskyvelehrad.pages.dev',
+    proxied: true, ttl: 1,
+    comment: 'Managed by Festapp Cloudflare Pages deployment automation',
+  });
+});
+
 test('prepares an apex custom domain without mutating externally managed DNS', async () => {
   const external = { ...config, domain: 'vstupenky.online', zone: 'vstupenky.online', manageDns: false };
   const calls = [];
@@ -160,6 +200,27 @@ test('accepts an externally managed apex domain only when explicitly configured'
   });
   assert.equal(resolved.zone, 'vstupenky.online');
   assert.equal(resolved.manageDns, false);
+});
+
+test('parses a complete approved legacy DNS takeover contract', () => {
+  const resolved = configFromEnvironment({
+    CF_API_TOKEN: 'x', CF_ACCOUNT_ID: 'a', CF_PROJECT: 'absolventskyvelehrad',
+    BRANCH: 'prod/absolventskyvelehrad', DOMAIN: 'app.absolventskyvelehrad.cz',
+    CLOUDFLARE_LEGACY_DNS_TYPE: 'A', CLOUDFLARE_LEGACY_DNS_TARGET: '75.2.60.5',
+    SUPABASE_URL: 'https://legacy.supabase.co', SUPABASE_ANON_KEY: 'legacy-anon',
+    ORGANIZATION_ID: '5',
+  });
+  assert.deepEqual(resolved.legacyDnsRecord, { type: 'A', content: '75.2.60.5' });
+});
+
+test('rejects a partial legacy DNS takeover contract', () => {
+  assert.throws(() => configFromEnvironment({
+    CF_API_TOKEN: 'x', CF_ACCOUNT_ID: 'a', CF_PROJECT: 'absolventskyvelehrad',
+    BRANCH: 'prod/absolventskyvelehrad', DOMAIN: 'app.absolventskyvelehrad.cz',
+    CLOUDFLARE_LEGACY_DNS_TYPE: 'A',
+    SUPABASE_URL: 'https://legacy.supabase.co', SUPABASE_ANON_KEY: 'legacy-anon',
+    ORGANIZATION_ID: '5',
+  }), /legacy DNS takeover configuration must be complete/);
 });
 
 test('a partially populated activation profile fails closed', () => {
