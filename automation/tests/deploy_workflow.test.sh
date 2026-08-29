@@ -85,6 +85,7 @@ for needle in \
     'FESTAPP_RELEASE_MANIFEST_CAVFOTOFEST' \
     'FESTAPP_RELEASE_MANIFEST_ABSOLVENTSKYVELEHRAD' \
     'FESTAPP_RELEASE_MANIFEST_FESTAPP' \
+    'FESTAPP_RELEASE_MANIFEST_FESTIVALSLUNOVRAT' \
     'Backend activation is disabled; cloud release preflight needs no private manifest.' \
     'FESTAPP_RELEASE_MANIFEST=$RELEASE_MANIFEST_PATH' \
     'ensure-pages-project.mjs'; do

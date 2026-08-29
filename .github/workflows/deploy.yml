@@ -29,6 +29,7 @@ jobs:
             prod/csmostrava2026) TENANT_ID=csmostrava2026 ;;
             prod/festapp) TENANT_ID=festapp ;;
             prod/festapptickets) TENANT_ID=festapptickets ;;
+            prod/festivalslunovrat) TENANT_ID=festivalslunovrat ;;
             prod/hvezdamorska) TENANT_ID=hvezdamorska ;;
             *) echo "No unified-overlay policy for $BRANCH"; exit 0 ;;
           esac
@@ -126,6 +127,7 @@ jobs:
           CAV_MANIFEST: ${{ secrets.FESTAPP_RELEASE_MANIFEST_CAVFOTOFEST }}
           AV_MANIFEST: ${{ secrets.FESTAPP_RELEASE_MANIFEST_ABSOLVENTSKYVELEHRAD }}
           FESTAPP_MANIFEST: ${{ secrets.FESTAPP_RELEASE_MANIFEST_FESTAPP }}
+          SLUNOVRAT_MANIFEST: ${{ secrets.FESTAPP_RELEASE_MANIFEST_FESTIVALSLUNOVRAT }}
         shell: bash
         run: |
           set -euo pipefail
@@ -142,6 +144,7 @@ jobs:
             prod/cavfotofest) RELEASE_MANIFEST="$CAV_MANIFEST" ;;
             prod/absolventskyvelehrad) RELEASE_MANIFEST="$AV_MANIFEST" ;;
             prod/festapp) RELEASE_MANIFEST="$FESTAPP_MANIFEST" ;;
+            prod/festivalslunovrat) RELEASE_MANIFEST="$SLUNOVRAT_MANIFEST" ;;
             *) echo "::error::No private release manifest mapping for $BRANCH."; exit 1 ;;
           esac
           test -n "$RELEASE_MANIFEST" || {

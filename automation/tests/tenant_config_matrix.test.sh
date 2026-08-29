@@ -58,7 +58,7 @@ grep -qF 'backendActivationCanonicalOrganizationId = 0' "$TMP_ROOT/absolventskyv
 grep -qE 'fixturecav' "$TMP_ROOT/cavfotofest/lib/app_config.dart"
 grep -qE 'fixturehm' "$TMP_ROOT/hvezdamorska/lib/app_config.dart"
 grep -qF "supabaseUrl = 'https://fixtureslunovrat.supabase.co'" "$TMP_ROOT/festivalslunovrat/lib/app_config.dart"
-grep -qE 'organization = 5' "$TMP_ROOT/festivalslunovrat/web_client/src/app_config.js"
+grep -qE 'organization = 1' "$TMP_ROOT/festivalslunovrat/web_client/src/app_config.js"
 grep -qF "backendActivationTenantId = 'festivalslunovrat'" "$TMP_ROOT/festivalslunovrat/lib/app_config.dart"
 grep -qF "backendActivationCanonicalSupabaseUrl = 'https://api.festapp.net'" "$TMP_ROOT/festivalslunovrat/web_client/src/app_config.js"
 grep -qF 'backendActivationCanonicalOrganizationId = 19' "$TMP_ROOT/festivalslunovrat/web_client/src/app_config.js"
