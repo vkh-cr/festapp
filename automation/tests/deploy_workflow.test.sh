@@ -148,9 +148,14 @@ for social_source in \
     fi
 done
 
-# 8. A deploy is not successful until the custom domain repeatedly serves one
-# coherent HTML/manifest/main/service-worker generation.
-for needle in 'verify_web_deployment.mjs' '"https://${DOMAIN}" "${VERSION}"'; do
+# 8. A deploy is not successful until its active origin repeatedly serves one
+# coherent HTML/manifest/main/service-worker generation. External-DNS tenants
+# prove the Pages origin without pretending the custom hostname has moved.
+for needle in \
+    'verify_web_deployment.mjs' \
+    'CLOUDFLARE_MANAGE_DNS:-true' \
+    'VERIFY_ORIGIN="https://${CLOUDFLARE_PROJECT_NAME}.pages.dev"' \
+    'VERIFY_ORIGIN="https://${DOMAIN}"'; do
     if grep -F -q "$needle" "$WORKFLOW"; then
         echo "  ok: deploy workflow contains release gate '$needle'"
     else

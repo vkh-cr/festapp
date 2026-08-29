@@ -200,12 +200,18 @@ jobs:
           set +a
           node automation/cloudflare/ensure-pages-project.mjs
 
-      - name: Verify coherent release on the production domain
+      - name: Verify coherent release on the active deployment origin
         shell: bash
         run: |
-          set -e
+          set -euo pipefail
           source automation/project.conf
-          node automation/verify_web_deployment.mjs "https://${DOMAIN}" "${VERSION}"
+          if [ "${CLOUDFLARE_MANAGE_DNS:-true}" = false ]; then
+            VERIFY_ORIGIN="https://${CLOUDFLARE_PROJECT_NAME}.pages.dev"
+            echo "External DNS remains pending; verifying the Cloudflare Pages origin ${VERIFY_ORIGIN}."
+          else
+            VERIFY_ORIGIN="https://${DOMAIN}"
+          fi
+          node automation/verify_web_deployment.mjs "${VERIFY_ORIGIN}" "${VERSION}"
 
   skipped:
     needs: detect
