@@ -205,7 +205,7 @@ if (!legal?.sourceDirectory || !legal?.privacyPolicyVersion ||
     typeof legal?.approvalRequired !== 'boolean' || typeof legal?.productionDeploymentRequired !== 'boolean') {
   fail('legal publication state is incomplete');
 }
-if (!legal.productionDeploymentRequired &&
+if (legal && !legal.productionDeploymentRequired &&
     (!/^\d{4}-\d{2}-\d{2}$/.test(legal.productionDeployedAt ?? '') || !legal.productionDeploymentId)) {
   fail('completed legal deployment lacks its receipt');
 }
