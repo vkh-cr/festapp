@@ -20,11 +20,14 @@ test('redirects only the registered Netlify provider hostname', async () => {
   ), nextResponse);
 });
 
-test('leaves worker retirement boundaries to Netlify rewrites', async () => {
+test('serves the retirement worker on legacy worker boundaries', async () => {
   for (const path of ['/festapp_service_worker.js', '/flutter_service_worker.js', '/push/OneSignalSDKWorker.js']) {
-    assert.equal(await handler(
-      new Request(`https://festivalslunovrat.netlify.app${path}`),
-      context,
-    ), nextResponse);
+    let forwarded;
+    const response = await handler(
+      new Request(`https://festivalslunovrat.netlify.app${path}?cache=stale`),
+      { next: (request) => { forwarded = request; return nextResponse; } },
+    );
+    assert.equal(response, nextResponse);
+    assert.equal(forwarded.url, 'https://festivalslunovrat.netlify.app/netlify-retire-worker.js');
   }
 });

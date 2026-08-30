@@ -12,10 +12,13 @@ export default function canonicalProviderOrigin(request, context) {
   const canonicalOrigin = CANONICAL_ORIGINS.get(url.hostname);
   if (!canonicalOrigin) return context.next();
 
-  // Let the host-specific Netlify rewrites replace cached application and
-  // push workers before all ordinary navigation leaves the provider origin.
+  // Replace cached application and push workers without relying on Netlify's
+  // host-wildcard redirect syntax. context.next() fetches the static worker
+  // asset while preserving this request's provider-origin boundary.
   if (RETIREMENT_WORKER_PATHS.has(url.pathname) || url.pathname.startsWith('/push/')) {
-    return context.next();
+    url.pathname = '/netlify-retire-worker.js';
+    url.search = '';
+    return context.next(new Request(url, request));
   }
 
   return Response.redirect(canonicalOrigin + url.pathname + url.search, 301);
