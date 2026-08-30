@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "tenant_id": "ticketonline",
+  "site_id": "2d708348-0bf7-478e-8578-6b799adde2bb",
+  "legacy_origin": "https://vstupenka.online",
+  "canonical_origin": "https://vstupenky.online",
+  "behavior": "path-and-query-preserving-301-with-worker-retirement"
+}

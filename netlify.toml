@@ -1,8 +1,33 @@
 [build]
-command = "curl -L https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.38.4-stable.tar.xz | tar -xJf - -C /opt/buildhome && PATH=/opt/buildhome/flutter/bin:$PATH flutter precache && PATH=/opt/buildhome/flutter/bin:$PATH flutter build web --release"
-publish = "build/web"
+  command = "test -f retirement/netlify-retire-worker.js"
+  publish = "retirement"
 
 [[redirects]]
-from = "/*"
-to = "/index.html"
-status = 200
+  from = "https://vstupenka.online/festapp_service_worker.js"
+  to = "/netlify-retire-worker.js"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "https://vstupenka.online/flutter_service_worker.js"
+  to = "/netlify-retire-worker.js"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "https://vstupenka.online/push/*"
+  to = "/netlify-retire-worker.js"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "https://vstupenka.online/*"
+  to = "https://vstupenky.online/:splat"
+  status = 301
+  force = true
+
+[[headers]]
+  for = "/netlify-retire-worker.js"
+  [headers.values]
+    Cache-Control = "no-store, max-age=0"
+    Content-Type = "application/javascript; charset=utf-8"
