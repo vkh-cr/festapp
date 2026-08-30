@@ -49,31 +49,33 @@ const workerRoutes = [
   'festapp_service_worker.js',
   'flutter_service_worker.js',
 ];
-const redirects = [
-  ...workerRoutes.map((route) => `[[redirects]]
-  from = "${legacy.origin}/${route}"
-  to = "/netlify-retire-worker.js"
-  status = 200
-  force = true
-`),
-  `[[redirects]]
-  from = "${legacy.origin}/push/*"
-  to = "/netlify-retire-worker.js"
-  status = 200
-  force = true
-`,
-  `[[redirects]]
-  from = "${legacy.origin}/*"
-  to = "${canonical.origin}/:splat"
-  status = 301
-  force = true
-`,
-].join('\n');
+const edgeDirectory = path.join(output, 'netlify/edge-functions');
+fs.mkdirSync(edgeDirectory, { recursive: true, mode: 0o700 });
+fs.writeFileSync(path.join(edgeDirectory, 'canonical-retirement.js'), `const LEGACY_HOST = ${JSON.stringify(legacy.hostname)};
+const CANONICAL_ORIGIN = ${JSON.stringify(canonical.origin)};
+const RETIREMENT_WORKER_PATHS = new Set(${JSON.stringify(workerRoutes.map((route) => `/${route}`))});
+
+export default function canonicalRetirement(request, context) {
+  const url = new URL(request.url);
+  if (url.hostname !== LEGACY_HOST) return context.next();
+  if (RETIREMENT_WORKER_PATHS.has(url.pathname) || url.pathname.startsWith('/push/')) {
+    url.pathname = '/netlify-retire-worker.js';
+    url.search = '';
+    return context.next(new Request(url, request));
+  }
+  return Response.redirect(CANONICAL_ORIGIN + url.pathname + url.search, 301);
+}
+
+export const config = { path: '/*' };
+`, { mode: 0o600 });
 
 fs.writeFileSync(path.join(output, 'netlify.toml'), `[build]
   publish = "."
 
-${redirects}
+[[edge_functions]]
+  path = "/*"
+  function = "canonical-retirement"
+
 [[headers]]
   for = "/netlify-retire-worker.js"
   [headers.values]

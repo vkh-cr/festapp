@@ -15,11 +15,15 @@ execFileSync('node', [
 
 const config = fs.readFileSync(path.join(output, 'netlify.toml'), 'utf8');
 const worker = fs.readFileSync(path.join(output, 'netlify-retire-worker.js'), 'utf8');
+const edge = fs.readFileSync(path.join(output, 'netlify/edge-functions/canonical-retirement.js'), 'utf8');
 const evidence = JSON.parse(fs.readFileSync(path.join(output, 'retirement.json'), 'utf8'));
-assert.match(config, /https:\/\/vstupenka\.online\/\*/);
-assert.match(config, /https:\/\/vstupenky\.online\/:splat/);
-assert.match(config, /status = 301/);
-assert.match(config, /\/push\/\*/);
+assert.match(config, /function = "canonical-retirement"/);
+assert.doesNotMatch(config, /redirects/);
+assert.match(edge, /vstupenka\.online/);
+assert.match(edge, /https:\/\/vstupenky\.online/);
+assert.match(edge, /url\.pathname \+ url\.search/);
+assert.match(edge, /RETIREMENT_WORKER_PATHS/);
+assert.match(edge, /url\.pathname\.startsWith\('\/push\/'\)/);
 assert.match(worker, /unregister|caches/);
 assert.match(worker, /const CANONICAL_ORIGIN = "https:\/\/vstupenky\.online";/);
 assert.doesNotMatch(worker, /biscup\.festapp\.net/);
