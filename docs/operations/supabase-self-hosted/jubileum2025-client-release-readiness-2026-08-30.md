@@ -37,7 +37,7 @@ the owner of its own independent push configuration.
 
 ## Legacy Netlify retirement
 
-Netlify deploy `6a93730d2ecfe6a3e2cf7229` reduced
+Netlify deploy `6a9375953b8c718dd064bf09` reduced
 `https://jubileum2025.netlify.app` to a compatibility boundary with no Edge
 Functions. Root, event, form and sitemap paths return HTTP 301 to the identical
 path and query at `jubileum2025.festapp.net`. The historical Flutter, Festapp
