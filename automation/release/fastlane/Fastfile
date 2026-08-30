@@ -1,6 +1,7 @@
 require 'json'
 require 'spaceship'
 require 'fileutils'
+require 'digest'
 require 'open3'
 require 'tmpdir'
 
@@ -361,6 +362,41 @@ platform :ios do
       submit_for_review: false, automatic_release: false,
       run_precheck_before_submit: false, force: true
     )
+  end
+
+  desc 'Upload an exact build to internal TestFlight without changing an App Store version'
+  lane :upload_testflight_build do
+    app = target_app!('UPLOAD_TESTFLIGHT_BUILD_ONLY')
+    ipa = ENV.fetch('IPA_PATH')
+    UI.user_error!("IPA not found: #{ipa}") unless File.file?(ipa)
+    digest = Digest::SHA256.file(ipa).hexdigest
+    expected = "#{APPLE_ID}|#{BUNDLE_ID}|#{TARGET_VERSION}|#{TARGET_BUILD}|#{digest}|UPLOAD_TESTFLIGHT_BUILD"
+    UI.user_error!("Set CUTOVER_CONFIRMATION exactly to #{expected}") unless ENV['CUTOVER_CONFIRMATION'] == expected
+    upload_to_testflight(
+      api_key: api_key,
+      ipa: ipa,
+      app_identifier: BUNDLE_ID,
+      skip_waiting_for_build_processing: true,
+      distribute_external: false,
+      notify_external_testers: false
+    )
+    UI.success("Uploaded exact internal TestFlight candidate #{TARGET_VERSION} (#{TARGET_BUILD}); App Store version unchanged")
+  end
+
+  desc 'Read-only editable-version inventory without canonical metadata assertions'
+  lane :editable_version_check do
+    app = target_app!('READ_ONLY_EDITABLE_VERSION_CHECK')
+    editable = app.get_edit_app_store_version
+    if editable
+      selected = begin
+        editable.get_build
+      rescue
+        nil
+      end
+      UI.message("EDITABLE VERSION=#{editable.version_string} STATE=#{editable.app_store_state} SELECTED_BUILD=#{selected&.version || 'none'}")
+    else
+      UI.message('EDITABLE VERSION=none')
+    end
   end
 
   desc 'Upload canonical metadata only; never submit or release'
