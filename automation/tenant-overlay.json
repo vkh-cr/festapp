@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "tenantId": "cavfotofest",
+  "baseMainSha": "6cf0384d6aa552d6215356c8345813cbaa35d7ab",
+  "release": {
+    "version": "0.19.93+465",
+    "note": "Program resilience and canonical event-back navigation"
+  }
+}
