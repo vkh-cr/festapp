@@ -60,14 +60,11 @@ no row was deleted.
 
 ## Android
 
-Control-channel command `1029` is superseded and any output it may later produce
-is invalid. Replacement command `1030` is queued against the exact pushed
-overlay `ff89230cc73f2994a8b18e97653dc8f835255157`, shared source
-`521cebfd3dfbd996e0ff8e59c2198a565963e6c6`, organization `12`, package
-`fstapp.jm2025`, version `0.19.92+450` and the rotated public-client credential
-digest. It authorizes only the existing owner-key signed AAB build and local
-readback; every Play mutation is forbidden. The Mac master and stable tunnel
-are healthy, but the paired Windows builder has not polled since 2026-08-10.
+Control-channel commands `1029` and `1030` are historical and have no retained
+result. They target superseded source/build state and must not be reused. After
+the refreshed tenant overlay is final, issue a new build-only command pinned to
+that exact source and manifest. Android remains deliberately deferred to the
+paired Windows workstation; no Play mutation is authorized.
 
 ## Rehearsal runtime credential rotation
 
@@ -77,8 +74,9 @@ Seven database logins and both database JWT settings passed, all services
 returned healthy, the new anon/service-role credentials returned HTTP 200 and
 both old public tokens returned HTTP 401. Persistent Vault, Realtime, S3,
 dashboard and provider credentials were deliberately left unchanged. No
-production target or DNS record was mutated. Web, iOS and Android command `1030`
-are pinned to the new public anon-key digest.
+production target or DNS record was mutated. The web and iOS evidence is pinned
+to the new public anon-key digest; a future Android command must derive the same
+digest from its final manifest rather than historical command state.
 
 ## Notification delivery credential
 

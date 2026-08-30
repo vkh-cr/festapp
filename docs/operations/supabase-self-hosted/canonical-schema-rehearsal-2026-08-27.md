@@ -268,7 +268,8 @@ rehearsal database, and deleted no path. All 11 services remained healthy.
 
 The second complete merge from a newer snapshot passed on 2026-08-28; see
 `second-canonical-rehearsal-2026-08-28.md`. The remaining production gates are
-the final freeze/journal snapshot, canonical hostname and four-URL rewrite,
+the final freeze/journal snapshot, canonical hostname and the complete
+registered legacy-URL rewrite,
 compatible web/Android/iOS releases, Auth/rights/write canaries, and the final
 write-authority/DML gate.
 

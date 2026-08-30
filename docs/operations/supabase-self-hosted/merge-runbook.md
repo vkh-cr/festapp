@@ -213,8 +213,8 @@ FESTAPP_REHEARSAL_ACK=validate-a-reference-registry \
 The final validator is the only step allowed to return the import to
 `validated`. It compares registered source values through the deterministic ID
 map, verifies transformed payload equality, proves obsolete inter-project sync
-is inert, and requires the four known legacy Storage links to have copied
-objects. Their host rewrite remains a separate `api.festapp.net` activation
+is inert, and requires every registered legacy Storage link to have a copied
+object. Their host rewrite remains a separate `api.festapp.net` activation
 gate. High sequence values are not compacted in place: a fresh target may use a
 new deterministic allocation policy only before import and only when the full
 reference registry proves every dependent value is transformed.

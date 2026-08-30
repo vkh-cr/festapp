@@ -133,7 +133,9 @@ restore cluster was stopped after validation; no cloud source or live target
 was mutated and no retained path was deleted.
 
 Retaining every prior successful and failed restore target initially exhausted
-the 40 GB rehearsal disk: only about 304 MB remained after this proof. On
+the 40 GB rehearsal disk: only about 304 MB remained after this proof. A later
+read-only check on 2026-08-30 reported approximately 19 GB free, so this
+historical capacity condition is no longer an active blocker. On
 2026-08-29 the latest coordinated backup and all three encrypted source
 snapshots were rehashed successfully before cleanup. Ten isolated
 `festapp_restore_*` databases, 17 restore-drill paths and 12 reproducible

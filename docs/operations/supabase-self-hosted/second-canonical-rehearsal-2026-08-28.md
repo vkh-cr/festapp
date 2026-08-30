@@ -104,14 +104,14 @@ canaries now pass against the rotated rehearsal client credential. Build-only
 Android command `1030` is queued against the exact pushed organization-12
 overlay; command `1029` is superseded. Remaining gates are that signed Android AAB, the final
 fresh full-freeze snapshot and final markers, `api.festapp.net` activation and
-the four legacy Storage URL rewrites, followed by store adoption and the final
+all registered legacy Storage URL rewrites, followed by store adoption and the final
 single-write-authority gate. This evidence does not authorize production
 cutover.
 
 ## Three-target SQL parity closure — 2026-08-29
 
 Migration `20260829110000_repair_legacy_companion_reader.sql` is now applied to
-both cloud sources and the active self-hosted rehearsal database
+all three registered sources and the active self-hosted rehearsal database
 `festapp_rehearsal_20260828234500`. The self-hosted application was performed
 through the authenticated, same-origin Studio database API because direct SSH
 was unavailable from the operator's changed source address. No database secret

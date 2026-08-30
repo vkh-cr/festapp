@@ -69,6 +69,23 @@ FESTAPP_CANONICAL_CUTOVER_RELEASE=1 \
   node automation/release/client_cutover_preflight.mjs --require-canonical-cutover
 ```
 
+For a product with both web and store lanes, one external schema-2 manifest
+must own every platform. Keep that tenant-specific manifest outside this public
+repository and prove the shared boundary with:
+
+```bash
+FESTAPP_RELEASE_MANIFEST=/private/path/config.json \
+  node automation/release/release_lane_preflight.mjs --web
+FESTAPP_RELEASE_MANIFEST=/private/path/config.json \
+  node automation/release/release_lane_preflight.mjs --mobile
+```
+
+The mobile gate additionally binds both package identities, the production
+branch and the read-only store preflight. A schema-1 evidence file is not a
+publishing manifest. Store state, signing authority, reviewer data and
+tenant-specific release evidence belong in the private release repository;
+only generic validation contracts belong here.
+
 For a self-hosted release, the private manifest must contain a `backend` object
 with `mode: "self-hosted"`, `releaseIntent: "canonical-cutover"`,
 `supabaseOrigin`, `anonKeySha256`, `installationGeneration`, and
@@ -145,12 +162,15 @@ accepts uncontrolled writes. In one guarded sequence:
 1. freeze legacy writes and prove the DML/write-authority gate;
 2. export and import the final business, Auth session/refresh-token, and Storage
    delta, then pass the canonical refresh-session canary;
-3. open canonical write authority;
-4. keep the transition release's compiled `SUPABASE_URL`/key on legacy, change
+3. start and validate the canonical runtime internally, while public client
+   routing still resolves to the frozen legacy backend;
+4. open canonical write authority immediately before activation; this makes
+   the target writable but does not itself route any public client;
+5. keep the transition release's compiled `SUPABASE_URL`/key on legacy, change
    only `BACKEND_ACTIVATION_PHASE=canonical`, rerun `apply_config.sh`, and
    atomically deploy the web output containing the exact canonical activation
    document; the pinned resolver, not a second compiled default, owns this switch;
-5. verify web/iOS/Android cold starts, writes and session refresh against only
+6. verify web/iOS/Android cold starts, writes and session refresh against only
    the canonical endpoint.
 
 An already running native process cannot safely replace its Supabase singleton.
@@ -214,7 +234,9 @@ returns non-enumerating responses, and writes reset tokens atomically.
 The encrypted exports produced during rehearsal are test inputs only and must
 never be promoted as final production state.
 
-1. Take fresh independent backups of both cloud sources.
+1. Take fresh independent backups of every source registered in
+   `automation/hetzner-supabase/merge/source-registry.json` (`default`, `a`, and
+   `slunovrat` at the time of this runbook).
 2. Freeze schema/config changes.
 3. Start the approved maintenance freeze or record the source journal position.
 4. Before acquiring the final Auth snapshot, freeze or route the old web/Auth

@@ -28,12 +28,15 @@ contracts. A clean browser start loaded the Jubilee occasion, selected the
 legacy backend for organization `6`, and completed initialization without an
 application error.
 
-Jubilee does not own or use a OneSignal application. Its web and native
-OneSignal identifiers are empty, notification capability is fail-closed, and
-all web bridge methods are inert when no web app ID is configured. Browser
-network evidence recorded zero OneSignal requests. The unused OneSignal app
-created during preparation was disabled before release; CSM Ostrava remains
-the owner of its own independent push configuration.
+The Jubilee release does not initialize OneSignal. Its web and native
+identifiers are empty, notification capability is fail-closed, and all web
+bridge methods are inert when no web app ID is configured. Browser network
+evidence recorded zero OneSignal requests.
+
+The historical OneSignal dashboard naming/state was corrected on 2026-08-30
+without changing any released client identity or subscriber namespace. Exact
+provider-account evidence belongs to the private release repository rather
+than this public operational document.
 
 ## Legacy Netlify retirement
 

@@ -86,9 +86,10 @@ full evidence is in `rehearsal-origin-2026-08-28.md`.
 The second complete rehearsal from a newer cloud snapshot passed on 2026-08-28
 in a new isolated database and the rehearsal runtime now targets it. The CSM web
 release, signed iOS candidate and password/refresh/rights/idempotent-write
-canaries now pass against rotated rehearsal runtime credentials. Build-only
-Android command `1030` is queued while its paired Windows builder is offline;
-superseded command `1029` is invalid. The remaining operational gate is that AAB plus the final
+canaries now pass against rotated rehearsal runtime credentials. Historical
+Android commands `1029` and `1030` are invalid for the refreshed overlay and
+have no retained result. A new build-only command remains deferred to the
+paired Windows workstation. The remaining operational gate is that AAB plus the final
 full-freeze snapshot/marker. Production `api.festapp.net`, cloud credentials,
 stores and write ownership remain unchanged.
 
@@ -97,6 +98,7 @@ Auth users, 1,453 Storage metadata objects and three validated imports. Its
 coordinated encrypted backup and clean-cluster restore passed with 1,717 files /
 1,296,547,327 bytes, RPO 0 and RTO 790 seconds. Because every older successful
 and failed restore target is still retained, the 40 GB filesystem now has only
-about 304 MB free. A retention cleanup or disk expansion is mandatory before
-another rehearsal or production cutover; this capacity gate does not permit
-deleting off-host backups or evidence ledgers.
+about 304 MB free at that time. A read-only host check on 2026-08-30 reports
+approximately 19 GB free, so that historical capacity blocker is closed. Fresh
+pre-freeze capacity and backup checks remain mandatory; off-host backups and
+evidence ledgers are not cleanup targets.

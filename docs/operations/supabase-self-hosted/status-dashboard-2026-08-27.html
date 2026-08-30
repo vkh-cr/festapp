@@ -188,15 +188,15 @@
       <div class="section-head"><div><h2>Co teď konkrétně blokuje postup</h2></div></div>
       <div class="grid">
         <article class="card span-6">
-          <div class="blocker"><span class="num">1</span><div><strong>Podepsaný Android AAB</strong><span>Build-only příkaz 1030 je zařazený na přesný pushed org-12 overlay a rotated client credential. Příkaz 1029 je zneplatněný; Windows builder od 10. 8. nepolloval.</span></div></div>
+          <div class="blocker"><span class="num">1</span><div><strong>Podepsaný Android AAB</strong><span>Historické příkazy 1029/1030 nemají výsledek a míří na překonaný overlay. Nový build-only příkaz vznikne až z finální větve; Android zůstává odložený na Windows builder.</span></div></div>
           <div class="blocker"><span class="num">2</span><div><strong>Finální full freeze</strong><span>Hybridní journal není autorizovaný bez 100% globálního pokrytí. Produkční cesta proto používá úplné uzavření všech zapisovatelů ještě před snapshotem.</span></div></div>
-          <div class="blocker"><span class="num">3</span><div><strong>Finální marker</strong><span>Čerstvé oba exporty, nulové mutující sessions a finální source markery mohou vzniknout až v reálném produkčním freeze okně.</span></div></div>
+          <div class="blocker"><span class="num">3</span><div><strong>Finální marker</strong><span>Čerstvé exporty všech tří registrovaných zdrojů, nulové mutující sessions a finální source markery mohou vzniknout až v reálném produkčním freeze okně.</span></div></div>
         </article>
         <article class="card span-6">
           <div class="blocker"><span class="num">4</span><div><strong>Finální hostname a 228 Storage URL</strong><span>Všech 228 legacy URL ze tří zdrojů má hashově ověřený lokální objekt. Přepis na produkční <code>api.festapp.net</code> proběhne až při finálním gate.</span></div></div>
           <div class="blocker"><span class="num">5</span><div><strong>Produkční klientská adopce</strong><span>CSM web i nový podepsaný iOS org-12 kandidát prošly s rotovaným anon credentialem včetně Auth/rights/write canary. Po AAB zbývá store schválení a adopce finálního <code>api.festapp.net</code> manifestu.</span></div></div>
           <div class="blocker"><span class="num">6</span><div><strong>OneSignal rotace</strong><span>REST credential je už v kódu přesunutý mimo klientský DTO/RPC do server-only úložiště. Před produkcí se musí autorizovaně nahradit, ověřit canary a starý klíč musí prokazatelně selhat.</span></div></div>
-          <div class="blocker"><span class="num">7</span><div><strong>Kapacita rehearsal hostu</strong><span>Třízdrojový clean-cluster restore prošel, ale po zachování všech starších drillů zbývá jen přibližně 304 MB. Před dalším během je nutný schválený retention cleanup nebo rozšíření disku.</span></div></div>
+          <div class="blocker"><span class="num">7</span><div><strong>Kapacita rehearsal hostu</strong><span>Historický stav 304 MB je uzavřený: kontrola 30. 8. ukazuje přibližně 19 GB volných. Před freeze se kapacita a recovery bod ověří znovu.</span></div></div>
         </article>
       </div>
     </section>
@@ -211,7 +211,7 @@
     </section>
 
     <section class="section">
-      <div class="callout"><strong>Nejbližší správný krok</strong><p>Nechat Windows builder dokončit příkaz 1030, autorizovaně rotovat OneSignal provider credential a připravit finální produkční manifesty a store adopci. Samotný cutover smí začít až úplným write/Auth/Storage/Functions freeze před novými exporty a skončit validovanými source markery.</p></div>
+      <div class="callout"><strong>Nejbližší správný krok</strong><p>Dokončit aktuální tenantní overlaye a privátní release manifesty; teprve potom vydat nový Windows build-only příkaz. Samotný cutover smí začít až úplným write/Auth/Storage/Functions freeze před exporty všech tří zdrojů a skončit validovanými source markery.</p></div>
     </section>
 
     <section class="section">

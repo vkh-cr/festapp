@@ -75,11 +75,12 @@ Password, refresh-token, rights and idempotent write canaries also pass; the
 application's intentionally disabled Google provider is preserved as disabled.
 The retained details are in `client-release-rehearsal-2026-08-28.md`.
 
-1. Complete build-only control-channel command `1030` on the paired Windows
-   builder; command `1029` and every artifact from it are superseded.
+1. Generate a new build-only Windows command only after the refreshed tenant
+   overlay is final. Historical commands `1029` and `1030` have no retained
+   result and must not be reused; Android remains deliberately deferred.
 2. Prepare `api.festapp.net` with the same firewall, Caddy and strict-TLS
    contract, but do not activate it before the final freeze/journal gate.
-3. Rewrite the four retained legacy Storage URLs only when the canonical
+3. Rewrite every retained registered legacy Storage URL only when the canonical
    production hostname is live and verified.
 
 Client release tooling now accepts a custom HTTPS Supabase origin, preserves an
