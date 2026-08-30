@@ -40,8 +40,8 @@ acronym `aksmcz` and the public listing name `CSA 2024` identify the same lane.
 ## `prod/farnostopava` / Rezervace Farnost Opava
 
 Farnost Opava is now proven web-only. Release `0.19.93+474` is based on main
-`f5649ac19d8786a409b4a749e87dc1b9859722f3` and production overlay
-`f772f22f07b8db1da3225358bcf9087848c59d07`. It retains source-`a`
+`67b49c3e4916009841c50006c8f3e4251313d23d` and production overlay
+`ea5e608410a84d24bb4bf7120347b24304243e05`. It retains source-`a`
 organization `8`, pins canonical organization `11`, preserves the source-`a`
 Auth storage namespace, and has no OneSignal configuration or mobile release.
 

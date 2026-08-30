@@ -102,7 +102,7 @@ only the shared freeze, delta import, activation and retained-session/write
 canary.
 
 Farnost Opava is deployed as web-only build `0.19.93+474` from overlay
-`f772f22f07b8db1da3225358bcf9087848c59d07`. It starts on source-`a`
+`ea5e608410a84d24bb4bf7120347b24304243e05`. It starts on source-`a`
 organization `8`, pins canonical organization `11`, preserves the legacy Auth
 storage namespace, and intentionally has no OneSignal IDs. Cloudflare origin
 verification and public Netlify-hybrid browser QA pass. The application lane is
