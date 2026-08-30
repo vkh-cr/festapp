@@ -188,7 +188,7 @@ jobs:
           set -a
           source automation/project.conf
           set +a
-          node automation/cloudflare/ensure-pages-project.mjs
+          CLOUDFLARE_MANAGE_DNS=false node automation/cloudflare/ensure-pages-project.mjs
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3

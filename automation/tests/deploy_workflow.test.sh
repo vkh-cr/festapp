@@ -51,6 +51,13 @@ for needle in 'on:' 'jobs:' 'tenant-drift:' 'legal-contract:' 'detect:' 'cloudfl
     fi
 done
 
+if grep -F -q 'CLOUDFLARE_MANAGE_DNS=false node automation/cloudflare/ensure-pages-project.mjs' "$WORKFLOW"; then
+    echo "  ok: project preparation cannot mutate DNS"
+else
+    echo "  FAIL: project preparation can inherit tenant DNS mutation settings"
+    fail=1
+fi
+
 # Production builds are release operations, not a side effect of pushing an
 # intermediate overlay commit. Keep the GitHub workflow available as an
 # explicit fallback, while the canonical deploy_direct.sh path remains usable
