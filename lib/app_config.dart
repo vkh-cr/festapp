@@ -5,8 +5,8 @@ import 'package:fstapp/components/app_management/language_model.dart';
 import 'package:fstapp/components/occasion/admin_page.dart';
 
 class AppConfig {
-  static const String supabaseUrl = 'https://kjdpmixlnhntmxjedpxh.supabase.co';
-  static const String anonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqZHBtaXhsbmhudG14amVkcHhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDE5NDI5NzEsImV4cCI6MjAxNzUxODk3MX0.06nTXCL-i1GxLckfEyCNlVVwt62QTzKUezqmsYSR_MI';
+  static const String supabaseUrl = 'https://lwfpdjxsdmkfyrzqbrlk.supabase.co';
+  static const String anonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx3ZnBkanhzZG1rZnlyenFicmxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTEyMjgwNDksImV4cCI6MjAyNjgwNDA0OX0.440P3yf8ZqNjOHEQTn9uJhkKyObhD_7PZ2NwaE9e4J0';
   static const String effectiveSupabaseUrl = String.fromEnvironment(
     'FESTAPP_SUPABASE_URL',
     defaultValue: supabaseUrl,
@@ -15,15 +15,15 @@ class AppConfig {
     'FESTAPP_SUPABASE_ANON_KEY',
     defaultValue: anonKey,
   );
-  static const String supabaseAuthStorageKey = 'sb-kjdpmixlnhntmxjedpxh-auth-token';
-  static const String backendActivationTenantId = '';
-  static const String backendActivationManifestUrl = '';
-  static const String backendActivationCanonicalManifestSha256 = '';
-  static const String backendActivationCanonicalSupabaseUrl = '';
-  static const String backendActivationCanonicalAnonKey = '';
-  static const int backendActivationCanonicalOrganizationId = 0;
-  static const String backendActivationCanonicalProfileSha256 = '';
-  static const String appName = 'Festapp';
+  static const String supabaseAuthStorageKey = 'sb-lwfpdjxsdmkfyrzqbrlk-auth-token';
+  static const String backendActivationTenantId = 'farnostopava';
+  static const String backendActivationManifestUrl = 'https://rezervace.farnostopava.cz/backend-activation.json';
+  static const String backendActivationCanonicalManifestSha256 = 'a86d20d3fd185ccf0152db0f67a43dc09fe2752b3264c1a62efd5dcc64017fd8';
+  static const String backendActivationCanonicalSupabaseUrl = 'https://api.festapp.net';
+  static const String backendActivationCanonicalAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzg3OTA4NjQyLCJleHAiOjE5NDU1ODg2NDJ9.uE20X1ueXZlul4F1fRfV5wXFVlGd8QKBFUHMIo1XD4M';
+  static const int backendActivationCanonicalOrganizationId = 11;
+  static const String backendActivationCanonicalProfileSha256 = '8c2b245e4b4893562a75761ed2bfb5e6ce629bba00a99b23a21c9e808faf60e1';
+  static const String appName = 'Rezervace Farnost Opava';
   static String get mapTitle => CommonStrings.map;
   static const bool showPWAInstallOption = true;
   static const bool isOwnProgramSupportedWithoutSignIn = true;
@@ -32,7 +32,7 @@ class AppConfig {
   static const bool isWebNotificationsSupported = true;
   static const String oneSignalAppId = '';
   static const String oneSignalWebAppId = '';
-  static const String pushAppGeneration = '';
+  static const String pushAppGeneration = 'farnostopava_no_push_v1';
   static const String effectivePushAppGeneration = String.fromEnvironment(
     'FESTAPP_PUSH_APP_GENERATION',
     defaultValue: pushAppGeneration,
@@ -42,26 +42,26 @@ class AppConfig {
   static const String programLogoAsset = 'assets/icons/fstapplogo.svg';
   static const String defaultAdministrationRoute = AdminPage.ROUTE;
 
-  static int organization = 1;
+  static int organization = 8;
   //setup occasion id to force occasion
   static const String? forceOccasionLink = null;
   static const bool isPublicNotificationSendingDisabled = false;
   static const bool isAllUnit = false;
-  static const bool isAppSupported = true;
+  static const bool isAppSupported = false;
   static const bool isWebclientSupported = true;
   static const bool isContractFeatureEnabled = false;
   static const bool showBankSupportRole = false;
 
-  static const String webLink = "https://vstupenky.online";
-  static const String privacyUrl = "https://vstupenky.online/privacy/";
-  static const String privacyChoicesUrl = "https://vstupenky.online/privacy/choices/";
-  static const String termsUrl = "https://vstupenky.online/terms/";
-  static const String supportUrl = "https://vstupenky.online/support/";
-  static const String deleteAccountUrl = "https://vstupenky.online/delete-account/";
+  static const String webLink = "https://rezervace.farnostopava.cz";
+  static const String privacyUrl = "https://rezervace.farnostopava.cz/privacy/";
+  static const String privacyChoicesUrl = "https://rezervace.farnostopava.cz/privacy/choices/";
+  static const String termsUrl = "https://rezervace.farnostopava.cz/terms/";
+  static const String supportUrl = "https://rezervace.farnostopava.cz/support/";
+  static const String deleteAccountUrl = "https://rezervace.farnostopava.cz/delete-account/";
   static const String syncHeadOrigin = "";
   static const String syncAssetOrigin = "";
   static const String imageApiUrl = 'https://image-api.festapp.net';
-  static const String imageProjectId = 'default';
+  static const String imageProjectId = 'a';
   static bool isProLicense = true;
   static const int imagesMaxWidth = 780;
   static const int imagesMaxBytes = 800000;
