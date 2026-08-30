@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "tenantId": "absolventskyvelehrad",
+  "baseMainSha": "6cf0384d6aa552d6215356c8345813cbaa35d7ab",
+  "release": {
+    "version": "0.19.93+467",
+    "note": "Cloudflare migration on the existing app.absolventskyvelehrad.cz origin with legacy-to-canonical backend activation readiness."
+  }
+}
