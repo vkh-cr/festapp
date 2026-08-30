@@ -6,6 +6,11 @@ one new transition release, and each active web deployment needs one regenerated
 transition deployment. Older writers must then be excluded by enforced minimum
 version/adoption evidence or by the maintenance freeze.
 
+This public matrix records only public application identities, origins and
+coarse gate states. Store-account readback, reviewer data, signing/provider
+receipts and exact artifact evidence belong exclusively in the private release
+repository and must not be copied here.
+
 ## Mobile release lanes
 
 | Product / production refs | iOS bundle / observed lower bound | Android package / observed lower bound | Required disposition |
@@ -79,16 +84,15 @@ canonical tenant overlay and deploy it, enforce read-only behavior, or prove
 from hosting/DNS/traffic/write telemetry that it is retired. Branch age is not
 retirement evidence.
 
-The active Cloudflare web lanes were regenerated from main through
-`a17e4c39d3310274526c74e247e451b74b5ac9e1` on 2026-08-29. All use Flutter
-`3.47.2` and semantic version `0.19.93`: CSM Ostrava and Clovek a vira use
-build `465`; Hvezda Morska uses build `466`; the ticket web uses build `464`; and
-`live.festapp.net` uses build `470`. Build numbers are monotonic within each
+The active Cloudflare web lanes use Flutter `3.47.2` and semantic version
+`0.19.93`. The current ticket web uses build `476` and `live.festapp.net` uses
+build `477`; other deployed tenant builds retain their independently monotonic
+build numbers. Build numbers are monotonic within each
 release lane and are not expected to be identical across unrelated store/web
 identities. The three source-a web overlays remain deliberately in `legacy`
 activation phase while carrying their mapped canonical organization and
 `api.festapp.net` configuration, so the final activation document can switch
-them after the full-freeze gate without rebuilding the bundle. Festapp `470`
+them after the full-freeze gate without rebuilding the bundle. Festapp `477`
 now carries the equivalent source-default transition profile for canonical
 organization `1`, while its public activation document remains in `legacy`.
 
@@ -111,7 +115,7 @@ verification and public Netlify-hybrid browser QA pass. The application lane is
 complete; only the external WEDOS CNAME handoff remains before Cloudflare owns
 the public hostname and Netlify can become a redirect-only compatibility edge.
 
-The Festapp `470` production smoke passes the canonical root-to-program
+The Festapp `477` production smoke passes the canonical root-to-program
 redirect, both legacy `get_events` reads, a program detail with its full HTML
 description, detail back-navigation to `/conference2024/event`, the public
 login route and the Flutter admin route. `backend-activation.json` is served as
@@ -169,10 +173,10 @@ Store release and Android Windows build remain gated.
 
 The Hvezda Morska `466` production smoke passes the all-unit catalogue root,
 occasion detail, reservation handoff to `/form/povyseni2026`, and the Flutter
-`/admin` handoff. On 2026-08-29 an authorized OneSignal dashboard session
-changed the app's saved web origin from `https://hvezdamorska.netlify.app` to
-`https://hvezdamorska.festapp.net`. A cold production check then completed the
-OneSignal initialization without an origin error, and the custom
+`/admin` handoff. The provider's saved web origin is canonical; its exact
+dashboard receipt is retained only in the private release repository. A cold
+production check completed OneSignal initialization without an origin error,
+and the custom
 `/push/OneSignalSDKWorker.js` returned JavaScript. The old Netlify root and a
 deep `/form/rijnovapout26` URL both return HTTP 301 to the same path on the new
 origin. This closes the Hvezda web-push origin gate. Browser subscriptions
