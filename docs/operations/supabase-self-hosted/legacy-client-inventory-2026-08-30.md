@@ -6,7 +6,7 @@ batch. Each receives one explicit release, replacement or retirement decision.
 Private inventory evidence is stored outside the repository at
 `~/.local/share/festapp-rehearsal-20260830/legacy-tenant-config-inventory.json`.
 
-## `prod/aksmcz` / CSA 2024
+## `prod/aksmcz` / Celostátní setkání animátorů (CSA 2024)
 
 The branch is a real historical tenant, not an unused test. It is pinned to
 source `a`, organization `1`, occasion `csa2024`, and app name `CSA 2024`.
@@ -25,6 +25,30 @@ Public App Store readback found the still-listed `CSA 2024`, Apple ID
 12 May 2025. The public Google Play URL for package `fstapp.csa` returns 404.
 The Apple listing therefore remains a real external consumer and cannot be
 silently retired or reassigned without an explicit listing decision.
+
+This is the older “Setkání animátorů” application referred to in operational
+discussions; it is not an additional fifteenth production ref. The repository
+acronym `aksmcz` and the public listing name `CSA 2024` identify the same lane.
+
+## `prod/farnostopava` / Rezervace Farnost Opava
+
+Farnost Opava is now proven web-only. Release `0.19.93+474` is based on main
+`f5649ac19d8786a409b4a749e87dc1b9859722f3` and production overlay
+`f772f22f07b8db1da3225358bcf9087848c59d07`. It retains source-`a`
+organization `8`, pins canonical organization `11`, preserves the source-`a`
+Auth storage namespace, and has no OneSignal configuration or mobile release.
+
+Cloudflare Pages deployment `bf422d3c.farnostopava.pages.dev` passes the
+coherent release verifier. The public `rezervace.farnostopava.cz` surface is
+temporarily serving the identical static adapter from Netlify deployment
+`6a937f193b8c71ae6664bf26`; root, form and admin routes return 200, the visible
+tenant heading is correct, and browser QA observed zero OneSignal resources.
+Cloudflare has accepted the custom-domain binding, but DNS remains externally
+blocked: the WEDOS-hosted `farnostopava.cz` zone is not present in the available
+WEDOS account. Its owner must change only CNAME `rezervace` from
+`farnostopava.netlify.app` to `farnostopava.pages.dev`. After Cloudflare reports
+the domain active, the Netlify origin can be reduced to the registered
+path/query-preserving retirement surface without another application build.
 
 ## `prod/avapp`
 
@@ -65,7 +89,9 @@ now prevents future automatic builds from restoring the obsolete Flutter app.
 ## Inventory result
 
 Fourteen production refs were inspected: ten have canonical configurations and
-four are the legacy refs above. The remaining broad source-`a` entries are not
+four originally lacked them. Farnost Opava has since been closed as a web-only
+lane, while the four legacy dispositions listed in the release matrix remain
+tracked explicitly. The remaining broad source-`a` entries are not
 unknown tenants; they are all-unit catalogue clients whose write reachability
 still closes under the shared freeze/write-authority gate. No Android or iOS
 build is authorized by this inventory.

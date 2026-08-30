@@ -17,8 +17,8 @@ version/adoption evidence or by the maintenance freeze.
 | Absolventský Velehrad (`prod/absolventskyvelehrad`) | `festapp.absolventskyvelehrad` / signed candidate `467` | `fstapp.AV25` / `>243` | Canonical web is deployed and a signed, non-uploaded iOS transition candidate is preserved. Complete physical-device/store proof; Android remains deferred to the independent Windows workstation. |
 | Člověk a víra (`prod/cavfotofest`) | `festapp.cavfotofest` / signed candidate `465` | `fstapp.cav` / `>243` | Canonical web is deployed and a signed, non-uploaded iOS transition candidate is preserved. Complete physical-device/store proof; Android remains deferred to the independent Windows workstation. |
 | Do O BiS Cup (`prod/doobiscup`) | `festapp.doobiscup` / signed candidate `472` | `fstapp.diecezkodoo` / `>243` | Canonical web is deployed and a signed, non-uploaded iOS transition candidate is preserved. Complete physical-device/store proof; Android remains deferred to the independent Windows workstation. |
-| AKSM / CSA 2024 (`prod/aksmcz`) | `festapp.aksmcz` / listed version `0.13.0`, Apple ID `6479449613` | `fstapp.csa` / public listing 404 | Historical 12–17 August 2024 event is preserved in canonical organization `4`; old Netlify remains reachable but the recorded custom domain is dead. Do not build until the still-live Apple listing receives an explicit archive/retirement decision. |
-| Farnost Opava (`prod/farnostopava`) | `festapp.aksmcz` / `>259` (shared legacy identity) | `fstapp.fstapp` / `>259` (shared Festapp identity) | **Open:** prove this is a web-only tenant of the shared binaries, or verify the shared transition binary routes it correctly; do not create a duplicate store upload blindly. |
+| Celostátní setkání animátorů / CSA 2024 (`prod/aksmcz`) | `festapp.aksmcz` / listed version `0.13.0`, Apple ID `6479449613` | `fstapp.csa` / public listing 404 | Historical 12–17 August 2024 event is preserved in canonical organization `4`; old Netlify remains reachable but the recorded custom domain is dead. Do not build until the still-live Apple listing receives an explicit archive/retirement decision. |
+| Farnost Opava (`prod/farnostopava`) | shared historical IDs; no new lane | shared historical IDs; no new lane | Proven web-only at `0.19.93+474`, with no OneSignal and no iOS/Android release. Cloudflare bundle is ready; the identical Netlify hybrid remains public only until the external WEDOS owner changes CNAME `rezervace` to `farnostopava.pages.dev`. |
 | AVApp (`prod/avapp`) | `festapp.festapp` / `>45` (collides with current Festapp identity) | `vkhcr.avapp` / `>45` | Old backend hostname is dead and the modern AV tenant is already canonical. Retire/read back the old Android listing; never create a second iOS upload under the Festapp identity. |
 | TicketOnline (`prod/ticketonline`) | `festapp.aksmcz` / `>236` (shared legacy identity) | `fstapp.fstapp` / `>236` (shared Festapp identity) | The singular `vstupenka.online` client is the same default organization `3` as canonical `vstupenky.online`; retire it as a path/query-preserving compatibility alias, with no new mobile build. |
 
@@ -100,6 +100,14 @@ owns its separate push and mobile identities. Its old Netlify origin is a pure
 historical PWA/push registrations. The remaining Jubilee gate is therefore
 only the shared freeze, delta import, activation and retained-session/write
 canary.
+
+Farnost Opava is deployed as web-only build `0.19.93+474` from overlay
+`f772f22f07b8db1da3225358bcf9087848c59d07`. It starts on source-`a`
+organization `8`, pins canonical organization `11`, preserves the legacy Auth
+storage namespace, and intentionally has no OneSignal IDs. Cloudflare origin
+verification and public Netlify-hybrid browser QA pass. The application lane is
+complete; only the external WEDOS CNAME handoff remains before Cloudflare owns
+the public hostname and Netlify can become a redirect-only compatibility edge.
 
 The Festapp `470` production smoke passes the canonical root-to-program
 redirect, both legacy `get_events` reads, a program detail with its full HTML
