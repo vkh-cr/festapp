@@ -232,7 +232,7 @@ fi
 # Migrated Netlify tenants own their legacy-origin retirement boundary as an
 # explicit overlay. This keeps redirects and service-worker retirement scoped
 # to the matching production branch instead of leaking between tenants.
-for tenant in aksmcz cavfotofest doobiscup farnostopava festapptickets hvezdamorska jubileum2025; do
+for tenant in aksmcz cavfotofest doobiscup farnostopava festapptickets festivalslunovrat hvezdamorska jubileum2025; do
     policy="$PROJECT_ROOT/automation/tenant-overlays/$tenant.paths"
     for path in netlify.toml web_client/public/netlify-retire-worker.js; do
         if grep -Fx -q "$path" "$policy"; then

@@ -1,5 +1,7 @@
 # Source/data overlay paths. Shell globs are matched against complete repo paths.
 automation/project.conf
+netlify.toml
+web_client/public/netlify-retire-worker.js
 assets/icons/fstappicon.png
 assets/icons/fstapplogo.dark.svg
 assets/icons/fstapplogo.png
