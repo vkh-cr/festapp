@@ -3,6 +3,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { parseProjectVersion } from './project_version.mjs';
+import { storeManifestShapeErrors } from './store_manifest_contract.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const manifestValue = process.env.FESTAPP_RELEASE_MANIFEST?.trim();
@@ -29,6 +30,12 @@ const listingPath = (relative) => {
   return resolved;
 };
 const requireListingFile = (relative) => fs.existsSync(listingPath(relative)) || fail(`missing release file ${relative}`);
+
+for (const error of storeManifestShapeErrors(manifest)) fail(error);
+if (errors.length) {
+  for (const error of errors) console.error(`ERROR: ${error}`);
+  process.exit(1);
+}
 
 if (!process.argv.includes('--local') || !process.argv.includes('--read-only')) {
   fail('preflight must be invoked with --local --read-only');
