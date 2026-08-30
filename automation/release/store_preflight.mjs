@@ -212,6 +212,10 @@ if (legal && !legal.productionDeploymentRequired &&
 
 const appleMetadataDirectory = manifest.apple?.metadataDirectory;
 if (!appleMetadataDirectory) fail('Apple metadata directory is missing');
+const appleStoreName = manifest.apple?.storeName;
+if (typeof appleStoreName !== 'string' || !appleStoreName.trim()) {
+  fail('Apple store name is missing');
+}
 const appleMetadataRoot = listingPath(appleMetadataDirectory ?? '.');
 const metadataDir = path.join(appleMetadataRoot, manifest.target.locale);
 const copyrightFile = path.join(appleMetadataRoot, 'copyright.txt');
@@ -224,6 +228,7 @@ for (const [name, limit] of Object.entries(limits)) {
   if (!fs.existsSync(file)) { fail(`missing metadata ${manifest.target.locale}/${name}.txt`); continue; }
   const content = fs.readFileSync(file, 'utf8').trim();
   if (!content || [...content].length > limit) fail(`metadata ${name} must be 1..${limit} characters`);
+  if (name === 'name' && content !== appleStoreName) fail('metadata name disagrees with apple.storeName');
 }
 for (const [field, expected] of [['privacy_url', manifest.urls.privacy], ['privacy_choices_url', manifest.urls.privacyChoices], ['support_url', manifest.urls.support], ['marketing_url', manifest.urls.marketing]]) {
   const value = fs.readFileSync(path.join(metadataDir, `${field}.txt`), 'utf8').trim();
