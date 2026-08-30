@@ -35,6 +35,12 @@ The Apple listing therefore remains a real external consumer. It receives no
 new build; removing it from sale is a separate App Store operation and is not
 performed by the web/backend cutover.
 
+The web-only transition is now deployed as `0.19.93+475` at
+`csa2024.festapp.net`. Its program and event detail load from source `a`, the
+detail back action returns to the program, and the legacy Netlify hostname
+redirects path and query to the canonical domain after retiring its cached
+service worker. Source-`a` Auth allows both canonical reset-password paths.
+
 This is the older “Setkání animátorů” application referred to in operational
 discussions; it is not an additional fifteenth production ref. The repository
 acronym `aksmcz` and the public listing name `CSA 2024` identify the same lane.
