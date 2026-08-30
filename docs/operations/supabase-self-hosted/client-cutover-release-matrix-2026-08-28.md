@@ -92,6 +92,15 @@ them after the full-freeze gate without rebuilding the bundle. Festapp `470`
 now carries the equivalent source-default transition profile for canonical
 organization `1`, while its public activation document remains in `legacy`.
 
+Jubilee is now deployed independently as web-only build `0.19.93+473` at
+`jubileum2025.festapp.net`, from overlay `77093978881186b9d25cedd88a5a355e05a60d36`.
+It has no OneSignal configuration and creates no mobile/store lane; CSM Ostrava
+owns its separate push and mobile identities. Its old Netlify origin is a pure
+301 compatibility surface, except for retirement worker responses that remove
+historical PWA/push registrations. The remaining Jubilee gate is therefore
+only the shared freeze, delta import, activation and retained-session/write
+canary.
+
 The Festapp `470` production smoke passes the canonical root-to-program
 redirect, both legacy `get_events` reads, a program detail with its full HTML
 description, detail back-navigation to `/conference2024/event`, the public
