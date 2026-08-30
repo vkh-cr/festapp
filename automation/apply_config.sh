@@ -375,6 +375,9 @@ APP_CONFIG="$PROJECT_ROOT/web_client/src/app_config.js"
 if [ -f "$APP_CONFIG" ]; then
     echo "Updating $APP_CONFIG..."
 
+    sed_inplace "s|static appName = '.*';|static appName = '$APP_NAME';|g" "$APP_CONFIG"
+    sed_inplace "s|static appTitleShort = '.*';|static appTitleShort = '$APP_TITLE_SHORT';|g" "$APP_CONFIG"
+
     # Update Supabase URL
     if [ ! -z "$SUPABASE_URL" ]; then
         sed_inplace "s|static supabaseUrl = '.*';|static supabaseUrl = '$SUPABASE_URL';|g" "$APP_CONFIG"

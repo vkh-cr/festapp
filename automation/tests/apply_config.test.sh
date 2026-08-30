@@ -221,6 +221,8 @@ assert_contains "$TMP_ROOT/web_client/index.html" "https://test.example.com/"
 echo
 echo "--- web_client/src/app_config.js ---"
 assert_contains "$TMP_ROOT/web_client/src/app_config.js" "static supabaseUrl = 'https://test.supabase.co';"
+assert_contains "$TMP_ROOT/web_client/src/app_config.js" "static appName = 'Test App Name';"
+assert_contains "$TMP_ROOT/web_client/src/app_config.js" "static appTitleShort = 'TST';"
 assert_contains "$TMP_ROOT/web_client/src/app_config.js" "static anonKey = 'test-anon-key-fixture';"
 assert_contains "$TMP_ROOT/web_client/src/app_config.js" "static backendActivationTenantId = '';"
 assert_contains "$TMP_ROOT/web_client/src/app_config.js" "auth: 'sb-test-auth-token'"

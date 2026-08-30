@@ -3,6 +3,7 @@ import { CommonStrings } from '../shared/common_strings.js';
 import './user_header.css';
 import { RightsService } from '../../services/rights_service.js';
 import { SupabaseService } from '../../services/supabase_service.js';
+import { AppConfig } from '../../app_config.js';
 
 import { SHARED_MODAL_STYLES } from '../shared/modal_styles.js';
 
@@ -110,7 +111,7 @@ export class UserHeader extends HTMLElement {
 
         // SEO: Hidden H1
         const h1 = document.createElement('h1');
-        h1.textContent = 'Vstupenky.online';
+        h1.textContent = AppConfig.appName;
         h1.style.position = 'absolute';
         h1.style.width = '1px';
         h1.style.height = '1px';

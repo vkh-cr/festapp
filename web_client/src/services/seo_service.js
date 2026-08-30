@@ -1,3 +1,5 @@
+import { AppConfig } from '../app_config.js';
+
 export class SeoService {
     
     /**
@@ -32,7 +34,7 @@ export class SeoService {
         }
 
         // 1. Update Title
-        document.title = `${title} - Vstupenky.online`;
+        document.title = `${title} - ${AppConfig.appTitleShort}`;
 
         // 2. Update Description
         this._setMetaTag('name', 'description', description);
