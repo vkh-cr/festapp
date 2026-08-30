@@ -195,3 +195,13 @@ test('promotion shell preserves rollback and excludes activation/write-authority
   assert.match(upgrade, /docker-compose\.database-target\.yml/);
   assert.doesNotMatch(upgrade, /rm\s|DELETE FROM|DROP (?:DATABASE|SCHEMA|TABLE)/);
 });
+
+test('host provisioning installs the runtime dependencies used by promotion tooling', () => {
+  const bootstrap = fs.readFileSync(path.join(runtime, 'bootstrap-host.sh'), 'utf8');
+  const cloudInit = fs.readFileSync(path.join(
+    root, 'automation/hetzner-supabase/terraform/cloud-init.yaml.tftpl'), 'utf8');
+  for (const dependency of ['jq', 'nodejs']) {
+    assert.match(bootstrap, new RegExp(`apt-get install[^\\n]*\\b${dependency}\\b`));
+    assert.match(cloudInit, new RegExp(`\\n  - ${dependency}\\n`));
+  }
+});
