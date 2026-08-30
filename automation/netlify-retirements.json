@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "sites": [
+    {
+      "tenant_id": "jubileum2025",
+      "site_id": "25df3a91-7001-451f-9510-a3a56afe108b",
+      "legacy_origin": "https://jubileum2025.netlify.app",
+      "canonical_origin": "https://jubileum2025.festapp.net"
+    },
+    {
+      "tenant_id": "ticketonline",
+      "site_id": "2d708348-0bf7-478e-8578-6b799adde2bb",
+      "legacy_origin": "https://vstupenka.online",
+      "canonical_origin": "https://vstupenky.online"
+    }
+  ]
+}
