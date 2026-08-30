@@ -36,6 +36,9 @@ readonly RUNTIME_CADDYFILE="$PROJECT_ROOT/automation/hetzner-supabase/runtime/Ca
 readonly RUNTIME_CONFIGURATOR="$PROJECT_ROOT/automation/hetzner-supabase/runtime/configure-rehearsal-env.py"
 readonly RUNTIME_DATABASE_COMPOSE="$PROJECT_ROOT/automation/hetzner-supabase/runtime/docker-compose.database-target.yml"
 readonly RUNTIME_SWITCH_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/runtime/switch-rehearsal-runtime-database.sh"
+readonly RUNTIME_PROMOTION_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/runtime/promote-production-runtime.sh"
+readonly RUNTIME_PROMOTION_VALIDATOR="$PROJECT_ROOT/automation/hetzner-supabase/runtime/validate-production-promotion.mjs"
+readonly RUNTIME_UPGRADE_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/runtime/upgrade-installed-production-runtime.sh"
 readonly RUNTIME_DEPLOY_SCRIPT="$PROJECT_ROOT/automation/hetzner-supabase/runtime/deploy-rehearsal.sh"
 readonly TERRAFORM_FIREWALL="$PROJECT_ROOT/automation/hetzner-supabase/terraform/firewall.tf"
 
@@ -71,6 +74,9 @@ readonly TERRAFORM_FIREWALL="$PROJECT_ROOT/automation/hetzner-supabase/terraform
 [[ -r "$RUNTIME_CADDYFILE" ]] || { echo "Caddy origin configuration must be readable" >&2; exit 1; }
 [[ -r "$RUNTIME_DATABASE_COMPOSE" ]] || { echo "database target Compose override must be readable" >&2; exit 1; }
 [[ -x "$RUNTIME_SWITCH_SCRIPT" ]] || { echo "runtime database switch must be executable" >&2; exit 1; }
+[[ -x "$RUNTIME_PROMOTION_SCRIPT" && -x "$RUNTIME_PROMOTION_VALIDATOR" && -x "$RUNTIME_UPGRADE_SCRIPT" ]] || {
+  echo "production runtime promotion tooling must be executable" >&2; exit 1;
+}
 
 for required in 'caddy:' 'network_mode: host' NET_BIND_SERVICE 'read_only: true' \
   'rehearsal-api.festapp.net'; do
@@ -440,14 +446,29 @@ for required in 'switch-validated-rehearsal-runtime-database' 'readonly SERVICES
   'storage:DATABASE_URL' 'rolled back to' '200|200|200|101' 'deleted_databases:[]'; do
   rg -Fq "$required" "$RUNTIME_SWITCH_SCRIPT" || { echo "missing runtime switch contract: $required" >&2; exit 1; }
 done
-for required in 'docker-compose.database-target.yml' 'caddy/Caddyfile' 'switch-rehearsal-runtime-database.sh'; do
+for required in 'promote-validated-runtime-without-opening-write-authority' \
+  'festapp-source-registry.json' 'festapp-reference-registry.json' \
+  'target import registry mismatch' 'client_activation_documents_published:false' \
+  'external_write_authority_opened:false' '.env.pre-production-promotion-'; do
+  rg -Fq "$required" "$RUNTIME_PROMOTION_SCRIPT" || { echo "missing production promotion contract: $required" >&2; exit 1; }
+done
+for required in 'upgrade-installed-production-runtime-additively' \
+  'bootstrap-missing-production-runtime-registries' 'forbidden partial state' \
+  'install-runtime-registries.mjs' 'docker-compose.database-target.yml' 'chmod 0444' 'deleted_entries'; do
+  rg -Fq "$required" "$RUNTIME_UPGRADE_SCRIPT" "$PROJECT_ROOT/automation/hetzner-supabase/runtime/install-runtime-registries.mjs" || {
+    echo "missing installed runtime upgrade contract: $required" >&2; exit 1;
+  }
+done
+for required in 'docker-compose.database-target.yml' 'caddy/Caddyfile' 'switch-rehearsal-runtime-database.sh' \
+  'promote-production-runtime.sh' 'upgrade-installed-production-runtime.sh' 'festapp-reference-registry.json'; do
   rg -Fq "$required" "$RUNTIME_DEPLOY_SCRIPT" || { echo "missing deploy runtime contract: $required" >&2; exit 1; }
 done
 
 if rg -n 'DROP (DATABASE|SCHEMA|TABLE)|TRUNCATE|DELETE FROM|rm -|unlink' \
   "$A_SEMANTIC_REPAIR_SCRIPT" "$A_PAYLOAD_REPAIR_SCRIPT" \
   "$A_OPERATIONAL_REPAIR_SCRIPT" "$A_REFERENCE_VALIDATION_SCRIPT" \
-  "$ENCRYPTED_BACKUP_SCRIPT" "$ENCRYPTED_RESTORE_SCRIPT" "$RUNTIME_SWITCH_SCRIPT"; then
+  "$ENCRYPTED_BACKUP_SCRIPT" "$ENCRYPTED_RESTORE_SCRIPT" "$RUNTIME_SWITCH_SCRIPT" \
+  "$RUNTIME_PROMOTION_SCRIPT" "$RUNTIME_UPGRADE_SCRIPT"; then
   echo "repair/recovery tooling contains an unapproved destructive statement" >&2
   exit 1
 fi

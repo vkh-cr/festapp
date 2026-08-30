@@ -276,6 +276,53 @@ the synthetic gate tests is tooling proof, not cutover authorization.
 
 ## 3. Activation order
 
+### Runtime promotion boundary
+
+The database-facing runtime has one production promotion entry point:
+`automation/hetzner-supabase/runtime/promote-production-runtime.sh`. It is not
+a client activation or write-authority command. It fails closed unless the
+timestamped target contains exactly the `default`, `a` and `slunovrat` imports
+from the installed immutable source registry, every validation row passes, and
+the private inputs bind the exact source/reference registry digests to a
+full-freeze final marker and matching encrypted backup/isolated-restore result.
+
+Before the first production run on an existing host, install the current
+runtime scripts and additively upgrade both registries:
+
+```bash
+FESTAPP_RUNTIME_UPGRADE_ACK=bootstrap-missing-production-runtime-registries \
+  automation/hetzner-supabase/runtime/upgrade-installed-production-runtime.sh
+
+# Subsequent registry/tooling updates:
+FESTAPP_RUNTIME_UPGRADE_ACK=upgrade-installed-production-runtime-additively \
+  automation/hetzner-supabase/runtime/upgrade-installed-production-runtime.sh
+```
+
+The bootstrap acknowledgement is accepted only when both installed registries
+are absent. A mixed one-present/one-missing state is rejected. Subsequent runs
+are idempotent, permit new source aliases/reference rules, reject mutation or
+removal of an installed entry, verify all installed runtime dependencies, and
+leave both installed JSON files root-owned and mode `0444`. Generate the
+semantic digests recorded in the private production runtime config with:
+
+```bash
+node automation/hetzner-supabase/runtime/validate-production-promotion.mjs \
+  --digest-json=/opt/festapp-supabase/docker/festapp-source-registry.json
+node automation/hetzner-supabase/runtime/validate-production-promotion.mjs \
+  --digest-json=/opt/festapp-supabase/docker/festapp-reference-registry.json
+```
+
+The mode-`0600` production runtime config must define the canonical
+`api.festapp.net` external URLs, Auth site/origin/redirect allowlists, and
+exactly one canary for every tenant in the source registry. Each tenant canary
+pins its canonical organization and occasion plus the SHA-256 of the still-
+legacy `backend-activation.json`. Promotion recreates only DB/API-facing
+services, verifies their target database, checks Auth/REST/Storage/Realtime and
+every tenant web/activation/occasion canary, and records a timestamped rollback
+`.env`. It never publishes a canonical activation document, changes DNS, grants
+database rights or opens external side effects. Those remain later, separately
+approved steps in the activation order below.
+
 1. Keep target side effects disabled during import and replay.
 2. Verify Auth, rights, orders/tickets/QR, finance, Storage, Realtime, Functions,
    images and per-tenant isolation against the final data.
