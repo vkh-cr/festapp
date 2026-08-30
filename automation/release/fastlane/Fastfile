@@ -494,7 +494,7 @@ platform :ios do
       UI.user_error!("#{name} URL mismatch: #{actual.inspect}") unless actual == expected
       UI.message("URL #{name}=#{actual}")
     end
-    UI.user_error!('Store name mismatch') unless info_localization.name == MANIFEST.fetch('target').fetch('name')
+    UI.user_error!('Store name mismatch') unless info_localization.name == MANIFEST.fetch('apple').fetch('storeName')
     UI.user_error!('Localized description is empty') if version_localization.description.to_s.strip.empty?
 
     sets = version_localization.get_app_screenshot_sets
