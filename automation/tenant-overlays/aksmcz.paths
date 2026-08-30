@@ -1,0 +1,15 @@
+# Web-only tenant overlay paths. Historical mobile identities remain recorded,
+# but this lane does not publish Android, iOS or OneSignal artifacts.
+automation/project.conf
+netlify.toml
+web_client/public/netlify-retire-worker.js
+assets/icons/fstappicon.png
+assets/icons/fstapplogo.dark.svg
+assets/icons/fstapplogo.svg
+assets/translations/cs.json
+web/apple-touch-icon.png
+web/favicon*.png
+web/favicon.ico
+web/safari-pinned-tab.svg
+web/web-app-manifest-*.png
+automation/release/legal/**

@@ -22,6 +22,7 @@ jobs:
           BRANCH="${GITHUB_REF#refs/heads/}"
           case "$BRANCH" in
             prod/absolventskyvelehrad) TENANT_ID=absolventskyvelehrad ;;
+            prod/aksmcz) TENANT_ID=aksmcz ;;
             prod/cavfotofest) TENANT_ID=cavfotofest ;;
             prod/csmostrava2026) TENANT_ID=csmostrava2026 ;;
             prod/doobiscup) TENANT_ID=doobiscup ;;
@@ -131,6 +132,7 @@ jobs:
           FESTAPP_MANIFEST: ${{ secrets.FESTAPP_RELEASE_MANIFEST_FESTAPP }}
           SLUNOVRAT_MANIFEST: ${{ secrets.FESTAPP_RELEASE_MANIFEST_FESTIVALSLUNOVRAT }}
           JUBILEUM_MANIFEST: ${{ secrets.FESTAPP_RELEASE_MANIFEST_JUBILEUM2025 }}
+          AKSMCZ_MANIFEST: ${{ secrets.FESTAPP_RELEASE_MANIFEST_AKSMCZ }}
         shell: bash
         run: |
           set -euo pipefail
@@ -151,6 +153,7 @@ jobs:
             prod/festapp) RELEASE_MANIFEST="$FESTAPP_MANIFEST" ;;
             prod/festivalslunovrat) RELEASE_MANIFEST="$SLUNOVRAT_MANIFEST" ;;
             prod/jubileum2025) RELEASE_MANIFEST="$JUBILEUM_MANIFEST" ;;
+            prod/aksmcz) RELEASE_MANIFEST="$AKSMCZ_MANIFEST" ;;
             *) echo "::error::No private release manifest mapping for $BRANCH."; exit 1 ;;
           esac
           test -n "$RELEASE_MANIFEST" || {

@@ -22,16 +22,18 @@ occasion-user relations. The canonical merge preserved it as organization `4`
 and occasion `1072505`.
 
 `aksmcz.netlify.app` still serves the old application, while its recorded
-custom origin `app.rawen.dev` no longer resolves. Before source `a` is retired,
-the lane needs an explicit archive/retirement decision and store-listing
-readback. No new tenant name, custom domain or mobile release is inferred from
-the historical acronym.
+custom origin `app.rawen.dev` no longer resolves. The approved disposition is
+web-only: rebuild the tenant from current `main` at `csa2024.festapp.net`, keep
+the legacy backend active behind the signed resolver until cutover, and then
+retire the Netlify origin with a path/query-preserving redirect. No Android,
+iOS or OneSignal release belongs to this lane.
 
 Public App Store readback found the still-listed `CSA 2024`, Apple ID
 `6479449613`, bundle `festapp.aksmcz`, version `0.13.0`, last released on
 12 May 2025. The public Google Play URL for package `fstapp.csa` returns 404.
-The Apple listing therefore remains a real external consumer and cannot be
-silently retired or reassigned without an explicit listing decision.
+The Apple listing therefore remains a real external consumer. It receives no
+new build; removing it from sale is a separate App Store operation and is not
+performed by the web/backend cutover.
 
 This is the older “Setkání animátorů” application referred to in operational
 discussions; it is not an additional fifteenth production ref. The repository
