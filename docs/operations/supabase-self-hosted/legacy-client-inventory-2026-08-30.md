@@ -5,6 +5,13 @@ canonical `automation/project.conf` contract. They must not be rebuilt as a
 batch. Each receives one explicit release, replacement or retirement decision.
 Private inventory evidence is stored outside the repository at
 `~/.local/share/festapp-rehearsal-20260830/legacy-tenant-config-inventory.json`.
+A second scan covered all 33 remote refs, including feature, rehearsal and
+cutover refs, rather than only `prod/*`. Its private result is
+`~/.local/share/festapp-rehearsal-20260830/all-remote-client-config-inventory.json`
+(SHA-256 `2f8348663c6bf1bd510bfdf7143ee96a6c31ae73d22de3855e311a4639dc2549`).
+Eighteen refs contain a client configuration, but they collapse to the already
+registered production identities plus CSM rehearsal/feature snapshots. No
+additional historical application was found outside the 14 production refs.
 
 ## `prod/aksmcz` / Celostátní setkání animátorů (CSA 2024)
 
