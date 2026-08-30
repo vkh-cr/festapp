@@ -27,7 +27,7 @@ hash_generated() {
   done < "$PROJECT_ROOT/automation/tenant-overlays/generated.paths"
 }
 
-for tenant in festapp festapptickets absolventskyvelehrad cavfotofest csmostrava2026 doobiscup festivalslunovrat hvezdamorska jubileum2025; do
+for tenant in festapp festapptickets absolventskyvelehrad cavfotofest csmostrava2026 doobiscup farnostopava festivalslunovrat hvezdamorska jubileum2025; do
   root="$TMP_ROOT/$tenant"
   copy_worktree "$root"
   config="$PROJECT_ROOT/automation/tests/fixtures/tenants/$tenant.conf"
@@ -57,6 +57,12 @@ grep -qF "backendActivationTenantId = '';" "$TMP_ROOT/absolventskyvelehrad/lib/a
 grep -qF 'backendActivationCanonicalOrganizationId = 0' "$TMP_ROOT/absolventskyvelehrad/web_client/src/app_config.js"
 grep -qE 'fixturecav' "$TMP_ROOT/cavfotofest/lib/app_config.dart"
 grep -qE 'fixturedoobiscup' "$TMP_ROOT/doobiscup/lib/app_config.dart"
+grep -qE 'fixturefarnost' "$TMP_ROOT/farnostopava/lib/app_config.dart"
+grep -qF "static const String appName = 'Rezervace Farnost Opava';" "$TMP_ROOT/farnostopava/lib/app_config.dart"
+grep -qF "static const String oneSignalAppId = '';" "$TMP_ROOT/farnostopava/lib/app_config.dart"
+grep -qF "static const String oneSignalWebAppId = '';" "$TMP_ROOT/farnostopava/lib/app_config.dart"
+grep -qF 'backendActivationCanonicalOrganizationId = 11' "$TMP_ROOT/farnostopava/web_client/src/app_config.js"
+grep -qF "supportedLanguages = ['cs', 'en']" "$TMP_ROOT/farnostopava/web_client/src/app_config.js"
 grep -qF "static const String appName = 'BISCUP';" "$TMP_ROOT/doobiscup/lib/app_config.dart"
 grep -qF 'backendActivationCanonicalOrganizationId = 5' "$TMP_ROOT/doobiscup/web_client/src/app_config.js"
 grep -qF 'group.vkhcr.doobiscup.onesignal' "$TMP_ROOT/doobiscup/ios/Runner/Runner.entitlements"

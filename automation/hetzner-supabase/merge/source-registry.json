@@ -5,13 +5,13 @@
       "alias": "default",
       "project_ref": "kjdpmixlnhntmxjedpxh",
       "role": "canonical-base",
-      "tenant_ids": ["festapp"]
+      "tenant_ids": ["festapp", "festapptickets"]
     },
     {
       "alias": "a",
       "project_ref": "lwfpdjxsdmkfyrzqbrlk",
       "role": "merge-source",
-      "tenant_ids": ["cavfotofest", "csmostrava2026", "hvezdamorska", "jubileum2025"]
+      "tenant_ids": ["absolventskyvelehrad", "cavfotofest", "csmostrava2026", "doobiscup", "farnostopava", "hvezdamorska", "jubileum2025"]
     },
     {
       "alias": "slunovrat",

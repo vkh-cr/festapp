@@ -106,6 +106,7 @@ for needle in \
     'FESTAPP_RELEASE_MANIFEST_HVEZDAMORSKA' \
     'FESTAPP_RELEASE_MANIFEST_CAVFOTOFEST' \
     'FESTAPP_RELEASE_MANIFEST_DOOBISCUP' \
+    'FESTAPP_RELEASE_MANIFEST_FARNOSTOPAVA' \
     'FESTAPP_RELEASE_MANIFEST_ABSOLVENTSKYVELEHRAD' \
     'FESTAPP_RELEASE_MANIFEST_FESTAPP' \
     'FESTAPP_RELEASE_MANIFEST_FESTIVALSLUNOVRAT' \
@@ -204,6 +205,7 @@ for branch_mapping in \
     'prod/cavfotofest) TENANT_ID=cavfotofest' \
     'prod/csmostrava2026) TENANT_ID=csmostrava2026' \
     'prod/doobiscup) TENANT_ID=doobiscup' \
+    'prod/farnostopava) TENANT_ID=farnostopava' \
     'prod/festapp) TENANT_ID=festapp' \
     'prod/festapptickets) TENANT_ID=festapptickets' \
     'prod/hvezdamorska) TENANT_ID=hvezdamorska' \
@@ -216,7 +218,7 @@ for branch_mapping in \
     fi
 done
 
-if grep -F -q 'cavfotofest|csmostrava2026|doobiscup|festapp|festapptickets|festivalslunovrat|hvezdamorska|jubileum2025' \
+if grep -F -q 'cavfotofest|csmostrava2026|doobiscup|farnostopava|festapp|festapptickets|festivalslunovrat|hvezdamorska|jubileum2025' \
     "$PROJECT_ROOT/automation/check_tenant_branch_drift.sh"; then
     echo "  ok: tenant drift checker recognizes the original Festapp tenant"
 else
@@ -227,7 +229,7 @@ fi
 # Migrated Netlify tenants own their legacy-origin retirement boundary as an
 # explicit overlay. This keeps redirects and service-worker retirement scoped
 # to the matching production branch instead of leaking between tenants.
-for tenant in cavfotofest doobiscup festapptickets hvezdamorska jubileum2025; do
+for tenant in cavfotofest doobiscup farnostopava festapptickets hvezdamorska jubileum2025; do
     policy="$PROJECT_ROOT/automation/tenant-overlays/$tenant.paths"
     for path in netlify.toml web_client/public/netlify-retire-worker.js; do
         if grep -Fx -q "$path" "$policy"; then

@@ -7,7 +7,7 @@
   "required": ["schemaVersion", "tenantId", "baseMainSha"],
   "properties": {
     "schemaVersion": { "const": 1 },
-    "tenantId": { "enum": ["absolventskyvelehrad", "cavfotofest", "csmostrava2026", "doobiscup", "festapp", "festapptickets", "festivalslunovrat", "hvezdamorska", "jubileum2025"] },
+    "tenantId": { "enum": ["absolventskyvelehrad", "cavfotofest", "csmostrava2026", "doobiscup", "farnostopava", "festapp", "festapptickets", "festivalslunovrat", "hvezdamorska", "jubileum2025"] },
     "baseMainSha": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
     "release": {
       "type": "object",
