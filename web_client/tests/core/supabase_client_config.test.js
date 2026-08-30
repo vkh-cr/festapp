@@ -7,11 +7,17 @@ import { SupabaseService } from '../../src/services/supabase_service.js';
 
 test('unsupported-app header data loads only after Supabase initialization', async () => {
   const mainSource = await readFile(new URL('../../src/main.js', import.meta.url), 'utf8');
-  const initializeAt = mainSource.indexOf('await SupabaseService.initialize()');
-  const rightsAt = mainSource.indexOf(
-    'if (!AppConfig.isAppSupported) await RightsService.updateAppData()',
+  const startupSource = await readFile(
+    new URL('../../src/startup/initialize_core_services.js', import.meta.url),
+    'utf8',
   );
-  assert.ok(initializeAt >= 0, 'main must initialize Supabase');
+  assert.match(mainSource, /await initializeCoreServices\(\{[\s\S]*supabaseService: SupabaseService,[\s\S]*rightsService: RightsService,[\s\S]*isAppSupported: AppConfig\.isAppSupported,/,
+    'main must provide the configured Supabase and rights services to canonical startup');
+  const initializeAt = startupSource.indexOf('await supabaseService.initialize()');
+  const rightsAt = startupSource.indexOf(
+    'if (!isAppSupported) await rightsService.updateAppData()',
+  );
+  assert.ok(initializeAt >= 0, 'canonical startup must initialize Supabase');
   assert.ok(rightsAt > initializeAt, 'rights fetch must happen after Supabase initialization');
 });
 
