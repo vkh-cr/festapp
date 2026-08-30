@@ -8,8 +8,10 @@ assets/icons/fstapplogo.dark.svg
 assets/icons/fstapplogo.svg
 assets/translations/cs.json
 web/apple-touch-icon.png
+web/android-chrome-*.png
 web/favicon*.png
 web/favicon.ico
+web/mstile-150x150.png
 web/safari-pinned-tab.svg
 web/web-app-manifest-*.png
 automation/release/legal/**
