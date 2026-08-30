@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "tenantId": "festapp",
+  "baseMainSha": "6cf0384d6aa552d6215356c8345813cbaa35d7ab",
+  "release": {
+    "version": "0.19.93+477",
+    "note": "Current main with the original Festapp Cloudflare web origin and pinned backend resolver"
+  }
+}

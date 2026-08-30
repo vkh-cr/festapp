@@ -196,7 +196,7 @@
        OneSignalDeferred.push(async function(OneSignal) {
            try {
              await OneSignal.User.addTags({
-               app_generation: '',
+               app_generation: 'festapp_cutover_v1',
                occasion: ''
              });
              if (callback) callback(null);
@@ -272,7 +272,7 @@
     atomic updates and offline cold starts.
   -->
   <script>
-    window.__FESTAPP_BUILD_VERSION__ = "0.19.93+455";
+    window.__FESTAPP_BUILD_VERSION__ = "0.19.93+477";
     window.__FESTAPP_LOCAL_DEVELOPMENT__ =
       ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
   </script>
