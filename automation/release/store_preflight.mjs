@@ -170,6 +170,7 @@ for (const configuration of ['Debug', 'Release', 'Profile']) {
 const fastfile = fs.readFileSync(path.join(root, 'automation/release/fastlane/Fastfile'), 'utf8');
 if (/produce\s*\(|lane\s+:publish_ipa/.test(fastfile)) fail('unsafe app creation or monolithic release path found');
 const submitLane = fastfile.match(/lane :submit_for_review do([\s\S]*?)^  end/m)?.[1] ?? '';
+const replaceScreenshotsLane = fastfile.match(/lane :replace_screenshots do([\s\S]*?)^  end/m)?.[1] ?? '';
 const selectBuildLane = fastfile.match(/lane :select_build do([\s\S]*?)^  end/m)?.[1] ?? '';
 const cancelReviewLane = fastfile.match(/lane :cancel_review_submission do([\s\S]*?)^  end/m)?.[1] ?? '';
 if (!/exact_gate!\('SELECT_BUILD'\)/.test(selectBuildLane) ||
@@ -181,6 +182,13 @@ if (!/exact_gate!\('CANCEL_REVIEW_SUBMISSION'\)/.test(cancelReviewLane) ||
     !/get_in_progress_review_submission/.test(cancelReviewLane) ||
     !/cancel_submission/.test(cancelReviewLane)) {
   fail('review cancellation must be an exact gated target operation');
+}
+if (/lane\s+:upload_screenshots/.test(fastfile) ||
+    !/exact_gate!\('REPLACE_SCREENSHOTS'\)/.test(replaceScreenshotsLane) ||
+    !/locale_staging\s*=\s*File\.join\(staging,\s*MANIFEST\.fetch\('target'\)\.fetch\('locale'\)\)/.test(replaceScreenshotsLane) ||
+    !/overwrite_screenshots:\s*true/.test(replaceScreenshotsLane) ||
+    !/sync_screenshots:\s*true/.test(replaceScreenshotsLane)) {
+  fail('screenshot replacement must use the exact gated locale-aware canonical lane');
 }
 if (!/automatic_release:\s*true/.test(submitLane) || /automatic_release:\s*false/.test(submitLane) ||
     !/release_type:\s*Spaceship::ConnectAPI::AppStoreVersion::ReleaseType::AFTER_APPROVAL/.test(submitLane) ||
