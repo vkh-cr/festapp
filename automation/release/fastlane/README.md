@@ -181,6 +181,15 @@ Delete retry-created screenshot duplicates only
 
 Upload canonical screenshots only; never submit or release
 
+### ios replace_screenshots
+
+```sh
+[bundle exec] fastlane ios replace_screenshots
+```
+
+Exactly gated replacement of all screenshots for the editable target version;
+never submits or releases the app
+
 ### ios select_build
 
 ```sh
