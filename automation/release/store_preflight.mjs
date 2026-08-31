@@ -181,7 +181,10 @@ if (!/exact_gate!\('CANCEL_REVIEW_SUBMISSION'\)/.test(cancelReviewLane) ||
     !/cancel_submission/.test(cancelReviewLane)) {
   fail('review cancellation must be an exact gated target operation');
 }
-if (!/automatic_release:\s*true/.test(submitLane) || /automatic_release:\s*false/.test(submitLane)) {
+if (!/automatic_release:\s*true/.test(submitLane) || /automatic_release:\s*false/.test(submitLane) ||
+    !/release_type:\s*Spaceship::ConnectAPI::AppStoreVersion::ReleaseType::AFTER_APPROVAL/.test(submitLane) ||
+    !/configured&?\.release_type\s*==\s*Spaceship::ConnectAPI::AppStoreVersion::ReleaseType::AFTER_APPROVAL/.test(submitLane) ||
+    !/submitted&?\.release_type\s*==\s*Spaceship::ConnectAPI::AppStoreVersion::ReleaseType::AFTER_APPROVAL/.test(submitLane)) {
   fail('Fastlane submission must use automatic release after Apple approval');
 }
 if (/release_approved_version|manual ASC action/.test(fastfile)) fail('obsolete manual release path found');
