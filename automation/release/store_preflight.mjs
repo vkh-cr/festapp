@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import crypto from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { parseProjectVersion } from './project_version.mjs';
@@ -264,6 +265,11 @@ const icon = path.join(root, 'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon
 try {
   const info = pngInfo(icon);
   if (info.width !== 1024 || info.height !== 1024 || [4, 6].includes(info.colorType)) fail('App Store icon must be 1024x1024 without alpha');
+  const expectedIconSha256 = manifest.apple?.appIconSha256;
+  if (expectedIconSha256) {
+    const actualIconSha256 = crypto.createHash('sha256').update(fs.readFileSync(icon)).digest('hex');
+    if (actualIconSha256 !== expectedIconSha256) fail('App Store icon disagrees with the approved tenant artwork');
+  }
 } catch (error) { fail(`App Store icon: ${error.message}`); }
 
 warnings.push('Legal approval and production-deployment gates require external evidence.');
