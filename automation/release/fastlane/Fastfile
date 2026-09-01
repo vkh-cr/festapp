@@ -614,32 +614,6 @@ platform :ios do
     UI.success("Removed only exact retry duplicates; App Store counts now match #{expected_counts}")
   end
 
-  desc 'Upload canonical screenshots only; never submit or release'
-  lane :upload_screenshots do
-    app = target_app!('UPLOAD_SCREENSHOTS_ONLY')
-    editable = app.get_edit_app_store_version
-    UI.user_error!("No editable target version") unless editable&.version_string == TARGET_VERSION
-    ENV['FASTLANE_ENABLE_BETA_DELIVER_SYNC_SCREENSHOTS'] = '1'
-    Dir.mktmpdir('apple-screenshots') do |staging|
-      MANIFEST.fetch('screenshots').transform_values do |rule|
-        File.expand_path(rule.fetch('sourceDirectory'), RELEASE_ROOT)
-      end.each do |prefix, source_dir|
-        UI.user_error!("Screenshot path escapes the release listing: #{source_dir}") unless source_dir.start_with?("#{RELEASE_ROOT}#{File::SEPARATOR}")
-        UI.user_error!("Missing internal screenshot set: #{source_dir}") unless Dir.exist?(source_dir)
-        Dir.glob(File.join(source_dir, '*.png')).sort.each do |source|
-          FileUtils.cp(source, File.join(staging, "#{prefix}-#{File.basename(source)}"))
-        end
-      end
-      deliver(
-        api_key: api_key, app_identifier: BUNDLE_ID,
-        screenshots_path: staging, metadata_path: staging,
-        skip_binary_upload: true, skip_metadata: true, skip_screenshots: false,
-        overwrite_screenshots: false, sync_screenshots: true, submit_for_review: false,
-        automatic_release: false, run_precheck_before_submit: false, force: true
-      )
-    end
-  end
-
   desc 'Replace all screenshots for the exact editable target version; never submit or release'
   lane :replace_screenshots do
     exact_gate!('REPLACE_SCREENSHOTS')
