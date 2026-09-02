@@ -35,6 +35,8 @@ test('backup shell and systemd contracts are syntactically valid', () => {
   assert.match(service, /ProtectSystem=strict/);
   assert.match(service, /ReadWritePaths=\/var\/backups\/festapp-supabase/);
   assert.match(timer, /Persistent=true/);
+  const installer = fs.readFileSync(path.join(backup, 'install-online-backup.sh'), 'utf8');
+  assert.match(installer, /\/var\/backups\/festapp-supabase-logs/);
 });
 
 test('runtime logs are encrypted before leaving the host and retained off-host', () => {

@@ -15,7 +15,8 @@ for file in create-online-encrypted-backup.sh upload-encrypted-runtime-logs.sh \
   festapp-runtime-log-upload.service festapp-runtime-log-upload.timer; do
   [[ -f "$SCRIPT_DIR/$file" ]] || fail "missing $file"
 done
-install -d -o root -g root -m 0700 /opt/festapp-backup /var/backups/festapp-supabase
+install -d -o root -g root -m 0700 /opt/festapp-backup /var/backups/festapp-supabase \
+  /var/backups/festapp-supabase-logs
 install -o root -g root -m 0700 "$SCRIPT_DIR/create-online-encrypted-backup.sh" \
   /opt/festapp-backup/create-online-encrypted-backup.sh
 install -o root -g root -m 0700 "$SCRIPT_DIR/upload-encrypted-runtime-logs.sh" \
