@@ -49,7 +49,6 @@ dependencies:
   intl: ^0.20.2
   badges: ^3.1.1
   collection: ^1.18.0
-  flutter_map_location_marker: ^10.3.0
   geolocator: ^14.0.2
   flutter_widget_from_html: ^0.17.1
   quill_html_editor:
@@ -137,9 +136,6 @@ dev_dependencies:
 # iOS. The iOS copy also exposes the plugin class during a clean Release build.
 # Each package documents its removal condition in FESTAPP_PATCH.md.
 dependency_overrides:
-  # flutter_map_location_marker 10.3.0 still pins latlong2 0.9. Its upstream
-  # compatibility fix is open as PR #167; keep Flutter Map 8.3 on one type.
-  latlong2: ^0.10.1
   # The Quill editor fork still declares Android WebView 3.x, but only uses
   # APIs retained by 4.x. Keep one WebView implementation for the current
   # YouTube player until the editor updates its dependency constraint.

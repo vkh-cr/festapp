@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart' as fm;
-import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fstapp/components/features/map_feature.dart';
 import 'package:fstapp/components/map/legacy_map_surface.dart';
@@ -104,16 +103,17 @@ void main() {
       ),
     ));
 
-    expect(find.byType(DefaultLocationMarker), findsOneWidget);
+    const locationMarkerKey = Key('legacy-current-location-marker');
+    expect(find.byKey(locationMarkerKey), findsOneWidget);
     final locationLayer = tester
         .widgetList<fm.MarkerLayer>(find.byType(fm.MarkerLayer))
         .singleWhere(
           (layer) => layer.markers.any(
-            (marker) => marker.child is DefaultLocationMarker,
+            (marker) => marker.child.key == locationMarkerKey,
           ),
         );
     final locationMarker = locationLayer.markers.singleWhere(
-      (marker) => marker.child is DefaultLocationMarker,
+      (marker) => marker.child.key == locationMarkerKey,
     );
     expect(locationMarker.width, 20);
     expect(locationMarker.height, 20);
@@ -134,7 +134,10 @@ void main() {
       ),
     ));
 
-    expect(find.byType(DefaultLocationMarker), findsNothing);
+    expect(
+      find.byKey(const Key('legacy-current-location-marker')),
+      findsNothing,
+    );
   });
 
   testWidgets('does not silently fall back when MapLibre is unavailable',

@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart' as fm;
 import 'package:flutter_map_animations/flutter_map_animations.dart';
-import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/components/features/map_feature.dart';
@@ -123,8 +122,8 @@ class _LegacyMapSurfaceState extends State<LegacyMapSurface>
                 point: widget.model.scene.currentLocation!,
                 width: MapLocationStyle.onMapMarkerSize,
                 height: MapLocationStyle.onMapMarkerSize,
-                child: const DefaultLocationMarker(
-                  color: MapLocationStyle.color,
+                child: const _CurrentLocationMarker(
+                  key: Key('legacy-current-location-marker'),
                 ),
               ),
             ],
@@ -290,6 +289,27 @@ class _LegacyMapSurfaceState extends State<LegacyMapSurface>
       }).toList(growable: false),
     );
   }
+}
+
+class _CurrentLocationMarker extends StatelessWidget {
+  const _CurrentLocationMarker({super.key});
+
+  @override
+  Widget build(BuildContext context) => DecoratedBox(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          shape: BoxShape.circle,
+        ),
+        child: const Padding(
+          padding: EdgeInsets.all(2),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: MapLocationStyle.color,
+              shape: BoxShape.circle,
+            ),
+          ),
+        ),
+      );
 }
 
 class LegacyMapResources {
