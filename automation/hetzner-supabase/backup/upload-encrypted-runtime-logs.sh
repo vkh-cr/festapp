@@ -41,7 +41,7 @@ provider = Cloudflare
 access_key_id = $AWS_ACCESS_KEY_ID
 secret_access_key = $AWS_SECRET_ACCESS_KEY
 endpoint = $R2_ENDPOINT
-acl = private
+no_check_bucket = true
 EOF
 
 cd "$COMPOSE_DIR"

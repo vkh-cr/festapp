@@ -16,6 +16,7 @@ test('scheduled backup is encrypted, bounded, off-host and never authorizes cuto
   assert.match(create, /festapp-supabase-backups/);
   assert.match(create, /rclone.+--immutable/);
   assert.match(create, /rclone.+check/);
+  assert.match(create, /no_check_bucket = true/);
   assert.match(create, /--min-age/);
   assert.match(create, /"\$BACKUP_ROOT\/\.lock"/);
   assert.doesNotMatch(create, /docker compose (?:stop|down|restart|up)/);
@@ -45,6 +46,7 @@ test('runtime logs are encrypted before leaving the host and retained off-host',
   assert.match(upload, /\| age -r "\$AGE_RECIPIENT"/);
   assert.match(upload, /logs\/\$EXPECTED_HOSTNAME/);
   assert.match(upload, /off_host_verified:true/);
+  assert.match(upload, /no_check_bucket = true/);
   assert.match(upload, /production_cutover_authorized:false/);
   assert.doesNotMatch(upload, /docker compose (?:stop|down|restart|up)/);
 });
