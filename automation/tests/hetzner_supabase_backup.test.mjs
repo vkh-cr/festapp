@@ -23,7 +23,10 @@ test('scheduled backup is encrypted, bounded, off-host and never authorizes cuto
 });
 
 test('backup shell and systemd contracts are syntactically valid', () => {
-  for (const name of ['create-online-encrypted-backup.sh', 'install-online-backup.sh']) {
+  for (const name of [
+    'create-online-encrypted-backup.sh', 'upload-encrypted-runtime-logs.sh',
+    'install-online-backup.sh',
+  ]) {
     const result = spawnSync('bash', ['-n', path.join(backup, name)], { encoding: 'utf8' });
     assert.equal(result.status, 0, result.stderr);
   }
@@ -32,4 +35,14 @@ test('backup shell and systemd contracts are syntactically valid', () => {
   assert.match(service, /ProtectSystem=strict/);
   assert.match(service, /ReadWritePaths=\/var\/backups\/festapp-supabase/);
   assert.match(timer, /Persistent=true/);
+});
+
+test('runtime logs are encrypted before leaving the host and retained off-host', () => {
+  const upload = fs.readFileSync(path.join(backup, 'upload-encrypted-runtime-logs.sh'), 'utf8');
+  assert.match(upload, /docker logs --timestamps --since 70m/);
+  assert.match(upload, /\| age -r "\$AGE_RECIPIENT"/);
+  assert.match(upload, /logs\/\$EXPECTED_HOSTNAME/);
+  assert.match(upload, /off_host_verified:true/);
+  assert.match(upload, /production_cutover_authorized:false/);
+  assert.doesNotMatch(upload, /docker compose (?:stop|down|restart|up)/);
 });
