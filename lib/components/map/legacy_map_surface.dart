@@ -17,10 +17,10 @@ import 'package:fstapp/components/map/map_surface_model.dart';
 import 'package:fstapp/components/map/map_viewport_controller.dart';
 import 'package:fstapp/components/map/offline_map_bundle_manager.dart';
 import 'package:fstapp/components/map/offline_map_bundle_manifest.dart';
-import 'package:fstapp/components/map/offline_mbtiles_vector_tile_provider.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:mbtiles/mbtiles.dart';
 import 'package:fstapp/services/launch_url_service.dart';
+import 'package:vector_map_tiles_mbtiles/vector_map_tiles_mbtiles.dart';
 import 'package:vector_map_tiles/vector_map_tiles.dart' as vmt;
 import 'package:vector_tile_renderer/vector_tile_renderer.dart' as vtr;
 
@@ -172,7 +172,7 @@ class _LegacyMapSurfaceState extends State<LegacyMapSurface>
       theme: style.theme,
       sprites: style.sprites,
       tileProviders: vmt.TileProviders({
-        sourceName: OfflineMbTilesVectorTileProvider(mbtiles: mbtiles),
+        sourceName: MbTilesVectorTileProvider(mbtiles: mbtiles),
       }),
       maximumZoom: MapZoomLimits.interactionMaximum,
     );
