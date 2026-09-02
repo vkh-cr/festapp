@@ -27,7 +27,8 @@ done
 [[ "$AGE_RECIPIENT" == age1* ]] || fail "AGE_RECIPIENT is invalid"
 [[ "$R2_BUCKET" == "festapp-supabase-backups" ]] || fail "unexpected backup bucket"
 
-exec 9>"$BACKUP_ROOT.lock"
+install -d -o root -g root -m 0700 "$BACKUP_ROOT"
+exec 9>"$BACKUP_ROOT/.lock"
 flock -n 9 || fail "another scheduled backup is active"
 readonly RUN_ID="$(date -u +%Y%m%dT%H%M%SZ)"
 readonly RUN_DIR="$BACKUP_ROOT/$RUN_ID"

@@ -17,6 +17,7 @@ test('scheduled backup is encrypted, bounded, off-host and never authorizes cuto
   assert.match(create, /rclone.+--immutable/);
   assert.match(create, /rclone.+check/);
   assert.match(create, /--min-age/);
+  assert.match(create, /"\$BACKUP_ROOT\/\.lock"/);
   assert.doesNotMatch(create, /docker compose (?:stop|down|restart|up)/);
   assert.doesNotMatch(create, /ALTER |DELETE FROM|DROP DATABASE/);
 });
